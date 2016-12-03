@@ -13,14 +13,14 @@ Synnaeve, G., Nardelli, N., Auvolat, A., Chintala, S., Lacroix, T., Lin, Z., Ric
 ## Running TorchCraft
 
 See [`examples/`](examples/) for a list of scripts that you can try.
-The simplest examples come in two flavors: DLL based and server-client based.
+The simplest examples come in two flavors: DLL/AIModule based and EXE/AIClient based.
 
 
-### DLL TorchCraft
+### DLL/AIModule TorchCraft
 
 #### Windows
 
-1. Open `bwapi.ini` and set `ai = PATH\TO\BWENV.dll` (or copy
+1. Open `bwapi.ini` and set `ai = PATH\TO\BWEnv.dll` (or copy
    ours from `config/bwapi.in`)
 2. Start ChaosLauncher, enable `BWAPI DLL Injector [Release]`.
 3. Press `Start`.
@@ -34,7 +34,7 @@ $ cd examples
 $ th simple_dll.lua
 ```
 
-### Client TorchCraft
+### EXE/AIClient TorchCraft
 
 #### Windows
 

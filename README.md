@@ -9,6 +9,9 @@ Synnaeve, G., Nardelli, N., Auvolat, A., Chintala, S., Lacroix, T., Lin, Z., Ric
 
 ## [Installation](docs/user/installation.md)
 
+Please follow the [installation instructions](docs/user/installation.md). 
+
+You will need to have a license of StarCraft: Brood War. The most tested and stable way to set it up is to have StarCraft running on Windows and Torch running in Linux or Mac OS X. If you already have StarCraft, you need to install [BWAPI](https://github.com/TorchCraft/TorchCraft/blob/master/docs/user/installation.md#bwapi), [copy a few files](https://github.com/TorchCraft/TorchCraft/blob/master/docs/user/installation.md#torchcraft-common-prerequisites), and either launch the [AIModule (DLL)](https://github.com/TorchCraft/TorchCraft/blob/master/docs/user/installation.md#torchcraft-aimodule-for-users) OR launch the [AIClient (EXE)](https://github.com/TorchCraft/TorchCraft/blob/master/docs/user/installation.md#torchcraft-aiclient-for-users). You can also run StarCraft on Linux through Wine, but this may be a bit more complicated, start with [BWAPI on Linux](https://github.com/TorchCraft/TorchCraft/blob/master/docs/user/bwapi_on_linux.md).
 
 ## Running TorchCraft
 

@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{22e0184c-2d7b-4497-b2eb-36f475c2b0f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{d76c4772-83d6-4a7f-a3ac-7e0b3bd627a6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(SolutionDir)\..\src\main.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\zmq_server.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\controller.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\utils.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dll.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\module.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\config_manager.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\recorder.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\replayer\frame.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\user_actions.cc">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\ZMQ_server.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\controller.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\utils.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\module.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\config_manager.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\recorder.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\replayer\frame.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\user_actions.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

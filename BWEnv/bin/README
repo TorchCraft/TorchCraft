@@ -1,0 +1,6 @@
+The files czmq.dll, libzmq.dll, libsodium.dll, are provided "as is", they are
+executables made respectively from the 3 following softwares:
+ - czmq can be found at: https://github.com/zeromq/czmq
+ - libzmq can be found at: https://github.com/zeromq/libzmq
+ - libsodium can be found: https://github.com/jedisct1/libsodium
+ - The source for the executable bwheadless.exe can be found at https://github.com/tscmoo/bwheadless 

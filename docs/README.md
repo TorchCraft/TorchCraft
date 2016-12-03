@@ -1,0 +1,5 @@
+- [Installation](/docs/user/installation.md)
+- [BWAPI on Linux](/docs/user/bwapi_on_linux.md)
+- [Replayer](/docs/user/replayer.md)
+- [TorchCraft](/docs/user/torchcraft.md)
+- [Code structure](/docs/contributor/code_structure.md)

@@ -1,0 +1,25 @@
+
+[Software\\Blizzard Entertainment\\Starcraft] 1479946881
+"bldgnoise"=dword:00000004
+"ColorCycle"=dword:00000001
+"CPUThrottle"=dword:00000000
+"Custom Type"="Use Map Settings"
+"Game Speed"="Normal"
+"Game Type"="Use Map Settings"
+"Gamma"=dword:00000064
+"intro"=dword:00000200
+"introX"=dword:00000000
+"kscroll"=dword:00000003
+"m_kscroll"=dword:00000003
+"m_mscroll"=dword:00000003
+"mscroll"=dword:00000003
+"music"=dword:00000019
+"sfx"=dword:00000032
+"speed"=dword:00000004
+"tip"=dword:00000000
+"tipnum"=dword:00000005
+"trigtext"=dword:00000000
+"unitnoise"=dword:00000002
+"UnitPortraits"=dword:00000002
+"unitspeech"=dword:00000001
+"usechatcolors"=dword:00001000

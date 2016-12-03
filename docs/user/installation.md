@@ -46,8 +46,9 @@ Installation of TorchCraft is based on your platform and whether you are using A
 - Copy `$STARCRAFT/TorchCraft/config/torchcraft.ini` in `$STARCRAFT/bwapi-data/torchcraft.ini`.
 - Copy `$STARCRAFT/TorchCraft/BWEnv/bin/*.dll` into `$STARCRAFT/`.
 
+Now you only need one of the following two methods, either AIModule (DLL) or AIClient (EXE).
 
-### TorchCraft AIModule for users:
+### TorchCraft AIModule (DLL) for users:
 
 - Download `BWEnv.dll` from [here](https://github.com/TorchCraft/TorchCraft/releases/download/v1.0/BWEnv.dll) and put it in `$STARCRAFT`
 - Run `$STARCRAFT/BWAPI/ChaosLauncher/Chaoslauncher - MultiInstance.exe` **as administrator**.
@@ -56,7 +57,7 @@ Installation of TorchCraft is based on your platform and whether you are using A
 - Goto [Installing the Torch client (Linux)](#installing-the-torch-client-linux)
 
 
-### TorchCraft AIClient for users:
+### TorchCraft AIClient (EXE) for users:
 
 - Download `BWEnv.exe` from [here](https://github.com/TorchCraft/TorchCraft/releases/download/v1.0/BWEnv.exe) and put it in `$STARCRAFT`.
 - Run `$STARCRAFT/BWEnv.exe`.

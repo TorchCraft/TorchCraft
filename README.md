@@ -19,8 +19,8 @@ The most tested and stable way to set it up is to have StarCraft running on Wind
 and Torch running in Linux or Mac OS X. If you already have StarCraft, you need to
 install [BWAPI](docs/user/installation.md#bwapi),
 [copy a few files](docs/user/installation.md#torchcraft-common-prerequisites), 
-and either launch the [AIModule (DLL)](docs/user/installation.md#torchcraft-aimodule-for-users) 
-OR launch the [AIClient (EXE)](docs/user/installation.md#torchcraft-aiclient-for-users). 
+and either launch the [AIModule (DLL)](docs/user/installation.md#torchcraft-aimodule-dll-for-users) 
+OR launch the [AIClient (EXE)](docs/user/installation.md#torchcraft-aiclient-exe-for-users). 
 
 You can also run StarCraft on Linux through Wine, but this may be a bit more 
 complicated, start with 

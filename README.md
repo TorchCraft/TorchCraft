@@ -79,4 +79,6 @@ Please cite the arXiv paper if you use TorchCraft in your work:
 }
 ```
 
-## Contribution
+## Contributing
+
+See [Contributing](CONTRIBUTING.md)

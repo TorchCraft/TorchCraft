@@ -21,8 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ADD https://raw.githubusercontent.com/suchja/x11client/master/docker-entrypoint.sh /entrypoint.sh
 RUN chmod 777 /entrypoint.sh
-# switch to user and start
-ENTRYPOINT ["/entrypoint.sh"]
 
 # Install packages for building the image
 RUN apt-get update -y \
@@ -30,6 +28,7 @@ RUN apt-get update -y \
     curl \
     unzip \
     software-properties-common \
+    vim \
   && add-apt-repository ppa:ubuntu-wine/ppa
 
 # Define which versions we need
@@ -72,11 +71,7 @@ ENV LD_LIBRARY_PATH=/root/torch/install/lib:$LD_LIBRARY_PATH
 ENV DYLD_LIBRARY_PATH=/root/torch/install/lib:$DYLD_LIBRARY_PATH
 ENV LUA_CPATH='/root/torch/install/lib/?.so;'$LUA_CPATH
 
-### TODO replace with git clone once torchcraft goes public
-# git clone https://github.com/torchcraft/torchcraft ./torchcraft
-RUN curl -L https://www.dropbox.com/sh/ipdeuobofbjyhql/AABKsPSI8gLw-3GLaHzgqMUGa\?dl\=1 -o ./torchcraft.zip
-# This has an error code 2 for some reason?
-RUN unzip ./torchcraft.zip -d ./TorchCraft; rm torchcraft.zip
+RUN git clone https://github.com/TorchCraft/TorchCraft
 RUN cd ./TorchCraft; luarocks make *.rockspec
 
 RUN curl -L http://ftp.blizzard.com/pub/broodwar/patches/PC/BW-1161.exe -o /home/torchcraft/BW-1161.exe
@@ -90,3 +85,6 @@ RUN chmod -R 777 /home/torchcraft/TorchCraft
 USER torchcraft
 ADD common/* ./
 RUN echo ". /root/torch/install/bin/torch-activate" >> ~/.bashrc
+RUN echo "export DISPLAY=xserver:0" >> ~/.bashrc
+
+ENTRYPOINT ["/entrypoint.sh"]

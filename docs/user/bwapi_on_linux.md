@@ -36,14 +36,14 @@ Warning: Chaoslauncher was only tested to work on wine1.6. For most non-ubuntu d
     
     # Install TorchCraft
     cd $STARCRAFT
-    git clone https://github.com/soumith/TorchCraft
+    git clone https://github.com/TorchCraft/TorchCraft
     bash TorchCraft/quick_setup.sh
 
 
 ## Running AIModule
 
     cd $STARCRAFT
-    wine bwheadless.exe -e $STARCRAFT/StarCraft.exe -l bwapi-data/BWAPI.dll --headful
+    wine bwheadless.exe -e $STARCRAFT/StarCraft.exe -l $STARCRAFT/bwapi-data/BWAPI.dll --headful
 
 
 ## Running AIClient

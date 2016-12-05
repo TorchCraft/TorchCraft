@@ -5,7 +5,7 @@
 ## Install the image
 
 First, download the [Starcraft: Brood War installer](https://us.battle.net/account/management/)
-to `torchcraft/docker/common/Downloader_StarCraft_Combo_enUS.exe`
+to `TorchCraft/docker/common/Downloader_StarCraft_Combo_enUS.exe`
 
 From the current directory:
 
@@ -18,17 +18,19 @@ or if you want CUDA (TODO):
 To run the client:
 
 ```
-# Start your VNC Server
+# Start your VNC Server. This will run as a daemon in the background
 docker run -d --name display -e VNC_PASSWORD=newPW -p 5900:5900 suchja/x11server
 # Run the Torchcraft docker image
-docker run --rm -it --link display:xserver --volumes-from display torchcraft /bin/bash
+docker run --rm --privileged -it --link display:xserver --volumes-from display torchcraft /bin/bash
 # Setup wine
 wine wineboot --init
 winetricks -q vcrun2013
 ```
 
 Use your favorite VNC client to connect to the docker image. For example, with
-TigerVNC, do `vncviewer localhost:0`.
+TigerVNC, do `vncviewer localhost:0`. If the daemon of suchja/x11server is ever
+closed, you must find the id with `docker ps -a`, remove it with `docker rm $ID`
+and restart the server with the above command.
 
 ## Install StarCraft
 
@@ -63,7 +65,5 @@ docker export $ID -o torchcraft.docker
 ```
 docker import torchcraft.docker
 # Note the output ID, which can also be found with `docker images`
-docker run --user torchcraft --rm -it --link display:xserver --volumes-from display $ID /entrypoint.sh bash
+docker run --user torchcraft --rm --privileged -it --link display:xserver --volumes-from display $ID bash
 ```
-
-TODO: Some of the environment variables gets lost, so we should make it resistance to saves and reloading

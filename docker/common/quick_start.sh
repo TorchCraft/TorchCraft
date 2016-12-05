@@ -1,10 +1,10 @@
-STARCRAFT_DIR=$WINEPREFIX/drive_c/StarCraft
+STARCRAFT_DIR=${WINEPREFIX:-~/.wine}/drive_c/StarCraft
 if [ ! -e $STARCRAFT_DIR ]; then
   echo "Starcraft dir not found... maybe you should install it to C:/ first!"
   exit 1
 fi
 
-cp -r ~/TorchCraft/ $STARCRAFT_DIR
+ln -s ~/TorchCraft/ $STARCRAFT_DIR/TorchCraft
 mkdir -p $STARCRAFT_DIR/characters
 cp ~/bwapi.?pc $STARCRAFT_DIR/characters
 

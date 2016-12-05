@@ -73,3 +73,6 @@ Warning: Chaoslauncher was only tested to work on wine1.6. For most non-ubuntu d
   - Make sure you have vcrun2013 installed through winetricks
   - Make sure `winecfg` shows that `msvcp120` and `msvcr120` are being used, and other
     versions of msvcp are not.
+    
+- Running Torch and Starcraft on the same machine
+  - To run the example scripts on the same machine as Starcraft, add the argument `-t localhost` when you run the lua script.

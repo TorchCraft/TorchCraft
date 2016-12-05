@@ -1,7 +1,4 @@
 # Torchcraft on Docker
-## Requirements
-- Docker 1.12.1 (Tested and did not work on 1.12.3, other versions might)
-
 ## Install the image
 
 First, download the [Starcraft: Brood War installer](https://us.battle.net/account/management/)

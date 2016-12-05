@@ -99,4 +99,4 @@ In a terminal or CLI, type:
     $ cd torchcraft
     $ luarocks make torchcraft-1.0-0.rockspec
     $ cd examples/
-    $ th simple_{exe|dll}.lua # depending on if you launched the exe or dll
+    $ th simple_{exe|dll}.lua -t $server_ip # depending on if you launched the exe or dll

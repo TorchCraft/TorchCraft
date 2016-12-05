@@ -31,7 +31,8 @@ complicated, start with
 
 See [`examples/`](examples/) for a list of scripts that you can try.
 The simplest examples come in two flavors: **DLL/AIModule** based and **EXE/AIClient**
-based.
+based. In all cases, the `$server_ip` is the ip address of the machine running
+StarCraft.
 
 ### DLL/AIModule TorchCraft
 
@@ -48,7 +49,7 @@ based.
 
 ```bash
 $ cd examples
-$ th simple_dll.lua
+$ th simple_dll.lua -t $server_ip
 ```
 
 ### EXE/AIClient TorchCraft
@@ -63,7 +64,7 @@ $ th simple_dll.lua
 
 ```bash
 $ cd examples
-$ th simple_exe.lua
+$ th simple_exe.lua -t $server_ip
 ```
 
 ## Citation

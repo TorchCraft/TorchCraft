@@ -1333,6 +1333,30 @@ function torchcraft:get_layer(layer_type, also_enemy)
                                        32, 32, color)
             end
         end
+    elseif layer_type == "minerals" then
+        t = self.state.units_neutral
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                color = utils.get_health_color(ut.hp, 1500)
+                print(ut.hp)
+                img = self:draw_entity(img, pos_x, pos_y,
+                                       ut.pixel_size_x, ut.pixel_size_y, color)
+            end
+        end
+    elseif layer_type == "gas" then
+        -- :TODO: add friendly refineries/etc
+        -- need to add interface for calling getResources on a refinery in controller.cc 
+        t = self:filter_type(self.state.units_neutral,
+                {self.unittypes.Resource_Vespene_Geyser})
+        for uid, ut in ipairs(t) do
+            if self:is_in_screen(ut) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                color = utils.get_health_color(ut.hp, 2500)
+                img = self:draw_entity(img, pos_x, pos_y,
+                                       32, 32, color)
+            end
+        end
     else
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) then
@@ -1343,6 +1367,12 @@ function torchcraft:get_layer(layer_type, also_enemy)
                     color = utils.html_color_table[ut.type]
                 elseif layer_type == "player" then
                     color = utils.players_color_table[ut.playerId]
+                elseif layer_type == "shield" then
+                    -- :TODO: Add max_shelds to state:
+                    color = utils.get_health_color(ut.shield, ut.max_hp)
+                elseif layer_type == "energy" then
+                    -- :TODO: Add something about max energy / upgrades
+                    color = utils.get_health_color(ut.energy, 250)
                 end
                 img = self:draw_entity(img, pos_x, pos_y,
                                        ut.pixel_size_x, ut.pixel_size_y,

@@ -290,6 +290,13 @@ function utils.get_health_color(hp_percentage, max_hp)
     return utils.hsv_to_rgb({hp_percentage, 100, 100})
 end
 
+function utils.is_mineral_field(ut)
+    if 176 <= ut.type and ut.type <= 178 then
+        return true
+    end
+    return false 
+end
+
 utils.visibility_color_table = {
     [0] = {0, 0, 0},       -- black
     [1] = {176,224,230},   -- powder blue

@@ -4,6 +4,8 @@
 ### 1. Installing Wine
 - On Ubuntu (confirmed on 14.04 and 16.04)
   -  `sudo apt-get install wine` 
+- On Mac (confirmed on 10.12.1)
+  -  `brew install wine winetricks`
 
 Warning: Chaoslauncher was only tested to work on wine1.6. For most non-ubuntu distributions you must compile from scratch. However, you can still use the server through bwheadless.
 
@@ -29,14 +31,14 @@ Warning: Chaoslauncher was only tested to work on wine1.6. For most non-ubuntu d
 
     winetricks -q vcrun2013
     
-    # - Download latest release of BWAPI at https://github.com/bwapi/bwapi/releases
+    # Download latest release of BWAPI at https://github.com/bwapi/bwapi/releases
     wget https://github.com/bwapi/bwapi/releases/download/v4.1.2/BWAPI_412_Setup.exe
     wine BWAPI_412_Setup.exe
     # INSTALL THIS TO C:\StarCraft\BWAPI
     
     # Install TorchCraft
     cd $STARCRAFT
-    git clone https://github.com/TorchCraft/TorchCraft
+    git clone https://github.com/TorchCraft/TorchCraft.git
     bash TorchCraft/quick_setup.sh
 
 

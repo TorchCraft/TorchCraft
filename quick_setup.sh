@@ -2,7 +2,13 @@
 
 WINE_DIR=${WINEPREFIX:-~/.wine}
 TC_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-SC_DIR="$(dirname $(readlink -f $(find $WINE_DIR -name StarCraft.exe -print -quit)))"
+
+if [[ `uname` == 'Darwin' ]]; then
+    SC_DIR="$(dirname $(find $WINE_DIR -name StarCraft.exe -print -quit))"
+else
+    SC_DIR="$(dirname $(readlink -f $(find $WINE_DIR -name StarCraft.exe -print -quit)))"
+fi
+
 SC_DIR=${STARCRAFT_DIR:-$SC_DIR}
 if [ ! -e $SC_DIR ]; then
 	echo "Cannot find StarCraft directory, try setting $STARCRAFT_DIR"
@@ -19,7 +25,11 @@ curl -LO https://github.com/TorchCraft/TorchCraft/releases/download/v1.0-0/torch
 unzip torchcraft-v1.0-0.zip
 cp torchcraft-v1.0-0/* ./
 
-sed -i "s|^ai *=.*|ai=$SC_DIR/BWEnv.dll|" bwapi-data/bwapi.ini
+if [[ `uname` == 'Darwin' ]]; then
+    sed -i '' "s|^ai *=.*|ai=$SC_DIR/BWEnv.dll|" bwapi-data/bwapi.ini
+else
+    sed -i "s|^ai *=.*|ai=$SC_DIR/BWEnv.dll|" bwapi-data/bwapi.ini
+fi
 
 # Set up the right registry keys
 cd $WINE_DIR

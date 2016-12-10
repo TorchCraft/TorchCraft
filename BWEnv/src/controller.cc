@@ -786,7 +786,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
   frame.units[player->getID()].push_back({
     u->getID(), x_wt, y_wt,
     u->getHitPoints(), utype.maxHitPoints(),
-    u->getShields(), utype.maxShields(),u->getEnergy(),
+    u->getShields(), utype.maxShields(), u->getEnergy(),
     player->weaponDamageCooldown(utype),
     u->getGroundWeaponCooldown(), u->getAirWeaponCooldown(),
     u->isIdle(), u->isVisible(),

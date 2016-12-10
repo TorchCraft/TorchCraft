@@ -12,7 +12,7 @@
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.id << " " << o.x << " " << o.y << " "
     << o.health << " " << o.max_health << " "
-    << o.shield << " " << o.energy << " " << o.maxCD << " "
+    << o.shield << " " << o.max_shield << " " << o.energy << " " << o.maxCD << " "
     << o.groundCD << " " << o.airCD << " " << o.idle << " "
     << o.visible << " " << o.type << " " << o.armor << " "
     << o.shieldArmor << " " << o.size << " "
@@ -30,11 +30,13 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
 
   out << o.velocityX << " " << o.velocityY;
   out << " " << o.playerId;
+  out << " " << o.resources;
   return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
-  in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >> o.energy
+  in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield 
+    >> o.max_shield >> o.energy
     >> o.maxCD >> o.groundCD >> o.airCD >> o.idle >> o.visible >> o.type
     >> o.armor >> o.shieldArmor >> o.size
     >> o.pixel_x >> o.pixel_y >> o.pixel_size_x >> o.pixel_size_y
@@ -54,6 +56,7 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
 
   in >> o.velocityX >> o.velocityY;
   in >> o.playerId;
+  in >> o.resources:
   return in;
 }
 

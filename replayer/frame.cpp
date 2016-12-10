@@ -56,7 +56,7 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
 
   in >> o.velocityX >> o.velocityY;
   in >> o.playerId;
-  in >> o.resources:
+  in >> o.resources;
   return in;
 }
 

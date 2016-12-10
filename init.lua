@@ -704,7 +704,6 @@ for command, orders in pairs(torchcraft.command2order) do
 end
 seal(torchcraft.order2command)
 
-
 torchcraft.xy_pixels_per_walktile = 8
 torchcraft.xy_pixels_per_buildtile = 32
 torchcraft.xy_walktiles_per_buildtile = 4
@@ -1338,23 +1337,19 @@ function torchcraft:get_layer(layer_type, also_enemy)
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
-                color = utils.get_health_color(ut.hp, 1500)
-                print(ut.hp)
+                color = utils.get_health_color(ut.resources, 1500)
                 img = self:draw_entity(img, pos_x, pos_y,
                                        ut.pixel_size_x, ut.pixel_size_y, color)
             end
         end
     elseif layer_type == "gas" then
-        -- :TODO: add friendly refineries/etc
-        -- need to add interface for calling getResources on a refinery in controller.cc 
-        t = self:filter_type(self.state.units_neutral,
-                {self.unittypes.Resource_Vespene_Geyser})
-        for uid, ut in ipairs(t) do
-            if self:is_in_screen(ut) then
+        t = tablex.merge(t, self.state.units_neutral, true);
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
-                color = utils.get_health_color(ut.hp, 2500)
+                color = utils.get_health_color(ut.resources, 2500)
                 img = self:draw_entity(img, pos_x, pos_y,
-                                       32, 32, color)
+                                       ut.pixel_size_x, ut.pixel_size_y, color)
             end
         end
     else
@@ -1368,16 +1363,75 @@ function torchcraft:get_layer(layer_type, also_enemy)
                 elseif layer_type == "player" then
                     color = utils.players_color_table[ut.playerId]
                 elseif layer_type == "shield" then
-                    -- :TODO: Add max_shelds to state:
-                    color = utils.get_health_color(ut.shield, ut.max_hp)
+                    color = utils.get_health_color(ut.shield, ut.max_shield)
                 elseif layer_type == "energy" then
-                    -- :TODO: Add something about max energy / upgrades
                     color = utils.get_health_color(ut.energy, 250)
                 end
                 img = self:draw_entity(img, pos_x, pos_y,
                                        ut.pixel_size_x, ut.pixel_size_y,
                                        color)
             end
+        end
+    end
+    return img
+end
+
+function torchcraft:draw_value(img, pox_x, pos_y, size_x, size_y, value)
+
+end
+
+function torchcraft:get_feature(feature, also_enemy)
+--returns 2D imagelike tensor of feature
+    local img = torch.ByteTensor(self.field_size[1],self.field_size[2]):fill(0)
+
+    local pos_x, pos_y
+
+    if layer_type == "visibility" then
+        for y, xs in ipairs(self.state.visibility) do
+            for x, value in ipairs(xs) do
+                pos_x = (x - 1) * 32
+                pos_y = (y - 1) * 32
+                img = self:draw_value(img, pos_x, pos_y,
+                                       32, 32, value)
+            end
+        end
+        return img
+    end
+
+    local t
+    
+    if layer_type == "minerals" then
+        t = self.state.units_neutral
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                img = self:draw_value(img, pos_x, pos_y,
+                                    ut.pixel_size_x, ut.pixel_size_y, ut.resources)
+            end
+        return img
+        end
+    elseif layer_type == "gas" then
+        t = tablex.merge(self.state.units.myself, self.state.units_neutral,true)
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                img = self:draw_value(img, pos_x, pos_y,
+                                    ut.pixel_size_x, ut.pixel_size_y, ut.resources)
+            end
+        return img
+        end
+    else
+        t = self.state.units_myself
+        if also_enemy then
+            t = tablex.merge(t, self.state.units_enemy, true)
+        end
+    end
+
+    for uid, ut in pairs(t) do
+        if self:is_unit_in_screen(ut) then
+            pos_x, pos_y = self.get_unit_pos(ut)
+            img = self:draw_value(img, pos_x, pos_y,
+                ut.pixel_size_x, ut.pixel_size_y, ut[feature])
         end
     end
     return img

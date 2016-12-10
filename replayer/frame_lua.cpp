@@ -200,6 +200,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.airATK = getInt(L, "awattack");
       unit.airDmgType = getInt(L, "awdmgtype");
       unit.airRange = getInt(L, "awrange");
+      unit.resources = getInt(L, "resources");
 
       //commands
       getField(L, "orders");
@@ -277,10 +278,10 @@ void pushUnit(lua_State* L, const Unit& unit) {
   lua_settable(L, -3);
 
   setInt(L, "type", unit.type);
-
   setInt(L, "hp", unit.health);
   setInt(L, "max_hp", unit.max_health);
   setInt(L, "shield", unit.shield);
+  setInt(L, "max_shield", unit.max_shield);
   setInt(L, "energy", unit.energy);
   setInt(L, "maxcd", unit.maxCD);
   setInt(L, "gwcd", unit.groundCD);
@@ -300,6 +301,7 @@ void pushUnit(lua_State* L, const Unit& unit) {
   setInt(L, "awdmgtype", unit.airDmgType);
   setInt(L, "gwrange", unit.groundRange);
   setInt(L, "awrange", unit.airRange);
+  setInt(L, "resources", unit.resources);
 
   // orders
   lua_pushstring(L, "orders");

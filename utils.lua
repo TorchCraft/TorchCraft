@@ -297,6 +297,14 @@ function utils.is_mineral_field(ut)
     return false 
 end
 
+function utils.is_gas_geyser(ut)
+    if ut.type == 188 or ut.type == 157
+    or ut.type == 149 or ut.type == 110 then
+        return true
+    end
+    return false 
+end
+
 utils.visibility_color_table = {
     [0] = {0, 0, 0},       -- black
     [1] = {176,224,230},   -- powder blue

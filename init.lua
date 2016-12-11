@@ -1384,17 +1384,55 @@ function torchcraft:get_layer(layer_type, also_enemy)
     return img
 end
 
-function torchcraft:draw_value(img, pox_x, pos_y, size_x, size_y, value)
+function torchcraft:draw_value(img, pos_x, pos_y, size_x, size_y, value)
+    local narrow_width_start = math.max(1,
+                                        math.floor(pos_x - size_x / 2))
+    local narrow_width_end = math.min(self.field_size[1],
+                                      math.floor(pos_x + size_x / 2))
+    local narrow_height_start = math.max(1,
+                                         math.floor(pos_y - size_y / 2))
+    local narrow_height_end = math.min(self.field_size[2],
+                                       math.floor(pos_y + size_y / 2))
+    -- Hack to fix crash were unit is on top left corner of FoV
+    if narrow_width_end <= 0 then
+        narrow_width_end = narrow_width_start
+    end
+    local rect = img:narrow(2, narrow_width_start,
+                            narrow_width_end - narrow_width_start + 1)
+    if narrow_height_end <= 0 then
+        narrow_height_end = narrow_height_start
+    end
+    local rect = rect:narrow(1, narrow_height_start,
+                             narrow_height_end - narrow_height_start + 1)
+    rect:fill(value)
     return img
 end
 
-function torchcraft:get_feature(feature, also_enemy)
+function torchcraft:get_feature(feature, also_enemy, dtype)
 --returns 2D imagelike tensor of feature
-    local img = torch.ByteTensor(self.field_size[1],self.field_size[2]):fill(0)
+--type defaults to ByteTensor
+
+-- :TODO: Maybe make categorical features return a 3D tensor of one-hots
+--        Or just render them to colors with draw value to increase spacing
+
+    local img
+    if dtype == "short" then
+        img = torch.ShortTensor(self.field_size[2],self.field_size[1]):fill(0)
+    elseif dtype == "int" then
+        img = torch.IntTensor(self.field_size[2],self.field_size[1]):fill(0)
+    elseif dtype == "long" then
+        img = torch.LongTensor(self.field_size[2],self.field_size[1]):fill(0)
+    elseif dtype == "float" then
+        img = torch.FloatTensor(self.field_size[2],self.field_size[1]):fill(0)
+    elseif dtype == "double" then
+        img = torch.DoubleTensor(self.field_size[2],self.field_size[1]):fill(0)
+    else
+        img = torch.ByteTensor(self.field_size[2],self.field_size[1]):fill(0)
+    end
 
     local pos_x, pos_y
 
-    if layer_type == "visibility" then
+    if feature == "visibility" then
         for y, xs in ipairs(self.state.visibility) do
             for x, value in ipairs(xs) do
                 pos_x = (x - 1) * 32
@@ -1408,7 +1446,7 @@ function torchcraft:get_feature(feature, also_enemy)
 
     local t
     
-    if layer_type == "minerals" then
+    if feature == "minerals" then
         t = self.state.units_neutral
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
@@ -1416,30 +1454,47 @@ function torchcraft:get_feature(feature, also_enemy)
                 img = self:draw_value(img, pos_x, pos_y,
                                     ut.pixel_size_x, ut.pixel_size_y, ut.resource)
             end
-        return img
         end
-    elseif layer_type == "gas" then
-        t = tablex.merge(self.state.units.myself, self.state.units_neutral,true)
+        return img
+    elseif feature == "gas" then
+        t = tablex.merge(self.state.units_myself, self.state.units_neutral,true)
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 img = self:draw_value(img, pos_x, pos_y,
                                     ut.pixel_size_x, ut.pixel_size_y, ut.resource)
             end
-        return img
         end
+        return img
     else
         t = self.state.units_myself
         if also_enemy then
             t = tablex.merge(t, self.state.units_enemy, true)
         end
     end
+    
+    -- adding one to these so they aren't 0 indexed, otherwise
+    -- they can become part of the background
+    if feature == "type" or feature == "playerId" then
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                if pos_x then
+                    img = self:draw_value(img, pos_x, pos_y,
+                        ut.pixel_size_x, ut.pixel_size_y, (ut[feature] + 1))
+                end
+            end
+        end
+        return img
+    end
 
     for uid, ut in pairs(t) do
         if self:is_unit_in_screen(ut) then
-            pos_x, pos_y = self.get_unit_pos(ut)
-            img = self:draw_value(img, pos_x, pos_y,
-                ut.pixel_size_x, ut.pixel_size_y, ut[feature])
+            pos_x, pos_y = self:get_unit_screen_pos(ut)
+            if pos_x then
+                img = self:draw_value(img, pos_x, pos_y,
+                    ut.pixel_size_x, ut.pixel_size_y, ut[feature])
+            end
         end
     end
     return img

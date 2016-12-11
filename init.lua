@@ -1294,9 +1294,15 @@ function torchcraft:draw_entity(img, pos_x, pos_y, size_x, size_y, rgb)
                                          math.floor(pos_y - size_y / 2))
     local narrow_height_end = math.min(img:size()[2],
                                        math.floor(pos_y + size_y / 2))
-
+    -- Hack to fix crash were unit is on top left corner of FoV
+    if narrow_width_end <= 0 then
+        narrow_width_end = narrow_width_start
+    end
     local rect = img:narrow(3, narrow_width_start,
-                            narrow_width_end - narrow_width_start)
+                            narrow_width_end - narrow_width_start + 1)
+    if narrow_height_end <= 0 then
+        narrow_height_end = narrow_height_start
+    end
     local rect = rect:narrow(2, narrow_height_start,
                              narrow_height_end - narrow_height_start + 1)
     rect[1]:fill(rgb[1])

@@ -145,10 +145,12 @@ while not tc.state.game_ended do
             image.save("images/layer_type_" .. cstr .. ".ppm", type_layer)
             image.save("images/layer_player_" .. cstr .. ".ppm", player_layer)
             image.save("images/layer_visibility_" .. cstr .. ".ppm", visibility_layer)
-            image.save("images/layer_minerals_" .. cstr .. ".ppm", minerals_layer)
-            image.save("images/layer_gas_"      .. cstr .. ".ppm", gas_layer)
-            image.save("images/layer_energy_"   .. cstr .. ".ppm", energy_layer)
             image.save("images/layer_shield_"   .. cstr .. ".ppm", shield_layer)
+            image.save("images/layer_energy_"   .. cstr .. ".ppm", energy_layer)
+            if not micro_game then
+                image.save("images/layer_minerals_" .. cstr .. ".ppm", minerals_layer)
+                image.save("images/layer_gas_"      .. cstr .. ".ppm", gas_layer)
+            end
 
         end
 

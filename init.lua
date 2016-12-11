@@ -1337,7 +1337,7 @@ function torchcraft:get_layer(layer_type, also_enemy)
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
-                color = utils.get_health_color(ut.resources, 1500)
+                color = utils.get_health_color(ut.resource, 1500)
                 img = self:draw_entity(img, pos_x, pos_y,
                                        ut.pixel_size_x, ut.pixel_size_y, color)
             end
@@ -1347,7 +1347,7 @@ function torchcraft:get_layer(layer_type, also_enemy)
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
-                color = utils.get_health_color(ut.resources, 2500)
+                color = utils.get_health_color(ut.resource, 2500)
                 img = self:draw_entity(img, pos_x, pos_y,
                                        ut.pixel_size_x, ut.pixel_size_y, color)
             end
@@ -1356,20 +1356,22 @@ function torchcraft:get_layer(layer_type, also_enemy)
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
-                if layer_type == "hp" then
+                if layer_type == "hp" and ut.max_hp > 0 then
                     color = utils.get_health_color(ut.hp, ut.max_hp)
                 elseif layer_type == "type" then
                     color = utils.html_color_table[ut.type]
                 elseif layer_type == "player" then
                     color = utils.players_color_table[ut.playerId]
-                elseif layer_type == "shield" then
+                elseif layer_type == "shield" and ut.shield > 0 then
                     color = utils.get_health_color(ut.shield, ut.max_shield)
                 elseif layer_type == "energy" then
                     color = utils.get_health_color(ut.energy, 250)
                 end
-                img = self:draw_entity(img, pos_x, pos_y,
-                                       ut.pixel_size_x, ut.pixel_size_y,
-                                       color)
+                if color then
+                    img = self:draw_entity(img, pos_x, pos_y,
+                                           ut.pixel_size_x, ut.pixel_size_y,
+                                           color)
+                end
             end
         end
     end
@@ -1377,7 +1379,7 @@ function torchcraft:get_layer(layer_type, also_enemy)
 end
 
 function torchcraft:draw_value(img, pox_x, pos_y, size_x, size_y, value)
-
+    return img
 end
 
 function torchcraft:get_feature(feature, also_enemy)
@@ -1406,7 +1408,7 @@ function torchcraft:get_feature(feature, also_enemy)
             if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 img = self:draw_value(img, pos_x, pos_y,
-                                    ut.pixel_size_x, ut.pixel_size_y, ut.resources)
+                                    ut.pixel_size_x, ut.pixel_size_y, ut.resource)
             end
         return img
         end
@@ -1416,7 +1418,7 @@ function torchcraft:get_feature(feature, also_enemy)
             if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 img = self:draw_value(img, pos_x, pos_y,
-                                    ut.pixel_size_x, ut.pixel_size_y, ut.resources)
+                                    ut.pixel_size_x, ut.pixel_size_y, ut.resource)
             end
         return img
         end

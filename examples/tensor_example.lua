@@ -132,14 +132,16 @@ while not tc.state.game_ended do
             -- for uid, ut in pairs(tc.state.units_myself) do
             --     print("Unit " .. uid .. " in screen: " .. tostring(tc:is_unit_in_screen(ut)))
             -- end
-            local hp_tensor         = tc:get_feature("hp",         true, "short")
-            local type_tensor       = tc:get_feature("type",       true, "byte")
+
+            local hp_tensor         = tc:get_feature("hp",         true)
+            local type_tensor       = tc:get_feature("type",       true)
             local player_tensor     = tc:get_feature("playerId",   true)
             local visibility_tensor = tc:get_feature("visibility", true)
-            local minerals_tensor   = tc:get_feature("minerals",   true, "short")
-            local gas_tensor        = tc:get_feature("gas",        true, "short")
+            local minerals_tensor   = tc:get_feature("minerals",   true)
+            local gas_tensor        = tc:get_feature("gas",        true)
             local energy_tensor     = tc:get_feature("energy",     true)
-            local shield_tensor     = tc:get_feature("shield",     true, "short")
+            local shield_tensor     = tc:get_feature("shield",     true)
+
 
             if save_continuous then
                 cstr = string.format("%05d", img_counter)

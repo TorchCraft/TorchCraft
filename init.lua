@@ -517,6 +517,20 @@ function torchcraft:isworker(unittypeid)
         unittypeid == torchcraft.unittypes.Zerg_Drone
 end
 
+function torchcraft:is_mineral_field(unittypeid):
+    return unittypeid == self.unittypes.Resource_Mineral_Field or
+        unittypeid == self.unittypes.Resource_Mineral_Field_Type_2 or
+        unittypeid == self.unittypes.Resource_Mineral_Field_Type_3
+end
+
+function torchcraft:is_gas_geyser(unittypeid):
+    return unittypeid == self.unittypes.Resource_Vespene_Geyser or
+        unittypeid == self.unittypes.Protoss_Assimilator or
+        unittypeid == self.unittypes.Terran_Refinery or
+        unittypeid == self.unittypes.Zerg_Extractor
+ 
+end
+
 -- static table, is sealed after initialization
 torchcraft.bullettypes = {
     -- corresponds to BWAPI::BulletTypes::Enum
@@ -733,7 +747,7 @@ do -- load and seal other static data
    setmetatable(torchcraft.staticdata, tmp)
 end
 
-torchcraft.PROTOCOL_VERSION = "15"
+torchcraft.PROTOCOL_VERSION = "16"
 torchcraft.hostname = nil
 torchcraft.state = {}
 torchcraft.mode = {micro_battles = false, replay = false}
@@ -1341,7 +1355,7 @@ function torchcraft:get_layer(layer_type, also_enemy)
     elseif layer_type == "minerals" then
         t = self.state.units_neutral
         for uid, ut in pairs(t) do
-            if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
+            if self:is_unit_in_screen(ut) and self:is_mineral_field(ut.type) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 color = utils.get_health_color(ut.resource, 1500)
                 img = self:draw_entity(img, pos_x, pos_y,
@@ -1351,7 +1365,7 @@ function torchcraft:get_layer(layer_type, also_enemy)
     elseif layer_type == "gas" then
         t = tablex.merge(t, self.state.units_neutral, true);
         for uid, ut in pairs(t) do
-            if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
+            if self:is_unit_in_screen(ut) and self:is_gas_geyser(ut.type) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 color = utils.get_health_color(ut.resource, 2500)
                 img = self:draw_entity(img, pos_x, pos_y,
@@ -1408,29 +1422,16 @@ function torchcraft:draw_value(img, pos_x, pos_y, size_x, size_y, value)
     return img
 end
 
-function torchcraft:get_feature(feature, also_enemy, dtype)
+function torchcraft:get_feature(feature, also_enemy)
 --returns 2D imagelike tensor of feature
 --type defaults to ByteTensor
 
 -- :TODO: Maybe make categorical features return a 3D tensor of one-hots
 --        Or just render them to colors with draw value to increase spacing
 
-    local img
-    if dtype == "short" then
-        img = torch.ShortTensor(self.field_size[2],self.field_size[1]):fill(0)
-    elseif dtype == "int" then
-        img = torch.IntTensor(self.field_size[2],self.field_size[1]):fill(0)
-    elseif dtype == "long" then
-        img = torch.LongTensor(self.field_size[2],self.field_size[1]):fill(0)
-    elseif dtype == "float" then
-        img = torch.FloatTensor(self.field_size[2],self.field_size[1]):fill(0)
-    elseif dtype == "double" then
-        img = torch.DoubleTensor(self.field_size[2],self.field_size[1]):fill(0)
-    else
-        img = torch.ByteTensor(self.field_size[2],self.field_size[1]):fill(0)
-    end
-
+    local img  = torch.ShortTensor(self.field_size[2],self.field_size[1]):fill(0)
     local pos_x, pos_y
+    local t
 
     if feature == "visibility" then
         for y, xs in ipairs(self.state.visibility) do
@@ -1441,15 +1442,12 @@ function torchcraft:get_feature(feature, also_enemy, dtype)
                                        32, 32, value)
             end
         end
-        return img
     end
 
-    local t
-    
     if feature == "minerals" then
         t = self.state.units_neutral
         for uid, ut in pairs(t) do
-            if self:is_unit_in_screen(ut) and utils.is_mineral_field(ut) then
+            if self:is_unit_in_screen(ut) and self:is_mineral_field(ut.type) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 img = self:draw_value(img, pos_x, pos_y,
                                     ut.pixel_size_x, ut.pixel_size_y, ut.resource)
@@ -1457,9 +1455,11 @@ function torchcraft:get_feature(feature, also_enemy, dtype)
         end
         return img
     elseif feature == "gas" then
-        t = tablex.merge(self.state.units_myself, self.state.units_neutral,true)
+
+        t = tablex.merge(self.state.units_myself, self.state.units_neutral, true)
+
         for uid, ut in pairs(t) do
-            if self:is_unit_in_screen(ut) and utils.is_gas_geyser(ut) then
+            if self:is_unit_in_screen(ut) and self:is_gas_geyser(ut.type) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
                 img = self:draw_value(img, pos_x, pos_y,
                                     ut.pixel_size_x, ut.pixel_size_y, ut.resource)
@@ -1471,32 +1471,31 @@ function torchcraft:get_feature(feature, also_enemy, dtype)
         if also_enemy then
             t = tablex.merge(t, self.state.units_enemy, true)
         end
-    end
-    
-    -- adding one to these so they aren't 0 indexed, otherwise
-    -- they can become part of the background
-    if feature == "type" or feature == "playerId" then
-        for uid, ut in pairs(t) do
-            if self:is_unit_in_screen(ut) then
-                pos_x, pos_y = self:get_unit_screen_pos(ut)
-                if pos_x then
-                    img = self:draw_value(img, pos_x, pos_y,
-                        ut.pixel_size_x, ut.pixel_size_y, (ut[feature] + 1))
+        -- adding one to these so they aren't 0 indexed, otherwise
+        -- they can become part of the background
+        if feature == "type" or feature == "playerId" then
+            for uid, ut in pairs(t) do
+                if self:is_unit_in_screen(ut) then
+                    pos_x, pos_y = self:get_unit_screen_pos(ut)
+                    if pos_x then
+                        img = self:draw_value(img, pos_x, pos_y,
+                            ut.pixel_size_x, ut.pixel_size_y, (ut[feature] + 1))
+                    end
+                end
+            end
+        else
+            for uid, ut in pairs(t) do
+                if self:is_unit_in_screen(ut) then
+                    pos_x, pos_y = self:get_unit_screen_pos(ut)
+                    if pos_x then
+                        img = self:draw_value(img, pos_x, pos_y,
+                            ut.pixel_size_x, ut.pixel_size_y, ut[feature])
+                    end
                 end
             end
         end
-        return img
     end
-
-    for uid, ut in pairs(t) do
-        if self:is_unit_in_screen(ut) then
-            pos_x, pos_y = self:get_unit_screen_pos(ut)
-            if pos_x then
-                img = self:draw_value(img, pos_x, pos_y,
-                    ut.pixel_size_x, ut.pixel_size_y, ut[feature])
-            end
-        end
-    end
+    
     return img
 end
 

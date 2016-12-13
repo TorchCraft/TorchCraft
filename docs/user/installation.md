@@ -95,7 +95,7 @@ In a terminal or CLI, type:
 
 ### TorchCraft
 
-    $ git clone git@github.com:torchcraft/torchcraft.git --recursive`
+    $ git clone git@github.com:torchcraft/torchcraft.git --recursive
     $ cd torchcraft
     $ luarocks make torchcraft-1.0-0.rockspec
     $ cd examples/

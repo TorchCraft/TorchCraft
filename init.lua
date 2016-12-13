@@ -517,13 +517,13 @@ function torchcraft:isworker(unittypeid)
         unittypeid == torchcraft.unittypes.Zerg_Drone
 end
 
-function torchcraft:is_mineral_field(unittypeid):
+function torchcraft:is_mineral_field(unittypeid)
     return unittypeid == self.unittypes.Resource_Mineral_Field or
         unittypeid == self.unittypes.Resource_Mineral_Field_Type_2 or
         unittypeid == self.unittypes.Resource_Mineral_Field_Type_3
 end
 
-function torchcraft:is_gas_geyser(unittypeid):
+function torchcraft:is_gas_geyser(unittypeid)
     return unittypeid == self.unittypes.Resource_Vespene_Geyser or
         unittypeid == self.unittypes.Protoss_Assimilator or
         unittypeid == self.unittypes.Terran_Refinery or
@@ -1442,9 +1442,7 @@ function torchcraft:get_feature(feature, also_enemy)
                                        32, 32, value)
             end
         end
-    end
-
-    if feature == "minerals" then
+    elseif feature == "minerals" then
         t = self.state.units_neutral
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) and self:is_mineral_field(ut.type) then

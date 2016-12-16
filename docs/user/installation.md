@@ -45,6 +45,7 @@ Installation of TorchCraft is based on your platform and whether you are using A
 - Copy `$STARCRAFT/TorchCraft/config/bwapi.ini` in `$STARCRAFT/bwapi-data/bwapi.ini`.
 - Copy `$STARCRAFT/TorchCraft/config/torchcraft.ini` in `$STARCRAFT/bwapi-data/torchcraft.ini`.
 - Copy `$STARCRAFT/TorchCraft/BWEnv/bin/*.dll` into `$STARCRAFT/`.
+- Copy `$STARCRAFT/TorchCraft/maps/*` into `$STARCRAFT/Maps/BroodWar`.
 
 Now you only need one of the following two methods, either AIModule (DLL) or AIClient (EXE).
 

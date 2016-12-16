@@ -1,6 +1,6 @@
 [submodule "BWEnv/include/libzmq"]
 	path = BWEnv/include/libzmq
-	url = git@github.com:torchcraft/libzmq
+	url = https://github.com/TorchCraft/libzmq
 [submodule "BWEnv/include/czmq"]
 	path = BWEnv/include/czmq
-	url = git@github.com:torchcraft/czmq
+	url = https://github.com/torchcraft/czmq

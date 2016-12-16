@@ -782,17 +782,11 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     + utype.airWeapon().damageBonus()
     * player->getUpgradeLevel(utype.airWeapon().upgradeType()))
     * utype.maxAirHits() * utype.airWeapon().damageFactor();
-  int max_health = utype.maxHitPoints();
-  int hp = 0;
-  if (utype.isMineralField() || utype == BWAPI::UnitTypes::Resource_Vespene_Geyser)
-    hp = u->getResources();
-  else
-    hp = u->getHitPoints();
 
   frame.units[player->getID()].push_back({
     u->getID(), x_wt, y_wt,
-    hp, max_health,
-    u->getShields(), u->getEnergy(),
+    u->getHitPoints(), utype.maxHitPoints(),
+    u->getShields(), utype.maxShields(), u->getEnergy(),
     player->weaponDamageCooldown(utype),
     u->getGroundWeaponCooldown(), u->getAirWeaponCooldown(),
     u->isIdle(), u->isVisible(),
@@ -813,7 +807,9 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getVelocityX(),
     u->getVelocityY(),
     unit_player,
+    u->getResources()
   });
+
 
   // Add curent order to order list
   // (we keep Orders::None orders as their timing marks the moment where

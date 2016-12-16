@@ -9,7 +9,7 @@
 require 'torch'
 torch.setdefaulttensortype('torch.FloatTensor')
 require 'sys'
-require 'image'
+require 'gnuplot'
 local stringx = require 'pl.stringx'
 local tablex = require 'pl.tablex'
 local lapp = require 'pl.lapp'
@@ -18,8 +18,9 @@ local args = lapp [[
     Baselines for Starcraft
     -t,--hostname       (default "")    Give hostname / ip pointing to VM
     -p,--port           (default 11111) Port for torchcraft. Do 0 to grab vm from cloud
-    -s,--skip_frames    (default 30)     Number of frames to skip per calculation
+    -s,--skip_frames    (default 240)     Number of frames to skip per calculation
     -m,--micro_game     (default true)  Set to false to run on a normal map (test resource layers)
+    -f,--feature        (default hp) select what feature to view
     ]]
 
 local skip_frames = args.skip_frames
@@ -28,6 +29,7 @@ local max_battles = 10
 local port = args.port
 local hostname = args.hostname or ""
 local micro_game = args.micro_game
+local test_feature = args.feature
 print("hostname:", hostname)
 print("max battles:", max_battles)
 print("micro_game:", micro_game)
@@ -55,7 +57,11 @@ local frames_in_battle = 1
 local last_frame_from_bwapi = 0
 local nloop = 1
 
-tc.initial_map = 'Maps/BroodWar/micro/m5v5_c_far.scm'
+if micro_game then
+    tc.initial_map = 'Maps/Broodwar/dragoons_zealots.scm'
+else
+    tc.initial_map = 'Maps/ICCup/ICCup Python 1.3.scx'
+end
 
 tc.window_pos = {200, 200}
 tc.window_size = {320, 240}
@@ -84,7 +90,7 @@ local save_continuous = true
 local cstr = ""
 local img_counter = 0
 
-os.execute('mkdir -p images')
+local tensor_to_string = torch.Tensor.__tostring__
 
 local tm = torch.Timer()
 while not tc.state.game_ended do
@@ -126,32 +132,41 @@ while not tc.state.game_ended do
             -- for uid, ut in pairs(tc.state.units_myself) do
             --     print("Unit " .. uid .. " in screen: " .. tostring(tc:is_unit_in_screen(ut)))
             -- end
-            local hp_layer         = tc:get_layer("hp",         true)
-            local type_layer       = tc:get_layer("type",       true)
-            local player_layer     = tc:get_layer("player",     true)
-            local visibility_layer = tc:get_layer("visibility", true)
-            local minerals_layer   = tc:get_layer("minerals",   true)
-            local gas_layer        = tc:get_layer("gas",        true)
-            local energy_layer     = tc:get_layer("energy",     true)
-            local shield_layer     = tc:get_layer("shield",     true)
+
+            local hp_tensor         = tc:get_feature("hp",         true)
+            local type_tensor       = tc:get_feature("type",       true)
+            local player_tensor     = tc:get_feature("playerId",   true)
+            local visibility_tensor = tc:get_feature("visibility", true)
+            local minerals_tensor   = tc:get_feature("minerals",   true)
+            local gas_tensor        = tc:get_feature("gas",        true)
+            local energy_tensor     = tc:get_feature("energy",     true)
+            local shield_tensor     = tc:get_feature("shield",     true)
+
 
             if save_continuous then
                 cstr = string.format("%05d", img_counter)
                 img_counter = img_counter + 1
             end
 
-            image.save("images/img_" .. cstr .. ".ppm", tc.state.image)
-            image.save("images/layer_health_" .. cstr .. ".ppm", hp_layer)
-            image.save("images/layer_type_" .. cstr .. ".ppm", type_layer)
-            image.save("images/layer_player_" .. cstr .. ".ppm", player_layer)
-            image.save("images/layer_visibility_" .. cstr .. ".ppm", visibility_layer)
-            image.save("images/layer_shield_"   .. cstr .. ".ppm", shield_layer)
-            image.save("images/layer_energy_"   .. cstr .. ".ppm", energy_layer)
-            if not micro_game then
-                image.save("images/layer_minerals_" .. cstr .. ".ppm", minerals_layer)
-                image.save("images/layer_gas_"      .. cstr .. ".ppm", gas_layer)
+            --                     #justvimthings V
+            if     test_feature == "hp" then
+                gnuplot.imagesc(hp_tensor         ,'color')
+            elseif test_feature == "type" then
+                gnuplot.imagesc(type_tensor       ,'color')  
+            elseif test_feature == "player" then
+                gnuplot.imagesc(player_tensor     ,'color')
+            elseif test_feature == "visibility" then
+                gnuplot.imagesc(visibility_tensor ,'color')
+            elseif test_feature == "minerals" then
+                gnuplot.imagesc(minerals_tensor   ,'color')
+            elseif test_feature == "gas" then
+                gnuplot.imagesc(gas_tensor        ,'color')
+            elseif test_feature == "energy" then
+                gnuplot.imagesc(energy_tensor     ,'color')
+            elseif test_feature == "shield" then
+                gnuplot.imagesc(shield_tensor     ,'color')
             end
-
+            
         end
 
         -- Choose random screen action
@@ -162,10 +177,6 @@ while not tc.state.game_ended do
         if tc.state.frame_from_bwapi > last_frame_from_bwapi then
             frames_in_battle = frames_in_battle + 1
             last_frame_from_bwapi = tc.state.frame_from_bwapi
-        end
-
-        if frames_in_battle > 2*60*24 then
-            actions = {tc.command(tc.quit)}
         end
 
         progress:pop()

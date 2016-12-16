@@ -42,7 +42,7 @@ namespace replayer {
 
   struct Unit {
     int32_t id, x, y;
-    int32_t health, max_health, shield, energy;
+    int32_t health, max_health, shield, max_shield, energy;
     int32_t maxCD, groundCD, airCD;
     bool idle, visible;
     int32_t type, armor, shieldArmor, size;
@@ -59,6 +59,8 @@ namespace replayer {
     double velocityX, velocityY;
 
     int32_t playerId;
+
+    int32_t resources;
   };
 
   std::ostream& operator<<(std::ostream& out, const Unit& o);

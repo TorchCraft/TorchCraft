@@ -517,6 +517,20 @@ function torchcraft:isworker(unittypeid)
         unittypeid == torchcraft.unittypes.Zerg_Drone
 end
 
+function torchcraft:is_mineral_field(unittypeid)
+    return unittypeid == self.unittypes.Resource_Mineral_Field or
+        unittypeid == self.unittypes.Resource_Mineral_Field_Type_2 or
+        unittypeid == self.unittypes.Resource_Mineral_Field_Type_3
+end
+
+function torchcraft:is_gas_geyser(unittypeid)
+    return unittypeid == self.unittypes.Resource_Vespene_Geyser or
+        unittypeid == self.unittypes.Protoss_Assimilator or
+        unittypeid == self.unittypes.Terran_Refinery or
+        unittypeid == self.unittypes.Zerg_Extractor
+ 
+end
+
 -- static table, is sealed after initialization
 torchcraft.bullettypes = {
     -- corresponds to BWAPI::BulletTypes::Enum
@@ -704,7 +718,6 @@ for command, orders in pairs(torchcraft.command2order) do
 end
 seal(torchcraft.order2command)
 
-
 torchcraft.xy_pixels_per_walktile = 8
 torchcraft.xy_pixels_per_buildtile = 32
 torchcraft.xy_walktiles_per_buildtile = 4
@@ -734,7 +747,7 @@ do -- load and seal other static data
    setmetatable(torchcraft.staticdata, tmp)
 end
 
-torchcraft.PROTOCOL_VERSION = "15"
+torchcraft.PROTOCOL_VERSION = "16"
 torchcraft.hostname = nil
 torchcraft.state = {}
 torchcraft.mode = {micro_battles = false, replay = false}
@@ -1295,9 +1308,15 @@ function torchcraft:draw_entity(img, pos_x, pos_y, size_x, size_y, rgb)
                                          math.floor(pos_y - size_y / 2))
     local narrow_height_end = math.min(img:size()[2],
                                        math.floor(pos_y + size_y / 2))
-
+    -- Hack to fix crash were unit is on top left corner of FoV
+    if narrow_width_end <= 0 then
+        narrow_width_end = narrow_width_start
+    end
     local rect = img:narrow(3, narrow_width_start,
-                            narrow_width_end - narrow_width_start)
+                            narrow_width_end - narrow_width_start + 1)
+    if narrow_height_end <= 0 then
+        narrow_height_end = narrow_height_start
+    end
     local rect = rect:narrow(2, narrow_height_start,
                              narrow_height_end - narrow_height_start + 1)
     rect[1]:fill(rgb[1])
@@ -1333,23 +1352,148 @@ function torchcraft:get_layer(layer_type, also_enemy)
                                        32, 32, color)
             end
         end
+    elseif layer_type == "minerals" then
+        t = self.state.units_neutral
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and self:is_mineral_field(ut.type) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                color = utils.get_health_color(ut.resource, 1500)
+                img = self:draw_entity(img, pos_x, pos_y,
+                                       ut.pixel_size_x, ut.pixel_size_y, color)
+            end
+        end
+    elseif layer_type == "gas" then
+        t = tablex.merge(t, self.state.units_neutral, true);
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and self:is_gas_geyser(ut.type) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                color = utils.get_health_color(ut.resource, 2500)
+                img = self:draw_entity(img, pos_x, pos_y,
+                                       ut.pixel_size_x, ut.pixel_size_y, color)
+            end
+        end
     else
         for uid, ut in pairs(t) do
             if self:is_unit_in_screen(ut) then
                 pos_x, pos_y = self:get_unit_screen_pos(ut)
-                if layer_type == "hp" then
+                if layer_type == "hp" and ut.max_hp > 0 then
                     color = utils.get_health_color(ut.hp, ut.max_hp)
                 elseif layer_type == "type" then
                     color = utils.html_color_table[ut.type]
                 elseif layer_type == "player" then
                     color = utils.players_color_table[ut.playerId]
+                elseif layer_type == "shield" and ut.shield > 0 then
+                    color = utils.get_health_color(ut.shield, ut.max_shield)
+                elseif layer_type == "energy" then
+                    color = utils.get_health_color(ut.energy, 250)
                 end
-                img = self:draw_entity(img, pos_x, pos_y,
-                                       ut.pixel_size_x, ut.pixel_size_y,
-                                       color)
+                if color then
+                    img = self:draw_entity(img, pos_x, pos_y,
+                                           ut.pixel_size_x, ut.pixel_size_y,
+                                           color)
+                end
             end
         end
     end
+    return img
+end
+
+function torchcraft:draw_value(img, pos_x, pos_y, size_x, size_y, value)
+    local narrow_width_start = math.max(1,
+                                        math.floor(pos_x - size_x / 2))
+    local narrow_width_end = math.min(self.field_size[1],
+                                      math.floor(pos_x + size_x / 2))
+    local narrow_height_start = math.max(1,
+                                         math.floor(pos_y - size_y / 2))
+    local narrow_height_end = math.min(self.field_size[2],
+                                       math.floor(pos_y + size_y / 2))
+    -- Hack to fix crash were unit is on top left corner of FoV
+    if narrow_width_end <= 0 then
+        narrow_width_end = narrow_width_start
+    end
+    local rect = img:narrow(2, narrow_width_start,
+                            narrow_width_end - narrow_width_start + 1)
+    if narrow_height_end <= 0 then
+        narrow_height_end = narrow_height_start
+    end
+    local rect = rect:narrow(1, narrow_height_start,
+                             narrow_height_end - narrow_height_start + 1)
+    rect:fill(value)
+    return img
+end
+
+function torchcraft:get_feature(feature, also_enemy)
+--returns 2D imagelike tensor of feature
+--type defaults to ByteTensor
+
+-- :TODO: Maybe make categorical features return a 3D tensor of one-hots
+--        Or just render them to colors with draw value to increase spacing
+
+    local img  = torch.ShortTensor(self.field_size[2],self.field_size[1]):fill(0)
+    local pos_x, pos_y
+    local t
+
+    if feature == "visibility" then
+        for y, xs in ipairs(self.state.visibility) do
+            for x, value in ipairs(xs) do
+                pos_x = (x - 1) * 32
+                pos_y = (y - 1) * 32
+                img = self:draw_value(img, pos_x, pos_y,
+                                       32, 32, value)
+            end
+        end
+    elseif feature == "minerals" then
+        t = self.state.units_neutral
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and self:is_mineral_field(ut.type) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                img = self:draw_value(img, pos_x, pos_y,
+                                    ut.pixel_size_x, ut.pixel_size_y, ut.resource)
+            end
+        end
+        return img
+    elseif feature == "gas" then
+
+        t = tablex.merge(self.state.units_myself, self.state.units_neutral, true)
+
+        for uid, ut in pairs(t) do
+            if self:is_unit_in_screen(ut) and self:is_gas_geyser(ut.type) then
+                pos_x, pos_y = self:get_unit_screen_pos(ut)
+                img = self:draw_value(img, pos_x, pos_y,
+                                    ut.pixel_size_x, ut.pixel_size_y, ut.resource)
+            end
+        end
+        return img
+    else
+        t = self.state.units_myself
+        if also_enemy then
+            t = tablex.merge(t, self.state.units_enemy, true)
+        end
+        -- adding one to these so they aren't 0 indexed, otherwise
+        -- they can become part of the background
+        if feature == "type" or feature == "playerId" then
+            for uid, ut in pairs(t) do
+                if self:is_unit_in_screen(ut) then
+                    pos_x, pos_y = self:get_unit_screen_pos(ut)
+                    if pos_x then
+                        img = self:draw_value(img, pos_x, pos_y,
+                            ut.pixel_size_x, ut.pixel_size_y, (ut[feature] + 1))
+                    end
+                end
+            end
+        else
+            for uid, ut in pairs(t) do
+                if self:is_unit_in_screen(ut) then
+                    pos_x, pos_y = self:get_unit_screen_pos(ut)
+                    if pos_x then
+                        img = self:draw_value(img, pos_x, pos_y,
+                            ut.pixel_size_x, ut.pixel_size_y, ut[feature])
+                    end
+                end
+            end
+        end
+    end
+    
     return img
 end
 

@@ -507,7 +507,7 @@ torchcraft.unittypes = {
 build_revert_indices_and_seal(torchcraft.unittypes)
 
 function torchcraft:isbuilding(unittypeid)
-    return unittypeid >= torchcraft.unittypes.Terran_Comsat_Station and
+    return unittypeid >= torchcraft.unittypes.Terran_Command_Center and
         unittypeid <= torchcraft.unittypes.Protoss_Shield_Battery
 end
 

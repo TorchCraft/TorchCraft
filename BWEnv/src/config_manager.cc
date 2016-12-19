@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -92,7 +92,7 @@ std::string ConfigManager::readString_(const char* section,
     char* temp = new char[255];
     GetPrivateProfileStringA(section, key, defaultVal, temp, 255, current_path_.c_str());
     val = temp;
-    delete temp;
+    delete[] temp;
   }
   return val;
 }

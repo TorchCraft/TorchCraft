@@ -810,7 +810,6 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getResources()
   });
 
-
   // Add curent order to order list
   // (we keep Orders::None orders as their timing marks the moment where
   //  previous order stops)
@@ -878,7 +877,7 @@ void Controller::launchStarCraft()
 
 void Controller::setMap(const std::string& relative_path)
 {
-  Utils::bwlog(output_log, "Set map: %s", relative_path);
+  Utils::bwlog(output_log, "Set map: %s", relative_path.c_str());
   Utils::overwriteConfig(sc_path_, "map", relative_path);
   std::string path(sc_path_.begin(), sc_path_.end()); // Can't set wstr paths in bwapi anyway...
   if (BWAPI::BroodwarPtr)

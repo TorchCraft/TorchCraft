@@ -532,6 +532,117 @@ function torchcraft:is_gas_geyser(unittypeid)
 end
 
 -- static table, is sealed after initialization
+torchcraft.produces = { -- a helpful approximation (e.g. bypasses Eggs)
+    -- TODO remove when port to C++, use BWAPI directly for this
+    [torchcraft.unittypes.Terran_Vulture] =
+        {torchcraft.unittypes.Terran_Vulture_Spider_Mine},
+    [torchcraft.unittypes.Terran_SCV] = (function()
+        r = {}
+        for i = torchcraft.unittypes.Terran_Command_Center,
+            torchcraft.unittypes.Terran_Bunker do table.insert(r, i) end
+        return r
+    end)(),
+    [torchcraft.unittypes.Zerg_Larva] = (function()
+        r = {}
+        for i = torchcraft.unittypes.Zerg_Zergling,
+            torchcraft.unittypes.Zerg_Scourge do 
+            if i ~= torchcraft.unittypes.Broodling and
+               i ~= torchcraft.unittypes.Guardian then
+                table.insert(r, i)
+            end 
+        end
+        return r
+    end)(),
+    [torchcraft.unittypes.Zerg_Queen] =
+        {torchcraft.unittypes.Zerg_Broodling,
+         torchcraft.unittypes.Zerg_Infested_Command_Center},
+    [torchcraft.unittypes.Zerg_Hydralisk] =
+        {torchcraft.unittypes.Zerg_Lurker},
+    [torchcraft.unittypes.Zerg_Drone] = (function()
+        r = {}
+        for i = torchcraft.unittypes.Zerg_Hatchery,
+            torchcraft.unittypes.Zerg_Extractor do table.insert(r, i) end
+        return r
+    end)(),
+    [torchcraft.unittypes.Zerg_Mutalisk] =
+        {torchcraft.unittypes.Zerg_Guardian,
+         torchcraft.unittypes.Zerg_Devourer},
+    [torchcraft.unittypes.Protoss_Probe] = (function()
+        r = {}
+        for i = torchcraft.unittypes.Protoss_Nexus,
+            torchcraft.unittypes.Protoss_Shield_Battery 
+            do
+                table.insert(r, i)
+            end
+        return r
+    end)(),
+    [torchcraft.unittypes.Protoss_Carrier] =
+        {torchcraft.unittypes.Protoss_Interceptor},
+    [torchcraft.unittypes.Protoss_Reaver] =
+        {torchcraft.unittypes.Protoss_Scarab},
+    [torchcraft.unittypes.Terran_Nuclear_Silo] =
+        {torchcraft.unittypes.Terran_Nuclear_Missile},
+    [torchcraft.unittypes.Terran_Barracks] =
+        {torchcraft.unittypes.Terran_Marine,
+         torchcraft.unittypes.Terran_Firebat,
+         torchcraft.unittypes.Terran_Medic},
+    [torchcraft.unittypes.Terran_Factory] =
+        {torchcraft.unittypes.Terran_Vulture,
+         torchcraft.unittypes.Terran_Siege_Tank_Tank_Mode,
+         torchcraft.unittypes.Terran_Goliath},
+    [torchcraft.unittypes.Terran_Starport] =
+        {torchcraft.unittypes.Terran_Wraith,
+         torchcraft.unittypes.Terran_Valkyrie,
+         torchcraft.unittypes.Terran_Science_Vessel,
+         torchcraft.unittypes.Terran_Dropship,
+         torchcraft.unittypes.Terran_Battlecruiser},
+    [torchcraft.unittypes.Zerg_Infested_Command_Center] =
+        {torchcraft.unittypes.Zerg_Infested_Terran},
+    [torchcraft.unittypes.Zerg_Hatchery] =
+        {torchcraft.unittypes.Zerg_Larva,
+         torchcraft.unittypes.Zerg_Lair},
+    [torchcraft.unittypes.Zerg_Lair] =
+        {torchcraft.unittypes.Zerg_Larva,
+         torchcraft.unittypes.Zerg_Hive},
+    [torchcraft.unittypes.Zerg_Hive] =
+        {torchcraft.unittypes.Zerg_Larva},
+    [torchcraft.unittypes.Zerg_Creep_Colony] =
+        {torchcraft.unittypes.Zerg_Spore_Colony,
+         torchcraft.unittypes.Zerg_Sunken_Colony},
+    [torchcraft.unittypes.Protoss_Nexus] =
+        {torchcraft.unittypes.Protoss_Probe},
+    [torchcraft.unittypes.Protoss_Robotics_Facility] =
+        {torchcraft.unittypes.Protoss_Reaver,
+         torchcraft.unittypes.Protoss_Observer,
+         torchcraft.unittypes.Protoss_Shuttle},
+    [torchcraft.unittypes.Protoss_High_Templar] =
+        {torchcraft.unittypes.Protoss_Archon},
+    [torchcraft.unittypes.Protoss_Dark_Templar] =
+        {torchcraft.unittypes.Protoss_Dark_Archon},
+    [torchcraft.unittypes.Protoss_Gateway] =
+        {torchcraft.unittypes.Protoss_Zealot,
+         torchcraft.unittypes.Protoss_Dragoon,
+         torchcraft.unittypes.Protoss_High_Templar,
+         torchcraft.unittypes.Protoss_Dark_Templar},
+    [torchcraft.unittypes.Protoss_Stargate] =
+        {torchcraft.unittypes.Protoss_Scout,
+         torchcraft.unittypes.Protoss_Corsair,
+         torchcraft.unittypes.Protoss_Carrier},
+}
+seal(torchcraft.produces)
+
+-- static table, is sealed after initialization
+torchcraft.isproducedby = {} -- a helpful (inverse) approximation
+-- TODO remove when port to C++, use BWAPI directly for this
+for producer, products in pairs(torchcraft.produces) do
+    seal(products)
+    for _, product in pairs(products) do
+        torchcraft.isproducedby[product] = producer
+    end
+end
+seal(torchcraft.isproducedby)
+
+-- static table, is sealed after initialization
 torchcraft.bullettypes = {
     -- corresponds to BWAPI::BulletTypes::Enum
     Melee = 0,

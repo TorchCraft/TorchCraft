@@ -858,6 +858,40 @@ do -- load and seal other static data
    setmetatable(torchcraft.staticdata, tmp)
 end
 
+torchcraft.total_price = {mineral = {}, gas = {}}
+for ut, _ in pairs(torchcraft.produces) do
+    torchcraft.total_price.mineral[ut] = torchcraft.staticdata.mineralPrice[ut]
+    torchcraft.total_price.gas[ut] = torchcraft.staticdata.gasPrice[ut]
+end
+for ut, producer in pairs(torchcraft.isproducedby) do -- only 1 hop ever
+    if torchcraft:isbuilding(producer) or
+        producer == torchcraft.unittypes.Zerg_Larva then
+        -- nothing
+    elseif ut == torchcraft.unittypes.Protoss_Archon 
+        or ut == torchcraft.unittypes.Protoss_Dark_Archon then
+        torchcraft.total_price.mineral[ut] =
+            2 * torchcraft.staticdata.mineralPrice[producer]
+        torchcraft.total_price.gas[ut] =
+            2 * torchcraft.staticdata.gasPrice[producer]
+    else
+        torchcraft.total_price.mineral[ut] =
+            (torchcraft.staticdata.mineralPrice[ut] or 0)
+            + torchcraft.staticdata.mineralPrice[producer]
+        torchcraft.total_price.gas[ut] =
+            (torchcraft.staticdata.gasPrice[ut] or 0)
+            + torchcraft.staticdata.gasPrice[producer]
+    end
+end
+seal(torchcraft.total_price)
+seal(torchcraft.total_price.mineral)
+seal(torchcraft.total_price.gas)
+assert(torchcraft.total_price.mineral[torchcraft.unittypes.Zerg_Guardian]
+    == torchcraft.staticdata.mineralPrice[torchcraft.unittypes.Zerg_Mutalisk]
+       + torchcraft.staticdata.mineralPrice[torchcraft.unittypes.Zerg_Guardian])
+assert(torchcraft.total_price.mineral[torchcraft.unittypes.Protoss_Dark_Archon]
+    == 2 * torchcraft.staticdata.mineralPrice[torchcraft.unittypes.Protoss_Dark_Templar])
+
+
 torchcraft.PROTOCOL_VERSION = "16"
 torchcraft.hostname = nil
 torchcraft.state = {}

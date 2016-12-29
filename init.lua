@@ -866,7 +866,8 @@ end
 for ut, producer in pairs(torchcraft.isproducedby) do -- only 1 hop ever
     if torchcraft:isbuilding(producer) or
         producer == torchcraft.unittypes.Zerg_Larva then
-        -- nothing
+        torchcraft.total_price.mineral[ut] = torchcraft.staticdata.mineralPrice[ut]
+        torchcraft.total_price.gas[ut] = torchcraft.staticdata.gasPrice[ut]
     elseif ut == torchcraft.unittypes.Protoss_Archon 
         or ut == torchcraft.unittypes.Protoss_Dark_Archon then
         torchcraft.total_price.mineral[ut] =
@@ -890,6 +891,8 @@ assert(torchcraft.total_price.mineral[torchcraft.unittypes.Zerg_Guardian]
        + torchcraft.staticdata.mineralPrice[torchcraft.unittypes.Zerg_Guardian])
 assert(torchcraft.total_price.mineral[torchcraft.unittypes.Protoss_Dark_Archon]
     == 2 * torchcraft.staticdata.mineralPrice[torchcraft.unittypes.Protoss_Dark_Templar])
+assert(torchcraft.total_price.gas[torchcraft.unittypes.Terran_Science_Vessel]
+    == 225)
 
 
 torchcraft.PROTOCOL_VERSION = "16"

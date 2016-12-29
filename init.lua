@@ -528,7 +528,6 @@ function torchcraft:is_gas_geyser(unittypeid)
         unittypeid == self.unittypes.Protoss_Assimilator or
         unittypeid == self.unittypes.Terran_Refinery or
         unittypeid == self.unittypes.Zerg_Extractor
- 
 end
 
 -- static table, is sealed after initialization
@@ -545,11 +544,11 @@ torchcraft.produces = { -- a helpful approximation (e.g. bypasses Eggs)
     [torchcraft.unittypes.Zerg_Larva] = (function()
         r = {}
         for i = torchcraft.unittypes.Zerg_Zergling,
-            torchcraft.unittypes.Zerg_Scourge do 
+            torchcraft.unittypes.Zerg_Scourge do
             if i ~= torchcraft.unittypes.Broodling and
                i ~= torchcraft.unittypes.Guardian then
                 table.insert(r, i)
-            end 
+            end
         end
         return r
     end)(),
@@ -570,7 +569,7 @@ torchcraft.produces = { -- a helpful approximation (e.g. bypasses Eggs)
     [torchcraft.unittypes.Protoss_Probe] = (function()
         r = {}
         for i = torchcraft.unittypes.Protoss_Nexus,
-            torchcraft.unittypes.Protoss_Shield_Battery 
+            torchcraft.unittypes.Protoss_Shield_Battery
             do
                 table.insert(r, i)
             end
@@ -868,7 +867,7 @@ for ut, producer in pairs(torchcraft.isproducedby) do -- only 1 hop ever
         producer == torchcraft.unittypes.Zerg_Larva then
         torchcraft.total_price.mineral[ut] = torchcraft.staticdata.mineralPrice[ut]
         torchcraft.total_price.gas[ut] = torchcraft.staticdata.gasPrice[ut]
-    elseif ut == torchcraft.unittypes.Protoss_Archon 
+    elseif ut == torchcraft.unittypes.Protoss_Archon
         or ut == torchcraft.unittypes.Protoss_Dark_Archon then
         torchcraft.total_price.mineral[ut] =
             2 * torchcraft.staticdata.mineralPrice[producer]
@@ -1641,7 +1640,7 @@ function torchcraft:get_feature(feature, also_enemy)
             end
         end
     end
-    
+
     return img
 end
 

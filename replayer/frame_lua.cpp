@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -87,13 +87,10 @@ void setBool(lua_State* L, const char* key, bool v) {
 }
 
 // put's table[key] on top of the stack. don't forget to pop !
-void getField(lua_State* L, const char* key) {
+bool getField(lua_State* L, const char* key) {
   lua_pushstring(L, key);
   lua_gettable(L, -2);
-  luaL_argcheck(
-    L, !lua_isnil(L, -1), 1,
-    (string("no key ") + key + string(" found in table.")).c_str()
-    );
+  return (! lua_isnil(L, -1));
 };
 
 int getInt(lua_State* L, const char* key) {
@@ -245,15 +242,22 @@ void toFrame(lua_State* L, int id, Frame& res) {
 
   // resources is a table {[playerid] = {ore=O, gas=G,
   //                                     used_psi=U, total_psi=T}, ...}
-  getField(L, "resources");
-  // iterate through player ids
-  lua_pushnil(L);
-  while (lua_next(L, -2) != 0) { // -1 is the key, -2 is the table
-    luaL_checktype(L, -2, LUA_TNUMBER);
-    int playerId = lua_tointeger(L, -2);
-    Resources r = {getInt(L, "ore"), getInt(L, "gas"),
-                   getInt(L, "used_psi"), getInt(L, "total_psi")};
-    res.resources[playerId] = r;
+  bool success = getField(L, "resources");
+  if (success) {
+    // iterate through player ids
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) { // -1 is the key, -2 is the table
+      luaL_checktype(L, -2, LUA_TNUMBER);
+      int playerId = lua_tointeger(L, -2);
+      Resources r = {getInt(L, "ore"), getInt(L, "gas"),
+                     getInt(L, "used_psi"), getInt(L, "total_psi")};
+      res.resources[playerId] = r;
+    }
+  } else { // Empty resources if not provided
+    for (const auto& idandlst : res.units) {
+      Resources r = {0, 0, 0, 0};
+      res.resources[idandlst.first] = r;
+    }
   }
   lua_pop(L, 1); // pop the resources table
 }

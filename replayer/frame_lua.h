@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -38,7 +38,7 @@ extern "C" int gcFrame(lua_State* L);
 // a bunch of utilities to manipulate the stack
 void setInt(lua_State* L, const char* key, int v);
 void setBool(lua_State* L, const char* key, bool v);
-void getField(lua_State* L, const char* key);
+bool getField(lua_State* L, const char* key);
 int getInt(lua_State* L, const char* key);
 bool getBool(lua_State* L, const char* key);
 

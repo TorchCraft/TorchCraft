@@ -59,7 +59,7 @@ progress:singleThreaded()
 local tc = require 'torchcraft'
 local utils = require 'torchcraft.utils'
 local replayer = require 'torchcraft.replayer'
-local heuristics = require 'targeting_heuristics'
+local heuristics = require './targeting_heuristics'
 local isFlyer = tc.staticdata.isFlyer
 tc.DEBUG = DEBUG
 

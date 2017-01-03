@@ -336,11 +336,15 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
       x = tposition.x;
       y = tposition.y;
     }
+    else
+    {
+      x = y = 0;
+    }
     auto extra = (args.size() >= 6 ? args[5] : 0);
     switch (command) {
     case Commands::COMMAND_UNIT:
       Utils::bwlog(output_log, "Unit:%d command (%d, %d, (%d, %d), %d)",
-        args[0], cmd_type, args[2],
+        args[0], cmd_type, target,
         x, y, extra);
       if (!unit->issueCommand(BWAPI::UnitCommand(unit, cmd_type, target,
         x, y, extra))

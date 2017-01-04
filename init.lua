@@ -1057,6 +1057,7 @@ end
 
 function torchcraft:filter_type(t, utt)
     -- This function keeps only units from `t` of one of the types in `utt`
+    -- TODO? redo with pl.Set?
     local r = {}
     if t == nil then return r end
     for uid, ud in pairs(t) do
@@ -1124,13 +1125,21 @@ function torchcraft:receive()
         -- function to check end of battle
         -- the drawback is that the first frame of the battle is lost
         local function check_battle_finished(units_myself, units_enemy)
+            local um, ue
+            if self.mode.only_consider_types ~= nil then
+                um = self:filter_type(units_myself, self.mode.only_consider_types)
+                ue = self:filter_type(units_enemy, self.mode.only_consider_types)
+            else
+                um = units_myself
+                ue = units_enemy
+            end
             if self.state.waiting_for_restart then
                 return false
             end
-            if utils.isEmpty(units_myself) or utils.isEmpty(units_enemy) then
+            if utils.isEmpty(um) or utils.isEmpty(ue) then
                 self:battle_ended()
-                self.state.battle_won = (not utils.isEmpty(units_myself))
-                    or utils.isEmpty(units_enemy)
+                self.state.battle_won = (not utils.isEmpty(um))
+                    or utils.isEmpty(ue)
                 return true
             end
             return false

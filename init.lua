@@ -581,6 +581,8 @@ torchcraft.produces = { -- a helpful approximation (e.g. bypasses Eggs)
         {torchcraft.unittypes.Protoss_Scarab},
     [torchcraft.unittypes.Terran_Nuclear_Silo] =
         {torchcraft.unittypes.Terran_Nuclear_Missile},
+    [torchcraft.unittypes.Terran_Command_Center] =
+        {torchcraft.unittypes.Terran_SCV},
     [torchcraft.unittypes.Terran_Barracks] =
         {torchcraft.unittypes.Terran_Marine,
          torchcraft.unittypes.Terran_Firebat,

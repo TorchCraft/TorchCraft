@@ -201,6 +201,8 @@ void Controller::setupHandshake()
     Utils::mapToTensorStr()));
   this->zmq_server->packMessage(std::string("map_name = '" +
     BWAPI::Broodwar->mapFileName() + "'"));
+  this->zmq_server->packMessage(std::string("neutral_id = " +
+        std::to_string(BWAPI::Broodwar->neutral()->getID())));
 
   if (BWAPI::Broodwar->isReplay()) {
     this->zmq_server->packMessage("is_replay = true");
@@ -209,8 +211,6 @@ void Controller::setupHandshake()
     this->zmq_server->packMessage("is_replay = false");
     this->zmq_server->packMessage(std::string("player_id = " +
       std::to_string(BWAPI::Broodwar->self()->getID())));
-    this->zmq_server->packMessage(std::string("neutral_id = " +
-      std::to_string(BWAPI::Broodwar->neutral()->getID())));
   }
 
   if (micro_mode)

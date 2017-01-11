@@ -12,8 +12,8 @@ FILE(GLOB luasrc *.lua)
 SET(CMAKE_CXX_FLAGS -std=c++11)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/replayer)
-FILE(GLOB src replayer/*.cpp)
-ADD_LIBRARY(replayer MODULE ${src})
+FILE(GLOB replayer_src replayer/*.cpp)
+ADD_LIBRARY(replayer MODULE ${replayer_src})
 SET_TARGET_PROPERTIES(replayer PROPERTIES
    PREFIX ""
    IMPORT_PREFIX "")
@@ -23,8 +23,19 @@ IF(APPLE)
 ENDIF()
 TARGET_LINK_LIBRARIES(replayer TH luaT)
 
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/client)
+FILE(GLOB client_src client/*.cpp replayer/*.cpp)
+ADD_LIBRARY(client MODULE ${client_src})
+SET_TARGET_PROPERTIES(client PROPERTIES
+   PREFIX ""
+   IMPORT_PREFIX "")
+IF(APPLE)
+   SET_TARGET_PROPERTIES(client PROPERTIES
+       LINK_FLAGS "-undefined dynamic_lookup")
+ENDIF()
+TARGET_LINK_LIBRARIES(client TH luaT zmq)
 
-INSTALL(TARGETS replayer
+INSTALL(TARGETS replayer client
         DESTINATION "${LIBDIR}/torchcraft"
 )
 

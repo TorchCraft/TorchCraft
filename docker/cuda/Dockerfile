@@ -1,4 +1,4 @@
-FROM kaixhin/torch:latest
+FROM kaixhin/cuda-torch:latest
 MAINTAINER Zeming Lin <zlin@fb.com>
 
 ### X11 server: inspired by suchja/x11server and suchja/wine ###

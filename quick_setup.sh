@@ -24,6 +24,7 @@ cp $TC_DIR/maps/micro/ $SC_DIR/Maps/BroodWar/ -r
 curl -LO https://github.com/TorchCraft/TorchCraft/releases/download/v1.0-2/torchcraft-v1.0-2.zip
 unzip torchcraft-v1.0-2.zip
 cp torchcraft-v1.0-2/* ./
+cp torchcraft-v1.0-2/bin/* ./
 
 if [[ `uname` == 'Darwin' ]]; then
     sed -i '' "s|^ai *=.*|ai=$SC_DIR/BWEnv.dll|" bwapi-data/bwapi.ini

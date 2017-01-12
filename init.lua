@@ -899,7 +899,8 @@ assert(torchcraft.total_price.gas[torchcraft.unittypes.Terran_Science_Vessel]
 
 torchcraft.PROTOCOL_VERSION = "16"
 torchcraft.hostname = nil
-torchcraft.state = {}
+torchcraft.client = client.Client()
+torchcraft.state = torchcraft.client.state
 torchcraft.mode = {micro_battles = false, replay = false}
 torchcraft.DEBUG = 0
 torchcraft.initial_map = nil
@@ -944,16 +945,15 @@ function torchcraft:connect(port)
         self:init(nil, port)
     end
     -- initialize socket connection
-    self.client = nil
-    while self.client == nil do
+    while not self.client:connected() do
         local status, ret
-        status, ret = pcall(client.Client, self.hostname, self.port)
+        status, ret = pcall(function()
+            return self.client:connect(self.hostname, self.port)
+        end)
         if not status then
             print('Socket error (' .. self.hostname .. ':' .. port ..
                   '), retrying connection in 1 second: ', ret)
             os.execute('sleep 1')
-        else
-            self.client = ret
         end
     end
 
@@ -974,25 +974,13 @@ end
 
 function torchcraft:set_variables()
     -- initializing the "game state" booleans
-    self.state.game_ended = false
-    self.state.img_mode = nil
-    self.state.screen_position = nil
-    self.state.window_size = {200, 150}
-    self.state.image = nil
+    self.state:reset()
+    self.window_size = {200, 150}
     if self.mode.micro_battles then
         self.state.battle_just_ended = false
         self.state.battle_won = false
         self.state.waiting_for_restart = true
         self.state.last_battle_end = 0
-        self.state.frame_from_bwapi = 0
-    end
-    if self.mode.replay then
-        self.state.units = {}
-        self.state.resources = {}
-    else
-        self.state.units_myself = {}
-        self.state.units_enemy = {}
-        self.state.resources_myself = {}
     end
 end
 
@@ -1120,7 +1108,8 @@ function torchcraft:receive()
                     self.state.units_enemy[id] = nil
                 end
             end
-            self.state.deaths = nil
+            -- TODO: why was this here?
+--            self.state.deaths = nil
         end
         if self.mode.micro_battles and self.state.waiting_for_restart then
             local ee = utils.isEmpty(self.state.units_enemy)
@@ -1158,7 +1147,7 @@ function torchcraft:send(t)
 end
 
 function torchcraft:close()
-    self.client = nil
+    self.client:close()
 end
 
 -- return a new torchcraft context
@@ -1167,8 +1156,10 @@ function torchcraft.new()
    for k,v in pairs(torchcraft) do
       newtc[k] = v
    end
-   newtc.state = {} -- reset state for new context
+   newtc.client = client.Client()
+   newtc.state = newtc.client.state
    newtc.mode = tablex.deepcopy(torchcraft.mode)  -- reset mode for new context
+   newtc:set_variables()
    return newtc
 end
 

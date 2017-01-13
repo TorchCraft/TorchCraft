@@ -252,6 +252,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       Resources r = {getInt(L, "ore"), getInt(L, "gas"),
                      getInt(L, "used_psi"), getInt(L, "total_psi")};
       res.resources[playerId] = r;
+      lua_pop(L, 1);
     }
   } else { // Empty resources if not provided
     for (const auto& idandlst : res.units) {

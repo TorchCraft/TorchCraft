@@ -27,8 +27,14 @@ class Client {
     bool micro_battles = false;
   };
 
+  struct Command {
+    int code = -1;
+    std::vector<int> args;
+    std::string str;
+  };
+
  public:
-  Client(lua_State* L);
+  Client();
   ~Client();
 
   bool connect(const std::string& hostname, int port);
@@ -36,9 +42,9 @@ class Client {
     return conn_ != nullptr;
   }
   bool close();
-  bool init(std::string& dest, Options opts = Options());
-  bool send(const std::string& msg);
-  bool receive(std::string& dest);
+  bool init(std::vector<std::string>& updates, const Options& opts = Options());
+  bool send(const std::vector<Command>& commands);
+  bool receive(std::vector<std::string>& updates);
   std::string error() const {
     return error_;
   }
@@ -55,10 +61,6 @@ class Client {
   State* state_;
   bool sent_;
   std::string error_;
-
-  // TODO: lua_State is currently needed for parsing data returned from server.
-  // This won't be necessary once the wire protocol has been reworked.
-  lua_State* L_;
 };
 
 } // namespace client

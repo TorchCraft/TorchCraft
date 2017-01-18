@@ -21,7 +21,7 @@ table Command {
 }
 
 table HandshakeClient {
-  protocol:int = 17;
+  protocol:int;
   map:string;
   window_size:Vec2;
   window_pos:Vec2;

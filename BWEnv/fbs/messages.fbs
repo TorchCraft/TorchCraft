@@ -1,0 +1,91 @@
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+namespace TorchCraft;
+
+struct Vec2 {
+  x:int;
+  y:int;
+}
+
+table Command {
+  code:int;
+  args:[int];
+  str:string;
+}
+
+table HandshakeClient {
+  protocol:int = 17;
+  map:string;
+  window_size:Vec2;
+  window_pos:Vec2;
+  micro_mode:bool;
+}
+
+table HandshakeServer {
+  lag_frames:int;
+  map_data:[ubyte];
+  map_size:Vec2;
+  map_name:string;
+  is_replay:bool;
+  player_id:int;    // if is_replay == false
+  neutral_id:int;   // if is_replay == false
+  battle_frame_count:int;  // if micro_mode == true
+}
+
+table Commands {
+  commands:[Command];
+}
+
+table Frame {
+  data:[ubyte]; // serialized frame data
+  deaths:[int];
+  frame_from_bwapi:int;
+  battle_frame_count:int;
+  
+  // if with_image
+  img_mode:string;
+  screen_position:Vec2;
+  visibility:[ubyte];
+  visibility_size:Vec2;
+  img_data:[ubyte];
+  img_size:Vec2;
+}
+
+table PlayerLeft {
+  player_left:string;
+}
+
+table EndGame {
+  frame:[ubyte];
+  game_won:bool;
+}
+
+table Error {
+  message:string;
+}
+
+union Any {
+  // from client
+  HandshakeClient,
+  Commands,
+
+  // from server
+  HandshakeServer,
+  Frame,
+  PlayerLeft,
+  EndGame,
+  Error,
+}
+
+table Message {
+  msg:Any;
+}
+
+root_type Message;

@@ -25,10 +25,10 @@ int push2DIntegerArray(
     const std::vector<uint8_t>& data,
     int size[2]) {
   auto it = data.begin();
-  lua_createtable(L, size[0], 0);
-  for (int i = 0; i < size[0]; i++) {
-    lua_createtable(L, size[1], 0);
-    for (int j = 0; j < size[1]; j++) {
+  lua_createtable(L, size[1], 0);
+  for (int i = 0; i < size[1]; i++) {
+    lua_createtable(L, size[0], 0);
+    for (int j = 0; j < size[0]; j++) {
       lua_pushinteger(L, *it++);
       lua_rawseti(L, -2, j + 1);
     }

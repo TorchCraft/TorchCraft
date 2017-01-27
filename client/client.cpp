@@ -11,6 +11,7 @@
 #include <sstream>
 
 #include "client.h"
+#include "constants.h"
 
 #include "BWEnv/fbs/messages_generated.h"
 
@@ -56,6 +57,10 @@ void buildCommandMessage(
 } // namespace
 
 namespace client {
+
+void init() {
+  client::BW::data::init();
+}
 
 Client::Client() : state_(new State()) {}
 

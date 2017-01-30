@@ -1333,23 +1333,6 @@ function torchcraft:apply_move(source, move, frames)
     source.position = next_position
 end
 
-function torchcraft:imgMsgToImage(img_msg, img_mode)
-  local img = nil
-  if img_mode == "raw" then
-    -- expecting "width,height,data"
-    local it = string.gmatch(img_msg, "%d+,")
-    local width = it()
-    local height = it()
-    width = tonumber(string.sub(width, 1, -2))
-    height = tonumber(string.sub(height, 1, -2))
-    -- remove data from img_msg
-    local _, second_comma = string.find(img_msg, "%d+,%d+,", 1)
-    img_msg = string.sub(img_msg, second_comma + 1)
-    img = replayer.rawBitmapToTensor(img_msg, width, height)
-  end
-  return img
-end
-
 function torchcraft:is_unit_in_screen(source)
     local screen_x, screen_y = unpack(self.state.screen_position)
     local field_x, field_y = unpack(self.field_size)

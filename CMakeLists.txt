@@ -11,9 +11,19 @@ FIND_PACKAGE(Torch REQUIRED)
 FILE(GLOB luasrc *.lua)
 SET(CMAKE_CXX_FLAGS -std=c++11)
 
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/replayer)
-FILE(GLOB src replayer/*.cpp)
-ADD_LIBRARY(replayer MODULE ${src})
+INCLUDE_DIRECTORIES(
+    ${CMAKE_CURRENT_SOURCE_DIR}/replayer
+    ${CMAKE_CURRENT_SOURCE_DIR}/client)
+
+ADD_LIBRARY(shared STATIC
+    replayer/frame.cpp
+    replayer/gamestore.cpp
+    replayer/imgmanager.cpp
+    replayer/replayer.cpp)
+
+ADD_LIBRARY(replayer MODULE
+    replayer/frame_lua.cpp
+    replayer/init.cpp)
 SET_TARGET_PROPERTIES(replayer PROPERTIES
    PREFIX ""
    IMPORT_PREFIX "")
@@ -21,10 +31,20 @@ IF(APPLE)
    SET_TARGET_PROPERTIES(replayer PROPERTIES
        LINK_FLAGS "-undefined dynamic_lookup")
 ENDIF()
-TARGET_LINK_LIBRARIES(replayer TH luaT)
+TARGET_LINK_LIBRARIES(replayer shared TH luaT)
 
+FILE(GLOB client_src client/*.cpp)
+ADD_LIBRARY(client MODULE ${client_src})
+SET_TARGET_PROPERTIES(client PROPERTIES
+   PREFIX ""
+   IMPORT_PREFIX "")
+IF(APPLE)
+   SET_TARGET_PROPERTIES(client PROPERTIES
+       LINK_FLAGS "-undefined dynamic_lookup")
+ENDIF()
+TARGET_LINK_LIBRARIES(client shared TH luaT zmq)
 
-INSTALL(TARGETS replayer
+INSTALL(TARGETS replayer client
         DESTINATION "${LIBDIR}/torchcraft"
 )
 

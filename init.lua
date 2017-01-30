@@ -1,6 +1,7 @@
 local torchcraft = require 'torchcraft._env'
 local utils = require 'torchcraft.utils'
 local replayer = require 'torchcraft.replayer'
+local client = require 'torchcraft.client'
 local tablex = require 'pl.tablex'
 local image = require 'image'
 
@@ -935,8 +936,6 @@ function torchcraft:init(hostname, port)
     end
     self.port = port ~= nil and port or (os.getenv('TorchCraft_PORT') or 11111)
     print('host: ' .. self.hostname .. ':' .. self.port)
-    -- we always need to make sure we alternate 1:1 send/receive, thus:
-    self.sent_message = false
 end
 
 function torchcraft:connect(port)
@@ -944,68 +943,32 @@ function torchcraft:connect(port)
     if self.hostname == nil or self.hostname == '' then
         self:init(nil, port)
     end
-    -- initialize ZMQ if needed
-    if self.zmq == nil then
-        self.zmq = require 'lzmq'
-    end
-    if self.zcontext == nil then
-        self.zcontext = self.zmq.context()
-    end
     -- initialize socket connection
-    self.sock = nil
-    while self.sock == nil do
-        local addr = 'tcp://' .. self.hostname .. ':' .. self.port
-        self.sock, self.err = self.zcontext:socket{self.zmq.REQ,
-            connect = addr}
-        if self.sock == nil then
-            print('Socket error (' .. addr ..
-                  '), retrying connection in 1 second: ', self.err)
+    self.client = nil
+    while self.client == nil do
+        local status, ret
+        status, ret = pcall(client.Client, self.hostname, self.port)
+        if not status then
+            print('Socket error (' .. self.hostname .. ':' .. port ..
+                  '), retrying connection in 1 second: ', ret)
             os.execute('sleep 1')
+        else
+            self.client = ret
         end
     end
 
-    self.state = {}
+    self.state = self.client.state
 
-    -- send hello message
-    local hello = 'protocol=' .. self.PROTOCOL_VERSION
+    local setup = self.client:init({
+        initial_map = self.initial_map,
+        window_size = self.window_size,
+        window_pos = self.window_pos,
+        micro_battles = self.mode.micro_battles,
+    })
 
-    if self.initial_map then
-        hello = hello .. ",map=" .. self.initial_map
-    end
-
-    if self.window_size then
-        hello = hello .. ",window_size=" .. self.window_size[1] .. " " .. self.window_size[2]
-    end
-
-    if self.window_pos then
-        hello = hello .. ",window_pos=" .. self.window_pos[1] .. " " .. self.window_pos[2]
-    end
-
-    hello = hello .. ",micro_mode=" .. tostring(self.mode.micro_battles)
-
-    local ok, err = self.sock:send(hello)
-    if not ok then
-        error('tc.connect send protocol: '..err:name()..' '..err:msg())
-    end
-
-    -- receive setup message
-    local msg, more = self.sock:recv()
-    if not msg then
-        local err = more
-        error('tc.connect receive setup: '..err:name()..' '..err:msg())
-    end
-    assert(not more, "Expected single message to be received.")
-
-    local setup = loadstring('return ' .. msg)()
-    for k, v in pairs(setup) do
-        self.state[k] = v
-    end
-
-    self.sent_message = false
     if self.DEBUG > 0 then
         print('torchcraft:connect() finished, establishing command control.')
     end
-
     return setup
 end
 
@@ -1071,49 +1034,8 @@ function torchcraft:filter_type(t, utt)
 end
 
 function torchcraft:receive()
-    if not self.sent_message then
-        if self.DEBUG > 1 then
-            print('unexpectedly sending ""')
-        end
-        self:send({""})
-    end
-
-    if not self.sock:poll(30000) then
-        -- timeout, starcraft.exe probably crashed.
-        self:close()
-        error("starcraft.exe crashed")
-    end
-    local msg, more = self.sock:recv()
-    if not msg then
-        local err = more
-        error('tc.receive: '..err:name()..' '..err:msg())
-    end
-    assert(not more, "Expected single message to be received.")
-    self.sent_message = false
-
-    -- check for stop
-    local symbolic_msg = ""
-    init_index, end_index = string.find(msg, "TCIMAGEDATA")
-    if init_index then
-      -- The image string is not properly escaped, so we have to split the data.
-      symbolic_msg = string.sub(msg, 1, init_index - 1) .. "}"
-      img_msg = string.sub(msg, end_index+1, -3)
-      if self.state.img_mode ~= nil then
-          self.state.image = self:imgMsgToImage(img_msg, self.state.img_mode)
-      end
-    else
-      symbolic_msg = msg
-    end
-
-    local upd = loadstring('return ' .. symbolic_msg)()
-
+    local upd = self.client:receive()
     for k, v in pairs(upd) do
-        if k == 'frame' then
-            self.state.frame_string = v
-            self.state.frame = replayer.frameFromString(v)
-        else
-            self.state[k] = v
-        end
         if k == 'is_replay' then
             assert(v == self.mode.replay,
                 "mode.replay inconsistent with starcraft state")
@@ -1232,26 +1154,11 @@ function torchcraft.same_order(o1, o2)
 end
 
 function torchcraft:send(t)
-    if self.sent_message then
-        local tmp_upd = self:receive()
-        if self.DEBUG > 1 then
-            print('unexpectedly received', tmp_upd)
-        end
-    end
-
-    if type(t) == "table" then
-        t = table.concat(t, ":")
-    end
-
-    local ok, err = self.sock:send(t)
-    if not ok then
-        error('tc.send: '..err:name()..' '..err:msg())
-    end
-    self.sent_message = true
+    self.client:send(t)
 end
 
 function torchcraft:close()
-    self.sock:close()
+    self.client = nil
 end
 
 -- return a new torchcraft context
@@ -1424,23 +1331,6 @@ function torchcraft:apply_move(source, move, frames)
         next_position, source.type)
     source.velocity = fake_velocity
     source.position = next_position
-end
-
-function torchcraft:imgMsgToImage(img_msg, img_mode)
-  local img = nil
-  if img_mode == "raw" then
-    -- expecting "width,height,data"
-    local it = string.gmatch(img_msg, "%d+,")
-    local width = it()
-    local height = it()
-    width = tonumber(string.sub(width, 1, -2))
-    height = tonumber(string.sub(height, 1, -2))
-    -- remove data from img_msg
-    local _, second_comma = string.find(img_msg, "%d+,%d+,", 1)
-    img_msg = string.sub(img_msg, second_comma + 1)
-    img = replayer.rawBitmapToTensor(img_msg, width, height)
-  end
-  return img
 end
 
 function torchcraft:is_unit_in_screen(source)

@@ -60,7 +60,7 @@ function torchcraft:init(hostname, port)
     if hostname == '' or hostname == nil then
         -- this is the local VM when running e.g. on a laptop + VMware windows
         -- known problem: sometimes this arp command fails on VPNs...
-        local arpstring = 'arp -a -i vmnet8 | grep -v incomplete | '
+        local arpstring = 'arp -a -i vmnet8 | grep -v "ff:ff:ff:ff:ff:ff" | grep -v incomplete | '
                           .. 'tail -1 | cut -f2 -d" " | tr -d "()"'
         print("executing: " .. arpstring)
         self.hostname = sys.fexecute(arpstring)

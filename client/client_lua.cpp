@@ -184,8 +184,8 @@ int initClient(lua_State* L) {
 
   std::string reply;
   if (!cl->init(reply, std::move(opts))) {
-    auto err = "initial connection setup failed: " + cl->error();
-    return luaL_error(L, err.c_str());
+    return luaL_error(
+        L, "initial connection setup failed: %s", cl->error().c_str());
   }
 
   luaL_dostring(L, ("return " + reply).c_str());
@@ -220,8 +220,7 @@ int sendClient(lua_State* L) {
   }
 
   if (!cl->send(msg)) {
-    auto err = "send failed: " + cl->error();
-    return luaL_error(L, err.c_str());
+    return luaL_error(L, "send failed: %s", cl->error().c_str());
   }
   return 0;
 }
@@ -231,8 +230,7 @@ int receiveClient(lua_State* L) {
       static_cast<client::Client*>(luaT_checkudata(L, 1, "torchcraft.Client"));
   std::string reply;
   if (!cl->receive(reply)) {
-    auto err = "receive failed: " + cl->error();
-    return luaL_error(L, err.c_str());
+    return luaL_error(L, "receive failed: %s", cl->error().c_str());
   }
 
   // Detect optional image in reply from server

@@ -16,9 +16,11 @@ extern "C" {
 }
 
 #include "client_lua.h"
+#include "state_lua.h"
 
 extern "C" int luaopen_torchcraft_client(lua_State* L) {
   lua_newtable(L);
   client::registerClient(L, lua_gettop(L));
+  client::registerState(L, lua_gettop(L));
   return 1;
 }

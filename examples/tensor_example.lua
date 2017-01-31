@@ -111,14 +111,14 @@ while not tc.state.game_ended do
     if tc.state.game_ended then
         break
 
-    elseif microgame and tc.state.battle_just_ended then
+    elseif micro_game and tc.state.battle_just_ended then
         battles_game = battles_game + 1
         frames_in_battle = 0
         if battles_game >= max_battles then -- this is an example
             actions = {tc.command(tc.quit)}
         end
 
-    elseif microgame and tc.state.waiting_for_restart then
+    elseif micro_game and tc.state.waiting_for_restart then
         -- do nothing
 
     else

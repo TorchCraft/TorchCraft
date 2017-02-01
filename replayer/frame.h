@@ -111,6 +111,15 @@ namespace replayer {
       is_terminal = o.is_terminal;
     }
 
+    void clear() {
+      units.clear();
+      actions.clear();
+      resources.clear();
+      bullets.clear();
+      reward = 0;
+      is_terminal = 0;
+    }
+
     void filter(int32_t x, int32_t y, Frame& o) const {
       auto inRadius = [x, y](int32_t ux, int32_t uy) {
         return (x / 8 - ux)*(x / 8 - ux) + (y / 8 - uy)*(y / 8 - uy) <= 20 * 4 * 20 * 4;

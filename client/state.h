@@ -12,12 +12,14 @@
 #include <string>
 #include <vector>
 
-extern "C" {
-#include <lua.h>
-}
-
 #include "replayer/frame.h"
 #include "replayer/refcount.h"
+
+namespace TorchCraft {
+struct HandshakeServer;
+struct Frame;
+struct EndGame;
+}
 
 namespace client {
 
@@ -55,10 +57,12 @@ class State : public RefCounted {
   ~State();
 
   void reset();
-  std::string update(lua_State* L, const std::string& upd);
+  std::vector<std::string> update(const TorchCraft::HandshakeServer* handshake);
+  std::vector<std::string> update(const TorchCraft::Frame* frame);
+  std::vector<std::string> update(const TorchCraft::EndGame* end);
 
  private:
-  void updateImage(const std::string& msg);
+  bool setRawImage(const TorchCraft::Frame* frame);
 };
 
 } // namespace client

@@ -23,10 +23,39 @@ inline client::Client* checkClient(lua_State* L, int index = 1) {
   return *static_cast<client::Client**>(s);
 }
 
+client::Client::Command parseCommand(const std::string& str) {
+  client::Client::Command comm;
+  bool gotCode = false;
+  std::istringstream ss(str);
+  for (std::string arg; std::getline(ss, arg, ',');) {
+    if (!gotCode) {
+      comm.code = std::stoi(arg);
+      gotCode = true;
+    } else {
+      try {
+        comm.args.push_back(std::stoi(arg));
+      } catch (std::invalid_argument& e) {
+        comm.str = arg;
+      }
+    }
+  }
+  return comm;
+}
+
+std::vector<client::Client::Command> parseCommandString(
+    const std::string& str) {
+  std::vector<client::Client::Command> comms;
+  std::istringstream ss(str);
+  for (std::string part; std::getline(ss, part, ':');) {
+    comms.emplace_back(parseCommand(part));
+  }
+  return comms;
+}
+
 } // namespace
 
 int newClient(lua_State* L) {
-  client::Client* cl = new client::Client(L);
+  client::Client* cl = new client::Client();
   luaT_pushudata(L, cl, "torchcraft.Client");
 
   // Store Lua wrapped state in uservalue table so that all changes done by Lua
@@ -137,19 +166,24 @@ int initClient(lua_State* L) {
     lua_pop(L, 1);
   }
 
-  std::string reply;
-  if (!cl->init(reply, std::move(opts))) {
-    return luaL_error(
-        L, "initial connection setup failed: %s", cl->error().c_str());
+  std::vector<std::string> updates;
+  if (!cl->init(updates, opts)) {
+    auto err = "initial connection setup failed: " + cl->error();
+    return luaL_error(L, err.c_str());
   }
 
-  luaL_dostring(L, ("return " + reply).c_str());
+  lua_getuservalue(L, 1);
+  lua_getfield(L, -1, "state");
+  lua_remove(L, -2);
+  pushUpdatesState(L, updates);
+  lua_remove(L, -2);
   return 1;
 }
 
 int sendClient(lua_State* L) {
   auto cl = checkClient(L);
-  std::string msg;
+  std::vector<client::Client::Command> comms;
+
   if (lua_istable(L, 2)) {
     lua_pushvalue(L, 2);
     std::ostringstream ss;
@@ -157,35 +191,35 @@ int sendClient(lua_State* L) {
     int index = 1;
     bool first = true;
     while (lua_next(L, -2) != 0) {
-      const char* item = lua_tostring(L, -1);
+      auto cs = parseCommandString(luaL_checkstring(L, -1));
+      std::move(cs.begin(), cs.end(), std::back_inserter(comms));
       lua_pop(L, 1);
-      if (!first) {
-        ss << ":" << item;
-      } else {
-        ss << item;
-        first = false;
-      }
     }
     lua_pop(L, 1);
-    msg = ss.str();
   } else {
-    msg = luaL_checkstring(L, 2);
+    comms = std::move(parseCommandString(luaL_checkstring(L, 2)));
   }
 
-  if (!cl->send(msg)) {
-    return luaL_error(L, "send failed: %s", cl->error().c_str());
+  if (!cl->send(comms)) {
+    auto err = "send failed: " + cl->error();
+    return luaL_error(L, err.c_str());
   }
   return 0;
 }
 
 int receiveClient(lua_State* L) {
   auto cl = checkClient(L);
-  std::string reply;
-  if (!cl->receive(reply)) {
-    return luaL_error(L, "receive failed: %s", cl->error().c_str());
+  std::vector<std::string> updates;
+  if (!cl->receive(updates)) {
+    auto err = "receive failed: " + cl->error();
+    return luaL_error(L, err.c_str());
   }
 
-  luaL_dostring(L, ("return " + reply).c_str());
+  lua_getuservalue(L, 1);
+  lua_getfield(L, -1, "state");
+  lua_remove(L, -2);
+  pushUpdatesState(L, updates);
+  lua_remove(L, -2);
   return 1;
 }
 

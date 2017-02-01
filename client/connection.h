@@ -19,7 +19,9 @@ class Connection {
   Connection(Connection&& conn);
 
   bool send(const std::string& data);
+  bool send(const void* buf, size_t len);
   bool receive(std::string& dest);
+  bool receive(std::vector<uint8_t>& dest);
   bool poll(int timeout);
 
   int errnum() const {

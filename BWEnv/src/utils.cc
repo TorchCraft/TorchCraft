@@ -178,6 +178,22 @@ void Utils::bwlog(std::ofstream& output_log,
   va_end(args);
 }
 
+std::vector<uint8_t> Utils::mapToVector()
+{
+  std::vector<uint8_t> v;
+  for (int x = 0; x < BWAPI::Broodwar->mapHeight() * 4; ++x) {
+    for (int y = 0; y < BWAPI::Broodwar->mapWidth() * 4; ++y) {
+      if (BWAPI::Broodwar->isWalkable(x, y)) {
+        v.push_back(BWAPI::Broodwar->getGroundHeight(x / 4, y / 4));
+      } else {
+        v.push_back(-1);
+      }
+      // TODO add isBuildable?
+    }
+  }
+  return v;
+}
+
 std::string Utils::mapToTensorStr()
 {
   std::stringstream r;

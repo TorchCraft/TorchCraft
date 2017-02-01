@@ -27,6 +27,10 @@ int indexState(lua_State* L);
 int newindexState(lua_State* L);
 int resetState(lua_State* L);
 int totableState(lua_State* L);
+int pushUpdatesState(
+    lua_State* L,
+    std::vector<std::string>& updates,
+    int index = -1);
 
 const struct luaL_Reg state_m[] = {
     {"__gc", gcState},

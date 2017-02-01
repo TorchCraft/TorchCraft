@@ -36,6 +36,18 @@ bool Connection::send(const std::string& data) {
   return true;
 }
 
+bool Connection::send(const void* buf, size_t len) {
+  clearError();
+  try {
+    sock_.send(buf, len);
+  } catch (zmq::error_t& e) {
+    errnum_ = e.num();
+    errmsg_ = e.what();
+    return false;
+  }
+  return true;
+}
+
 bool Connection::receive(std::string& dest) {
   clearError();
   try {
@@ -47,6 +59,21 @@ bool Connection::receive(std::string& dest) {
   }
 
   dest.assign(recvmsg_.data<char>(), recvmsg_.size());
+  return true;
+}
+
+bool Connection::receive(std::vector<uint8_t>& dest) {
+  clearError();
+  try {
+    sock_.recv(&recvmsg_);
+  } catch (zmq::error_t& e) {
+    errnum_ = e.num();
+    errmsg_ = e.what();
+    return false;
+  }
+
+  auto d = recvmsg_.data<unsigned char>();
+  dest.assign(d, d + recvmsg_.size());
   return true;
 }
 

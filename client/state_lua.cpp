@@ -244,6 +244,19 @@ int totableState(lua_State* L) {
   return 1;
 }
 
+int pushUpdatesState(
+    lua_State* L,
+    std::vector<std::string>& updates,
+    int index) {
+  auto s = checkState(L, index);
+  lua_newtable(L);
+  for (auto u : updates) {
+    pushMember(L, s, u);
+    lua_setfield(L, -2, u.c_str());
+  }
+  return 1;
+}
+
 namespace client {
 void registerState(lua_State* L, int index) {
   luaT_newlocalmetatable(

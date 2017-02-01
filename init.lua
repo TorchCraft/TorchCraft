@@ -897,7 +897,6 @@ assert(torchcraft.total_price.gas[torchcraft.unittypes.Terran_Science_Vessel]
     == 225)
 
 
-torchcraft.PROTOCOL_VERSION = "16"
 torchcraft.hostname = nil
 torchcraft.client = client.Client()
 torchcraft.state = torchcraft.client.state

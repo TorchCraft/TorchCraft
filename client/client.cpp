@@ -12,9 +12,52 @@
 
 #include "client.h"
 
+#include "BWEnv/fbs/messages_generated.h"
+
+namespace {
+
+void buildHandshakeMessage(
+    flatbuffers::FlatBufferBuilder& fbb,
+    const client::Client::Options& opts) {
+  TorchCraft::HandshakeClientT hsc;
+  hsc.protocol = 17;
+  hsc.map = opts.initial_map;
+  if (opts.window_size[0] >= 0) {
+    hsc.window_size.reset(
+        new TorchCraft::Vec2(opts.window_size[0], opts.window_size[1]));
+  }
+  if (opts.window_pos[0] >= 0) {
+    hsc.window_pos.reset(
+        new TorchCraft::Vec2(opts.window_pos[0], opts.window_pos[1]));
+  }
+  hsc.micro_mode = opts.micro_battles;
+
+  auto payload = TorchCraft::HandshakeClient::Pack(fbb, &hsc);
+  auto root = TorchCraft::CreateMessage(
+      fbb, TorchCraft::Any::HandshakeClient, payload.Union());
+  TorchCraft::FinishMessageBuffer(fbb, root);
+}
+
+void buildCommandMessage(
+    flatbuffers::FlatBufferBuilder& fbb,
+    const std::vector<client::Client::Command>& commands) {
+  std::vector<flatbuffers::Offset<TorchCraft::Command>> offsets;
+  for (auto comm : commands) {
+    offsets.push_back(TorchCraft::CreateCommandDirect(
+        fbb, comm.code, &comm.args, comm.str.c_str()));
+  }
+
+  auto payload = TorchCraft::CreateCommandsDirect(fbb, &offsets);
+  auto root = TorchCraft::CreateMessage(
+      fbb, TorchCraft::Any::Commands, payload.Union());
+  TorchCraft::FinishMessageBuffer(fbb, root);
+}
+
+} // namespace
+
 namespace client {
 
-Client::Client(lua_State* L) : L_(L), state_(new State()) {}
+Client::Client() : state_(new State()) {}
 
 Client::~Client() {
   state_->decref();
@@ -49,26 +92,16 @@ bool Client::close() {
   return true;
 }
 
-bool Client::init(std::string& dest, Options opts) {
-  std::ostringstream ss;
-  ss << "protocol=16";
-  if (!opts.initial_map.empty()) {
-    ss << ",map=" << opts.initial_map;
-  }
-  if (opts.window_size[0] >= 0) {
-    ss << ",window_size=" << opts.window_size[0] << " " << opts.window_size[1];
-  }
-  if (opts.window_pos[0] >= 0) {
-    ss << ",window_pos=" << opts.window_pos[0] << " " << opts.window_pos[1];
-  }
-  ss << ",micro_mode=" << (opts.micro_battles ? "true" : "false");
+bool Client::init(std::vector<std::string>& updates, const Options& opts) {
+  flatbuffers::FlatBufferBuilder fbb;
+  buildHandshakeMessage(fbb, opts);
 
   clearError();
   if (!conn_) {
     error_ = "No active connection";
     return false;
   }
-  if (!conn_->send(ss.str())) {
+  if (!conn_->send(fbb.GetBufferPointer(), fbb.GetSize())) {
     std::stringstream ss;
     ss << "Error sending init request: " << conn_->errmsg() << " ("
        << conn_->errnum() << ")";
@@ -76,7 +109,7 @@ bool Client::init(std::string& dest, Options opts) {
     return false;
   }
 
-  std::string reply;
+  std::vector<uint8_t> reply;
   if (!conn_->receive(reply)) {
     std::stringstream ss;
     ss << "Error receiving init reply: " << conn_->errmsg() << " ("
@@ -86,13 +119,30 @@ bool Client::init(std::string& dest, Options opts) {
   }
   sent_ = false;
 
-  // Retain Lua-parsable message for returning updates to Lua-land
-  auto update = state_->update(L_, reply);
-  dest.assign(update);
+  flatbuffers::Verifier verifier(reply.data(), reply.size());
+  if (!TorchCraft::VerifyMessageBuffer(verifier)) {
+    error_ = "Error parsing init reply";
+    return false;
+  }
+  auto msg = TorchCraft::GetMessage(reply.data());
+  if (msg->msg_type() != TorchCraft::Any::HandshakeServer) {
+    error_ = std::string(
+                 "Error parsing init reply: expected HandshakeServer, got ") +
+        TorchCraft::EnumNameAny(msg->msg_type());
+    return false;
+  }
+  if (!TorchCraft::VerifyAny(
+          verifier, msg->msg(), TorchCraft::Any::HandshakeServer)) {
+    error_ = "Error parsing init reply";
+    return false;
+  }
+
+  updates = state_->update(
+      reinterpret_cast<const TorchCraft::HandshakeServer*>(msg->msg()));
   return true;
 }
 
-bool Client::send(const std::string& msg) {
+bool Client::send(const std::vector<Command>& commands) {
   clearError();
   if (sent_) {
     error_ = "Attempt to perform successive sends";
@@ -103,7 +153,11 @@ bool Client::send(const std::string& msg) {
     error_ = "No active connection";
     return false;
   }
-  if (!conn_->send(msg)) {
+
+  flatbuffers::FlatBufferBuilder fbb;
+  buildCommandMessage(fbb, commands);
+
+  if (!conn_->send(fbb.GetBufferPointer(), fbb.GetSize())) {
     std::stringstream ss;
     ss << "Error sending request: " << conn_->errmsg() << " ("
        << conn_->errnum() << ")";
@@ -114,9 +168,9 @@ bool Client::send(const std::string& msg) {
   return true;
 }
 
-bool Client::receive(std::string& dest) {
+bool Client::receive(std::vector<std::string>& updates) {
   if (!sent_) {
-    send(std::string());
+    send(std::vector<Command>());
   }
 
   clearError();
@@ -129,7 +183,7 @@ bool Client::receive(std::string& dest) {
     return false;
   }
 
-  std::string reply;
+  std::vector<uint8_t> reply;
   if (!conn_->receive(reply)) {
     std::stringstream ss;
     ss << "Error receiving reply: " << conn_->errmsg() << " ("
@@ -139,10 +193,52 @@ bool Client::receive(std::string& dest) {
   }
   sent_ = false;
 
-  // Retain Lua-parsable message for returning updates to Lua-land
-  auto update = state_->update(L_, reply);
-  dest.assign(update);
+  flatbuffers::Verifier verifier(reply.data(), reply.size());
+  if (!TorchCraft::VerifyMessageBuffer(verifier)) {
+    error_ = "Error parsing reply";
+    return false;
+  }
+  auto msg = TorchCraft::GetMessage(reply.data());
+  if (!TorchCraft::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
+    error_ = "Error parsing reply";
+    return false;
+  }
 
+  switch (msg->msg_type()) {
+    case TorchCraft::Any::Frame:
+      updates = state_->update(
+          reinterpret_cast<const TorchCraft::Frame*>(msg->msg()));
+      break;
+    case TorchCraft::Any::EndGame:
+      updates = state_->update(
+          reinterpret_cast<const TorchCraft::EndGame*>(msg->msg()));
+      break;
+    case TorchCraft::Any::HandshakeServer:
+      updates = state_->update(
+          reinterpret_cast<const TorchCraft::HandshakeServer*>(msg->msg()));
+      break;
+    // TODO These message types were not explicitly handled in the Lua version
+    case TorchCraft::Any::PlayerLeft:
+      std::cerr << "[Warning] Unhandled message from server: "
+                << TorchCraft::EnumNameAny(msg->msg_type()) << "(player_left=\""
+                << reinterpret_cast<const TorchCraft::PlayerLeft*>(msg->msg())
+                       ->player_left()
+                       ->str()
+                << "\")" << std::endl;
+      break;
+    case TorchCraft::Any::Error:
+      std::cerr << "[Warning] Unhandled message from server: "
+                << TorchCraft::EnumNameAny(msg->msg_type()) << "(message=\""
+                << reinterpret_cast<const TorchCraft::Error*>(msg->msg())
+                       ->message()
+                       ->str()
+                << "\"" << std::endl;
+      break;
+    default:
+      error_ = std::string("Error parsing reply: cannot handle message: ") +
+          TorchCraft::EnumNameAny(msg->msg_type());
+      return false;
+  }
   return true;
 }
 

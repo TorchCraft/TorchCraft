@@ -18,6 +18,23 @@
 
 using namespace std;
 
+namespace {
+
+template<typename T>
+void sendFBObject(zsock_t* sock, const T* obj) {
+  flatbuffers::FlatBufferBuilder fbb;
+  auto payload = T::TableType::Pack(fbb, obj);
+  auto root = TorchCraft::CreateMessage(
+      fbb, TorchCraft::AnyTraits<T::TableType>::enum_value, payload.Union());
+  TorchCraft::FinishMessageBuffer(fbb, root);
+
+  if (zsock_send(sock, "b", fbb.GetBufferPointer(), fbb.GetSize()) != 0) {
+    throw exception("ZMQ_server::send(): zmq_send failed.");
+  }
+}
+
+} // namespace
+
 ZMQ_server::ZMQ_server(Controller *c, int port)
 {
   server_sock_connected = false;
@@ -66,128 +83,51 @@ void ZMQ_server::connect()
 
   this->server_sock_connected = true;
 
-  char* welcome_message;
-  if (zsock_recv(server_sock, "s", &welcome_message) != 0) {
-    throw exception("ZMQ_server::connect(): zsock_recv failed.");
+  zchunk_t *chunk;
+  if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
+    throw exception("ZMQ_server::connect(): zmq_recv failed.");
   }
 
-  if (strlen(welcome_message) == 0) {
-    zsock_send(this->server_sock, "s", "{}");
-    zstr_free(&welcome_message);
-    if (zsock_recv(server_sock, "s", &welcome_message) != 0) {
+  if (zchunk_size(chunk) == 0) {
+    // Retry
+    TorchCraft::ErrorT err;
+    sendError(&err);
+    zchunk_destroy(&chunk);
+    if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
       throw exception("ZMQ_server::connect(): zsock_recv failed.");
     }
   }
 
-  Utils::bwlog(controller->output_log, "From Client: %s", welcome_message);
-
-  // expect welcome message
-  if (!checkForWelcomeMessage(welcome_message)) {
-    throw logic_error(string("Wrong welcome message, got: ")
-      + welcome_message);
+  uint8_t* data = zchunk_data(chunk);
+  size_t size = zchunk_size(chunk);
+  flatbuffers::Verifier verifier(data, size);
+  if (!TorchCraft::VerifyMessageBuffer(verifier)) {
+    zchunk_destroy(&chunk);
+    throw exception("ZMQ_server::connect(): invalid message.");
   }
-  zstr_free(&welcome_message);
+
+  auto msg = TorchCraft::GetMessage(data);
+  if (msg->msg_type() == TorchCraft::Any::HandshakeClient) {
+    if (!TorchCraft::VerifyAny(
+            verifier, msg->msg(), TorchCraft::Any::HandshakeClient)) {
+      zchunk_destroy(&chunk);
+      throw runtime_error("ZMQ_server::connect(): invalid message.");
+    }
+    handleReconnect(
+        reinterpret_cast<const TorchCraft::HandshakeClient*>(msg->msg()));
+  } else {
+    zchunk_destroy(&chunk);
+    throw logic_error(
+        string("ZMQ_server::connect(): cannot handle message: ") +
+        TorchCraft::EnumNameAny(msg->msg_type()));
+  }
+
+  zchunk_destroy(&chunk);
 }
 
 ZMQ_server::~ZMQ_server()
 {
   this->close();
-}
-
-bool ZMQ_server::checkProtocolMessage(const char* msg) {
-  // Returns true if protocol message with correct version
-  // Raises logic_error if protocol message with wrong version
-  // Returns false if not protocol message
-  const char* s_protocol = "protocol=";
-  if (!strncmp(msg, s_protocol, strlen(s_protocol))) {
-    if (ZMQ_server::protocol_version !=
-      atoi(msg + strlen(s_protocol))) {
-      throw logic_error(string("Wrong protocol version: ") + msg);
-    }
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-std::string ZMQ_server::checkInitialMap(const char* msg)
-{
-  auto s = std::string("");
-  const char* s_map = "map=";
-  auto found_index = strstr(msg, s_map);
-  // assuming string ends with map_path\0 or ,
-  if (found_index != nullptr){
-    s = std::string(found_index + 4);
-    auto possible_comma = s.find(',');
-    if (possible_comma != std::string::npos)
-    {
-      s = s.substr(0, possible_comma);
-    }
-  }
-  return s;
-}
-
-std::pair<int, int> ZMQ_server::checkWindowSize(const char* msg)
-{
-  auto sizes = std::pair<int, int>(-1, -1);
-  auto s = std::string("");
-  const char* s_ws = "window_size=";
-  auto found_index = strstr(msg, s_ws);
-  // assuming string ends with map_path\0 or ,
-  if (found_index != nullptr){
-    s = std::string(found_index + 12);
-    auto possible_comma = s.find(',');
-
-    if (possible_comma != std::string::npos)
-    {
-      s = s.substr(0, possible_comma);
-    }
-
-    std::istringstream stream(s);
-    stream >> sizes.first >> sizes.second;
-  }
-
-  return sizes;
-}
-
-std::pair<int, int> ZMQ_server::checkWindowPos(const char* msg)
-{
-  auto pos = std::pair<int, int>(-1, -1);
-  auto s = std::string("");
-  const char* s_wp = "window_pos=";
-  auto found_index = strstr(msg, s_wp);
-  // assuming string ends with map_path\0 or ,
-  if (found_index != nullptr){
-    s = std::string(found_index + 11);
-    auto possible_comma = s.find(',');
-
-    if (possible_comma != std::string::npos)
-    {
-      s = s.substr(0, possible_comma);
-    }
-
-    std::istringstream stream(s);
-    stream >> pos.first >> pos.second;
-  }
-
-  return pos;
-}
-
-bool ZMQ_server::checkMode(const char* msg)
-{
-  // Sets controller.micro_mode, because we prefer to give
-  // control to the Torch part instead of enforcing that
-  // BWAPI::Broodwar->getGameType() == BWAPI::GameTypes::Use_Map_Settings
-  // for micro_mode to be true.
-
-  auto s = string(msg);
-  auto i = s.find("micro_mode=");
-  i = i + 11;
-  auto sf = s.substr(i, 4);
-  if (sf == "true")
-    return true;
-  return false;
 }
 
 void ZMQ_server::close()
@@ -205,27 +145,24 @@ void ZMQ_server::close()
   this->server_sock_connected = false;
 }
 
-void ZMQ_server::packMessage(const string &str)
-{
-  /* concatenating the elements in a Lua table */
-  if (!this->server_sock_connected) return;
-  this->sbuf << str << ",";
+void ZMQ_server::sendHandshake(const TorchCraft::HandshakeServerT* handshake) {
+  sendFBObject(this->server_sock, handshake);
 }
 
-void ZMQ_server::sendMessage()
-{
-  /* if not yet connected, do nothing */
-  if (!this->server_sock_connected) return;
+void ZMQ_server::sendFrame(const TorchCraft::FrameT* frame) {
+  sendFBObject(this->server_sock, frame);
+}
 
-  string str = "{" + this->sbuf.str() + "}";
-  this->sbuf.str("");
+void ZMQ_server::sendPlayerLeft(const TorchCraft::PlayerLeftT* pl) {
+  sendFBObject(this->server_sock, pl);
+}
 
-  // Message is sent as bytestream to tell zmq to not ignore null
-  // bytes (for image)
-  if (zsock_send(this->server_sock,
-    "b", reinterpret_cast<const byte*>(str.c_str()), str.size()) != 0) {
-    throw exception("ZMQ_server::sendMessage(): zsock_send failed.");
-  }
+void ZMQ_server::sendEndGame(const TorchCraft::EndGameT* endgame) {
+  sendFBObject(this->server_sock, endgame);
+}
+
+void ZMQ_server::sendError(const TorchCraft::ErrorT* error) {
+  sendFBObject(this->server_sock, error);
 }
 
 void ZMQ_server::receiveMessage()
@@ -233,88 +170,88 @@ void ZMQ_server::receiveMessage()
   /* if not yet connected, do nothing */
   if (!this->server_sock_connected) return;
 
-  char *message;
-  if (zsock_recv(this->server_sock, "s", &message) != 0) {
-    throw exception("ZMQ_server::receiveMessage(): zsock_recv failed.");
+  zchunk_t *chunk;
+  if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
+    throw runtime_error("ZMQ_server::receiveMessage(): zmq_recv failed.");
   }
 
-  // if message is welcome message it means it reconnected
-  if (!checkForWelcomeMessage(message))
-    this->executeTokenize(message);
-  zstr_free(&message);
+  uint8_t *data = zchunk_data(chunk);
+  size_t size = zchunk_size(chunk);
+  flatbuffers::Verifier verifier(data, size);
+  if (!TorchCraft::VerifyMessageBuffer(verifier)) {
+    zchunk_destroy(&chunk);
+    throw exception("ZMQ_server::receiveMessage(): invalid message.");
+  }
+
+  auto msg = TorchCraft::GetMessage(data);
+  if (!TorchCraft::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
+    zchunk_destroy(&chunk);
+    throw runtime_error("ZMQ_server::receiveMessage(): invalid message.");
+  }
+
+  switch (msg->msg_type()) {
+    case TorchCraft::Any::HandshakeClient: // reconnection
+      handleReconnect(
+          reinterpret_cast<const TorchCraft::HandshakeClient*>(msg->msg()));
+      break;
+    case TorchCraft::Any::Commands:
+      handleCommands(reinterpret_cast<const TorchCraft::Commands*>(msg->msg()));
+      break;
+    default:
+      zchunk_destroy(&chunk);
+      throw runtime_error(
+          string("ZMQ_server::receiveMessage(): cannot handle message: ") +
+          TorchCraft::EnumNameAny(msg->msg_type()));
+  }
+
+  zchunk_destroy(&chunk);
 }
 
-bool ZMQ_server::checkForWelcomeMessage(const char* msg) {
-  if (!checkProtocolMessage(msg))
-    return false;
-
-  auto map_path = checkInitialMap(msg);
-  if (map_path.length() > 0)
-    controller->setMap(map_path);
-
-  auto sizes = checkWindowSize(msg);
-  if (!(sizes.first < 0 || sizes.second < 0))
-    controller->setWindowSize(sizes);
-
-  auto pos = checkWindowPos(msg);
-  if (!(pos.first < 0 || pos.second < 0))
-    controller->setWindowPos(pos);
-
-  controller->micro_mode = checkMode(msg);
+void ZMQ_server::handleReconnect(const TorchCraft::HandshakeClient* handshake) {
+  if (handshake->protocol() != ZMQ_server::protocol_version) {
+    throw logic_error(
+        string("Wrong protocol version: ") + to_string(handshake->protocol()));
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, TorchCraft::HandshakeClient::VT_MAP)) {
+    controller->setMap(handshake->map()->str());
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, TorchCraft::HandshakeClient::VT_WINDOW_SIZE)) {
+    controller->setWindowSize(pair<int, int>(
+        handshake->window_size()->x(), handshake->window_size()->y()));
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, TorchCraft::HandshakeClient::VT_WINDOW_POS)) {
+    controller->setWindowPos(pair<int, int>(
+        handshake->window_size()->x(), handshake->window_size()->y()));
+  }
+  controller->micro_mode = handshake->micro_mode();
 
   // if we aren't in client mode it means that game has started already
   // so we can go ahead with handshake
   if (!controller->is_client)
     controller->setupHandshake();
-
-  return true;
 }
 
-void ZMQ_server::executeTokenize(char* message)
-{
-  Utils::bwlog(controller->output_log, "(%d) Received: %s", BWAPI::Broodwar->getFrameCount(), message);
-
-  char* saveptr;
-  char* token = strtok_s(message, ":", &saveptr);
-  int commandCount = 0;
-  char* commands[ZMQ_server::max_commands];
-
-  while (token != nullptr && commandCount < ZMQ_server::max_commands)
-  {
-    commands[commandCount] = token;
-    commandCount++;
-    token = strtok_s(nullptr, ":", &saveptr);
+void ZMQ_server::handleCommands(const TorchCraft::Commands* comms) {
+  if (!flatbuffers::IsFieldPresent(comms, TorchCraft::Commands::VT_COMMANDS)) {
+    return;
   }
+  auto commands = comms->commands();
+  Utils::bwlog(controller->output_log, "(%d) Received %d commands", BWAPI::Broodwar->getFrameCount(), commands->size());
 
-  // tokenize the arguments
-  std::vector<int> args;
-  args.reserve(6);
-  std::string str;
-  for (int i = 0; i < commandCount; i++)
-  {
-    if (strlen(commands[i]) == 0) continue;
-    int command = atoi(strtok_s(commands[i], ",", &saveptr));
-    auto toConv = strtok_s(nullptr, ",", &saveptr);
-    if (command == Commands::SET_MAP)
-    {
-      str = std::string(toConv);
-      args.push_back(0); // doesn't matter, as we are going to ignore this.
-    }
-    else
-    {
-      while (toConv != nullptr) {
-        args.push_back(atoi(toConv));
-        toConv = strtok_s(nullptr, ",", &saveptr);
-      }
+  int count = 0;
+  for (auto comm : *commands) {
+    if (count >= ZMQ_server::max_commands) {
+      break;
     }
     try {
-      controller->handleCommand(command, args, str);
-    }
-    catch (std::runtime_error& e) {
+      std::vector<int> args(comm->args()->data(), comm->args()->data() + comm->args()->size());
+      controller->handleCommand(comm->code(), args, comm->str()->str());
+    } catch (runtime_error& e) {
       Utils::bwlog(controller->output_log, "Exception : %s", e.what());
     }
-    args.clear();
-    str.clear();
   }
 }
 

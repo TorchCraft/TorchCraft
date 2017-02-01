@@ -216,7 +216,7 @@ struct HandshakeClientT : public flatbuffers::NativeTable {
   std::unique_ptr<Vec2> window_pos;
   bool micro_mode;
   HandshakeClientT()
-    : protocol(17),
+    : protocol(0),
       micro_mode(false) {}
 };
 
@@ -229,7 +229,7 @@ struct HandshakeClient FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_WINDOW_POS = 10,
     VT_MICRO_MODE = 12
   };
-  int32_t protocol() const { return GetField<int32_t>(VT_PROTOCOL, 17); }
+  int32_t protocol() const { return GetField<int32_t>(VT_PROTOCOL, 0); }
   bool mutate_protocol(int32_t _protocol) { return SetField(VT_PROTOCOL, _protocol); }
   const flatbuffers::String *map() const { return GetPointer<const flatbuffers::String *>(VT_MAP); }
   flatbuffers::String *mutable_map() { return GetPointer<flatbuffers::String *>(VT_MAP); }
@@ -256,7 +256,7 @@ struct HandshakeClient FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct HandshakeClientBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_protocol(int32_t protocol) { fbb_.AddElement<int32_t>(HandshakeClient::VT_PROTOCOL, protocol, 17); }
+  void add_protocol(int32_t protocol) { fbb_.AddElement<int32_t>(HandshakeClient::VT_PROTOCOL, protocol, 0); }
   void add_map(flatbuffers::Offset<flatbuffers::String> map) { fbb_.AddOffset(HandshakeClient::VT_MAP, map); }
   void add_window_size(const Vec2 *window_size) { fbb_.AddStruct(HandshakeClient::VT_WINDOW_SIZE, window_size); }
   void add_window_pos(const Vec2 *window_pos) { fbb_.AddStruct(HandshakeClient::VT_WINDOW_POS, window_pos); }
@@ -270,7 +270,7 @@ struct HandshakeClientBuilder {
 };
 
 inline flatbuffers::Offset<HandshakeClient> CreateHandshakeClient(flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t protocol = 17,
+    int32_t protocol = 0,
     flatbuffers::Offset<flatbuffers::String> map = 0,
     const Vec2 *window_size = 0,
     const Vec2 *window_pos = 0,
@@ -285,7 +285,7 @@ inline flatbuffers::Offset<HandshakeClient> CreateHandshakeClient(flatbuffers::F
 }
 
 inline flatbuffers::Offset<HandshakeClient> CreateHandshakeClientDirect(flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t protocol = 17,
+    int32_t protocol = 0,
     const char *map = nullptr,
     const Vec2 *window_size = 0,
     const Vec2 *window_pos = 0,

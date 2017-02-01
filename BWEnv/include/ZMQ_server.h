@@ -10,23 +10,21 @@
 #ifndef TORCHCRAFT_ZMQ_H_
 #define TORCHCRAFT_ZMQ_H_
 
-#include <sstream>
-
 #include <czmq.h>
 #include "controller.h"
+#include "messages_generated.h"
 
 class Controller;
 
 class ZMQ_server
 {
-  static const int protocol_version = 16;
+  static const int protocol_version = 17;
   static const int max_commands = 400; // maximum number of commands per frame
   static const int starting_port = 11111;
   static const int max_instances = 1000;
 
   Controller *controller;
   zsock_t* server_sock = nullptr;
-  std::stringstream sbuf; /** stringstream buffers for zmq */
   int port = 0;
 public:
   bool server_sock_connected;
@@ -35,17 +33,15 @@ public:
   ~ZMQ_server();
 
   void connect();
-  bool checkForWelcomeMessage(const char*);
-  bool checkProtocolMessage(const char*);
-  std::string checkInitialMap(const char* msg);
-  std::pair<int, int> checkWindowSize(const char* msg);
-  std::pair<int, int> checkWindowPos(const char* msg);
-  bool checkMode(const char* msg);
   void close();
-  void packMessage(const std::string&);
-  void sendMessage();
+  void sendHandshake(const TorchCraft::HandshakeServerT* handshake);
+  void sendFrame(const TorchCraft::FrameT* frame);
+  void sendPlayerLeft(const TorchCraft::PlayerLeftT *pl);
+  void sendEndGame(const TorchCraft::EndGameT *endgame);
+  void sendError(const TorchCraft::ErrorT *error);
   void receiveMessage();
-  void executeTokenize(char*);
+  void handleReconnect(const TorchCraft::HandshakeClient* handshake);
+  void handleCommands(const TorchCraft::Commands* commands);
   int getPort();
 };
 

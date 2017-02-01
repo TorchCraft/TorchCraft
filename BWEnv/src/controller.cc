@@ -16,6 +16,8 @@
 #include "utils.h"
 #include "user_actions.h"
 
+#include "messages_generated.h"
+
 Controller::Controller(bool is_client) {
   this->is_client = is_client;
   sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"C:/StarCraft/");
@@ -34,6 +36,10 @@ Controller::Controller(bool is_client) {
   std::cout << *config_ << std::endl;
 
   this->zmq_server = std::make_unique<ZMQ_server>(this, config_->port);
+
+  tcframe_.screen_position = std::make_unique<TorchCraft::Vec2>();
+  tcframe_.visibility_size = std::make_unique<TorchCraft::Vec2>();
+  tcframe_.img_size = std::make_unique<TorchCraft::Vec2>();
 }
 
 Controller::~Controller()
@@ -53,11 +59,9 @@ bool Controller::connect_server()
       + std::to_string(this->zmq_server->getPort()) + ".txt");
     Utils::bwlog(output_log, "Error on connection: %s", e.what());
     if (this->zmq_server->server_sock_connected) {
-      std::ostringstream out;
-      this->zmq_server->packMessage("error = true");
-      out << "error_msg = [[" << e.what() << "]]";
-      this->zmq_server->packMessage(out.str());
-      this->zmq_server->sendMessage();
+      TorchCraft::ErrorT err;
+      err.message = e.what();
+      this->zmq_server->sendError(&err);
       this->zmq_server->close();
     }
     return false;
@@ -194,35 +198,24 @@ void Controller::initGame()
 
 void Controller::setupHandshake()
 {
-  /* Pack and send a specific message with all setup variables */
-  this->zmq_server->packMessage(std::string("lag_frames = " +
-    std::to_string(BWAPI::Broodwar->getLatencyFrames())));
-  this->zmq_server->packMessage(std::string("map_data = " +
-    Utils::mapToTensorStr()));
-  this->zmq_server->packMessage(std::string("map_name = '" +
-    BWAPI::Broodwar->mapFileName() + "'"));
-  this->zmq_server->packMessage(std::string("neutral_id = " +
-        std::to_string(BWAPI::Broodwar->neutral()->getID())));
-
+  TorchCraft::HandshakeServerT handshake;
+  handshake.lag_frames = BWAPI::Broodwar->getLatencyFrames();
+  handshake.map_data = Utils::mapToVector();
+  handshake.map_size.reset(new TorchCraft::Vec2(BWAPI::Broodwar->mapHeight() * 4, BWAPI::Broodwar->mapWidth() * 4));
+  handshake.map_name = BWAPI::Broodwar->mapFileName();
+  handshake.neutral_id = BWAPI::Broodwar->neutral()->getID();
   if (BWAPI::Broodwar->isReplay()) {
-    this->zmq_server->packMessage("is_replay = true");
+    handshake.is_replay = true;
+  } else {
+    handshake.is_replay = false;
+    handshake.player_id = BWAPI::Broodwar->self()->getID();
   }
-  else {
-    this->zmq_server->packMessage("is_replay = false");
-    this->zmq_server->packMessage(std::string("player_id = " +
-      std::to_string(BWAPI::Broodwar->self()->getID())));
-  }
+  handshake.battle_frame_count = battle_frame_count;
 
-  if (micro_mode)
-    this->zmq_server->packMessage("battle_frame_count = "
-    + std::to_string(battle_frame_count));
-
-  this->zmq_server->sendMessage();
+  this->zmq_server->sendHandshake(&handshake);
 
   /* Receive first message (usually setup commands) */
   this->zmq_server->receiveMessage();
-
-  battle_frame_count = 0;
 }
 
 void Controller::handleCommand(int command, const std::vector<int>& args,
@@ -469,18 +462,17 @@ void Controller::endGame()
 {
   Utils::bwlog(output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
+  TorchCraft::EndGameT endg;
   if (last_frame != nullptr) {
     std::ostringstream out;
-    out << "frame=[[" << *last_frame << "]]";
-    this->zmq_server->packMessage(out.str());
-    clearLastFrame();
+    out << *last_frame;
+    auto s = out.str();
+    endg.frame.assign(s.data(), s.data() + s.size());
   }
+  endg.game_won = this->is_winner;
 
-  this->zmq_server->packMessage("game_ended = true");
-  this->zmq_server->packMessage("game_won = " +
-    std::string(this->is_winner ? "true" : "false"));
-  this->zmq_server->sendMessage();
-
+  this->zmq_server->sendEndGame(&endg);
+ 
   if (is_client)
   {
     // And receive new commands
@@ -579,81 +571,73 @@ void Controller::onFrame()
 
     if (with_image_)
     {
-      std::string img_mode = "img_mode = \"" + config_->img_mode + "\"";
-      this->zmq_server->packMessage(img_mode);
+      this->tcframe_.img_mode = config_->img_mode;
 
       auto pos = BWAPI::Broodwar->getScreenPosition();
-      std::stringstream spos;
-      spos << "screen_position = { " << pos.x << ", " << pos.y << " }";
-      this->zmq_server->packMessage(spos.str());
+      this->tcframe_.screen_position->mutate_x(pos.x);
+      this->tcframe_.screen_position->mutate_y(pos.y);
 
       // get visibility
-      std::stringstream vis;
-      // This is going to be a table of tables, max size 20 x 13
+      this->tcframe_.visibility_size->mutate_x(20);
+      this->tcframe_.visibility_size->mutate_y(13);
+      this->tcframe_.visibility.resize(20 * 13);
+
       auto init_x = pos.x / 32;
       auto init_y = pos.y / 32;
-      vis << "visibility={";
-
+      auto it = this->tcframe_.visibility.begin();
       for (auto y = 0; y < 13; y++)
       {
-        vis << "{";
         for (auto x = 0; x < 20; x++)
         {
-          auto tile = 0;
+          uint8_t tile = 0;
           if (BWAPI::Broodwar->isExplored(init_x + x, init_y + y))
             tile += 1;
 
           if (BWAPI::Broodwar->isVisible(init_x + x, init_y + y))
             tile += 1;
 
-          vis << tile << ",";
+          *it++ = tile;
         }
-        vis << "},";
       }
-
-      vis << "}";
-
-      this->zmq_server->packMessage(vis.str());
     }
 
     {
       std::ostringstream out;
-      out << "frame=[[" << *last_frame << "]]";
-      this->zmq_server->packMessage(out.str());
+      out << *last_frame;
+      auto s = out.str();
+      this->tcframe_.data.assign(s.data(), s.data() + s.size());
       clearLastFrame();
     }
 
-    {
-      std::ostringstream out;
-      out << "deaths={";
-      for (auto i : this->deaths) {
-        out << i << ",";
-      }
-      out << "}";
-      this->zmq_server->packMessage(out.str());
-      deaths.clear();
-    }
+    this->tcframe_.deaths = this->deaths;
+    this->deaths.clear();
 
-    this->zmq_server->packMessage("frame_from_bwapi = "
-      + std::to_string(BWAPI::Broodwar->getFrameCount()));
-    this->zmq_server->packMessage("battle_frame_count = "
-      + std::to_string(this->battle_frame_count));
+    this->tcframe_.frame_from_bwapi = BWAPI::Broodwar->getFrameCount();
+    this->tcframe_.battle_frame_count = this->battle_frame_count;
 
     if (with_image_)
     {
       auto bin_data = recorder_->getScreenData(config_->img_mode, config_->window_mode, config_->window_mode_custom);
       if (bin_data->size() > 0)
       {
-        auto s = ("TCIMAGEDATA" + std::to_string(recorder_->width)
-          + "," + std::to_string(recorder_->height) + ",");
-        this->zmq_server->packMessage(s + *bin_data);
+        this->tcframe_.img_size->mutate_x(recorder_->width);
+        this->tcframe_.img_size->mutate_y(recorder_->height);
+        this->tcframe_.img_data.assign(bin_data->data(), bin_data->data() + bin_data->size());
+      }
+      else
+      {
+        this->tcframe_.img_data.clear();
       }
 
       delete bin_data;
       with_image_ = false;
     }
+    else
+    {
+      this->tcframe_.img_data.clear();
+    }
 
-    this->zmq_server->sendMessage();
+    this->zmq_server->sendFrame(&this->tcframe_);
 
     // And receive new commands
     this->zmq_server->receiveMessage();

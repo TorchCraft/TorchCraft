@@ -417,6 +417,13 @@ void pushFrame(lua_State* L, const Frame& res) {
 extern "C" int frameGetUnits(lua_State* L) {
   Frame *f = checkFrame(L);
   size_t playerId = luaL_checkint(L, 2);
+  int filterIndex = -1;
+  if (lua_gettop(L) > 2) {
+    if (!lua_isfunction(L, 3) && !lua_iscfunction(L, 3)) {
+      return luaL_error(L, "expected function argument (3)");
+    }
+    filterIndex = 3;
+  }
 
   // create an array of tables (units)
   lua_newtable(L);
@@ -426,9 +433,19 @@ extern "C" int frameGetUnits(lua_State* L) {
     return 1;
 
   for (const auto& unit : f->units.at(playerId)) {
-    lua_pushnumber(L, (lua_Number) unit.id);
     pushUnit(L, unit);
-    lua_settable(L, -3);
+    if (filterIndex > 0) {
+      lua_pushvalue(L, filterIndex);
+      lua_pushvalue(L, -2); // unit
+      lua_call(L, 1, 1);
+      bool filter = lua_toboolean(L, -1);
+      lua_pop(L, 1);
+      if (!filter) {
+        lua_pop(L, 1); // pop unit
+        continue;
+      }
+    }
+    lua_rawseti(L, -2, unit.id);
   }
 
   return 1;

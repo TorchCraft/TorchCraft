@@ -1002,24 +1002,6 @@ function torchcraft:battle_ended()
     self.state.last_battle_ended = self.state.frame_from_bwapi
 end
 
-function torchcraft:filter_units_table(t)
-    --[[
-    This function deletes all the units with an unknown type. (typically map
-  reavelers)
-    Input:
-      - t : a lua table containing the units indexed by their units ID (uid)
-    Output:
-      - r : same lua table without the unknown units.
-    ]]
-    local r = {}
-    for uid, ud in pairs(t) do
-        if self.unittypes[ud.type] ~= nil then
-            r[uid] = ud
-        end
-    end
-    return r
-end
-
 function torchcraft:filter_type(t, utt)
     -- This function keeps only units from `t` of one of the types in `utt`
     -- TODO? redo with pl.Set?
@@ -1094,8 +1076,8 @@ function torchcraft:receive()
         if not self.mode.replay and self.state.frame then
             local myself = self.state.player_id
             assert(myself ~= nil, "player_id not set but not a replay either")
-            self.state.units_myself
-                = self:filter_units_table(self.state.frame:getUnits(myself))
+            self.state.units_myself = self.state.frame:getUnits(myself,
+                function(ud) return self.unittypes[ud.type] ~= nil end)
             self.state.units_enemy = self.state.frame:getUnits(1 - myself)
             self.state.resources_myself = self.state.frame:getResources(myself)
             self.state.units_neutral = self.state.frame:getUnits(self.state.neutral_id)

@@ -18,6 +18,8 @@ extern "C" {
 
 namespace client {
 
+void init();
+
 class Client {
  public:
   struct Options {

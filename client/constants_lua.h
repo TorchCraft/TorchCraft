@@ -7,25 +7,17 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#pragma once
+
 extern "C" {
-#include <TH/TH.h>
+
 #include <lauxlib.h>
 #include <lua.h>
 #include <luaT.h>
 #include <lualib.h>
+
 }
 
-#include "client.h"
-#include "client_lua.h"
-#include "constants_lua.h"
-#include "state_lua.h"
-
-extern "C" int luaopen_torchcraft_client(lua_State* L) {
-  client::init();
-
-  lua_newtable(L);
-  client::registerClient(L, lua_gettop(L));
-  client::registerState(L, lua_gettop(L));
-  client::registerConstants(L, lua_gettop(L));
-  return 1;
+namespace client {
+void registerConstants(lua_State* L, int index);
 }

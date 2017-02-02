@@ -50,4 +50,4 @@ INSTALL(TARGETS replayer client
 
 
 ADD_TORCH_PACKAGE(torchcraft "" "${luasrc}" "TorchCraft")
-INSTALL(FILES "starcraft_static.json" DESTINATION "${Torch_INSTALL_LUA_PATH_SUBDIR}/torchcraft")
+INSTALL(FILES DESTINATION "${Torch_INSTALL_LUA_PATH_SUBDIR}/torchcraft")

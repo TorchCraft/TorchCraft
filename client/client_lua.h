@@ -11,11 +11,8 @@
 
 extern "C" {
 
-#include <TH/TH.h>
 #include <lauxlib.h>
 #include <lua.h>
-#include <luaT.h>
-#include <lualib.h>
 
 int newClient(lua_State* L);
 int freeClient(lua_State* L);

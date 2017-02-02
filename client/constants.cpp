@@ -79,11 +79,9 @@ std::vector<UnitType> unitProductions(UnitType id) {
       return {UnitType::Zerg_Zergling,
               UnitType::Zerg_Hydralisk,
               UnitType::Zerg_Ultralisk,
-              UnitType::Zerg_Broodling,
               UnitType::Zerg_Drone,
               UnitType::Zerg_Overlord,
               UnitType::Zerg_Mutalisk,
-              UnitType::Zerg_Guardian,
               UnitType::Zerg_Queen,
               UnitType::Zerg_Defiler,
               UnitType::Zerg_Scourge};

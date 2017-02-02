@@ -28,6 +28,7 @@ void State::reset() {
   map_data_size[1] = 0;
   map_name.clear();
   frame_string.clear();
+  frame->clear();
   deaths.clear();
   frame_from_bwapi = 0;
   battle_frame_count = 0;

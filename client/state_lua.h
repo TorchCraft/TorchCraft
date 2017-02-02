@@ -13,11 +13,8 @@
 
 extern "C" {
 
-#include <TH/TH.h>
 #include <lauxlib.h>
 #include <lua.h>
-#include <luaT.h>
-#include <lualib.h>
 
 int newState(lua_State* L);
 int pushState(lua_State* L, client::State* s = nullptr);

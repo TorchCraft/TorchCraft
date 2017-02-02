@@ -12,6 +12,10 @@
 
 #include "constants.h"
 #include "constants_lua.h"
+#include "lua_utils.h"
+
+using client::lua::pushValue;
+using client::lua::sealTable;
 
 namespace {
 
@@ -73,19 +77,6 @@ int wisGasGeyser(lua_State* L) {
   return 1;
 }
 
-int sealedTableGuard(lua_State* L) {
-  return luaL_error(L, "Attempting to add a field to a sealed table");
-}
-
-void sealTable(lua_State* L, int index = -1) {
-  lua_pushvalue(L, index);
-  lua_newtable(L);
-  lua_pushcfunction(L, sealedTableGuard);
-  lua_setfield(L, -2, "__newindex");
-  lua_setmetatable(L, -2);
-  lua_pop(L, 1);
-}
-
 template <typename Enum>
 void pushTable(lua_State* L) {
   lua_newtable(L);
@@ -119,19 +110,6 @@ void pushVector(lua_State* L, std::vector<Enum> v) {
     lua_rawseti(L, -2, i + 1);
   }
   sealTable(L);
-}
-
-inline void pushValue(lua_State* L, bool val) {
-  lua_pushboolean(L, val);
-}
-inline void pushValue(lua_State* L, int val) {
-  lua_pushinteger(L, val);
-}
-inline void pushValue(lua_State* L, double val) {
-  lua_pushnumber(L, val);
-}
-inline void pushValue(lua_State* L, const std::string& val) {
-  lua_pushstring(L, val.c_str());
 }
 
 template <typename T>

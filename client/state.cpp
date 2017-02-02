@@ -13,7 +13,11 @@
 
 namespace client {
 
-State::State() : RefCounted(), frame(new replayer::Frame()) {
+State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
+    : RefCounted(),
+      frame(new replayer::Frame()),
+      microBattles_(microBattles),
+      onlyConsiderTypes_(std::move(onlyConsiderTypes)) {
   reset();
 }
 
@@ -22,6 +26,7 @@ State::~State() {
 }
 
 void State::reset() {
+  replay = false;
   lag_frames = 0;
   map_data.clear();
   map_data_size[0] = 0;
@@ -34,12 +39,19 @@ void State::reset() {
   battle_frame_count = 0;
   game_ended = false;
   game_won = false;
+  battle_just_ended = false;
+  battle_won = false;
+  waiting_for_restart = microBattles_;
+  last_battle_ended = 0;
   img_mode.clear();
   screen_position[0] = -1;
   screen_position[1] = -1;
   image.clear(); // XXX invalidates existing tensors pointing to it
   image_size[0] = 0;
   image_size[1] = 0;
+  aliveUnits.clear();
+  aliveUnitsConsidered.clear();
+  units.clear();
 }
 
 std::vector<std::string> State::update(
@@ -65,13 +77,16 @@ std::vector<std::string> State::update(
     map_name = handshake->map_name()->str();
     upd.emplace_back("map_name");
   }
-  // TODO: is_replay
   player_id = handshake->player_id();
   upd.emplace_back("player_id");
   neutral_id = handshake->neutral_id();
   upd.emplace_back("neutral_id");
   battle_frame_count = handshake->battle_frame_count();
   upd.emplace_back("battle_frame_count");
+  replay = handshake->is_replay();
+  upd.emplace_back("replay");
+
+  postUpdate(upd);
   return upd;
 }
 
@@ -135,6 +150,7 @@ std::vector<std::string> State::update(const TorchCraft::Frame* frame) {
     }
   }
 
+  postUpdate(upd);
   return upd;
 }
 
@@ -154,6 +170,7 @@ std::vector<std::string> State::update(const TorchCraft::EndGame* end) {
   game_won = end->game_won();
   upd.emplace_back("game_won");
 
+  postUpdate(upd);
   return upd;
 }
 
@@ -183,6 +200,130 @@ bool State::setRawImage(const TorchCraft::Frame* frame) {
   }
 
   return true;
+}
+
+void State::postUpdate(std::vector<std::string>& upd) {
+  if (microBattles_) {
+    if (battle_just_ended) {
+      upd.emplace_back("battle_just_ended");
+    }
+    battle_just_ended = false;
+
+    // Apply list of deaths on list of units from previous frame
+    // so that battle ended condition can be detected every time.
+    // This is particularly important with frame skipping: it's possible
+    // that all remaining units die in the same interval and we wouldn't be able
+    // to find out who won.
+    for (auto d : deaths) {
+      aliveUnits.erase(d);
+      if (!onlyConsiderTypes_.empty()) {
+        aliveUnitsConsidered.erase(d);
+      }
+      if (checkBattleFinished(upd)) {
+        break;
+      }
+    }
+
+    if (battle_just_ended) {
+      // Remove dead units from *previous* frame; if the battle has just ended,
+      // we won't bother copying the frame units.
+      for (auto& us : units) {
+        us.second.erase(
+            std::remove_if(
+                us.second.begin(),
+                us.second.end(),
+                [this](const replayer::Unit& unit) {
+                  return aliveUnits.find(unit.id) == aliveUnits.end();
+                }),
+            us.second.end());
+      }
+    }
+  }
+
+  if (microBattles_ && battle_just_ended) {
+    return;
+  }
+
+  // Update units
+  for (const auto& fus : frame->units) {
+    auto player = fus.first;
+    if (units.find(player) == units.end()) {
+      units.emplace(player, std::vector<replayer::Unit>());
+    } else {
+      units[player].clear();
+    }
+
+    std::copy_if(
+        fus.second.begin(),
+        fus.second.end(),
+        std::back_inserter(units[player]),
+        [this, player](const replayer::Unit& unit) {
+          auto ut = client::BW::UnitType::_from_integral_nothrow(unit.type);
+          return (
+              // Unit is of known type (or enemy unit)
+              (player != player_id || ut) &&
+              // Unit has not been marked dead
+              std::find(deaths.begin(), deaths.end(), unit.id) == deaths.end());
+        });
+  }
+
+  // Update alive units
+  aliveUnits.clear();
+  aliveUnitsConsidered.clear();
+  for (const auto& us : units) {
+    auto player = us.first;
+    for (const auto& unit : us.second) {
+      aliveUnits[unit.id] = player;
+      if (!onlyConsiderTypes_.empty() &&
+          onlyConsiderTypes_.find(BW::UnitType::_from_integral(unit.type)) !=
+              onlyConsiderTypes_.end()) {
+        aliveUnitsConsidered[unit.id] = player;
+      }
+    }
+  }
+
+  if (microBattles_ && waiting_for_restart) {
+    // Check if both players have active units
+    auto numUnitsMyself = units[player_id].size();
+    auto numUnitsEnemy = units[1 - player_id].size();
+    if (numUnitsMyself > 0 && numUnitsEnemy > 0) {
+      waiting_for_restart = false;
+      upd.emplace_back("waiting_for_restart");
+    }
+  }
+}
+
+bool State::checkBattleFinished(std::vector<std::string>& upd) {
+  if (waiting_for_restart) {
+    return false;
+  }
+
+  auto map = &aliveUnits;
+  if (!onlyConsiderTypes_.empty()) {
+    map = &aliveUnitsConsidered;
+  }
+  size_t numUnitsMyself = 0;
+  size_t numUnitsEnemy = 0;
+  for (auto unit : *map) {
+    if (unit.second == player_id) {
+      numUnitsMyself++;
+    } else if (unit.second == 1 - player_id) {
+      numUnitsEnemy++;
+    }
+  }
+
+  if (numUnitsMyself == 0 || numUnitsEnemy == 0) {
+    battle_just_ended = true;
+    upd.emplace_back("battle_just_ended");
+    battle_won = numUnitsMyself > 0 || numUnitsEnemy == 0;
+    upd.emplace_back("battle_won");
+    waiting_for_restart = true;
+    upd.emplace_back("waiting_for_restart");
+    last_battle_ended = frame_from_bwapi;
+    upd.emplace_back("last_battle_ended");
+    return true;
+  }
+  return false;
 }
 
 } // namespace client

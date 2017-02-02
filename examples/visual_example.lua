@@ -59,8 +59,7 @@ tc.initial_map = 'Maps/BroodWar/micro/m5v5_c_far.scm'
 
 tc.window_pos = {200, 200}
 tc.window_size = {320, 240}
-tc.mode.micro_battles = micro_game
-tc.mode.replay = false
+tc.micro_battles = micro_game
 
 tc:init(hostname, port)
 local update = tc:connect(port)
@@ -77,6 +76,7 @@ tc:send({table.concat({
                       }, ':')})
 
 print("\nMap name: ", tc.state.map_name)
+assert(tc.state.replay == false)
 
 -- ~~~~~~~~~~~~~~ LOOP ~~~~~~~~~~~~~~~
 

@@ -24,6 +24,7 @@ int indexState(lua_State* L);
 int newindexState(lua_State* L);
 int resetState(lua_State* L);
 int totableState(lua_State* L);
+int setconsiderState(lua_State* L);
 int pushUpdatesState(
     lua_State* L,
     std::vector<std::string>& updates,
@@ -35,11 +36,14 @@ const struct luaL_Reg state_m[] = {
     {"__newindex", newindexState},
     {"reset", resetState},
     {"toTable", totableState},
+    {"setOnlyConsiderTypes", setconsiderState},
     {nullptr, nullptr},
 };
 
 } // extern "C"
 
 namespace client {
+std::set<client::BW::UnitType> getConsideredTypes(lua_State* L, int index = -1);
+
 void registerState(lua_State* L, int index);
 }

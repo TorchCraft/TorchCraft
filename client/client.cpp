@@ -12,6 +12,7 @@
 
 #include "client.h"
 #include "constants.h"
+#include "state.h"
 
 #include "BWEnv/fbs/messages_generated.h"
 
@@ -142,6 +143,8 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
     return false;
   }
 
+  state_->setMicroBattles(opts.micro_battles);
+  state_->setOnlyConsiderTypes(opts.only_consider_types);
   updates = state_->update(
       reinterpret_cast<const TorchCraft::HandshakeServer*>(msg->msg()));
   return true;

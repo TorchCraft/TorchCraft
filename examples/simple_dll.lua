@@ -57,8 +57,7 @@ local total_battles = 0
 local maps = {'Maps/BroodWar/micro/dragoons_zealots.scm',
               'Maps/BroodWar/micro/m5v5_c_far.scm'}
 
-tc.mode.micro_battles = MICRO_MODE
-tc.mode.replay = false
+tc.micro_battles = MICRO_MODE
 local nrestarts = -1
 
 while total_battles < 40 do
@@ -78,6 +77,7 @@ while total_battles < 40 do
     if DEBUG > 1 then
         print('Received init: ', update)
     end
+    assert(tc.state.replay == false)
 
     -- first message to BWAPI's side is setting up variables
     local setup = {

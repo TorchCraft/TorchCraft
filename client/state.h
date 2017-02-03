@@ -9,9 +9,10 @@
 
 #pragma once
 
-#include <string>
+#include <set>
 #include <vector>
 
+#include "constants.h"
 #include "replayer/frame.h"
 #include "replayer/refcount.h"
 
@@ -30,9 +31,9 @@ class State : public RefCounted {
   std::vector<uint8_t> map_data; // 2D. 255 where not available
   int map_data_size[2];
   std::string map_name; // Name on the current map
-  bool is_replay;
   int player_id;
   int neutral_id;
+  bool replay;
 
   // game state
   replayer::Frame* frame; // this will allow for easy reset (XXX)
@@ -44,6 +45,12 @@ class State : public RefCounted {
   bool game_ended; // did the game end?
   bool game_won;
 
+  // if micro mode
+  bool battle_just_ended;
+  bool battle_won;
+  bool waiting_for_restart;
+  int last_battle_ended;
+
   // if with image
   std::string img_mode;
   int screen_position[2]; // position of screen {x, y} in pixels. {0, 0} is
@@ -53,16 +60,61 @@ class State : public RefCounted {
   std::vector<uint8_t> image; // RGB
   int image_size[2];
 
-  State();
+  // Alive units in this frame. Used to detect end-of-battle in micro mode. If
+  // the current frame is the end of a battle, this will contain all units that
+  // were alive when the battle ended (which is not necessarily the current
+  // frame due to frame skipping on the serv side). Note that this map ignores
+  // onlyConsiderUnits_.
+  // Maps unit id to player id
+  std::unordered_map<int32_t, int32_t> aliveUnits;
+
+  // Like aliveUnits, but containing only units of types in onlyConsiderUnits.
+  // If onlyConsiderUnits is empty, this map is invalid.
+  std::unordered_map<int32_t, int32_t> aliveUnitsConsidered;
+
+  // Bots might want to use this map instead of frame->units because:
+  // - Unknown unit types are not present (e.g. map revealers)
+  // - Units reported as dead are not present (important if the server performs
+  //   frame skipping. In that case, frame->units will still contain all units
+  //   that have died since the last update.
+  // - In micro mode and with frame skipping, deaths are only applied until the
+  //   battle is considered finished, i.e. it corresponds to aliveUnits.
+  std::unordered_map<int32_t, std::vector<replayer::Unit>> units;
+
+  State(
+      bool microBattles = false,
+      std::set<BW::UnitType> onlyConsiderTypes = std::set<BW::UnitType>());
   ~State();
+
+  bool microBattles() const {
+    return microBattles_;
+  }
+  const std::set<BW::UnitType>& onlyConsiderTypes() const {
+    return onlyConsiderTypes_;
+  }
+  void setMicroBattles(bool microBattles) {
+    microBattles_ = microBattles;
+  }
+  void setOnlyConsiderTypes(std::set<BW::UnitType> types) {
+    onlyConsiderTypes_ = std::move(types);
+    aliveUnitsConsidered.clear();
+  }
 
   void reset();
   std::vector<std::string> update(const TorchCraft::HandshakeServer* handshake);
   std::vector<std::string> update(const TorchCraft::Frame* frame);
   std::vector<std::string> update(const TorchCraft::EndGame* end);
+  void trackAliveUnits(
+      std::vector<std::string>& upd,
+      const std::set<BW::UnitType>& considered);
 
  private:
   bool setRawImage(const TorchCraft::Frame* frame);
+  void postUpdate(std::vector<std::string>& upd);
+  bool checkBattleFinished(std::vector<std::string>& upd);
+
+  bool microBattles_;
+  std::set<BW::UnitType> onlyConsiderTypes_;
 };
 
 } // namespace client

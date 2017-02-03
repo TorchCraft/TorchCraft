@@ -9,6 +9,8 @@
 
 #include <set>
 
+#include "constants.h"
+#include "lua_utils.h"
 #include "replayer/frame_lua.h"
 #include "state_lua.h"
 
@@ -43,6 +45,7 @@ const std::set<std::string> stateMembers = {
     "map_name",
     "player_id",
     "neutral_id",
+    "replay",
     "frame",
     "frame_string",
     "deaths",
@@ -50,10 +53,16 @@ const std::set<std::string> stateMembers = {
     "battle_frame_count",
     "game_ended",
     "game_won",
+    "battle_just_ended",
+    "battle_won",
+    "waiting_for_restart",
+    "last_battle_ended",
     "img_mode",
     "screen_position",
     "visibility",
     "image",
+    "micro_battles",
+    "only_consider_types",
 };
 
 // index represents the index of the state userdata on the stack
@@ -82,6 +91,8 @@ int pushMember(
     lua_pushinteger(L, s->player_id);
   } else if (m == "neutral_id") {
     lua_pushinteger(L, s->neutral_id);
+  } else if (m == "replay") {
+    lua_pushboolean(L, s->replay);
   } else if (m == "frame") {
     auto f = (replayer::Frame**)lua_newuserdata(L, sizeof(replayer::Frame*));
     *f = s->frame;
@@ -105,6 +116,14 @@ int pushMember(
     lua_pushboolean(L, s->game_ended);
   } else if (m == "game_won") {
     lua_pushboolean(L, s->game_won);
+  } else if (m == "battle_just_ended") {
+    lua_pushboolean(L, s->battle_just_ended);
+  } else if (m == "battle_won") {
+    lua_pushboolean(L, s->battle_won);
+  } else if (m == "waiting_for_restart") {
+    lua_pushboolean(L, s->waiting_for_restart);
+  } else if (m == "last_battle_ended") {
+    lua_pushinteger(L, s->last_battle_ended);
   } else if (m == "img_mode") {
     lua_pushstring(L, s->img_mode.c_str());
   } else if (m == "screen_position") {
@@ -128,12 +147,41 @@ int pushMember(
     } else {
       lua_pushnil(L);
     }
+  } else if (m == "micro_battles") {
+    lua_pushboolean(L, s->microBattles());
+  } else if (m == "only_consider_types") {
+    auto types = s->onlyConsiderTypes();
+    lua_createtable(L, types.size(), 0);
+    int i = 1;
+    for (auto ut : types) {
+      client::lua::pushValue(L, ut._to_integral());
+      lua_rawseti(L, -2, i++);
+    }
   } else {
     lua_getuservalue(L, index);
     lua_getfield(L, -1, m.c_str());
     lua_remove(L, -2);
   }
   return 1;
+}
+
+void pushFrameMember(
+    lua_State* L,
+    client::State* s,
+    lua_CFunction f,
+    int player) {
+  lua_pushcfunction(L, f);
+  pushMember(L, s, "frame");
+  lua_pushinteger(L, player);
+  lua_call(L, 2, 1);
+}
+
+void pushUnits(lua_State* L, const std::vector<replayer::Unit>& units) {
+  lua_createtable(L, units.size(), 0);
+  for (const auto& u : units) {
+    pushUnit(L, u);
+    lua_rawseti(L, -2, u.id);
+  }
 }
 
 } // namespace
@@ -145,7 +193,14 @@ int newState(lua_State* L) {
 int pushState(lua_State* L, client::State* state) {
   auto s = (client::State**)lua_newuserdata(L, sizeof(client::State*));
   if (state == nullptr) {
-    *s = new client::State();
+    if (lua_gettop(L) == 1) {
+      *s = new client::State();
+    } else if (lua_gettop(L) == 2) {
+      *s = new client::State(lua_toboolean(L, 2));
+    } else {
+      *s = new client::State(
+          lua_toboolean(L, 2), client::getConsideredTypes(L, 3));
+    }
   } else {
     *s = state;
     state->incref();
@@ -193,7 +248,7 @@ int newindexState(lua_State* L) {
   auto key = luaL_checkstring(L, 2);
 
   if (stateMembers.find(key) != stateMembers.end()) {
-    return luaL_error(L, ("Cannot overwrite key " + std::string(key)).c_str());
+    return luaL_error(L, "Cannot overwrite key %s", key);
   }
   lua_getuservalue(L, 1);
   lua_pushvalue(L, 2);
@@ -207,13 +262,13 @@ int resetState(lua_State* L) {
   auto s = checkState(L);
   s->reset();
 
-  // TODO: manage these things in State
   lua_getuservalue(L, 1);
-  for (auto f : std::vector<const char*>({"units",
-                                          "resources",
-                                          "units_myself",
-                                          "units_enemy",
-                                          "resources_myself"})) {
+  for (auto f : {"units",
+                 "resources",
+                 "units_myself",
+                 "units_enemy",
+                 "units_neutral",
+                 "resources_myself"}) {
     lua_newtable(L);
     lua_setfield(L, -2, f);
   }
@@ -244,20 +299,90 @@ int totableState(lua_State* L) {
   return 1;
 }
 
+int setconsiderState(lua_State* L) {
+  auto s = checkState(L);
+  if (lua_gettop(L) != 2 || !lua_istable(L, 2)) {
+    return luaL_error(L, "Expected table argument");
+  }
+  s->setOnlyConsiderTypes(client::getConsideredTypes(L));
+  return 0;
+}
+
 int pushUpdatesState(
     lua_State* L,
     std::vector<std::string>& updates,
     int index) {
-  auto s = checkState(L, index);
+  lua_pushvalue(L, index);
+  auto s = checkState(L, -1);
   lua_newtable(L);
   for (auto u : updates) {
     pushMember(L, s, u);
     lua_setfield(L, -2, u.c_str());
   }
+
+  // Update Lua-side values
+  // TODO: Could also be done in some post-receive update hook?
+  auto myself = s->player_id;
+  lua_getuservalue(L, -2);
+  if (!s->replay) {
+    pushUnits(L, s->units[myself]);
+    lua_setfield(L, -2, "units_myself");
+    pushUnits(L, s->units[1 - myself]);
+    lua_setfield(L, -2, "units_enemy");
+    pushFrameMember(L, s, frameGetResources, myself);
+    lua_setfield(L, -2, "resources_myself");
+  } else { // if replay
+    auto nplayers = s->units.size();
+    lua_newtable(L);
+    for (size_t p = 0; p < nplayers; p++) {
+      if (p != s->neutral_id) {
+        pushUnits(L, s->units[p]);
+        lua_rawseti(L, -2, p);
+      }
+    }
+    lua_setfield(L, -2, "units");
+
+    lua_newtable(L);
+    for (size_t p = 0; p < nplayers; p++) {
+      if (p != s->neutral_id) {
+        pushFrameMember(L, s, frameGetResources, p);
+        lua_rawseti(L, -2, p);
+      }
+    }
+    lua_setfield(L, -2, "resources");
+  }
+
+  pushUnits(L, s->units[s->neutral_id]);
+  lua_setfield(L, -2, "units_neutral");
+
+  lua_pop(L, 1); // remove uservalue
+  lua_remove(L, -2); // remove state copy
   return 1;
 }
 
 namespace client {
+
+std::set<BW::UnitType> getConsideredTypes(lua_State* L, int index) {
+  if (!lua_istable(L, index)) {
+    luaL_error(L, "getConsideredTypes: table expected");
+    // does not return
+  }
+
+  std::set<client::BW::UnitType> types;
+  lua_pushvalue(L, index);
+  lua_pushnil(L);
+  while (lua_next(L, -2) != 0) {
+    auto ut =
+        client::BW::UnitType::_from_integral_nothrow(luaL_checkinteger(L, -1));
+    if (!ut) {
+      luaL_error(L, "Invalid unit type: %d", lua_tointeger(L, -1));
+    }
+    types.emplace(*ut);
+    lua_pop(L, 1);
+  }
+  return types;
+}
+
 void registerState(lua_State* L, int index) {
   luaT_newlocalmetatable(
       L, "torchcraft.State", nullptr, ::newState, ::freeState, nullptr, index);

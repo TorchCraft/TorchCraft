@@ -9,8 +9,11 @@
 
 #pragma once
 
+#include <set>
+#include <vector>
+
 #include "connection.h"
-#include "state.h"
+#include "constants.h"
 
 extern "C" {
 #include <lua.h>
@@ -20,6 +23,8 @@ namespace client {
 
 void init();
 
+class State;
+
 class Client {
  public:
   struct Options {
@@ -27,6 +32,10 @@ class Client {
     int window_size[2] = {-1, -1};
     int window_pos[2] = {-1, -1};
     bool micro_battles = false;
+
+    // A subset of unit types to consider when checking for end-of-game
+    // condition, for example.
+    std::set<BW::UnitType> only_consider_types;
   };
 
   struct Command {
@@ -59,6 +68,7 @@ class Client {
     error_.clear();
   }
 
+  // The connection is RAII and is created/reset in init().
   std::unique_ptr<Connection> conn_;
   State* state_;
   bool sent_;

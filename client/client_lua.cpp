@@ -12,6 +12,7 @@
 
 #include "client.h"
 #include "client_lua.h"
+#include "lua_utils.h"
 #include "replayer/frame_lua.h"
 #include "state_lua.h"
 
@@ -164,6 +165,12 @@ int initClient(lua_State* L) {
       opts.micro_battles = lua_toboolean(L, -1);
     }
     lua_pop(L, 1);
+
+    lua_getfield(L, 2, "only_consider_types");
+    if (!lua_isnil(L, -1)) {
+      opts.only_consider_types = client::getConsideredTypes(L);
+    }
+    lua_pop(L, 1);
   }
 
   std::vector<std::string> updates;
@@ -197,7 +204,7 @@ int sendClient(lua_State* L) {
     }
     lua_pop(L, 1);
   } else {
-    comms = std::move(parseCommandString(luaL_checkstring(L, 2)));
+    comms = parseCommandString(luaL_checkstring(L, 2));
   }
 
   if (!cl->send(comms)) {

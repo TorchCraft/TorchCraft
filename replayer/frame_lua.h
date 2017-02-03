@@ -41,6 +41,7 @@ void setBool(lua_State* L, const char* key, bool v);
 bool getField(lua_State* L, const char* key);
 int getInt(lua_State* L, const char* key);
 bool getBool(lua_State* L, const char* key);
+void pushUnit(lua_State* L, const replayer::Unit& unit);
 
 // Lua tables from/to Frame class
 void toFrame(lua_State* L, int id, replayer::Frame& res);

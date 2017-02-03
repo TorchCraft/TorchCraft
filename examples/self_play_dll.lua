@@ -60,8 +60,7 @@ local nloop = 1
 local maps = {'Maps/BroodWar/micro/sp_dragoons_zealots.scm',
               'Maps/BroodWar/micro/sp_m5v5_c_far.scm'}
 
-tc.mode.micro_battles = true
-tc.mode.replay = false
+tc.micro_battles = true
 
 local nrestarts = 0
 

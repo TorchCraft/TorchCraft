@@ -17,12 +17,12 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY(shared STATIC
     replayer/frame.cpp
+    replayer/frame_lua.cpp
     replayer/gamestore.cpp
     replayer/imgmanager.cpp
     replayer/replayer.cpp)
 
 ADD_LIBRARY(replayer MODULE
-    replayer/frame_lua.cpp
     replayer/init.cpp)
 SET_TARGET_PROPERTIES(replayer PROPERTIES
    PREFIX ""

@@ -29,11 +29,12 @@ assert(torchcraft.total_price.gas[torchcraft.unittypes.Terran_Science_Vessel]
 torchcraft.hostname = nil
 torchcraft.client = client.Client()
 torchcraft.state = torchcraft.client.state
-torchcraft.mode = {micro_battles = false, replay = false}
 torchcraft.DEBUG = 0
 torchcraft.initial_map = nil
 torchcraft.window_size = nil
 torchcraft.window_pos = nil
+torchcraft.micro_battles = false
+torchcraft.only_consider_types = {}
 torchcraft.field_size = {640, 370}   -- size of the field view in pixels (approximately)
 --[[
     state will get its content updated from bwapi, it will have
@@ -91,7 +92,8 @@ function torchcraft:connect(port)
         initial_map = self.initial_map,
         window_size = self.window_size,
         window_pos = self.window_pos,
-        micro_battles = self.mode.micro_battles,
+        micro_battles = self.micro_battles,
+        only_consider_types = self.only_consider_types,
     })
 
     if self.DEBUG > 0 then
@@ -104,18 +106,6 @@ function torchcraft:set_variables()
     -- initializing the "game state" booleans
     self.state:reset()
     self.window_size = {200, 150}
-    if self.mode.micro_battles then
-        self.state.battle_just_ended = false
-        self.state.battle_won = false
-        self.state.waiting_for_restart = true
-        self.state.last_battle_end = 0
-    end
-end
-
-function torchcraft:battle_ended()
-    self.state.battle_just_ended = true
-    self.state.waiting_for_restart = true
-    self.state.last_battle_ended = self.state.frame_from_bwapi
 end
 
 function torchcraft:filter_units_table(t)
@@ -150,105 +140,7 @@ function torchcraft:filter_type(t, utt)
 end
 
 function torchcraft:receive()
-    local upd = self.client:receive()
-    for k, v in pairs(upd) do
-        if k == 'is_replay' then
-            assert(v == self.mode.replay,
-                "mode.replay inconsistent with starcraft state")
-        end
-    end
-
-    if self.mode.micro_battles then
-        -- initialize flags
-        self.state.battle_just_ended = false
-        self.state.battle_won = nil
-        -- function to check end of battle
-        -- the drawback is that the first frame of the battle is lost
-        local function check_battle_finished(units_myself, units_enemy)
-            local um, ue
-            if self.mode.only_consider_types ~= nil then
-                um = self:filter_type(units_myself, self.mode.only_consider_types)
-                ue = self:filter_type(units_enemy, self.mode.only_consider_types)
-            else
-                um = units_myself
-                ue = units_enemy
-            end
-            if self.state.waiting_for_restart then
-                return false
-            end
-            if utils.isEmpty(um) or utils.isEmpty(ue) then
-                self:battle_ended()
-                self.state.battle_won = (not utils.isEmpty(um))
-                    or utils.isEmpty(ue)
-                return true
-            end
-            return false
-        end
-
-        -- apply list of deaths on old list of units
-        -- so that battle ended condition can be detected every time
-        if self.state.deaths ~= nil then
-            for i=1, #self.state.deaths do -- make sure order is correct
-                local id = self.state.deaths[i]
-                if self.mode.replay then
-                    self.state.units[id] = nil
-                else
-                    self.state.units_myself[id] = nil
-                    self.state.units_enemy[id] = nil
-                end
-                if check_battle_finished(self.state.units_myself,
-                                         self.state.units_enemy) then
-                    -- ignore the killing of remaining units in that battle
-                    -- this will be re-initialized anyway in the next frame
-                    break
-                end
-            end
-        end
-    end
-
-    if not self.mode.micro_battles or not self.state.battle_just_ended then
-        if not self.mode.replay and self.state.frame then
-            local myself = self.state.player_id
-            assert(myself ~= nil, "player_id not set but not a replay either")
-            self.state.units_myself
-                = self:filter_units_table(self.state.frame:getUnits(myself))
-            self.state.units_enemy = self.state.frame:getUnits(1 - myself)
-            self.state.resources_myself = self.state.frame:getResources(myself)
-            self.state.units_neutral = self.state.frame:getUnits(self.state.neutral_id)
-        elseif self.state.frame then
-            self.state.units = {}
-            self.state.resources = {}
-            for player = 0, self.state.frame:getNumPlayers() - 1 do
-                if player ~= self.state.neutral_id then
-                    self.state.units[player] = self.state.frame:getUnits(player)
-                    self.state.resources[player] = self.state.frame:getResources(player)
-                end
-            end
-            self.state.units_neutral = self.state.frame:getUnits(self.state.neutral_id)
-        end
-
-        if self.state.deaths ~= nil then
-            for _, id in pairs(self.state.deaths) do
-                if self.mode.replay then
-                    self.state.units[id] = nil
-                else
-                    self.state.units_myself[id] = nil
-                    self.state.units_enemy[id] = nil
-                end
-            end
-            -- TODO: why was this here?
---            self.state.deaths = nil
-        end
-        if self.mode.micro_battles and self.state.waiting_for_restart then
-            local ee = utils.isEmpty(self.state.units_enemy)
-            -- check if table is empty
-            local we = utils.isEmpty(self.state.units_myself)
-            if (not ee) and (not we) then -- we both have units
-                self.state.waiting_for_restart = false
-            end
-        end
-    end
-    return upd -- for debug purposes
+    return self.client:receive()
 end
 
 function torchcraft.command(command, ...)

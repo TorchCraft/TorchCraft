@@ -87,8 +87,7 @@ while (first_loop or not one_loop_only)
     battles_game = 0
 
     -- connects to the StarCraft running with BWEnv
-    tc.mode.micro_battles = true
-    tc.mode.replay = false
+    tc.micro_battles = true
 
     tc:init(hostname, port)
     -- first message from the BWAPI side is setting up variables
@@ -106,6 +105,7 @@ while (first_loop or not one_loop_only)
     }, ':')})
 
     print("\nMap name: ", tc.state.map_name)
+    assert(tc.state.replay == false)
     if log_fname ~= "" then
         wf:write("Map name: " .. tc.state.map_name .. '\n')
     end

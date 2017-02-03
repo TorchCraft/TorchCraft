@@ -17,7 +17,6 @@ dependencies = {
     "penlight",
     "tds",
     "lua-cjson",
-    "lzmq",
     "torch >= 7.0",
 }
 build = {

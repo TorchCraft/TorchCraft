@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <cassert>
 #include <string>
 #include <vector>
 
@@ -55,9 +56,11 @@ inline void pushValue(lua_State* L, const std::vector<T>& val) {
 }
 
 template <typename T>
-inline void pushToTable(lua_State* L, int index, const char* key, T val) {
+inline void pushToTable(lua_State* L, const char* key, T val) {
+  // Table is expected at top of stack
+  assert(lua_istable(L, -1));
   pushValue(L, val);
-  lua_setfield(L, index, key);
+  lua_setfield(L, -2, key);
 }
 
 } // namespace lua

@@ -676,8 +676,8 @@ BETTER_ENUM(DamageType, int,
 constexpr int XYPixelsPerWalktile = 8;
 constexpr int XYPixelsPerBuildtile = 32;
 constexpr int XYWalktilesPerBuildtile = XYPixelsPerBuildtile / XYPixelsPerWalktile;
-constexpr double HitProbRangedUphilDoodad = 0.53125;
-constexpr double ProbRanged = 0.99609375;
+constexpr double HitProbRangedUphillDoodad = 0.53125;
+constexpr double HitProbRanged = 0.99609375;
 
 inline bool isBuilding(UnitType id) {
   return (

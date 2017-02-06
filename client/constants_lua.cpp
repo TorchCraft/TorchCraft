@@ -15,6 +15,7 @@
 #include "lua_utils.h"
 
 using client::lua::pushValue;
+using client::lua::pushToTable;
 using client::lua::sealTable;
 
 namespace {
@@ -292,6 +293,13 @@ namespace client {
 void registerConstants(lua_State* L, int index) {
   lua_pushvalue(L, index);
   lua_newtable(L);
+
+  // Numeric constants
+  pushToTable(L, "xy_pixels_per_walktile", BW::XYPixelsPerWalktile);
+  pushToTable(L, "xy_pixels_per_buildtile", BW::XYPixelsPerBuildtile);
+  pushToTable(L, "xy_walktiles_per_buildtile", BW::XYWalktilesPerBuildtile);
+  pushToTable(L, "hit_prob_ranged_uphill_doodad", BW::HitProbRangedUphillDoodad);
+  pushToTable(L, "hit_prob_ranged", BW::HitProbRanged);
 
   pushTable<BW::Command>(L, fromCamelCaseToLower);
   lua_setfield(L, -2, "commands");

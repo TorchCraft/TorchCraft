@@ -84,7 +84,7 @@ int gcClient(lua_State* L) {
 }
 
 int indexClient(lua_State* L) {
-  auto cl = checkClient(L);
+  checkClient(L);
   auto key = luaL_checkstring(L, 2);
 
   if (luaL_getmetafield(L, 1, key)) {
@@ -195,8 +195,6 @@ int sendClient(lua_State* L) {
     lua_pushvalue(L, 2);
     std::ostringstream ss;
     lua_pushnil(L);
-    int index = 1;
-    bool first = true;
     while (lua_next(L, -2) != 0) {
       auto cs = parseCommandString(luaL_checkstring(L, -1));
       std::move(cs.begin(), cs.end(), std::back_inserter(comms));

@@ -353,8 +353,8 @@ std::unordered_map<UnitType, int> TotalGasPrice;
 
 void init() {
   // Build TotalPrice maps
-  TotalMineralPrice = std::move(buildTotalPriceMap(MineralPrice));
-  TotalGasPrice = std::move(buildTotalPriceMap(GasPrice));
+  TotalMineralPrice = buildTotalPriceMap(MineralPrice);
+  TotalGasPrice = buildTotalPriceMap(GasPrice);
 }
 
 } // namespace data

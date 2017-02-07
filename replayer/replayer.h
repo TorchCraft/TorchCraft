@@ -42,7 +42,7 @@ namespace replayer {
     public:
       ~Replayer() {
         for (auto f: frames) {
-          f->decref();
+          if (f) f->decref();
         }
       }
 

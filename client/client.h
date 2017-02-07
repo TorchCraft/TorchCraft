@@ -47,6 +47,8 @@ class Client {
  public:
   Client();
   ~Client();
+  Client(const Client&) = delete;
+  Client& operator=(const Client&) = delete;
 
   bool connect(const std::string& hostname, int port);
   bool connected() const {

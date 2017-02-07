@@ -85,6 +85,8 @@ class State : public RefCounted {
       bool microBattles = false,
       std::set<BW::UnitType> onlyConsiderTypes = std::set<BW::UnitType>());
   ~State();
+  State(const State&) = delete;
+  State& operator=(const State&) = delete;
 
   bool microBattles() const {
     return microBattles_;

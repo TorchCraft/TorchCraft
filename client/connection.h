@@ -17,6 +17,8 @@ class Connection {
  public:
   Connection(const std::string& hostname, int port);
   Connection(Connection&& conn);
+  Connection(const Connection&) = delete;
+  Connection& operator=(const Connection&) = delete;
 
   bool send(const std::string& data);
   bool send(const void* buf, size_t len);

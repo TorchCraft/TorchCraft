@@ -244,7 +244,7 @@ int indexState(lua_State* L) {
 }
 
 int newindexState(lua_State* L) {
-  auto s = checkState(L);
+  checkState(L);
   auto key = luaL_checkstring(L, 2);
 
   if (stateMembers.find(key) != stateMembers.end()) {

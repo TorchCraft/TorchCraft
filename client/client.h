@@ -15,10 +15,6 @@
 #include "connection.h"
 #include "constants.h"
 
-extern "C" {
-#include <lua.h>
-}
-
 namespace client {
 
 void init();

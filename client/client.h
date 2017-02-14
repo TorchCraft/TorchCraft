@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -29,13 +30,15 @@ class Client {
  public:
   struct Options {
     std::string initial_map;
-    int window_size[2] = {-1, -1};
-    int window_pos[2] = {-1, -1};
-    bool micro_battles = false;
+    int window_size[2];
+    int window_pos[2];
+    bool micro_battles;
 
     // A subset of unit types to consider when checking for end-of-game
     // condition, for example.
     std::set<BW::UnitType> only_consider_types;
+
+    Options() : window_size{-1, -1}, window_pos{-1, -1}, micro_battles(false) {}
   };
 
   struct Command {

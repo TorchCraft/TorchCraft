@@ -68,17 +68,15 @@ function torchcraft:init(hostname, port)
     print('host: ' .. self.hostname .. ':' .. self.port)
 end
 
-function torchcraft:connect(port, send_timeout_ms, receive_timeout_ms)
+function torchcraft:connect(port, timeoutMs)
     -- connect() should be called at the beginning of every game
     if self.hostname == nil or self.hostname == '' then
         self:init(nil, port)
     end
-    -- timeouts for send and receive operations
-    send_timeout_ms = send_timeout_ms or -1
-    receive_timeout_ms = receive_timeout_ms or -1
+    -- timeout for send / receive operations
+    timeoutMs = timeoutMs or -1
     -- initialize socket connection, use the specified timeouts
-    self.client:connect(self.hostname, self.port, send_timeout_ms,
-        receive_timeout_ms)
+    self.client:connect(self.hostname, self.port, timeoutMs)
 
     self.state = self.client.state
 

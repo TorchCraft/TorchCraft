@@ -105,9 +105,8 @@ int connectClient(lua_State* L) {
   auto hostname = luaL_checkstring(L, 2);
   auto port = luaL_checkint(L, 3);
   int nargs = lua_gettop(L);
-  int send_timeout_ms = (nargs > 2 ? luaL_checkint(L, 4) : -1);
-  int receive_timeout_ms = (nargs > 3 ? luaL_checkint(L, 5) : -1);
-  if (!cl->connect(hostname, port, send_timeout_ms, receive_timeout_ms)) {
+  int timeoutMs = (nargs > 3 ? luaL_checkint(L, 4) : -1);
+  if (!cl->connect(hostname, port, timeoutMs)) {
     auto err = "connect failed: " + cl->error();
     return luaL_error(L, err.c_str());
   }

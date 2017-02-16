@@ -25,25 +25,17 @@ class Connection {
   ///     tcp://<hostname>:<port>
   /// @param hostname [in] Hostname part of the TCP address
   /// @param port [in] Port part of the TCP address
-  /// @param send_timeout_ms [in] Send operation timeout in milliseconds
+  /// @param timeoutMs [in] Send / receive operation timeout in milliseconds
   ///     (default = -1), the value is interpreted as follows:
-  ///    -1 = blocking send operation
-  ///     0 = non-blocking send operation without retries
+  ///    -1 = blocking operation
+  ///     0 = non-blocking operation without retries
   ///    >0 = time (in milliseconds) after which the function returns an error,
-  ///         if the send operation was not accomplished
-  /// @param receive_timeout_ms [in] Receive operation timeout in milliseconds
-  ///     (default = -1), the value is interpreted as follows:
-  ///    -1 = blocking receive operation
-  ///     0 = non-blocking receive operation without retries
-  ///    >0 = time (in milliseconds) after which the function returns an error,
-  ///         if the receive operation was not accomplished
-  Connection(const std::string& hostname, int port,
-      int send_timeout_ms = -1, int receive_timeout_ms = -1);
+  ///         if the operation was not accomplished
+  Connection(const std::string& hostname, int port, int timeoutMs = -1);
 
   /// Move constructor
   Connection(Connection&& conn);
 
-  // Forbid copy construction and assignment
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
 

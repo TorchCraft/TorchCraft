@@ -38,7 +38,7 @@ void buildHandshakeMessage(
   auto root = TorchCraft::CreateMessage(
       fbb, TorchCraft::Any::HandshakeClient, payload.Union());
   TorchCraft::FinishMessageBuffer(fbb, root);
-}
+} // buildHandshakeMessage
 
 void buildCommandMessage(
     flatbuffers::FlatBufferBuilder& fbb,
@@ -53,7 +53,7 @@ void buildCommandMessage(
   auto root = TorchCraft::CreateMessage(
       fbb, TorchCraft::Any::Commands, payload.Union());
   TorchCraft::FinishMessageBuffer(fbb, root);
-}
+} // buildCommandMessage
 
 } // namespace
 
@@ -61,7 +61,7 @@ namespace client {
 
 void init() {
   client::BW::data::init();
-}
+} // init
 
 //============================= LIFECYCLE ====================================
 
@@ -69,12 +69,12 @@ Client::Client() : state_(new State()) {}
 
 Client::~Client() {
   state_->decref();
-}
+} // ~Client
 
 //============================= OPERATIONS ===================================
 
 bool Client::connect(const std::string& hostname, int port,
-    int send_timeout_ms /* = -1 */, int receive_timeout_ms /* = -1 */) {
+  int timeoutMs /* = -1 */) {
   clearError();
   if (conn_) {
     error_ = "Active connection present";
@@ -82,8 +82,7 @@ bool Client::connect(const std::string& hostname, int port,
   }
 
   try {
-    conn_.reset(new Connection(hostname, port, send_timeout_ms,
-      receive_timeout_ms));
+    conn_.reset(new Connection(hostname, port, timeoutMs));
   } catch (zmq::error_t& e) {
     error_ = e.what();
     return false;
@@ -158,7 +157,6 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
 } // init
 
 bool Client::send(const std::vector<Command>& commands) {
-
   clearError();
   if (sent_) {
     error_ = "Attempt to perform successive sends";
@@ -185,7 +183,6 @@ bool Client::send(const std::vector<Command>& commands) {
 } // send
 
 bool Client::receive(std::vector<std::string>& updates) {
-
   if (!sent_) {
     send(std::vector<Command>());
   }
@@ -253,6 +250,6 @@ bool Client::receive(std::vector<std::string>& updates) {
       return false;
   }
   return true;
-}
+} // receive
 
 } // namespace client

@@ -14,16 +14,62 @@
 namespace client {
 
 class Connection {
- public:
-  Connection(const std::string& hostname, int port);
+
+  public:
+
+  // LIFECYCLE
+
+  /// Creates a new socket and connects it to an endpoint specified
+  /// by a hostname and a port. TCP transport protocol is used
+  /// for the connection; the full address is thus
+  ///     tcp://<hostname>:<port>
+  /// @param hostname [in] Hostname part of the TCP address
+  /// @param port [in] Port part of the TCP address
+  /// @param send_timeout_ms [in] Send operation timeout in milliseconds
+  ///     (default = -1), the value is interpreted as follows:
+  ///    -1 = blocking send operation
+  ///     0 = non-blocking send operation without retries
+  ///    >0 = time (in milliseconds) after which the function returns an error,
+  ///         if the send operation was not accomplished
+  /// @param receive_timeout_ms [in] Receive operation timeout in milliseconds
+  ///     (default = -1), the value is interpreted as follows:
+  ///    -1 = blocking receive operation
+  ///     0 = non-blocking receive operation without retries
+  ///    >0 = time (in milliseconds) after which the function returns an error,
+  ///         if the receive operation was not accomplished
+  Connection(const std::string& hostname, int port,
+      int send_timeout_ms = -1, int receive_timeout_ms = -1);
+
+  /// Move constructor
   Connection(Connection&& conn);
+
+  // Forbid copy construction and assignment
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
 
+  // OPERATIONS
+
+  /// Send data in a string format over the socket connection
+  /// @param data [in] Data to send to the socket
+  /// @return true if the send operation succeeded
   bool send(const std::string& data);
+
+  /// Send data in a general binary format over the socket connection
+  /// @param buf [in] Buffer containing data to send to the socket
+  /// @param len [in] Length of the data in buffer (in bytes)
+  /// @return true if the send operation succeeded
   bool send(const void* buf, size_t len);
+
+  /// Receive data over the socket connection and interpret it as a string
+  /// @param dest [out] String to store the received data to
+  /// @return true if the receive operation succeeded
   bool receive(std::string& dest);
+
+  /// Receive data over the socket connection and interpret it as a vector
+  /// @param dest [out] Vector to store the received data to
+  /// @return true if the receive operation succeeded
   bool receive(std::vector<uint8_t>& dest);
+
   bool poll(int timeout);
 
   int errnum() const {

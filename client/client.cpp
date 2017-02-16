@@ -63,13 +63,18 @@ void init() {
   client::BW::data::init();
 }
 
+//============================= LIFECYCLE ====================================
+
 Client::Client() : state_(new State()) {}
 
 Client::~Client() {
   state_->decref();
 }
 
-bool Client::connect(const std::string& hostname, int port) {
+//============================= OPERATIONS ===================================
+
+bool Client::connect(const std::string& hostname, int port,
+    int send_timeout_ms /* = -1 */, int receive_timeout_ms /* = -1 */) {
   clearError();
   if (conn_) {
     error_ = "Active connection present";
@@ -77,7 +82,8 @@ bool Client::connect(const std::string& hostname, int port) {
   }
 
   try {
-    conn_.reset(new Connection(hostname, port));
+    conn_.reset(new Connection(hostname, port, send_timeout_ms,
+      receive_timeout_ms));
   } catch (zmq::error_t& e) {
     error_ = e.what();
     return false;
@@ -86,7 +92,7 @@ bool Client::connect(const std::string& hostname, int port) {
   state_->reset();
   sent_ = false;
   return true;
-}
+} // connect
 
 bool Client::close() {
   clearError();
@@ -96,7 +102,7 @@ bool Client::close() {
   }
   conn_.reset();
   return true;
-}
+} // close
 
 bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   flatbuffers::FlatBufferBuilder fbb;
@@ -107,6 +113,7 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
     error_ = "No active connection";
     return false;
   }
+
   if (!conn_->send(fbb.GetBufferPointer(), fbb.GetSize())) {
     std::stringstream ss;
     ss << "Error sending init request: " << conn_->errmsg() << " ("
@@ -148,9 +155,10 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   updates = state_->update(
       reinterpret_cast<const TorchCraft::HandshakeServer*>(msg->msg()));
   return true;
-}
+} // init
 
 bool Client::send(const std::vector<Command>& commands) {
+
   clearError();
   if (sent_) {
     error_ = "Attempt to perform successive sends";
@@ -174,9 +182,10 @@ bool Client::send(const std::vector<Command>& commands) {
   }
   sent_ = true;
   return true;
-}
+} // send
 
 bool Client::receive(std::vector<std::string>& updates) {
+
   if (!sent_) {
     send(std::vector<Command>());
   }
@@ -184,10 +193,6 @@ bool Client::receive(std::vector<std::string>& updates) {
   clearError();
   if (!conn_) {
     error_ = "No active connection";
-    return false;
-  }
-  if (!conn_->poll(30000)) {
-    error_ = "Timeout while waiting for server";
     return false;
   }
 

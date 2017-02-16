@@ -77,7 +77,7 @@ function torchcraft:connect(port, send_timeout_ms, receive_timeout_ms)
     send_timeout_ms = send_timeout_ms or -1
     receive_timeout_ms = receive_timeout_ms or -1
     -- initialize socket connection, use the specified timeouts
-    self.client.connect(self.hostname, self.port, send_timeout_ms,
+    self.client:connect(self.hostname, self.port, send_timeout_ms,
         receive_timeout_ms)
 
     self.state = self.client.state

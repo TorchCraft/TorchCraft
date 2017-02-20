@@ -14,7 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define BETTER_ENUMS_MACRO_FILE <enum_macros.h>
+#define BETTER_ENUMS_MACRO_FILE "enum_macros.h"
 #include "enum.h"
 
 namespace client {

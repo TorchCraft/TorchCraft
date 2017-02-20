@@ -13,7 +13,6 @@
 #include <set>
 #include <vector>
 
-#include "connection.h"
 #include "constants.h"
 
 namespace client {
@@ -21,6 +20,7 @@ namespace client {
 void init();
 
 class State;
+class Connection;
 
 class Client {
  public:

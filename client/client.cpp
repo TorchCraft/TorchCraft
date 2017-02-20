@@ -11,7 +11,7 @@
 #include <sstream>
 
 #include "client.h"
-#include "constants.h"
+#include "connection.h"
 #include "state.h"
 
 #include "BWEnv/fbs/messages_generated.h"

@@ -38,7 +38,7 @@ void buildHandshakeMessage(
   auto root = TorchCraft::CreateMessage(
       fbb, TorchCraft::Any::HandshakeClient, payload.Union());
   TorchCraft::FinishMessageBuffer(fbb, root);
-} // buildHandshakeMessage
+}
 
 void buildCommandMessage(
     flatbuffers::FlatBufferBuilder& fbb,
@@ -53,7 +53,7 @@ void buildCommandMessage(
   auto root = TorchCraft::CreateMessage(
       fbb, TorchCraft::Any::Commands, payload.Union());
   TorchCraft::FinishMessageBuffer(fbb, root);
-} // buildCommandMessage
+}
 
 } // namespace
 
@@ -61,7 +61,7 @@ namespace client {
 
 void init() {
   client::BW::data::init();
-} // init
+}
 
 //============================= LIFECYCLE ====================================
 
@@ -69,7 +69,7 @@ Client::Client() : state_(new State()) {}
 
 Client::~Client() {
   state_->decref();
-} // ~Client
+}
 
 //============================= OPERATIONS ===================================
 
@@ -91,7 +91,7 @@ bool Client::connect(const std::string& hostname, int port,
   state_->reset();
   sent_ = false;
   return true;
-} // connect
+}
 
 bool Client::close() {
   clearError();
@@ -101,7 +101,7 @@ bool Client::close() {
   }
   conn_.reset();
   return true;
-} // close
+}
 
 bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   flatbuffers::FlatBufferBuilder fbb;
@@ -154,7 +154,7 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   updates = state_->update(
       reinterpret_cast<const TorchCraft::HandshakeServer*>(msg->msg()));
   return true;
-} // init
+}
 
 bool Client::send(const std::vector<Command>& commands) {
   clearError();
@@ -180,7 +180,7 @@ bool Client::send(const std::vector<Command>& commands) {
   }
   sent_ = true;
   return true;
-} // send
+}
 
 bool Client::receive(std::vector<std::string>& updates) {
   if (!sent_) {
@@ -250,6 +250,6 @@ bool Client::receive(std::vector<std::string>& updates) {
       return false;
   }
   return true;
-} // receive
+}
 
 } // namespace client

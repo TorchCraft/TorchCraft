@@ -18,13 +18,9 @@ can be launched and will completely control StarCraft, while the second will
 have to be injected within StarCraft using for instance ChaosLauncher.
 
 
-## Replayer
-
-`replayer/` contains the code that serialises and deserialises the game data
-both within the client and the server, both for communicating between StarCraft and Torch and for the experience replay (gamestore).
-
-
 ## TorchCraft
+
+### Lua library
 
 * `init.lua` contains the majority of the code that provides the lua interface.
  Most of it is accessible directly to the user after a `require 'torchcraft'`.
@@ -39,6 +35,19 @@ both within the client and the server, both for communicating between StarCraft 
   - `baseline_heuristic.lua` contains a few simple heuristics for micro battles
   (and works similarly to `simple_dll` unless stated otherwise in the
   script).
+
+### C++ library
+
+* `client/` contains code for client-server communication, client-side game
+ state management and some useful constants from BWAPI.
+* `replayer/` contains the code that serialises and deserialises the game data
+ both within the client and the server, both for communicating between
+ StarCraft and Torch and for the experience replay (gamestore). Note that some
+ of this functionality is currently implemented in `lua/`.
+* `include/` contains headers that make the above functionality available to
+ other C++ clients.
+* Lua wrappers used in the Lua library for both `client/` and `replayer/` code
+ are available in `lua/`.
 
 
 ## Non-code

@@ -11,7 +11,7 @@
 
 #include "BWEnv/fbs/messages_generated.h"
 
-namespace client {
+namespace torchcraft {
 
 State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
     : RefCounted(),
@@ -259,7 +259,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
         fus.second.end(),
         std::back_inserter(units[player]),
         [this, player](const replayer::Unit& unit) {
-          auto ut = client::BW::UnitType::_from_integral_nothrow(unit.type);
+          auto ut = torchcraft::BW::UnitType::_from_integral_nothrow(unit.type);
           return (
               // Unit is of known type (or enemy unit)
               (player != player_id || ut) &&
@@ -327,4 +327,4 @@ bool State::checkBattleFinished(std::vector<std::string>& upd) {
   return false;
 }
 
-} // namespace client
+} // namespace torchcraft

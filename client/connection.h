@@ -11,7 +11,7 @@
 
 #include "zmq.hpp"
 
-namespace client {
+namespace torchcraft {
 
 class Connection {
  public:
@@ -79,4 +79,4 @@ class Connection {
   std::string errmsg_;
 };
 
-} // namespace client
+} // namespace torchcraft

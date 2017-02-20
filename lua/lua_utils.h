@@ -22,7 +22,7 @@ extern "C" {
 
 } // extern "C"
 
-namespace client {
+namespace torchcraft {
 namespace lua {
 
 void sealTable(lua_State* L, int index = -1);
@@ -64,4 +64,4 @@ inline void pushToTable(lua_State* L, const char* key, T val) {
 }
 
 } // namespace lua
-} // namespace client
+} // namespace torchcraft

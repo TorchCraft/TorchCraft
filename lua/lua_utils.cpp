@@ -13,7 +13,7 @@ extern "C" {
 
 #include "lua_utils.h"
 
-namespace client {
+namespace torchcraft {
 namespace lua {
 
 int sealedTableGuard(lua_State* L) {
@@ -31,4 +31,4 @@ void sealTable(lua_State* L, int index) {
 }
 
 } // namespace lua
-} // namespace client
+} // namespace torchcraft

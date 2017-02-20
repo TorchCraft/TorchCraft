@@ -15,7 +15,7 @@
 
 #include "constants.h"
 
-namespace client {
+namespace torchcraft {
 
 void init();
 
@@ -121,4 +121,4 @@ class Client {
   std::string error_;
 };
 
-} // namespace client
+} // namespace torchcraft

@@ -16,6 +16,6 @@ extern "C" {
 
 }
 
-namespace client {
+namespace torchcraft {
 void registerConstants(lua_State* L, int index);
 }

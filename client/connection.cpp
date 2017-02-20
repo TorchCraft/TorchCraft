@@ -12,7 +12,7 @@
 
 #include "connection.h"
 
-namespace client {
+namespace torchcraft {
 
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
@@ -109,4 +109,4 @@ void Connection::clearError() {
   errmsg_.clear();
 }
 
-} // namespace client
+} // namespace torchcraft

@@ -9,6 +9,8 @@
 
 #include "frame.h"
 
+namespace replayer = torchcraft::replayer;
+
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.id << " " << o.x << " " << o.y << " "
     << o.health << " " << o.max_health << " "

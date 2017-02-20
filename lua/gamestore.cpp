@@ -10,7 +10,9 @@
 #include "gamestore.h"
 
 using namespace std;
-using namespace replayer;
+namespace replayer = torchcraft::replayer;
+using replayer::GameStore;
+using replayer::Replayer;
 
 // Serialization
 

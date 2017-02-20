@@ -20,7 +20,7 @@ namespace {
 
 void buildHandshakeMessage(
     flatbuffers::FlatBufferBuilder& fbb,
-    const client::Client::Options& opts) {
+    const torchcraft::Client::Options& opts) {
   torchcraft::fbs::HandshakeClientT hsc;
   hsc.protocol = 17;
   hsc.map = opts.initial_map;
@@ -42,7 +42,7 @@ void buildHandshakeMessage(
 
 void buildCommandMessage(
     flatbuffers::FlatBufferBuilder& fbb,
-    const std::vector<client::Client::Command>& commands) {
+    const std::vector<torchcraft::Client::Command>& commands) {
   std::vector<flatbuffers::Offset<torchcraft::fbs::Command>> offsets;
   for (auto comm : commands) {
     offsets.push_back(torchcraft::fbs::CreateCommandDirect(
@@ -57,10 +57,10 @@ void buildCommandMessage(
 
 } // namespace
 
-namespace client {
+namespace torchcraft {
 
 void init() {
-  client::BW::data::init();
+  torchcraft::BW::data::init();
 }
 
 //============================= LIFECYCLE ====================================
@@ -258,4 +258,4 @@ bool Client::receive(std::vector<std::string>& updates) {
   return true;
 }
 
-} // namespace client
+} // namespace torchcraft

@@ -14,9 +14,9 @@
 #include "constants_lua.h"
 #include "lua_utils.h"
 
-using client::lua::pushValue;
-using client::lua::pushToTable;
-using client::lua::sealTable;
+using torchcraft::lua::pushValue;
+using torchcraft::lua::pushToTable;
+using torchcraft::lua::sealTable;
 
 namespace {
 
@@ -40,41 +40,41 @@ std::string fromCamelCaseToLower(const std::string& s) {
 
 int wisBuilding(lua_State* L) {
   int n = luaL_checkint(L, lua_gettop(L) > 1 ? 2 : 1);
-  auto id = client::BW::UnitType::_from_integral_nothrow(n);
+  auto id = torchcraft::BW::UnitType::_from_integral_nothrow(n);
   if (!id) {
     return luaL_error(L, "Invalid unit ID: %d", n);
   }
-  lua_pushboolean(L, client::BW::isBuilding(*id));
+  lua_pushboolean(L, torchcraft::BW::isBuilding(*id));
   return 1;
 }
 
 int wisWorker(lua_State* L) {
   int n = luaL_checkint(L, lua_gettop(L) > 1 ? 2 : 1);
-  auto id = client::BW::UnitType::_from_integral_nothrow(n);
+  auto id = torchcraft::BW::UnitType::_from_integral_nothrow(n);
   if (!id) {
     return luaL_error(L, "Invalid unit ID: %d", n);
   }
-  lua_pushboolean(L, client::BW::isWorker(*id));
+  lua_pushboolean(L, torchcraft::BW::isWorker(*id));
   return 1;
 }
 
 int wisMineralField(lua_State* L) {
   int n = luaL_checkint(L, lua_gettop(L) > 1 ? 2 : 1);
-  auto id = client::BW::UnitType::_from_integral_nothrow(n);
+  auto id = torchcraft::BW::UnitType::_from_integral_nothrow(n);
   if (!id) {
     return luaL_error(L, "Invalid unit ID: %d", n);
   }
-  lua_pushboolean(L, client::BW::isMineralField(*id));
+  lua_pushboolean(L, torchcraft::BW::isMineralField(*id));
   return 1;
 }
 
 int wisGasGeyser(lua_State* L) {
   int n = luaL_checkint(L, lua_gettop(L) > 1 ? 2 : 1);
-  auto id = client::BW::UnitType::_from_integral_nothrow(n);
+  auto id = torchcraft::BW::UnitType::_from_integral_nothrow(n);
   if (!id) {
     return luaL_error(L, "Invalid unit ID: %d", n);
   }
-  lua_pushboolean(L, client::BW::isGasGeyser(*id));
+  lua_pushboolean(L, torchcraft::BW::isGasGeyser(*id));
   return 1;
 }
 
@@ -116,12 +116,12 @@ void pushVector(lua_State* L, std::vector<Enum> v) {
 template <typename T>
 void pushStaticValues(lua_State* L, const T m[]) {
   lua_newtable(L);
-  for (size_t i = 0; i < client::BW::data::NumKeys; i++) {
-    const auto& key = client::BW::data::Keys[i];
+  for (size_t i = 0; i < torchcraft::BW::data::NumKeys; i++) {
+    const auto& key = torchcraft::BW::data::Keys[i];
     pushValue(L, m[i]);
     lua_setfield(L, -2, key.c_str());
 
-    auto t = client::BW::UnitType::_from_string_nothrow(key.c_str());
+    auto t = torchcraft::BW::UnitType::_from_string_nothrow(key.c_str());
     if (t) {
       pushValue(L, m[i]);
       lua_rawseti(L, -2, t->_to_integral());
@@ -130,7 +130,7 @@ void pushStaticValues(lua_State* L, const T m[]) {
   sealTable(L);
 }
 
-void pushMap(lua_State* L, std::unordered_map<client::BW::UnitType, int>& m) {
+void pushMap(lua_State* L, std::unordered_map<torchcraft::BW::UnitType, int>& m) {
   lua_newtable(L);
   for (const auto& kv : m) {
     pushValue(L, kv.second);
@@ -141,155 +141,155 @@ void pushMap(lua_State* L, std::unordered_map<client::BW::UnitType, int>& m) {
 
 void pushStaticData(lua_State* L) {
   lua_newtable(L);
-  pushStaticValues(L, client::BW::data::CanAttack);
+  pushStaticValues(L, torchcraft::BW::data::CanAttack);
   lua_setfield(L, -2, "canAttack");
-  pushStaticValues(L, client::BW::data::DimensionRight);
+  pushStaticValues(L, torchcraft::BW::data::DimensionRight);
   lua_setfield(L, -2, "dimensionRight");
-  pushStaticValues(L, client::BW::data::Height);
+  pushStaticValues(L, torchcraft::BW::data::Height);
   lua_setfield(L, -2, "height");
-  pushStaticValues(L, client::BW::data::IsMineralField);
+  pushStaticValues(L, torchcraft::BW::data::IsMineralField);
   lua_setfield(L, -2, "isMineralField");
-  pushStaticValues(L, client::BW::data::CanProduce);
+  pushStaticValues(L, torchcraft::BW::data::CanProduce);
   lua_setfield(L, -2, "canProduce");
-  pushStaticValues(L, client::BW::data::IsRefinery);
+  pushStaticValues(L, torchcraft::BW::data::IsRefinery);
   lua_setfield(L, -2, "isRefinery");
-  pushStaticValues(L, client::BW::data::IsResourceDepot);
+  pushStaticValues(L, torchcraft::BW::data::IsResourceDepot);
   lua_setfield(L, -2, "isResourceDepot");
-  pushStaticValues(L, client::BW::data::RegeneratesHP);
+  pushStaticValues(L, torchcraft::BW::data::RegeneratesHP);
   lua_setfield(L, -2, "regeneratesHP");
-  pushStaticValues(L, client::BW::data::IsCloakable);
+  pushStaticValues(L, torchcraft::BW::data::IsCloakable);
   lua_setfield(L, -2, "isCloakable");
-  pushStaticValues(L, client::BW::data::IsTwoUnitsInOneEgg);
+  pushStaticValues(L, torchcraft::BW::data::IsTwoUnitsInOneEgg);
   lua_setfield(L, -2, "isTwoUnitsInOneEgg");
-  pushStaticValues(L, client::BW::data::IsSpellcaster);
+  pushStaticValues(L, torchcraft::BW::data::IsSpellcaster);
   lua_setfield(L, -2, "isSpellcaster");
-  pushStaticValues(L, client::BW::data::SupplyRequired);
+  pushStaticValues(L, torchcraft::BW::data::SupplyRequired);
   lua_setfield(L, -2, "supplyRequired");
-  pushStaticValues(L, client::BW::data::AirWeapon);
+  pushStaticValues(L, torchcraft::BW::data::AirWeapon);
   lua_setfield(L, -2, "airWeapon");
-  pushStaticValues(L, client::BW::data::BuildScore);
+  pushStaticValues(L, torchcraft::BW::data::BuildScore);
   lua_setfield(L, -2, "buildScore");
-  pushStaticValues(L, client::BW::data::MaxAirHits);
+  pushStaticValues(L, torchcraft::BW::data::MaxAirHits);
   lua_setfield(L, -2, "maxAirHits");
-  pushStaticValues(L, client::BW::data::IsPowerup);
+  pushStaticValues(L, torchcraft::BW::data::IsPowerup);
   lua_setfield(L, -2, "isPowerup");
-  pushStaticValues(L, client::BW::data::IsBeacon);
+  pushStaticValues(L, torchcraft::BW::data::IsBeacon);
   lua_setfield(L, -2, "isBeacon");
-  pushStaticValues(L, client::BW::data::MineralPrice);
+  pushStaticValues(L, torchcraft::BW::data::MineralPrice);
   lua_setfield(L, -2, "mineralPrice");
-  pushStaticValues(L, client::BW::data::IsInvincible);
+  pushStaticValues(L, torchcraft::BW::data::IsInvincible);
   lua_setfield(L, -2, "isInvincible");
-  pushStaticValues(L, client::BW::data::RequiredTech);
+  pushStaticValues(L, torchcraft::BW::data::RequiredTech);
   lua_setfield(L, -2, "requiredTech");
-  pushStaticValues(L, client::BW::data::DimensionDown);
+  pushStaticValues(L, torchcraft::BW::data::DimensionDown);
   lua_setfield(L, -2, "dimensionDown");
-  pushStaticValues(L, client::BW::data::CanBuildAddon);
+  pushStaticValues(L, torchcraft::BW::data::CanBuildAddon);
   lua_setfield(L, -2, "canBuildAddon");
-  pushStaticValues(L, client::BW::data::DimensionLeft);
+  pushStaticValues(L, torchcraft::BW::data::DimensionLeft);
   lua_setfield(L, -2, "dimensionLeft");
-  pushStaticValues(L, client::BW::data::ProducesLarva);
+  pushStaticValues(L, torchcraft::BW::data::ProducesLarva);
   lua_setfield(L, -2, "producesLarva");
-  pushStaticValues(L, client::BW::data::Armor);
+  pushStaticValues(L, torchcraft::BW::data::Armor);
   lua_setfield(L, -2, "armor");
-  pushStaticValues(L, client::BW::data::IsMechanical);
+  pushStaticValues(L, torchcraft::BW::data::IsMechanical);
   lua_setfield(L, -2, "isMechanical");
-  pushStaticValues(L, client::BW::data::IsBuilding);
+  pushStaticValues(L, torchcraft::BW::data::IsBuilding);
   lua_setfield(L, -2, "isBuilding");
-  pushStaticValues(L, client::BW::data::SupplyProvided);
+  pushStaticValues(L, torchcraft::BW::data::SupplyProvided);
   lua_setfield(L, -2, "supplyProvided");
-  pushStaticValues(L, client::BW::data::SightRange);
+  pushStaticValues(L, torchcraft::BW::data::SightRange);
   lua_setfield(L, -2, "sightRange");
-  pushStaticValues(L, client::BW::data::GasPrice);
+  pushStaticValues(L, torchcraft::BW::data::GasPrice);
   lua_setfield(L, -2, "gasPrice");
-  pushStaticValues(L, client::BW::data::MaxHitPoints);
+  pushStaticValues(L, torchcraft::BW::data::MaxHitPoints);
   lua_setfield(L, -2, "maxHitPoints");
-  pushStaticValues(L, client::BW::data::Width);
+  pushStaticValues(L, torchcraft::BW::data::Width);
   lua_setfield(L, -2, "width");
-  pushStaticValues(L, client::BW::data::TileWidth);
+  pushStaticValues(L, torchcraft::BW::data::TileWidth);
   lua_setfield(L, -2, "tileWidth");
-  pushStaticValues(L, client::BW::data::IsHero);
+  pushStaticValues(L, torchcraft::BW::data::IsHero);
   lua_setfield(L, -2, "isHero");
-  pushStaticValues(L, client::BW::data::SeekRange);
+  pushStaticValues(L, torchcraft::BW::data::SeekRange);
   lua_setfield(L, -2, "seekRange");
-  pushStaticValues(L, client::BW::data::BuildTime);
+  pushStaticValues(L, torchcraft::BW::data::BuildTime);
   lua_setfield(L, -2, "buildTime");
-  pushStaticValues(L, client::BW::data::IsCritter);
+  pushStaticValues(L, torchcraft::BW::data::IsCritter);
   lua_setfield(L, -2, "isCritter");
-  pushStaticValues(L, client::BW::data::RequiresPsi);
+  pushStaticValues(L, torchcraft::BW::data::RequiresPsi);
   lua_setfield(L, -2, "requiresPsi");
-  pushStaticValues(L, client::BW::data::IsSpecialBuilding);
+  pushStaticValues(L, torchcraft::BW::data::IsSpecialBuilding);
   lua_setfield(L, -2, "isSpecialBuilding");
-  pushStaticValues(L, client::BW::data::GroundWeapon);
+  pushStaticValues(L, torchcraft::BW::data::GroundWeapon);
   lua_setfield(L, -2, "groundWeapon");
-  pushStaticValues(L, client::BW::data::IsFlyer);
+  pushStaticValues(L, torchcraft::BW::data::IsFlyer);
   lua_setfield(L, -2, "isFlyer");
-  pushStaticValues(L, client::BW::data::Size);
+  pushStaticValues(L, torchcraft::BW::data::Size);
   lua_setfield(L, -2, "size");
-  pushStaticValues(L, client::BW::data::IsNeutral);
+  pushStaticValues(L, torchcraft::BW::data::IsNeutral);
   lua_setfield(L, -2, "isNeutral");
-  pushStaticValues(L, client::BW::data::MaxShields);
+  pushStaticValues(L, torchcraft::BW::data::MaxShields);
   lua_setfield(L, -2, "maxShields");
-  pushStaticValues(L, client::BW::data::HasPermanentCloak);
+  pushStaticValues(L, torchcraft::BW::data::HasPermanentCloak);
   lua_setfield(L, -2, "hasPermanentCloak");
-  pushStaticValues(L, client::BW::data::TopSpeed);
+  pushStaticValues(L, torchcraft::BW::data::TopSpeed);
   lua_setfield(L, -2, "topSpeed");
-  pushStaticValues(L, client::BW::data::TileHeight);
+  pushStaticValues(L, torchcraft::BW::data::TileHeight);
   lua_setfield(L, -2, "tileHeight");
-  pushStaticValues(L, client::BW::data::IsRobotic);
+  pushStaticValues(L, torchcraft::BW::data::IsRobotic);
   lua_setfield(L, -2, "isRobotic");
-  pushStaticValues(L, client::BW::data::DimensionUp);
+  pushStaticValues(L, torchcraft::BW::data::DimensionUp);
   lua_setfield(L, -2, "dimensionUp");
-  pushStaticValues(L, client::BW::data::DestroyScore);
+  pushStaticValues(L, torchcraft::BW::data::DestroyScore);
   lua_setfield(L, -2, "destroyScore");
-  pushStaticValues(L, client::BW::data::SpaceProvided);
+  pushStaticValues(L, torchcraft::BW::data::SpaceProvided);
   lua_setfield(L, -2, "spaceProvided");
-  pushStaticValues(L, client::BW::data::TileSize);
+  pushStaticValues(L, torchcraft::BW::data::TileSize);
   lua_setfield(L, -2, "tileSize");
-  pushStaticValues(L, client::BW::data::HaltDistance);
+  pushStaticValues(L, torchcraft::BW::data::HaltDistance);
   lua_setfield(L, -2, "haltDistance");
-  pushStaticValues(L, client::BW::data::IsAddon);
+  pushStaticValues(L, torchcraft::BW::data::IsAddon);
   lua_setfield(L, -2, "isAddon");
-  pushStaticValues(L, client::BW::data::CanMove);
+  pushStaticValues(L, torchcraft::BW::data::CanMove);
   lua_setfield(L, -2, "canMove");
-  pushStaticValues(L, client::BW::data::IsFlyingBuilding);
+  pushStaticValues(L, torchcraft::BW::data::IsFlyingBuilding);
   lua_setfield(L, -2, "isFlyingBuilding");
-  pushStaticValues(L, client::BW::data::MaxEnergy);
+  pushStaticValues(L, torchcraft::BW::data::MaxEnergy);
   lua_setfield(L, -2, "maxEnergy");
-  pushStaticValues(L, client::BW::data::IsDetector);
+  pushStaticValues(L, torchcraft::BW::data::IsDetector);
   lua_setfield(L, -2, "isDetector");
-  pushStaticValues(L, client::BW::data::IsOrganic);
+  pushStaticValues(L, torchcraft::BW::data::IsOrganic);
   lua_setfield(L, -2, "isOrganic");
-  pushStaticValues(L, client::BW::data::SpaceRequired);
+  pushStaticValues(L, torchcraft::BW::data::SpaceRequired);
   lua_setfield(L, -2, "spaceRequired");
-  pushStaticValues(L, client::BW::data::IsFlagBeacon);
+  pushStaticValues(L, torchcraft::BW::data::IsFlagBeacon);
   lua_setfield(L, -2, "isFlagBeacon");
-  pushStaticValues(L, client::BW::data::IsWorker);
+  pushStaticValues(L, torchcraft::BW::data::IsWorker);
   lua_setfield(L, -2, "isWorker");
-  pushStaticValues(L, client::BW::data::IsBurrowable);
+  pushStaticValues(L, torchcraft::BW::data::IsBurrowable);
   lua_setfield(L, -2, "isBurrowable");
-  pushStaticValues(L, client::BW::data::CloakingTech);
+  pushStaticValues(L, torchcraft::BW::data::CloakingTech);
   lua_setfield(L, -2, "cloakingTech");
-  pushStaticValues(L, client::BW::data::IsResourceContainer);
+  pushStaticValues(L, torchcraft::BW::data::IsResourceContainer);
   lua_setfield(L, -2, "isResourceContainer");
-  pushStaticValues(L, client::BW::data::Acceleration);
+  pushStaticValues(L, torchcraft::BW::data::Acceleration);
   lua_setfield(L, -2, "acceleration");
-  pushStaticValues(L, client::BW::data::IsSpell);
+  pushStaticValues(L, torchcraft::BW::data::IsSpell);
   lua_setfield(L, -2, "isSpell");
-  pushStaticValues(L, client::BW::data::RequiresCreep);
+  pushStaticValues(L, torchcraft::BW::data::RequiresCreep);
   lua_setfield(L, -2, "requiresCreep");
-  pushStaticValues(L, client::BW::data::ArmorUpgrade);
+  pushStaticValues(L, torchcraft::BW::data::ArmorUpgrade);
   lua_setfield(L, -2, "armorUpgrade");
-  pushStaticValues(L, client::BW::data::MaxGroundHits);
+  pushStaticValues(L, torchcraft::BW::data::MaxGroundHits);
   lua_setfield(L, -2, "maxGroundHits");
-  pushStaticValues(L, client::BW::data::TurnRadius);
+  pushStaticValues(L, torchcraft::BW::data::TurnRadius);
   lua_setfield(L, -2, "turnRadius");
-  pushStaticValues(L, client::BW::data::GetRace);
+  pushStaticValues(L, torchcraft::BW::data::GetRace);
   lua_setfield(L, -2, "getRace");
 }
 
 } // namespace
 
-namespace client {
+namespace torchcraft {
 void registerConstants(lua_State* L, int index) {
   lua_pushvalue(L, index);
   lua_newtable(L);
@@ -388,13 +388,13 @@ void registerConstants(lua_State* L, int index) {
 
   // total_price
   lua_newtable(L);
-  pushMap(L, client::BW::data::TotalMineralPrice);
+  pushMap(L, torchcraft::BW::data::TotalMineralPrice);
   lua_setfield(L, -2, "mineral");
-  pushMap(L, client::BW::data::TotalGasPrice);
+  pushMap(L, torchcraft::BW::data::TotalGasPrice);
   lua_setfield(L, -2, "gas");
   lua_setfield(L, -2, "total_price");
 
   lua_setfield(L, -2, "const");
   lua_pop(L, 1);
 }
-} // namespace client
+} // namespace torchcraft

@@ -26,6 +26,7 @@ typedef int int32_t;
 
 //TODO Check types !
 
+namespace torchcraft {
 namespace replayer {
   struct Order {
     int32_t first_frame; // first frame number where order appeared
@@ -197,4 +198,5 @@ namespace replayer {
   };
   std::ostream& operator<<(std::ostream& out, const Frame& o);
   std::istream& operator>>(std::istream& in, Frame& o);
-} // replayer
+} // namespace replayer
+} // namespace torchcraft

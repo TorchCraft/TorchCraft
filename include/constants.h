@@ -17,7 +17,7 @@
 #define BETTER_ENUMS_MACRO_FILE "enum_macros.h"
 #include "enum.h"
 
-namespace client {
+namespace torchcraft {
 namespace BW {
 
 BETTER_ENUM(
@@ -812,16 +812,16 @@ void init();
 } // namespace data
 
 } // namespace BW
-} // namespace client
+} // namespace torchcraft
 
 // Specialized hash functions for enums declared above
 namespace std {
 template <>
-struct hash<client::BW::UnitType> {
-  typedef client::BW::UnitType argument_type;
+struct hash<torchcraft::BW::UnitType> {
+  typedef torchcraft::BW::UnitType argument_type;
   typedef std::size_t result_type;
   result_type operator()(argument_type const& s) const {
-		return std::hash<client::BW::UnitType::_integral>{}(s._to_integral());
+		return std::hash<torchcraft::BW::UnitType::_integral>{}(s._to_integral());
   }
 };
 } // namespace std

@@ -1,15 +1,18 @@
 local torchcraft = require 'torchcraft._env'
 local utils = require 'torchcraft.utils'
 local replayer = require 'torchcraft.replayer'
-local client = require 'torchcraft.client'
 local tablex = require 'pl.tablex'
 local image = require 'image'
-
--- Pull constants into module namespace
-for k,v in pairs(client.const) do
+local lib = require 'torchcraft.tc_lib'
+for k,v in pairs(lib) do
     torchcraft[k] = v
 end
-for k,v in pairs(client.const.commands) do
+
+-- Pull constants into module namespace
+for k,v in pairs(lib.const) do
+    torchcraft[k] = v
+end
+for k,v in pairs(lib.const.commands) do
     torchcraft[k] = v
 end
 
@@ -27,7 +30,7 @@ assert(torchcraft.total_price.gas[torchcraft.unittypes.Terran_Science_Vessel]
 
 
 torchcraft.hostname = nil
-torchcraft.client = client.Client()
+torchcraft.client = torchcraft.Client()
 torchcraft.state = torchcraft.client.state
 torchcraft.DEBUG = 0
 torchcraft.initial_map = nil
@@ -168,7 +171,7 @@ function torchcraft.new()
    for k,v in pairs(torchcraft) do
       newtc[k] = v
    end
-   newtc.client = client.Client()
+   newtc.client = torchcraft.Client()
    newtc.state = newtc.client.state
    newtc.mode = tablex.deepcopy(torchcraft.mode)  -- reset mode for new context
    newtc:set_variables()

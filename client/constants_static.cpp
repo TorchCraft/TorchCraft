@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace client {
+namespace torchcraft {
 namespace BW {
 namespace data {
 

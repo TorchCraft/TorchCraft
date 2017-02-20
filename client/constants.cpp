@@ -14,27 +14,27 @@
 namespace {
 
 template <typename T>
-std::unordered_map<client::BW::UnitType, int> buildTotalPriceMap(const T& prices) {
-  std::unordered_map<client::BW::UnitType, int> total;
-  using client::BW::data::KeyIndex;
+std::unordered_map<torchcraft::BW::UnitType, int> buildTotalPriceMap(const T& prices) {
+  std::unordered_map<torchcraft::BW::UnitType, int> total;
+  using torchcraft::BW::data::KeyIndex;
 
   // Production prices for producers
-  for (auto ut : client::BW::UnitType::_values()) {
-    if (!client::BW::unitProductions(ut).empty()) {
+  for (auto ut : torchcraft::BW::UnitType::_values()) {
+    if (!torchcraft::BW::unitProductions(ut).empty()) {
       total[ut] = prices[KeyIndex.at(ut._to_string())];
     }
   }
 
   // Two separate loops required so that total prices are not overwritten
-  for (auto producer : client::BW::UnitType::_values()) {
-    for (auto ut : client::BW::unitProductions(producer)) {
+  for (auto producer : torchcraft::BW::UnitType::_values()) {
+    for (auto ut : torchcraft::BW::unitProductions(producer)) {
       int price;
-      if (client::BW::isBuilding(producer) ||
-          producer == +client::BW::UnitType::Zerg_Larva) {
+      if (torchcraft::BW::isBuilding(producer) ||
+          producer == +torchcraft::BW::UnitType::Zerg_Larva) {
         price = prices[KeyIndex.at(ut._to_string())];
       } else if (
-          ut == +client::BW::UnitType::Protoss_Archon ||
-          ut == +client::BW::UnitType::Protoss_Dark_Archon) {
+          ut == +torchcraft::BW::UnitType::Protoss_Archon ||
+          ut == +torchcraft::BW::UnitType::Protoss_Dark_Archon) {
         price = 2 * prices[KeyIndex.at(producer._to_string())];
       } else {
         price = prices[KeyIndex.at(producer._to_string())] +
@@ -49,7 +49,7 @@ std::unordered_map<client::BW::UnitType, int> buildTotalPriceMap(const T& prices
 
 } // namespace
 
-namespace client {
+namespace torchcraft {
 namespace BW {
 
 // Returns a sorted (by integral value) vector of units that a given unit is
@@ -361,4 +361,4 @@ void init() {
 
 } // namespace data
 } // namespace BW
-} // namespace client
+} // namespace torchcraft

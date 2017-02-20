@@ -20,6 +20,7 @@
 #include "frame.h"
 #include "replayer.h"
 
+namespace torchcraft {
 namespace replayer {
 
   // When playing the game, we add frames to a Replayer.
@@ -156,9 +157,10 @@ namespace replayer {
   };
 
 
-} // replayer
+} // namespace replayer
+} // namespace torchcraft
 
-replayer::GameStore* checkGameStore(lua_State* L, int id = 1);
+torchcraft::replayer::GameStore* checkGameStore(lua_State* L, int id = 1);
 
 extern "C" int newGameStore(lua_State* L);
 extern "C" int gcGameStore(lua_State* L);

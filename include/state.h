@@ -13,8 +13,8 @@
 #include <vector>
 
 #include "constants.h"
-#include "replayer/frame.h"
-#include "replayer/refcount.h"
+#include "frame.h"
+#include "refcount.h"
 
 namespace TorchCraft {
 struct HandshakeServer;

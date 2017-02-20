@@ -11,8 +11,9 @@
 
 #include "constants.h"
 #include "lua_utils.h"
-#include "replayer/frame_lua.h"
 #include "state_lua.h"
+
+#include "frame_lua.h"
 
 namespace {
 

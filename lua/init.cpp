@@ -16,11 +16,15 @@ extern "C" {
 #include <lualib.h>
 }
 
+#include "client.h"
+#include "client_lua.h"
+#include "constants_lua.h"
 #include "frame.h"
 #include "frame_lua.h"
-#include "replayer.h"
 #include "gamestore.h"
 #include "imgmanager.h"
+#include "replayer.h"
+#include "state_lua.h"
 
 using namespace replayer;
 
@@ -56,12 +60,7 @@ static const struct luaL_Reg replayer_f [] = {
   {nullptr, nullptr}
 };
 
-/*This is the entry point of the lua binding
- * General syntax is luaopen_packagename(lua_State *L)
- * It is called when calling "require torchcraft.replayer" from lua and register
- * all the c++ function for call from lua
- */
-extern "C" int luaopen_torchcraft_replayer(lua_State *L) {
+int registerReplayer(lua_State *L) {
   lua_newtable(L);
   int replayer_stack_location = lua_gettop(L);
 
@@ -86,8 +85,34 @@ extern "C" int luaopen_torchcraft_replayer(lua_State *L) {
   lua_setfield(L, -2, "__index");
   luaT_setfuncs(L, gamestore_m, 0);
   lua_setfield(L, -2, "GameStore");
+  lua_pop(L, 1);
 
   luaT_setfuncs(L, replayer_f, 0);
 
+  return 1;
+}
+
+int registerClient(lua_State* L) {
+  client::init();
+
+  lua_newtable(L);
+  client::registerClient(L, lua_gettop(L));
+  client::registerState(L, lua_gettop(L));
+  client::registerConstants(L, lua_gettop(L));
+  return 1;
+}
+
+
+/*This is the entry point of the lua binding
+ * General syntax is luaopen_packagename(lua_State *L)
+ * It is called when calling "require torchcraft.replayer" from lua and register
+ * all the c++ function for call from lua
+ */
+extern "C" int luaopen_torchcraft_tc_lib(lua_State* L) {
+  lua_newtable(L);
+  registerClient(L);
+  lua_setfield(L, -2, "client");
+  registerReplayer(L);
+  lua_setfield(L, -2, "replayer");
   return 1;
 }

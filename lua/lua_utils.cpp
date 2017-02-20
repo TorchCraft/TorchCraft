@@ -12,10 +12,6 @@ extern "C" {
 }
 
 #include "lua_utils.h"
-#include "client.h"
-#include "client_lua.h"
-#include "constants_lua.h"
-#include "state_lua.h"
 
 namespace client {
 namespace lua {
@@ -36,13 +32,3 @@ void sealTable(lua_State* L, int index) {
 
 } // namespace lua
 } // namespace client
-
-extern "C" int luaopen_torchcraft_client(lua_State* L) {
-  client::init();
-
-  lua_newtable(L);
-  client::registerClient(L, lua_gettop(L));
-  client::registerState(L, lua_gettop(L));
-  client::registerConstants(L, lua_gettop(L));
-  return 1;
-}

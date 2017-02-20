@@ -16,10 +16,13 @@
 #include "frame.h"
 #include "refcount.h"
 
-namespace TorchCraft {
+// Flatbuffer messages
+namespace torchcraft {
+namespace fbs {
 struct HandshakeServer;
 struct Frame;
 struct EndGame;
+}
 }
 
 namespace client {
@@ -103,15 +106,16 @@ class State : public RefCounted {
   }
 
   void reset();
-  std::vector<std::string> update(const TorchCraft::HandshakeServer* handshake);
-  std::vector<std::string> update(const TorchCraft::Frame* frame);
-  std::vector<std::string> update(const TorchCraft::EndGame* end);
+  std::vector<std::string> update(
+      const torchcraft::fbs::HandshakeServer* handshake);
+  std::vector<std::string> update(const torchcraft::fbs::Frame* frame);
+  std::vector<std::string> update(const torchcraft::fbs::EndGame* end);
   void trackAliveUnits(
       std::vector<std::string>& upd,
       const std::set<BW::UnitType>& considered);
 
  private:
-  bool setRawImage(const TorchCraft::Frame* frame);
+  bool setRawImage(const torchcraft::fbs::Frame* frame);
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
 

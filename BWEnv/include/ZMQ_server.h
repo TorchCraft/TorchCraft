@@ -34,14 +34,14 @@ public:
 
   void connect();
   void close();
-  void sendHandshake(const TorchCraft::HandshakeServerT* handshake);
-  void sendFrame(const TorchCraft::FrameT* frame);
-  void sendPlayerLeft(const TorchCraft::PlayerLeftT *pl);
-  void sendEndGame(const TorchCraft::EndGameT *endgame);
-  void sendError(const TorchCraft::ErrorT *error);
+  void sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake);
+  void sendFrame(const torchcraft::fbs::FrameT* frame);
+  void sendPlayerLeft(const torchcraft::fbs::PlayerLeftT *pl);
+  void sendEndGame(const torchcraft::fbs::EndGameT *endgame);
+  void sendError(const torchcraft::fbs::ErrorT *error);
   void receiveMessage();
-  void handleReconnect(const TorchCraft::HandshakeClient* handshake);
-  void handleCommands(const TorchCraft::Commands* commands);
+  void handleReconnect(const torchcraft::fbs::HandshakeClient* handshake);
+  void handleCommands(const torchcraft::fbs::Commands* commands);
   int getPort();
 };
 

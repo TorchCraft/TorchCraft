@@ -18,8 +18,11 @@ namespace client {
 
 //============================= LIFECYCLE ====================================
 
-Connection::Connection(const std::string& hostname, int port,
-  int timeoutMs /* = -1 */) : sock_(ctx_, zmq::socket_type::req) {
+Connection::Connection(
+    const std::string& hostname,
+    int port,
+    int timeoutMs /* = -1 */)
+    : sock_(ctx_, zmq::socket_type::req) {
   std::ostringstream ss;
   ss << "tcp://" << hostname << ":" << port;
   sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));

@@ -24,9 +24,9 @@ template<typename T>
 void sendFBObject(zsock_t* sock, const T* obj) {
   flatbuffers::FlatBufferBuilder fbb;
   auto payload = T::TableType::Pack(fbb, obj);
-  auto root = TorchCraft::CreateMessage(
-      fbb, TorchCraft::AnyTraits<T::TableType>::enum_value, payload.Union());
-  TorchCraft::FinishMessageBuffer(fbb, root);
+  auto root = torchcraft::fbs::CreateMessage(
+      fbb, torchcraft::fbs::AnyTraits<T::TableType>::enum_value, payload.Union());
+  torchcraft::fbs::FinishMessageBuffer(fbb, root);
 
   if (zsock_send(sock, "b", fbb.GetBufferPointer(), fbb.GetSize()) != 0) {
     throw exception("ZMQ_server::send(): zmq_send failed.");
@@ -90,7 +90,7 @@ void ZMQ_server::connect()
 
   if (zchunk_size(chunk) == 0) {
     // Retry
-    TorchCraft::ErrorT err;
+    torchcraft::fbs::ErrorT err;
     sendError(&err);
     zchunk_destroy(&chunk);
     if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
@@ -101,25 +101,25 @@ void ZMQ_server::connect()
   uint8_t* data = zchunk_data(chunk);
   size_t size = zchunk_size(chunk);
   flatbuffers::Verifier verifier(data, size);
-  if (!TorchCraft::VerifyMessageBuffer(verifier)) {
+  if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
     zchunk_destroy(&chunk);
     throw exception("ZMQ_server::connect(): invalid message.");
   }
 
-  auto msg = TorchCraft::GetMessage(data);
-  if (msg->msg_type() == TorchCraft::Any::HandshakeClient) {
-    if (!TorchCraft::VerifyAny(
-            verifier, msg->msg(), TorchCraft::Any::HandshakeClient)) {
+  auto msg = torchcraft::fbs::GetMessage(data);
+  if (msg->msg_type() == torchcraft::fbs::Any::HandshakeClient) {
+    if (!torchcraft::fbs::VerifyAny(
+            verifier, msg->msg(), torchcraft::fbs::Any::HandshakeClient)) {
       zchunk_destroy(&chunk);
       throw runtime_error("ZMQ_server::connect(): invalid message.");
     }
     handleReconnect(
-        reinterpret_cast<const TorchCraft::HandshakeClient*>(msg->msg()));
+        reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
   } else {
     zchunk_destroy(&chunk);
     throw logic_error(
         string("ZMQ_server::connect(): cannot handle message: ") +
-        TorchCraft::EnumNameAny(msg->msg_type()));
+        torchcraft::fbs::EnumNameAny(msg->msg_type()));
   }
 
   zchunk_destroy(&chunk);
@@ -145,23 +145,23 @@ void ZMQ_server::close()
   this->server_sock_connected = false;
 }
 
-void ZMQ_server::sendHandshake(const TorchCraft::HandshakeServerT* handshake) {
+void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake) {
   sendFBObject(this->server_sock, handshake);
 }
 
-void ZMQ_server::sendFrame(const TorchCraft::FrameT* frame) {
+void ZMQ_server::sendFrame(const torchcraft::fbs::FrameT* frame) {
   sendFBObject(this->server_sock, frame);
 }
 
-void ZMQ_server::sendPlayerLeft(const TorchCraft::PlayerLeftT* pl) {
+void ZMQ_server::sendPlayerLeft(const torchcraft::fbs::PlayerLeftT* pl) {
   sendFBObject(this->server_sock, pl);
 }
 
-void ZMQ_server::sendEndGame(const TorchCraft::EndGameT* endgame) {
+void ZMQ_server::sendEndGame(const torchcraft::fbs::EndGameT* endgame) {
   sendFBObject(this->server_sock, endgame);
 }
 
-void ZMQ_server::sendError(const TorchCraft::ErrorT* error) {
+void ZMQ_server::sendError(const torchcraft::fbs::ErrorT* error) {
   sendFBObject(this->server_sock, error);
 }
 
@@ -178,51 +178,51 @@ void ZMQ_server::receiveMessage()
   uint8_t *data = zchunk_data(chunk);
   size_t size = zchunk_size(chunk);
   flatbuffers::Verifier verifier(data, size);
-  if (!TorchCraft::VerifyMessageBuffer(verifier)) {
+  if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
     zchunk_destroy(&chunk);
     throw exception("ZMQ_server::receiveMessage(): invalid message.");
   }
 
-  auto msg = TorchCraft::GetMessage(data);
-  if (!TorchCraft::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
+  auto msg = torchcraft::fbs::GetMessage(data);
+  if (!torchcraft::fbs::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
     zchunk_destroy(&chunk);
     throw runtime_error("ZMQ_server::receiveMessage(): invalid message.");
   }
 
   switch (msg->msg_type()) {
-    case TorchCraft::Any::HandshakeClient: // reconnection
+    case torchcraft::fbs::Any::HandshakeClient: // reconnection
       handleReconnect(
-          reinterpret_cast<const TorchCraft::HandshakeClient*>(msg->msg()));
+          reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
       break;
-    case TorchCraft::Any::Commands:
-      handleCommands(reinterpret_cast<const TorchCraft::Commands*>(msg->msg()));
+    case torchcraft::fbs::Any::Commands:
+      handleCommands(reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
       break;
     default:
       zchunk_destroy(&chunk);
       throw runtime_error(
           string("ZMQ_server::receiveMessage(): cannot handle message: ") +
-          TorchCraft::EnumNameAny(msg->msg_type()));
+          torchcraft::fbs::EnumNameAny(msg->msg_type()));
   }
 
   zchunk_destroy(&chunk);
 }
 
-void ZMQ_server::handleReconnect(const TorchCraft::HandshakeClient* handshake) {
+void ZMQ_server::handleReconnect(const torchcraft::fbs::HandshakeClient* handshake) {
   if (handshake->protocol() != ZMQ_server::protocol_version) {
     throw logic_error(
         string("Wrong protocol version: ") + to_string(handshake->protocol()));
   }
   if (flatbuffers::IsFieldPresent(
-          handshake, TorchCraft::HandshakeClient::VT_MAP)) {
+          handshake, torchcraft::fbs::HandshakeClient::VT_MAP)) {
     controller->setMap(handshake->map()->str());
   }
   if (flatbuffers::IsFieldPresent(
-          handshake, TorchCraft::HandshakeClient::VT_WINDOW_SIZE)) {
+          handshake, torchcraft::fbs::HandshakeClient::VT_WINDOW_SIZE)) {
     controller->setWindowSize(pair<int, int>(
         handshake->window_size()->x(), handshake->window_size()->y()));
   }
   if (flatbuffers::IsFieldPresent(
-          handshake, TorchCraft::HandshakeClient::VT_WINDOW_POS)) {
+          handshake, torchcraft::fbs::HandshakeClient::VT_WINDOW_POS)) {
     controller->setWindowPos(pair<int, int>(
         handshake->window_size()->x(), handshake->window_size()->y()));
   }
@@ -234,8 +234,8 @@ void ZMQ_server::handleReconnect(const TorchCraft::HandshakeClient* handshake) {
     controller->setupHandshake();
 }
 
-void ZMQ_server::handleCommands(const TorchCraft::Commands* comms) {
-  if (!flatbuffers::IsFieldPresent(comms, TorchCraft::Commands::VT_COMMANDS)) {
+void ZMQ_server::handleCommands(const torchcraft::fbs::Commands* comms) {
+  if (!flatbuffers::IsFieldPresent(comms, torchcraft::fbs::Commands::VT_COMMANDS)) {
     return;
   }
   auto commands = comms->commands();

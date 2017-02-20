@@ -37,9 +37,9 @@ Controller::Controller(bool is_client) {
 
   this->zmq_server = std::make_unique<ZMQ_server>(this, config_->port);
 
-  tcframe_.screen_position = std::make_unique<TorchCraft::Vec2>();
-  tcframe_.visibility_size = std::make_unique<TorchCraft::Vec2>();
-  tcframe_.img_size = std::make_unique<TorchCraft::Vec2>();
+  tcframe_.screen_position = std::make_unique<torchcraft::fbs::Vec2>();
+  tcframe_.visibility_size = std::make_unique<torchcraft::fbs::Vec2>();
+  tcframe_.img_size = std::make_unique<torchcraft::fbs::Vec2>();
 }
 
 Controller::~Controller()
@@ -59,7 +59,7 @@ bool Controller::connect_server()
       + std::to_string(this->zmq_server->getPort()) + ".txt");
     Utils::bwlog(output_log, "Error on connection: %s", e.what());
     if (this->zmq_server->server_sock_connected) {
-      TorchCraft::ErrorT err;
+      torchcraft::fbs::ErrorT err;
       err.message = e.what();
       this->zmq_server->sendError(&err);
       this->zmq_server->close();
@@ -198,10 +198,10 @@ void Controller::initGame()
 
 void Controller::setupHandshake()
 {
-  TorchCraft::HandshakeServerT handshake;
+  torchcraft::fbs::HandshakeServerT handshake;
   handshake.lag_frames = BWAPI::Broodwar->getLatencyFrames();
   handshake.map_data = Utils::mapToVector();
-  handshake.map_size.reset(new TorchCraft::Vec2(BWAPI::Broodwar->mapHeight() * 4, BWAPI::Broodwar->mapWidth() * 4));
+  handshake.map_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapHeight() * 4, BWAPI::Broodwar->mapWidth() * 4));
   handshake.map_name = BWAPI::Broodwar->mapFileName();
   handshake.neutral_id = BWAPI::Broodwar->neutral()->getID();
   if (BWAPI::Broodwar->isReplay()) {
@@ -462,7 +462,7 @@ void Controller::endGame()
 {
   Utils::bwlog(output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
-  TorchCraft::EndGameT endg;
+  torchcraft::fbs::EndGameT endg;
   if (last_frame != nullptr) {
     std::ostringstream out;
     out << *last_frame;

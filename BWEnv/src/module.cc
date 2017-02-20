@@ -56,7 +56,7 @@ void Module::onPlayerLeft(BWAPI::Player player)
   // announcing that the other player has left.
   BWAPI::Broodwar->sendText("Goodbye %s!", player->getName().c_str());
 
-  TorchCraft::PlayerLeftT pl;
+  torchcraft::fbs::PlayerLeftT pl;
   pl.player_left = player->getName();
   this->c_->zmq_server->sendPlayerLeft(&pl);
   this->c_->zmq_server->receiveMessage();

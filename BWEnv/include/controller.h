@@ -24,6 +24,7 @@
 #include "messages_generated.h"
 
 class ZMQ_server;
+namespace replayer = torchcraft::replayer;
 
 enum Commands {
   // without args
@@ -93,7 +94,7 @@ private:
   bool too_long_play_ = false;
   bool exit_process_ = false;
   bool with_image_ = false;
-  TorchCraft::FrameT tcframe_;
+  torchcraft::fbs::FrameT tcframe_;
 };
 
 #endif // TORCHCRAFT_CONTROL_H_

@@ -44,22 +44,67 @@ class Client {
   };
 
  public:
+
+  // LIFECYCLE
+
   Client();
   ~Client();
   Client(const Client&) = delete;
   Client& operator=(const Client&) = delete;
 
-  bool connect(const std::string& hostname, int port);
+  // OPERATIONS
+
+  /// Create a socket connection and connect it to an endpoint specified by
+  /// a TCP address parametrized by a hostname and a port. The final endpoint
+  /// is defined as tcp://<hostname>:<port>
+  /// @param hostname [in] Hostname part of a TCP address for socket connection
+  /// @param port [in] Port part of a TCP address for socket connection
+  /// @param timeoutMs [in] Send / receive operation timeout in milliseconds
+  ///     (default = -1), the value is interpreted as follows:
+  ///    -1 = blocking operation
+  ///     0 = non-blocking operation without retries
+  ///    >0 = time (in milliseconds) after which the function returns an error,
+  ///         if the operation was not accomplished
+  /// @return true if the connection was established; false otherwise
+  bool connect(const std::string& hostname, int port, int timeoutMs = -1);
+
+  /// Indicates whether the connection was successfully established
+  /// @return true if the connection was successfully established;
+  ///     false otherwise
   bool connected() const {
     return conn_ != nullptr;
   }
+
+  /// Close the socket connection if it was previously successfully established
+  /// and destroy the associated socket
+  /// @return true if the connection was closed successfully; false if the
+  ///     connection did not exist
   bool close();
+
+  /// Perform handshake over the established connection.
+  /// @param updates [out] State field names that were updated from
+  ///     the handshake response
+  /// @param opts [in] Options to pass in the handshake message
+  ///     (default = Options())
+  /// @return true if the handshake succeeded; false otherwise
   bool init(std::vector<std::string>& updates, const Options& opts = Options());
+
+  /// Send a message containing commands over the established socket connection
+  /// @param commands [in] Commands to send over the socket connection
+  /// @return true if the send operation succeeded, false otherwise
   bool send(const std::vector<Command>& commands);
+
+  /// Receive a message containing state updates over the established socket
+  /// connection
+  /// @param updates [out] State field names that were updated from
+  ///     the received message
+  /// @return true if the receive operation succeeded, false otherwise
   bool receive(std::vector<std::string>& updates);
+
   std::string error() const {
     return error_;
   }
+
   State* state() const {
     return state_;
   }

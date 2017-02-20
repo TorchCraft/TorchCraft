@@ -68,23 +68,15 @@ function torchcraft:init(hostname, port)
     print('host: ' .. self.hostname .. ':' .. self.port)
 end
 
-function torchcraft:connect(port)
+function torchcraft:connect(port, timeoutMs)
     -- connect() should be called at the beginning of every game
     if self.hostname == nil or self.hostname == '' then
         self:init(nil, port)
     end
-    -- initialize socket connection
-    while not self.client:connected() do
-        local status, ret
-        status, ret = pcall(function()
-            return self.client:connect(self.hostname, self.port)
-        end)
-        if not status then
-            print('Socket error (' .. self.hostname .. ':' .. port ..
-                  '), retrying connection in 1 second: ', ret)
-            os.execute('sleep 1')
-        end
-    end
+    -- timeout for send / receive operations
+    timeoutMs = timeoutMs or -1
+    -- initialize socket connection, use the specified timeouts
+    self.client:connect(self.hostname, self.port, timeoutMs)
 
     self.state = self.client.state
 

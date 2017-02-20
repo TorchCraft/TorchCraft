@@ -63,13 +63,18 @@ void init() {
   client::BW::data::init();
 }
 
+//============================= LIFECYCLE ====================================
+
 Client::Client() : state_(new State()) {}
 
 Client::~Client() {
   state_->decref();
 }
 
-bool Client::connect(const std::string& hostname, int port) {
+//============================= OPERATIONS ===================================
+
+bool Client::connect(const std::string& hostname, int port,
+  int timeoutMs /* = -1 */) {
   clearError();
   if (conn_) {
     error_ = "Active connection present";
@@ -77,7 +82,7 @@ bool Client::connect(const std::string& hostname, int port) {
   }
 
   try {
-    conn_.reset(new Connection(hostname, port));
+    conn_.reset(new Connection(hostname, port, timeoutMs));
   } catch (zmq::error_t& e) {
     error_ = e.what();
     return false;
@@ -107,6 +112,7 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
     error_ = "No active connection";
     return false;
   }
+
   if (!conn_->send(fbb.GetBufferPointer(), fbb.GetSize())) {
     std::stringstream ss;
     ss << "Error sending init request: " << conn_->errmsg() << " ("
@@ -184,10 +190,6 @@ bool Client::receive(std::vector<std::string>& updates) {
   clearError();
   if (!conn_) {
     error_ = "No active connection";
-    return false;
-  }
-  if (!conn_->poll(30000)) {
-    error_ = "Timeout while waiting for server";
     return false;
   }
 

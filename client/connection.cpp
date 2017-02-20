@@ -14,15 +14,23 @@
 
 namespace client {
 
-Connection::Connection(const std::string& hostname, int port)
-    : sock_(ctx_, zmq::socket_type::req) {
+/////////////////////////////// PUBLIC ///////////////////////////////////////
+
+//============================= LIFECYCLE ====================================
+
+Connection::Connection(const std::string& hostname, int port,
+  int timeoutMs /* = -1 */) : sock_(ctx_, zmq::socket_type::req) {
   std::ostringstream ss;
   ss << "tcp://" << hostname << ":" << port;
+  sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_.setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
   sock_.connect(ss.str());
-}
+} // Connection
 
 Connection::Connection(Connection&& conn)
     : ctx_(std::move(conn.ctx_)), sock_(std::move(conn.sock_)) {}
+
+//============================= OPERATIONS ===================================
 
 bool Connection::send(const std::string& data) {
   clearError();
@@ -34,7 +42,7 @@ bool Connection::send(const std::string& data) {
     return false;
   }
   return true;
-}
+} // send
 
 bool Connection::send(const void* buf, size_t len) {
   clearError();
@@ -46,7 +54,7 @@ bool Connection::send(const void* buf, size_t len) {
     return false;
   }
   return true;
-}
+} // send
 
 bool Connection::receive(std::string& dest) {
   clearError();
@@ -60,7 +68,7 @@ bool Connection::receive(std::string& dest) {
 
   dest.assign(recvmsg_.data<char>(), recvmsg_.size());
   return true;
-}
+} // receive
 
 bool Connection::receive(std::vector<uint8_t>& dest) {
   clearError();
@@ -75,7 +83,7 @@ bool Connection::receive(std::vector<uint8_t>& dest) {
   auto d = recvmsg_.data<unsigned char>();
   dest.assign(d, d + recvmsg_.size());
   return true;
-}
+} // receive
 
 bool Connection::poll(int timeout) {
   short mask = ZMQ_POLLIN;

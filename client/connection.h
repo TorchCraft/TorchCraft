@@ -14,9 +14,7 @@
 namespace client {
 
 class Connection {
-
-  public:
-
+ public:
   // LIFECYCLE
 
   /// Creates a new socket and connects it to an endpoint specified

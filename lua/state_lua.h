@@ -17,7 +17,7 @@ extern "C" {
 #include <lua.h>
 
 int newState(lua_State* L);
-int pushState(lua_State* L, client::State* s = nullptr);
+int pushState(lua_State* L, torchcraft::State* s = nullptr);
 int freeState(lua_State* L);
 int gcState(lua_State* L);
 int indexState(lua_State* L);
@@ -42,8 +42,8 @@ const struct luaL_Reg state_m[] = {
 
 } // extern "C"
 
-namespace client {
-std::set<client::BW::UnitType> getConsideredTypes(lua_State* L, int index = -1);
+namespace torchcraft {
+std::set<torchcraft::BW::UnitType> getConsideredTypes(lua_State* L, int index = -1);
 
 void registerState(lua_State* L, int index);
 }

@@ -21,7 +21,7 @@ extern "C" {
 
 #include "frame.h"
 
-replayer::Frame* checkFrame(lua_State* L, int id = 1);
+torchcraft::replayer::Frame* checkFrame(lua_State* L, int id = 1);
 
 extern "C" int frameFromTable(lua_State* L);
 extern "C" int frameFromString(lua_State* L);
@@ -41,11 +41,11 @@ void setBool(lua_State* L, const char* key, bool v);
 bool getField(lua_State* L, const char* key);
 int getInt(lua_State* L, const char* key);
 bool getBool(lua_State* L, const char* key);
-void pushUnit(lua_State* L, const replayer::Unit& unit);
+void pushUnit(lua_State* L, const torchcraft::replayer::Unit& unit);
 
 // Lua tables from/to Frame class
-void toFrame(lua_State* L, int id, replayer::Frame& res);
-void pushFrame(lua_State* L, const replayer::Frame& res);
+void toFrame(lua_State* L, int id, torchcraft::replayer::Frame& res);
+void pushFrame(lua_State* L, const torchcraft::replayer::Frame& res);
 
 const struct luaL_Reg frame_m [] = {
   {"__gc", gcFrame},

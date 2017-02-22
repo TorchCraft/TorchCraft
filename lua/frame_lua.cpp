@@ -9,8 +9,8 @@
 
 #include "frame_lua.h"
 
-using namespace replayer;
 using namespace std;
+using namespace torchcraft::replayer;
 
 // Utility
 
@@ -36,7 +36,7 @@ extern "C" int frameFromTable(lua_State* L) {
   Frame *f = new Frame();
   toFrame(L, 1, *f);
 
-  auto f2 = (replayer::Frame **)lua_newuserdata(L, sizeof(replayer::Frame *));
+  auto f2 = (Frame **)lua_newuserdata(L, sizeof(Frame *));
   *f2 = f;
 
   luaL_getmetatable(L, "torchcraft.Frame");

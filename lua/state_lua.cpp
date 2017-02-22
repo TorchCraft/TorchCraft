@@ -15,12 +15,14 @@
 
 #include "frame_lua.h"
 
+namespace replayer = torchcraft::replayer;
+
 namespace {
 
-inline client::State* checkState(lua_State* L, int index = 1) {
+inline torchcraft::State* checkState(lua_State* L, int index = 1) {
   auto s = luaL_checkudata(L, index, "torchcraft.State");
   luaL_argcheck(L, s != nullptr, index, "'state' expected");
-  return *static_cast<client::State**>(s);
+  return *static_cast<torchcraft::State**>(s);
 }
 
 int push2DIntegerArray(
@@ -69,7 +71,7 @@ const std::set<std::string> stateMembers = {
 // index represents the index of the state userdata on the stack
 int pushMember(
     lua_State* L,
-    client::State* s,
+    torchcraft::State* s,
     const std::string& m,
     int index = 1) {
   if (m == "lag_frames") {
@@ -155,7 +157,7 @@ int pushMember(
     lua_createtable(L, types.size(), 0);
     int i = 1;
     for (auto ut : types) {
-      client::lua::pushValue(L, ut._to_integral());
+      torchcraft::lua::pushValue(L, ut._to_integral());
       lua_rawseti(L, -2, i++);
     }
   } else {
@@ -168,7 +170,7 @@ int pushMember(
 
 void pushFrameMember(
     lua_State* L,
-    client::State* s,
+    torchcraft::State* s,
     lua_CFunction f,
     int player) {
   lua_pushcfunction(L, f);
@@ -191,16 +193,16 @@ int newState(lua_State* L) {
   return pushState(L);
 }
 
-int pushState(lua_State* L, client::State* state) {
-  auto s = (client::State**)lua_newuserdata(L, sizeof(client::State*));
+int pushState(lua_State* L, torchcraft::State* state) {
+  auto s = (torchcraft::State**)lua_newuserdata(L, sizeof(torchcraft::State*));
   if (state == nullptr) {
     if (lua_gettop(L) == 1) {
-      *s = new client::State();
+      *s = new torchcraft::State();
     } else if (lua_gettop(L) == 2) {
-      *s = new client::State(lua_toboolean(L, 2));
+      *s = new torchcraft::State(lua_toboolean(L, 2));
     } else {
-      *s = new client::State(
-          lua_toboolean(L, 2), client::getConsideredTypes(L, 3));
+      *s = new torchcraft::State(
+          lua_toboolean(L, 2), torchcraft::getConsideredTypes(L, 3));
     }
   } else {
     *s = state;
@@ -223,7 +225,7 @@ int freeState(lua_State* L) {
 
 int gcState(lua_State* L) {
   auto s =
-      static_cast<client::State**>(luaL_checkudata(L, 1, "torchcraft.State"));
+      static_cast<torchcraft::State**>(luaL_checkudata(L, 1, "torchcraft.State"));
   assert(*s != nullptr);
   (*s)->decref();
   *s = nullptr;
@@ -305,7 +307,7 @@ int setconsiderState(lua_State* L) {
   if (lua_gettop(L) != 2 || !lua_istable(L, 2)) {
     return luaL_error(L, "Expected table argument");
   }
-  s->setOnlyConsiderTypes(client::getConsideredTypes(L));
+  s->setOnlyConsiderTypes(torchcraft::getConsideredTypes(L));
   return 0;
 }
 
@@ -361,7 +363,7 @@ int pushUpdatesState(
   return 1;
 }
 
-namespace client {
+namespace torchcraft {
 
 std::set<BW::UnitType> getConsideredTypes(lua_State* L, int index) {
   if (!lua_istable(L, index)) {
@@ -369,12 +371,12 @@ std::set<BW::UnitType> getConsideredTypes(lua_State* L, int index) {
     // does not return
   }
 
-  std::set<client::BW::UnitType> types;
+  std::set<torchcraft::BW::UnitType> types;
   lua_pushvalue(L, index);
   lua_pushnil(L);
   while (lua_next(L, -2) != 0) {
     auto ut =
-        client::BW::UnitType::_from_integral_nothrow(luaL_checkinteger(L, -1));
+        torchcraft::BW::UnitType::_from_integral_nothrow(luaL_checkinteger(L, -1));
     if (!ut) {
       luaL_error(L, "Invalid unit type: %d", lua_tointeger(L, -1));
     }

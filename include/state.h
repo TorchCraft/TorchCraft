@@ -25,7 +25,7 @@ struct EndGame;
 }
 }
 
-namespace client {
+namespace torchcraft {
 
 class State : public RefCounted {
  public:
@@ -123,4 +123,4 @@ class State : public RefCounted {
   std::set<BW::UnitType> onlyConsiderTypes_;
 };
 
-} // namespace client
+} // namespace torchcraft

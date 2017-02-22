@@ -26,7 +26,7 @@ extern "C" {
 #include "replayer.h"
 #include "state_lua.h"
 
-using namespace replayer;
+using torchcraft::replayer::GameStore;
 
 
 extern "C" int new_gameStore(lua_State* L) {
@@ -93,12 +93,12 @@ int registerReplayer(lua_State *L) {
 }
 
 int registerClient(lua_State* L) {
-  client::init();
+  torchcraft::init();
 
   lua_newtable(L);
-  client::registerClient(L, lua_gettop(L));
-  client::registerState(L, lua_gettop(L));
-  client::registerConstants(L, lua_gettop(L));
+  torchcraft::registerClient(L, lua_gettop(L));
+  torchcraft::registerState(L, lua_gettop(L));
+  torchcraft::registerConstants(L, lua_gettop(L));
   return 1;
 }
 
@@ -109,9 +109,7 @@ int registerClient(lua_State* L) {
  * all the c++ function for call from lua
  */
 extern "C" int luaopen_torchcraft_tc_lib(lua_State* L) {
-  lua_newtable(L);
   registerClient(L);
-  lua_setfield(L, -2, "client");
   registerReplayer(L);
   lua_setfield(L, -2, "replayer");
   return 1;

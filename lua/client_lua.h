@@ -39,6 +39,6 @@ const struct luaL_Reg client_m[] = {
 
 } // extern "C"
 
-namespace client {
+namespace torchcraft {
 void registerClient(lua_State* L, int index);
 }

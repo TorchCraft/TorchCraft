@@ -19,14 +19,14 @@
 
 namespace {
 
-inline client::Client* checkClient(lua_State* L, int index = 1) {
+inline torchcraft::Client* checkClient(lua_State* L, int index = 1) {
   auto s = luaL_checkudata(L, index, "torchcraft.Client");
   luaL_argcheck(L, s != nullptr, index, "'client' expected");
-  return *static_cast<client::Client**>(s);
+  return *static_cast<torchcraft::Client**>(s);
 }
 
-client::Client::Command parseCommand(const std::string& str) {
-  client::Client::Command comm;
+torchcraft::Client::Command parseCommand(const std::string& str) {
+  torchcraft::Client::Command comm;
   bool gotCode = false;
   std::istringstream ss(str);
   for (std::string arg; std::getline(ss, arg, ',');) {
@@ -44,9 +44,9 @@ client::Client::Command parseCommand(const std::string& str) {
   return comm;
 }
 
-std::vector<client::Client::Command> parseCommandString(
+std::vector<torchcraft::Client::Command> parseCommandString(
     const std::string& str) {
-  std::vector<client::Client::Command> comms;
+  std::vector<torchcraft::Client::Command> comms;
   std::istringstream ss(str);
   for (std::string part; std::getline(ss, part, ':');) {
     comms.emplace_back(parseCommand(part));
@@ -57,7 +57,7 @@ std::vector<client::Client::Command> parseCommandString(
 } // namespace
 
 int newClient(lua_State* L) {
-  client::Client* cl = new client::Client();
+  torchcraft::Client* cl = new torchcraft::Client();
   luaT_pushudata(L, cl, "torchcraft.Client");
 
   // Store Lua wrapped state in uservalue table so that all changes done by Lua
@@ -77,7 +77,7 @@ int freeClient(lua_State* L) {
 
 int gcClient(lua_State* L) {
   auto cl =
-      static_cast<client::Client**>(luaL_checkudata(L, 1, "torchcraft.Client"));
+      static_cast<torchcraft::Client**>(luaL_checkudata(L, 1, "torchcraft.Client"));
   assert(*cl != nullptr);
   delete *cl;
   *cl = nullptr;
@@ -131,7 +131,7 @@ int closeClient(lua_State* L) {
 
 int initClient(lua_State* L) {
   auto cl = checkClient(L);
-  client::Client::Options opts;
+  torchcraft::Client::Options opts;
   if (lua_gettop(L) > 1) {
     if (!lua_istable(L, 2)) {
       return luaL_error(L, "table argument expected");
@@ -171,7 +171,7 @@ int initClient(lua_State* L) {
 
     lua_getfield(L, 2, "only_consider_types");
     if (!lua_isnil(L, -1)) {
-      opts.only_consider_types = client::getConsideredTypes(L);
+      opts.only_consider_types = torchcraft::getConsideredTypes(L);
     }
     lua_pop(L, 1);
   }
@@ -192,7 +192,7 @@ int initClient(lua_State* L) {
 
 int sendClient(lua_State* L) {
   auto cl = checkClient(L);
-  std::vector<client::Client::Command> comms;
+  std::vector<torchcraft::Client::Command> comms;
 
   if (lua_istable(L, 2)) {
     lua_pushvalue(L, 2);
@@ -231,7 +231,7 @@ int receiveClient(lua_State* L) {
   return 1;
 }
 
-namespace client {
+namespace torchcraft {
 void registerClient(lua_State* L, int index) {
   luaT_newlocalmetatable(
       L,

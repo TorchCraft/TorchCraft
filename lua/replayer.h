@@ -25,6 +25,7 @@ extern "C" {
 #include "refcount.h"
 #include "frame.h"
 
+namespace torchcraft {
 namespace replayer {
 
   struct Map{
@@ -105,9 +106,10 @@ namespace replayer {
       friend std::istream& operator>>(std::istream& in, Replayer& o);
   };
 
-} // replayer
+} // namespace replayer
+} // namespace torchcraft
 
-replayer::Replayer* checkReplayer(lua_State* L, int id = 1);
+torchcraft::replayer::Replayer* checkReplayer(lua_State* L, int id = 1);
 
 extern "C" int newReplayer(lua_State* L);
 extern "C" int gcReplayer(lua_State* L);

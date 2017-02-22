@@ -12,7 +12,8 @@
 #include "frame_lua.h"
 
 using namespace std;
-using namespace replayer;
+namespace replayer = torchcraft::replayer;
+using replayer::Replayer;
 
 // Serialization
 

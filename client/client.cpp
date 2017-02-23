@@ -20,12 +20,7 @@
 namespace {
 
 std::string makeUid(size_t len = 6) {
-  static std::mt19937* rng = nullptr;
-  // Initialize random number generator
-  if (rng == nullptr) {
-    std::random_device rd;
-    rng = new std::mt19937(rd());
-  }
+  static std::mt19937 rng = std::mt19937(std::random_device()());
 
   static const char alphanum[] =
       "0123456789"
@@ -34,7 +29,7 @@ std::string makeUid(size_t len = 6) {
   std::uniform_int_distribution<int> dis(0, sizeof(alphanum) - 1);
   std::string s(len, 0);
   for (size_t i = 0; i < len; i++) {
-    s[i] = alphanum[dis(*rng)];
+    s[i] = alphanum[dis(rng)];
   }
   return s;
 }

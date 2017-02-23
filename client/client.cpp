@@ -23,18 +23,18 @@ std::string makeUid(size_t len = 6) {
   static std::mt19937* rng = nullptr;
   // Initialize random number generator
   if (rng == nullptr) {
-    std::random_device r;
-    std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
-    rng = new std::mt19937(seed);
+    std::random_device rd;
+    rng = new std::mt19937(rd());
   }
 
   static const char alphanum[] =
       "0123456789"
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
       "abcdefghijklmnopqrstuvwxyz";
+  std::uniform_int_distribution<int> dis(0, sizeof(alphanum) - 1);
   std::string s(len, 0);
   for (size_t i = 0; i < len; i++) {
-    s[i] = alphanum[(*rng)() % (sizeof(alphanum) - 1)];
+    s[i] = alphanum[dis(*rng)];
   }
   return s;
 }

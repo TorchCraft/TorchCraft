@@ -119,6 +119,7 @@ class Client {
   State* state_;
   bool sent_;
   std::string error_;
+  std::string uid_;
 };
 
 } // namespace torchcraft

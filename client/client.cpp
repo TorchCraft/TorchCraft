@@ -8,6 +8,7 @@
  */
 
 #include <iostream>
+#include <random>
 #include <sstream>
 
 #include "client.h"
@@ -18,9 +19,30 @@
 
 namespace {
 
+std::string makeUid(size_t len = 6) {
+  static std::mt19937* rng = nullptr;
+  // Initialize random number generator
+  if (rng == nullptr) {
+    std::random_device r;
+    std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
+    rng = new std::mt19937(seed);
+  }
+
+  static const char alphanum[] =
+      "0123456789"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+      "abcdefghijklmnopqrstuvwxyz";
+  std::string s(len, 0);
+  for (size_t i = 0; i < len; i++) {
+    s[i] = alphanum[(*rng)() % (sizeof(alphanum) - 1)];
+  }
+  return s;
+}
+
 void buildHandshakeMessage(
     flatbuffers::FlatBufferBuilder& fbb,
-    const torchcraft::Client::Options& opts) {
+    const torchcraft::Client::Options& opts,
+    const std::string* uid = nullptr) {
   torchcraft::fbs::HandshakeClientT hsc;
   hsc.protocol = 17;
   hsc.map = opts.initial_map;
@@ -35,14 +57,18 @@ void buildHandshakeMessage(
   hsc.micro_mode = opts.micro_battles;
 
   auto payload = torchcraft::fbs::HandshakeClient::Pack(fbb, &hsc);
-  auto root = torchcraft::fbs::CreateMessage(
-      fbb, torchcraft::fbs::Any::HandshakeClient, payload.Union());
+  auto root = torchcraft::fbs::CreateMessageDirect(
+      fbb,
+      torchcraft::fbs::Any::HandshakeClient,
+      payload.Union(),
+      uid ? uid->c_str() : nullptr);
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 }
 
 void buildCommandMessage(
     flatbuffers::FlatBufferBuilder& fbb,
-    const std::vector<torchcraft::Client::Command>& commands) {
+    const std::vector<torchcraft::Client::Command>& commands,
+    const std::string* uid = nullptr) {
   std::vector<flatbuffers::Offset<torchcraft::fbs::Command>> offsets;
   for (auto comm : commands) {
     offsets.push_back(torchcraft::fbs::CreateCommandDirect(
@@ -50,8 +76,11 @@ void buildCommandMessage(
   }
 
   auto payload = torchcraft::fbs::CreateCommandsDirect(fbb, &offsets);
-  auto root = torchcraft::fbs::CreateMessage(
-      fbb, torchcraft::fbs::Any::Commands, payload.Union());
+  auto root = torchcraft::fbs::CreateMessageDirect(
+      fbb,
+      torchcraft::fbs::Any::Commands,
+      payload.Union(),
+      uid ? uid->c_str() : nullptr);
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 }
 
@@ -85,6 +114,7 @@ bool Client::connect(
 
   try {
     conn_.reset(new Connection(hostname, port, timeoutMs));
+    uid_ = makeUid();
   } catch (zmq::error_t& e) {
     error_ = e.what();
     return false;
@@ -107,7 +137,7 @@ bool Client::close() {
 
 bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   flatbuffers::FlatBufferBuilder fbb;
-  buildHandshakeMessage(fbb, opts);
+  buildHandshakeMessage(fbb, opts, &uid_);
 
   clearError();
   if (!conn_) {
@@ -171,7 +201,7 @@ bool Client::send(const std::vector<Command>& commands) {
   }
 
   flatbuffers::FlatBufferBuilder fbb;
-  buildCommandMessage(fbb, commands);
+  buildCommandMessage(fbb, commands, &uid_);
 
   if (!conn_->send(fbb.GetBufferPointer(), fbb.GetSize())) {
     std::stringstream ss;

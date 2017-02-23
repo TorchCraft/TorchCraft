@@ -14,6 +14,10 @@
 
 namespace torchcraft {
 
+///////////////////////// LOCAL DECLARATIONS /////////////////////////////////
+
+static const std::string ERRMSG_TIMEOUT_EXCEEDED = "Timeout exceeded";
+
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
 //============================= LIFECYCLE ====================================
@@ -38,54 +42,70 @@ Connection::Connection(Connection&& conn)
 bool Connection::send(const std::string& data) {
   clearError();
   try {
-    sock_.send(data.begin(), data.end());
+    bool res = sock_.send(data.begin(), data.end());
+    if (!res) {
+      errnum_ = EAGAIN;
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
+    }
+    return res;
   } catch (zmq::error_t& e) {
     errnum_ = e.num();
     errmsg_ = e.what();
     return false;
   }
-  return true;
 } // send
 
 bool Connection::send(const void* buf, size_t len) {
   clearError();
   try {
-    sock_.send(buf, len);
+    bool res = sock_.send(buf, len);
+    if (!res) {
+      errnum_ = EAGAIN;
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
+    }
+    return res;
   } catch (zmq::error_t& e) {
     errnum_ = e.num();
     errmsg_ = e.what();
     return false;
   }
-  return true;
 } // send
 
 bool Connection::receive(std::string& dest) {
   clearError();
   try {
-    sock_.recv(&recvmsg_);
+    bool res = sock_.recv(&recvmsg_);
+    if (res) {
+      dest.assign(recvmsg_.data<char>(), recvmsg_.size());
+    } else {
+      errnum_ = EAGAIN;
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
+    }
+    return res;
   } catch (zmq::error_t& e) {
     errnum_ = e.num();
     errmsg_ = e.what();
     return false;
   }
-
-  dest.assign(recvmsg_.data<char>(), recvmsg_.size());
-  return true;
 } // receive
 
 bool Connection::receive(std::vector<uint8_t>& dest) {
   clearError();
   try {
-    sock_.recv(&recvmsg_);
+    bool res = sock_.recv(&recvmsg_);
+    if (res) {
+      auto d = recvmsg_.data<unsigned char>();
+      dest.assign(d, d + recvmsg_.size());
+    } else {
+      errnum_ = EAGAIN;
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
+    }
+    return res;
   } catch (zmq::error_t& e) {
     errnum_ = e.num();
     errmsg_ = e.what();
     return false;
   }
-
-  auto d = recvmsg_.data<unsigned char>();
-  dest.assign(d, d + recvmsg_.size());
-  return true;
 } // receive
 
 bool Connection::poll(int timeout) {

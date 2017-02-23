@@ -14,6 +14,10 @@
 
 namespace torchcraft {
 
+///////////////////////// LOCAL DECLARATIONS /////////////////////////////////
+
+static const std::string ERRMSG_TIMEOUT_EXCEEDED = "Timeout exceeded";
+
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 
 //============================= LIFECYCLE ====================================
@@ -41,7 +45,7 @@ bool Connection::send(const std::string& data) {
     bool res = sock_.send(data.begin(), data.end());
     if (!res) {
       errnum_ = EAGAIN;
-      errmsg_ = "Timeout exceeded";
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
     }
     return res;
   } catch (zmq::error_t& e) {
@@ -57,7 +61,7 @@ bool Connection::send(const void* buf, size_t len) {
     bool res = sock_.send(buf, len);
     if (!res) {
       errnum_ = EAGAIN;
-      errmsg_ = "Timeout exceeded";
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
     }
     return res;
   } catch (zmq::error_t& e) {
@@ -75,7 +79,7 @@ bool Connection::receive(std::string& dest) {
       dest.assign(recvmsg_.data<char>(), recvmsg_.size());
     } else {
       errnum_ = EAGAIN;
-      errmsg_ = "Timeout exceeded";
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
     }
     return res;
   } catch (zmq::error_t& e) {
@@ -94,7 +98,7 @@ bool Connection::receive(std::vector<uint8_t>& dest) {
       dest.assign(d, d + recvmsg_.size());
     } else {
       errnum_ = EAGAIN;
-      errmsg_ = "Timeout exceeded";
+      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
     }
     return res;
   } catch (zmq::error_t& e) {

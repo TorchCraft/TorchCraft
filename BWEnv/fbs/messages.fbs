@@ -86,6 +86,7 @@ union Any {
 
 table Message {
   msg:Any;
+  uid:string; // sender ID
 }
 
 root_type Message;

@@ -760,6 +760,7 @@ inline flatbuffers::Offset<Error> CreateError(flatbuffers::FlatBufferBuilder &_f
 struct MessageT : public flatbuffers::NativeTable {
   typedef Message TableType;
   AnyUnion msg;
+  std::string uid;
   MessageT() {}
 };
 
@@ -767,17 +768,22 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef MessageT NativeTableType;
   enum {
     VT_MSG_TYPE = 4,
-    VT_MSG = 6
+    VT_MSG = 6,
+    VT_UID = 8
   };
   Any msg_type() const { return static_cast<Any>(GetField<uint8_t>(VT_MSG_TYPE, 0)); }
   bool mutate_msg_type(Any _msg_type) { return SetField(VT_MSG_TYPE, static_cast<uint8_t>(_msg_type)); }
   const void *msg() const { return GetPointer<const void *>(VT_MSG); }
   void *mutable_msg() { return GetPointer<void *>(VT_MSG); }
+  const flatbuffers::String *uid() const { return GetPointer<const flatbuffers::String *>(VT_UID); }
+  flatbuffers::String *mutable_uid() { return GetPointer<flatbuffers::String *>(VT_UID); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_MSG_TYPE) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_MSG) &&
            VerifyAny(verifier, msg(), msg_type()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_UID) &&
+           verifier.Verify(uid()) &&
            verifier.EndTable();
   }
   MessageT *UnPack(const flatbuffers::resolver_function_t *resolver = nullptr) const;
@@ -789,21 +795,31 @@ struct MessageBuilder {
   flatbuffers::uoffset_t start_;
   void add_msg_type(Any msg_type) { fbb_.AddElement<uint8_t>(Message::VT_MSG_TYPE, static_cast<uint8_t>(msg_type), 0); }
   void add_msg(flatbuffers::Offset<void> msg) { fbb_.AddOffset(Message::VT_MSG, msg); }
+  void add_uid(flatbuffers::Offset<flatbuffers::String> uid) { fbb_.AddOffset(Message::VT_UID, uid); }
   MessageBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   MessageBuilder &operator=(const MessageBuilder &);
   flatbuffers::Offset<Message> Finish() {
-    auto o = flatbuffers::Offset<Message>(fbb_.EndTable(start_, 2));
+    auto o = flatbuffers::Offset<Message>(fbb_.EndTable(start_, 3));
     return o;
   }
 };
 
 inline flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder &_fbb,
     Any msg_type = Any::NONE,
-    flatbuffers::Offset<void> msg = 0) {
+    flatbuffers::Offset<void> msg = 0,
+    flatbuffers::Offset<flatbuffers::String> uid = 0) {
   MessageBuilder builder_(_fbb);
+  builder_.add_uid(uid);
   builder_.add_msg(msg);
   builder_.add_msg_type(msg_type);
   return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Message> CreateMessageDirect(flatbuffers::FlatBufferBuilder &_fbb,
+    Any msg_type = Any::NONE,
+    flatbuffers::Offset<void> msg = 0,
+    const char *uid = nullptr) {
+  return CreateMessage(_fbb, msg_type, msg, uid ? _fbb.CreateString(uid) : 0);
 }
 
 inline flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder &_fbb, const MessageT *_o, const flatbuffers::rehasher_function_t *rehasher = nullptr);
@@ -995,6 +1011,7 @@ inline MessageT *Message::UnPack(const flatbuffers::resolver_function_t *resolve
   auto _o = new MessageT();
   { auto _e = msg_type(); _o->msg.type = _e; };
   { auto _e = msg(); if (_e) _o->msg.table = AnyUnion::UnPack(_e, msg_type(), resolver); };
+  { auto _e = uid(); if (_e) _o->uid = _e->str(); };
   return _o;
 }
 
@@ -1006,7 +1023,8 @@ inline flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder
   (void)rehasher;
   return CreateMessage(_fbb,
     _o->msg.type,
-    _o->msg.Pack(_fbb));
+    _o->msg.Pack(_fbb),
+    _o->uid.size() ? _fbb.CreateString(_o->uid) : 0);
 }
 
 inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *union_obj, Any type) {

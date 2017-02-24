@@ -9,6 +9,8 @@
 
 #include "gamestore.h"
 
+#include "replayer_lua.h"
+
 using namespace std;
 namespace replayer = torchcraft::replayer;
 using replayer::GameStore;

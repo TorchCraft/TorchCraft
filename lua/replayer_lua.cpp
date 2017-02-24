@@ -7,88 +7,12 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#include "replayer.h"
+#include "replayer_lua.h"
 
 #include "frame_lua.h"
 
 using namespace std;
-namespace replayer = torchcraft::replayer;
-using replayer::Replayer;
-
-// Serialization
-
-ostream& replayer::operator<<(ostream& out, const replayer::Replayer& o) {
-  auto height = THByteTensor_size(o.map.data, 0);
-  auto width = THByteTensor_size(o.map.data, 1);
-  auto data = THByteTensor_data(o.map.data);
-
-  out << height << " " << width << " ";
-  for(int y = 0; y < height; y++) {
-    for(int x = 0; x < width; x++) {
-      out << data[y * width + x] << " ";
-    }
-  }
-
-  out << o.frames.size() << " ";
-  for (auto& f : o.frames) {
-    out << *f << " ";
-  }
-
-  out<< o.numUnits.size() << " ";
-  for (const auto& nu : o.numUnits) {
-    out << nu.first << " " << nu.second << " ";
-  }
-
-  return out;
-}
-
-istream& replayer::operator>>(istream& in, replayer::Replayer& o) {
-  // WARNING: cases were observed where this operator left a Replayer
-  // that was in a corrupted state, and would produce a segfault
-  // if we tried to delete it.
-  // Cause: invalid data file? I/O error? or a bug in the code?
-
-  int height, width;
-  in >> height >> width;
-  if (height <= 0 || width <= 0)
-    throw std::runtime_error("Corrupted replay: invalid map size");
-  uint8_t* data = (uint8_t*) THAlloc(sizeof(uint8_t) * height * width);
-  for(int y = 0; y < height; y++) {
-    for(int x = 0; x < width; x++) {
-      in >> data[y * width + x];
-    }
-  }
-  o.setMap(height, width, data);
-  int nFrames;
-  in >> nFrames;
-  if (nFrames < 0) throw std::runtime_error("Corrupted replay: nFrames < 0");
-  o.frames.resize(nFrames);
-  for (size_t i = 0; i < nFrames; i++) {
-    o.frames[i] = new Frame();
-    in >> *o.frames[i];
-  }
-
-  int s;
-  in >> s;
-  if (s < 0) throw std::runtime_error("Corrupted replay: s < 0");
-  int32_t key, val;
-  for (auto i = 0; i < s; i++) {
-    in >> key >> val;
-    o.numUnits[key] = val;
-  }
-
-  return in;
-}
-
-// Utility
-
-replayer::Replayer* checkReplayer(lua_State* L, int id) {
-  void *r = luaL_checkudata(L, id, "torchcraft.Replayer");
-  luaL_argcheck(L, r != nullptr, id, "'replayer' expected");
-  return *(replayer::Replayer**) r;
-}
-
-// Constructor/Destructor/Load/Save
+using namespace torchcraft::replayer;
 
 extern "C" int newReplayer(lua_State* L) {
   Replayer **r = (Replayer **)lua_newuserdata(L, sizeof(Replayer *));
@@ -101,7 +25,7 @@ extern "C" int newReplayer(lua_State* L) {
 }
 
 extern "C" int gcReplayer(lua_State* L) {
-  auto r = (replayer::Replayer**)luaL_checkudata(L, 1, "torchcraft.Replayer");
+  auto r = (Replayer**)luaL_checkudata(L, 1, "torchcraft.Replayer");
 
   assert(*r != nullptr);
   (*r)->decref();
@@ -150,7 +74,7 @@ extern "C" int replayerSave(lua_State* L) {
 
 extern "C" int replayerGetFrame(lua_State* L) {
   auto r = checkReplayer(L);
-  auto f = (replayer::Frame **)lua_newuserdata(L, sizeof(replayer::Frame *));
+  auto f = (Frame **)lua_newuserdata(L, sizeof(Frame *));
   size_t id = luaL_checkint(L, 2) - 1;
   luaL_argcheck(L, id >= 0 && id < r->size(), 2, "invalid index");
 
@@ -206,3 +130,12 @@ extern "C" int replayerPush(lua_State* L) {
   r->push(f);
   return 0;
 }
+
+// Utility
+
+Replayer* checkReplayer(lua_State* L, int id) {
+  void *r = luaL_checkudata(L, id, "torchcraft.Replayer");
+  luaL_argcheck(L, r != nullptr, id, "'replayer' expected");
+  return *(Replayer**) r;
+}
+

@@ -27,7 +27,7 @@ ENDIF()
 SET_TARGET_PROPERTIES(torchcraft PROPERTIES
     VERSION   1.0.2
     SOVERSION 1.0.2)
-TARGET_LINK_LIBRARIES(torchcraft zmq)
+TARGET_LINK_LIBRARIES(torchcraft TH luaT zmq)
 INSTALL(FILES ${headers}
         DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"
 )

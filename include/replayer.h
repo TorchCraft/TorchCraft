@@ -11,10 +11,6 @@
 
 extern "C" {
 #include <TH/TH.h>
-#include <lua.h>
-#include <luaT.h>
-#include <lauxlib.h>
-#include <lualib.h>
 }
 
 #include <vector>
@@ -24,12 +20,6 @@ extern "C" {
 
 #include "refcount.h"
 #include "frame.h"
-
-#ifdef _MSC_VER
-typedef unsigned int uint32_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-#endif
 
 namespace torchcraft {
   namespace replayer {

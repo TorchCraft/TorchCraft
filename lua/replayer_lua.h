@@ -9,6 +9,13 @@
 
 #pragma once
 
+extern "C" {
+#include <lua.h>
+#include <luaT.h>
+#include <lauxlib.h>
+#include <lualib.h>
+}
+
 #include <cassert>
 
 #include "replayer.h"

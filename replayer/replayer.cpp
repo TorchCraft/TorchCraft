@@ -75,6 +75,3 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
 
   return in;
 }
-
-// Constructor/Destructor/Load/Save
-

@@ -20,6 +20,7 @@ std::ostream& replayer::operator<<(
   auto width = THByteTensor_size(o.map.data, 1);
   auto data = THByteTensor_data(o.map.data);
 
+  if (o.keyframe != 0) out << 0 << " " << o.keyframe << " ";
   out << height << " " << width << " ";
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
@@ -27,9 +28,11 @@ std::ostream& replayer::operator<<(
     }
   }
 
+  auto kf = o.keyframe == 0 ? 1 : o.keyframe;
   out << o.frames.size() << " ";
-  for (auto& f : o.frames) {
-    out << *f << " ";
+  for (size_t i = 0; i < o.frames.size(); i++) {
+    if (i % kf == 0) out << *o.frames[i] << " ";
+    else out << replayer::frame_diff(o.frames[i], o.frames[i - 1]) << " ";
   }
 
   out << o.numUnits.size() << " ";
@@ -46,8 +49,17 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
   // if we tried to delete it.
   // Cause: invalid data file? I/O error? or a bug in the code?
 
-  int height, width;
-  in >> height >> width;
+  int32_t diffed;
+  int32_t height, width;
+  in >> diffed;
+
+  if (diffed == 0) in >> o.keyframe >> height >> width;
+  else {
+    height = diffed;
+    in >> width;
+    o.keyframe = 0;
+  }
+  diffed = (diffed == 0); // Every kf is a Frame, others are frame diffs
   if (height <= 0 || width <= 0)
     throw std::runtime_error("Corrupted replay: invalid map size");
   uint8_t* data = (uint8_t*)THAlloc(sizeof(uint8_t) * height * width);
@@ -57,14 +69,27 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
     }
   }
   o.setMap(height, width, data);
-  int nFrames;
+  size_t nFrames;
   in >> nFrames;
   if (nFrames < 0)
     throw std::runtime_error("Corrupted replay: nFrames < 0");
   o.frames.resize(nFrames);
   for (size_t i = 0; i < nFrames; i++) {
-    o.frames[i] = new Frame();
-    in >> *o.frames[i];
+    if (o.keyframe == 0) {
+      o.frames[i] = new Frame();
+      in >> *o.frames[i];
+    }
+    else {
+      if (i % o.keyframe == 0) {
+        o.frames[i] = new Frame();
+        in >> *o.frames[i];
+      }
+      else {
+        replayer::FrameDiff du;
+        in >> du;
+        o.frames[i] = replayer::frame_undiff(&du, o.frames[i-1]);
+      }
+    }
   }
 
   int s;

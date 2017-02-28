@@ -7,6 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#include <algorithm>
+
 #include "frame.h"
 
 namespace replayer = torchcraft::replayer;
@@ -84,6 +86,92 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Bullet& o) {
 
 std::ostream& replayer::operator<<(
     std::ostream& out,
+    const replayer::Action& o) {
+  out << o.uid << " " << o.aid << " " << o.action.size() << " ";
+  for (auto& a : o.action) {
+    out << a;
+  }
+  return out;
+}
+
+std::istream& replayer::operator>>(std::istream& in, replayer::Action& o) {
+  in >> o.uid >> o.aid;
+  int sizeA;
+  in >> sizeA;
+  if (sizeA < 0)
+    throw std::runtime_error("Corrupted replay: sizeA < 0");
+
+  o.action.resize(sizeA);
+  for (int32_t k = 0; k < sizeA; k++) {
+    in >> o.action[k];
+  }
+  return in;
+}
+
+void writeTail(
+    std::ostream& out,
+    const std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
+    const std::unordered_map<int32_t, replayer::Resources>& resources,
+    const std::vector<replayer::Bullet>& bullets) {
+  out << actions.size() << " ";
+  for (auto& v : actions) {
+    out << v.first << " " << v.second.size() << " ";
+    for (auto& u : v.second) {
+      out << u << " ";
+    }
+  }
+  out << resources.size() << " ";
+  for (auto& r : resources) {
+    out << r.first << " " << r.second << " ";
+  }
+  out << bullets.size();
+  for (auto& b : bullets) {
+    out << " " << b;
+  }
+}
+
+void readTail(
+    std::istream& in,
+    std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
+    std::unordered_map<int32_t, replayer::Resources>& resources,
+    std::vector<replayer::Bullet>& bullets) {
+  int nPlayer, nBullets;
+
+  in >> nPlayer;
+  if (nPlayer < 0)
+    throw std::runtime_error("Corrupted replay: actions nPlayer < 0");
+  for (int32_t i = 0; i < nPlayer; i++) {
+    int idPlayer, nActions;
+    in >> idPlayer >> nActions;
+    if (nActions < 0)
+      throw std::runtime_error("Corrupted replay: nActions < 0");
+    actions[idPlayer] = std::vector<replayer::Action>();
+    actions[idPlayer].resize(nActions);
+    for (int32_t j = 0; j < nActions; j++) {
+      in >> actions[idPlayer][j];
+    }
+  }
+
+  in >> nPlayer;
+  if (nPlayer < 0)
+    throw std::runtime_error("Corrupted replay: resources nPlayer < 0");
+  for (int32_t i = 0; i < nPlayer; i++) {
+    int32_t idPlayer;
+    in >> idPlayer;
+    in >> resources[idPlayer];
+  }
+
+  in >> nBullets;
+  if (nBullets < 0)
+    throw std::runtime_error("Corrupted replay: nBullets < 0");
+  bullets.resize(nBullets);
+  for (int32_t i = 0; i < nBullets; i++) {
+    in >> bullets[i];
+  }
+}
+
+std::ostream& replayer::operator<<(
+    std::ostream& out,
     const replayer::Frame& o) {
   out << o.units.size() << " ";
   for (auto& v : o.units) {
@@ -92,30 +180,15 @@ std::ostream& replayer::operator<<(
       out << u << " ";
     }
   }
-  out << o.actions.size() << " ";
-  for (auto& v : o.actions) {
-    out << v.first << " " << v.second.size() << " ";
-    for (auto& u : v.second) {
-      out << u.uid << " " << u.aid << " " << u.action.size() << " ";
-      for (auto& a : u.action) {
-        out << a << " ";
-      }
-    }
-  }
-  out << o.resources.size() << " ";
-  for (auto& r : o.resources) {
-    out << r.first << " " << r.second << " ";
-  }
-  out << o.bullets.size() << " ";
-  for (auto& b : o.bullets) {
-    out << b << " ";
-  }
-  out << o.reward << " " << o.is_terminal;
+
+  writeTail(out, o.actions, o.resources, o.bullets);
+
+  out << " " << o.reward << " " << o.is_terminal;
   return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
-  int nPlayer, nBullets;
+  int nPlayer;
 
   in >> nPlayer;
   if (nPlayer < 0)
@@ -132,46 +205,289 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
     }
   }
 
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: actions nPlayer < 0");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int32_t idPlayer, nActions;
-    in >> idPlayer >> nActions;
-    if (nActions < 0)
-      throw std::runtime_error("Corrupted replay: nActions < 0");
-    o.actions[idPlayer] = std::vector<replayer::Action>();
-    o.actions[idPlayer].resize(nActions);
-    for (int32_t j = 0; j < nActions; j++) {
-      in >> o.actions[idPlayer][j].uid >> o.actions[idPlayer][j].aid;
-      int sizeA;
-      in >> sizeA;
-      if (sizeA < 0)
-        throw std::runtime_error("Corrupted replay: sizeA < 0");
+  readTail(in, o.actions, o.resources, o.bullets);
 
-      o.actions[idPlayer][j].action.resize(sizeA);
-      for (int32_t k = 0; k < sizeA; k++) {
-        in >> o.actions[idPlayer][j].action[k];
+  in >> o.reward >> o.is_terminal;
+  return in;
+}
+
+namespace detail = replayer::detail;
+// This macro maps the member variables of Unit to some IDs
+#define DOALL(F)       \
+  F(x, 0)              \
+  F(y, 1)              \
+  F(health, 2)         \
+  F(max_health, 3)     \
+  F(shield, 4)         \
+  F(max_shield, 5)     \
+  F(energy, 6)         \
+  F(maxCD, 7)          \
+  F(groundCD, 8)       \
+  F(airCD, 9)          \
+  F(idle, 10)          \
+  F(visible, 11)       \
+  F(type, 12)          \
+  F(armor, 13)         \
+  F(shieldArmor, 14)   \
+  F(size, 15)          \
+  F(pixel_x, 16)       \
+  F(pixel_y, 17)       \
+  F(pixel_size_x, 18)  \
+  F(pixel_size_y, 19)  \
+  F(groundATK, 20)     \
+  F(airATK, 21)        \
+  F(groundDmgType, 22) \
+  F(airDmgType, 23)    \
+  F(groundRange, 24)   \
+  F(airRange, 25)      \
+  F(playerId, 26)      \
+  F(resources, 27)
+
+#define DOALL_ON_ORDER(F) \
+  F(first_frame, 0)       \
+  F(type, 1)              \
+  F(targetId, 2)          \
+  F(targetX, 3)           \
+  F(targetY, 4)
+
+replayer::FrameDiff replayer::frame_diff(
+    replayer::Frame& lhs,
+    replayer::Frame& rhs) {
+  return replayer::frame_diff(&lhs, &rhs);
+}
+
+replayer::FrameDiff replayer::frame_diff(
+    replayer::Frame* lhs,
+    replayer::Frame* rhs) {
+  replayer::FrameDiff df;
+  df.reward = lhs->reward;
+  df.is_terminal = lhs->is_terminal;
+  df.bullets = lhs->bullets;
+  df.actions = lhs->actions;
+  df.resources = lhs->resources;
+  for (auto it : lhs->units) { // Iterates across number of players
+    // We assume the number of players are the same.
+    // I think people never run out of units (or they lose)
+    df.pids.push_back(it.first);
+
+    // Set up the units list
+    df.units.emplace_back();
+    std::vector<detail::UnitDiff>& ul = df.units.back();
+
+    auto lhsu = it.second;
+    auto rhsu = rhs->units.at(it.first);
+    std::sort(lhsu.begin(), lhsu.end(), detail::orderUnitByiD);
+    std::sort(rhsu.begin(), rhsu.end(), detail::orderUnitByiD);
+    auto rit = rhsu.begin();
+    for (auto lit : lhsu) {
+      while (rit != rhsu.end() && lit.id > rit->id)
+        rit++;
+      ul.emplace_back();
+      detail::UnitDiff& du = ul.back();
+      du.id = lit.id;
+      du.velocityX = lit.velocityX;
+      du.velocityY = lit.velocityY;
+      du.order_size = lit.orders.size();
+      if (rit != rhsu.end() &&
+          lit.id == rit->id) { // Unit exists in both frames
+        int32_t buffer = 0;
+// Fill out diffs for the int32_t variables
+#define GEN_VAR(NAME, NUM)          \
+  buffer = lit.NAME - rit->NAME;    \
+  if (buffer != 0) {                \
+    du.var_ids.push_back(NUM);      \
+    du.var_diffs.push_back(buffer); \
+  }
+        DOALL(GEN_VAR)
+#undef GEN_VAR
+        // Fill out diffs for orders
+        for (size_t i = 0; i < lit.orders.size(); i++) {
+#define GEN_VAR(NAME, NUM)                           \
+  buffer = lit.orders[i].NAME - rit->orders[i].NAME; \
+  if (buffer != 0) {                                 \
+    du.order_ids.push_back(5 * i + NUM);             \
+    du.order_diffs.push_back(buffer);                \
+  }
+          DOALL_ON_ORDER(GEN_VAR)
+#undef GEN_VAR
+        }
+      } else { // Unit only exist in latter frame;
+// Fill out diffs for the int32_t variables
+#define GEN_VAR(NAME, NUM)   \
+  du.var_ids.push_back(NUM); \
+  du.var_diffs.push_back(lit.NAME);
+        DOALL(GEN_VAR)
+#undef GEN_VAR
+        // Fill out diffs for orders
+        for (size_t i = 0; i < lit.orders.size(); i++) {
+#define GEN_VAR(NAME, NUM)             \
+  du.order_ids.push_back(5 * i + NUM); \
+  du.order_diffs.push_back(lit.orders[i].NAME);
+          DOALL_ON_ORDER(GEN_VAR)
+#undef GEN_VAR
+        }
+      } // end if
+    } // end loop over units
+  } // end loop over players
+
+  return df;
+}
+
+replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
+  auto f = new replayer::Frame();
+  f->reward = df->reward;
+  f->is_terminal = df->is_terminal;
+  f->bullets = df->bullets;
+  f->actions = df->actions;
+  f->resources = df->resources;
+  for (size_t i = 0; i < df->pids.size(); i++) {
+    auto pid = df->pids[i];
+    f->units[pid] = std::vector<replayer::Unit>();
+
+    auto f_units = frame->units.at(pid);
+    std::sort(f_units.begin(), f_units.end(), detail::orderUnitByiD);
+
+    // Should be in order
+    auto fit = f_units.begin();
+    for (auto du : df->units[i]) {
+      while (fit != f_units.end() && fit->id < du.id)
+        fit++;
+
+      if (fit != f_units.end() && du.id == fit->id)
+        f->units[pid].emplace_back(*fit);
+      else
+        f->units[pid].emplace_back();
+
+      replayer::Unit& u = f->units[pid].back();
+      u.id = du.id;
+      u.velocityX = du.velocityX;
+      u.velocityY = du.velocityY;
+
+      for (size_t k = 0; k < du.var_diffs.size(); k++) {
+        switch (du.var_ids[k]) { // assumes int32_t are 0 initted
+#define SWITCHES(NAME, NUM)    \
+  case NUM:                    \
+    u.NAME += du.var_diffs[k]; \
+    break;
+          DOALL(SWITCHES)
+#undef SWITCHES
+        }
+      }
+
+      u.orders.resize(du.order_size);
+      for (size_t k = 0; k < du.order_diffs.size(); k++) {
+        auto order_n = du.order_ids[k] / 5;
+        auto field_n = du.order_ids[k] % 5;
+        switch (field_n) {
+#define SWITCHES(NAME, NUM)                      \
+  case NUM:                                      \
+    u.orders[order_n].NAME += du.order_diffs[k]; \
+    break;
+          DOALL_ON_ORDER(SWITCHES)
+#undef SWITCHES
+        }
       }
     }
   }
 
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: resources nPlayer < 0");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int32_t idPlayer;
-    in >> idPlayer;
-    in >> o.resources[idPlayer];
-  }
+  return f;
+}
 
-  in >> nBullets;
-  if (nBullets < 0)
-    throw std::runtime_error("Corrupted replay: nBullets < 0");
-  o.bullets.resize(nBullets);
-  for (int32_t i = 0; i < nBullets; i++) {
-    in >> o.bullets[i];
+replayer::Frame* replayer::frame_undiff(
+    replayer::FrameDiff& lhs,
+    replayer::Frame& rhs) {
+  return detail::add(&rhs, &lhs);
+}
+
+replayer::Frame* replayer::frame_undiff(
+    replayer::Frame& lhs,
+    replayer::FrameDiff& rhs) {
+  return detail::add(&lhs, &rhs);
+}
+
+replayer::Frame* replayer::frame_undiff(
+    replayer::FrameDiff* lhs,
+    replayer::Frame* rhs) {
+  return detail::add(rhs, lhs);
+}
+
+replayer::Frame* replayer::frame_undiff(
+    replayer::Frame* lhs,
+    replayer::FrameDiff* rhs) {
+  return detail::add(lhs, rhs);
+}
+
+std::ostream& replayer::operator<<(
+    std::ostream& out,
+    const replayer::FrameDiff& o) {
+  out << o.pids.size();
+  for (auto& pid : o.pids)
+    out << " " << pid;
+  for (auto& player_unit : o.units) {
+    out << " " << player_unit.size() << " ";
+    for (auto& du : player_unit)
+      out << du << " ";
   }
+  writeTail(out, o.actions, o.resources, o.bullets);
+  out << " " << o.reward << " " << o.is_terminal;
+  return out;
+}
+
+std::ostream& replayer::operator<<(
+    std::ostream& out,
+    const detail::UnitDiff& o) {
+  out << o.id << " " << o.velocityX << " " << o.velocityY;
+  out << " " << o.var_ids.size();
+  for (size_t i = 0; i < o.var_ids.size(); i++)
+    out << " " << o.var_ids[i];
+  for (size_t i = 0; i < o.var_ids.size(); i++)
+    out << " " << o.var_diffs[i];
+  out << " " << o.order_size << " " << o.order_ids.size();
+  for (size_t i = 0; i < o.order_ids.size(); i++)
+    out << " " << o.order_ids[i];
+  for (size_t i = 0; i < o.order_ids.size(); i++)
+    out << " " << o.order_diffs[i];
+  return out;
+}
+
+std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
+  int32_t npids;
+  in >> npids;
+  o.pids.resize(npids);
+  o.units.resize(npids);
+  for (size_t i = 0; i < npids; i++)
+    in >> o.pids[i];
+  for (size_t i = 0, nunits = 0; i < npids; i++) {
+    in >> nunits;
+    o.units[i].resize(nunits);
+    for (size_t k = 0; k < nunits; k++)
+      in >> o.units[i][k];
+  }
+  readTail(in, o.actions, o.resources, o.bullets);
   in >> o.reward >> o.is_terminal;
   return in;
 }
+
+std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
+  size_t nvars, norders;
+
+  in >> o.id >> o.velocityX >> o.velocityY;
+  in >> nvars;
+  o.var_ids.resize(nvars);
+  o.var_diffs.resize(nvars);
+  for (size_t i = 0; i < nvars; i++)
+    in >> o.var_ids[i];
+  for (size_t i = 0; i < nvars; i++)
+    in >> o.var_diffs[i];
+  in >> o.order_size >> norders;
+  o.order_ids.resize(norders);
+  o.order_diffs.resize(norders);
+  for (size_t i = 0; i < norders; i++)
+    in >> o.order_ids[i];
+  for (size_t i = 0; i < norders; i++)
+    in >> o.order_diffs[i];
+  return in;
+}
+
+#undef DOALL
+#undef DOALL_ON_ORDER

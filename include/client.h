@@ -41,10 +41,18 @@ class Client {
     int code = -1;
     std::vector<int> args;
     std::string str;
+
+    Command() {}
+    Command(int code) : code(code) {}
+    Command(int code, std::initializer_list<int>&& args)
+        : code(code), args(args) {}
+    template <typename... Ints>
+    Command(int code, Ints&&... args)
+        : Command(code, {std::forward<Ints>(args)...}) {}
+    Command(int code, std::string str) : code(code), str(std::move(str)) {}
   };
 
  public:
-
   // LIFECYCLE
 
   Client();

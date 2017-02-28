@@ -43,7 +43,9 @@ const struct luaL_Reg state_m[] = {
 } // extern "C"
 
 namespace torchcraft {
-std::set<torchcraft::BW::UnitType> getConsideredTypes(lua_State* L, int index = -1);
+std::set<torchcraft::BW::UnitType> getConsideredTypes(
+    lua_State* L,
+    int index = -1);
 
 void registerState(lua_State* L, int index);
 }

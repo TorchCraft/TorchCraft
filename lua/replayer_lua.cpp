@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -15,7 +15,7 @@ using namespace std;
 using namespace torchcraft::replayer;
 
 extern "C" int newReplayer(lua_State* L) {
-  Replayer **r = (Replayer **)lua_newuserdata(L, sizeof(Replayer *));
+  Replayer** r = (Replayer**)lua_newuserdata(L, sizeof(Replayer*));
   *r = new Replayer();
 
   luaL_getmetatable(L, "torchcraft.Replayer");
@@ -39,20 +39,21 @@ extern "C" int loadReplayer(lua_State* L) {
   std::ifstream in(path);
   luaL_argcheck(L, in, 1, "Invalid load path");
 
-  Replayer *rep = nullptr;
+  Replayer* rep = nullptr;
   try {
     rep = new Replayer();
     in >> *rep;
   } catch (std::exception& e) {
     in.close();
-    if (rep != nullptr) delete rep;
+    if (rep != nullptr)
+      delete rep;
 
     luaL_error(L, "C++ exception in loadReplayer: %s", e.what());
     assert(false);
   }
   in.close();
 
-  Replayer **r = (Replayer **)lua_newuserdata(L, sizeof(Replayer *));
+  Replayer** r = (Replayer**)lua_newuserdata(L, sizeof(Replayer*));
   *r = rep;
   luaL_getmetatable(L, "torchcraft.Replayer");
   lua_setmetatable(L, -2);
@@ -74,7 +75,7 @@ extern "C" int replayerSave(lua_State* L) {
 
 extern "C" int replayerGetFrame(lua_State* L) {
   auto r = checkReplayer(L);
-  auto f = (Frame **)lua_newuserdata(L, sizeof(Frame *));
+  auto f = (Frame**)lua_newuserdata(L, sizeof(Frame*));
   size_t id = luaL_checkint(L, 2) - 1;
   luaL_argcheck(L, id >= 0 && id < r->size(), 2, "invalid index");
 
@@ -88,7 +89,7 @@ extern "C" int replayerGetFrame(lua_State* L) {
 }
 
 extern "C" int replayerGetNumUnits(lua_State* L) {
-  auto r  = checkReplayer(L);
+  auto r = checkReplayer(L);
   auto id = luaL_checkint(L, 2);
   auto n = r->getNumUnits(id);
   luaL_argcheck(L, n >= 0, 2, "invalid index");
@@ -105,8 +106,7 @@ extern "C" int replayerSetNumUnits(lua_State* L) {
 extern "C" int replayerSetMap(lua_State* L) {
   auto r = checkReplayer(L);
   THByteTensor* map = reinterpret_cast<THByteTensor*>(
-      luaT_checkudata(L, 2, "torch.ByteTensor")
-      );
+      luaT_checkudata(L, 2, "torch.ByteTensor"));
   r->setMap(map);
   return 0;
 }
@@ -120,7 +120,7 @@ extern "C" int replayerGetMap(lua_State* L) {
 
 extern "C" int replayerGetNumFrames(lua_State* L) {
   auto r = checkReplayer(L);
-  lua_pushnumber(L, (lua_Number) r->size());
+  lua_pushnumber(L, (lua_Number)r->size());
   return 1;
 }
 
@@ -134,8 +134,7 @@ extern "C" int replayerPush(lua_State* L) {
 // Utility
 
 Replayer* checkReplayer(lua_State* L, int id) {
-  void *r = luaL_checkudata(L, id, "torchcraft.Replayer");
+  void* r = luaL_checkudata(L, id, "torchcraft.Replayer");
   luaL_argcheck(L, r != nullptr, id, "'replayer' expected");
-  return *(Replayer**) r;
+  return *(Replayer**)r;
 }
-

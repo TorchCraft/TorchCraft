@@ -76,8 +76,8 @@ int freeClient(lua_State* L) {
 }
 
 int gcClient(lua_State* L) {
-  auto cl =
-      static_cast<torchcraft::Client**>(luaL_checkudata(L, 1, "torchcraft.Client"));
+  auto cl = static_cast<torchcraft::Client**>(
+      luaL_checkudata(L, 1, "torchcraft.Client"));
   assert(*cl != nullptr);
   delete *cl;
   *cl = nullptr;

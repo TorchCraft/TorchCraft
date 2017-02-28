@@ -130,7 +130,9 @@ void pushStaticValues(lua_State* L, const T m[]) {
   sealTable(L);
 }
 
-void pushMap(lua_State* L, std::unordered_map<torchcraft::BW::UnitType, int>& m) {
+void pushMap(
+    lua_State* L,
+    std::unordered_map<torchcraft::BW::UnitType, int>& m) {
   lua_newtable(L);
   for (const auto& kv : m) {
     pushValue(L, kv.second);
@@ -298,7 +300,8 @@ void registerConstants(lua_State* L, int index) {
   pushToTable(L, "xy_pixels_per_walktile", BW::XYPixelsPerWalktile);
   pushToTable(L, "xy_pixels_per_buildtile", BW::XYPixelsPerBuildtile);
   pushToTable(L, "xy_walktiles_per_buildtile", BW::XYWalktilesPerBuildtile);
-  pushToTable(L, "hit_prob_ranged_uphill_doodad", BW::HitProbRangedUphillDoodad);
+  pushToTable(
+      L, "hit_prob_ranged_uphill_doodad", BW::HitProbRangedUphillDoodad);
   pushToTable(L, "hit_prob_ranged", BW::HitProbRanged);
 
   pushTable<BW::Command>(L, fromCamelCaseToLower);

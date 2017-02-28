@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -12,22 +12,19 @@
 namespace replayer = torchcraft::replayer;
 
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
-  out << o.id << " " << o.x << " " << o.y << " "
-    << o.health << " " << o.max_health << " "
-    << o.shield << " " << o.max_shield << " " << o.energy << " " << o.maxCD << " "
-    << o.groundCD << " " << o.airCD << " " << o.idle << " "
-    << o.visible << " " << o.type << " " << o.armor << " "
-    << o.shieldArmor << " " << o.size << " "
-    << o.pixel_x << " " << o.pixel_y << " "
-    << o.pixel_size_x << " " << o.pixel_size_y << " "
-    << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
-    << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
+  out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
+      << o.max_health << " " << o.shield << " " << o.max_shield << " "
+      << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
+      << " " << o.idle << " " << o.visible << " " << o.type << " " << o.armor
+      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
+      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
+      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
+      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
 
   out << o.orders.size() << " ";
   for (auto& c : o.orders) {
-    out << c.first_frame << " "
-      << c.type << " " << c.targetId << " "
-      << c.targetX << " " << c.targetY << " ";
+    out << c.first_frame << " " << c.type << " " << c.targetId << " "
+        << c.targetX << " " << c.targetY << " ";
   }
 
   out << o.velocityX << " " << o.velocityY;
@@ -37,13 +34,12 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
-  in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield 
-    >> o.max_shield >> o.energy
-    >> o.maxCD >> o.groundCD >> o.airCD >> o.idle >> o.visible >> o.type
-    >> o.armor >> o.shieldArmor >> o.size
-    >> o.pixel_x >> o.pixel_y >> o.pixel_size_x >> o.pixel_size_y
-    >> o.groundATK >> o.airATK >> o.groundDmgType >> o.airDmgType
-    >> o.groundRange >> o.airRange;
+  in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >>
+      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.idle >>
+      o.visible >> o.type >> o.armor >> o.shieldArmor >> o.size >> o.pixel_x >>
+      o.pixel_y >> o.pixel_size_x >> o.pixel_size_y >> o.groundATK >>
+      o.airATK >> o.groundDmgType >> o.airDmgType >> o.groundRange >>
+      o.airRange;
 
   int n_orders;
   in >> n_orders;
@@ -51,9 +47,8 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
     throw std::runtime_error("Corrupted replay: n_orders < 0");
   o.orders.resize(n_orders);
   for (int i = 0; i < n_orders; i++) {
-    in >> o.orders[i].first_frame
-      >> o.orders[i].type >> o.orders[i].targetId
-      >> o.orders[i].targetX >> o.orders[i].targetY;
+    in >> o.orders[i].first_frame >> o.orders[i].type >> o.orders[i].targetId >>
+        o.orders[i].targetX >> o.orders[i].targetY;
   }
 
   in >> o.velocityX >> o.velocityY;
@@ -62,33 +57,34 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   return in;
 }
 
-std::ostream& replayer::operator<<(std::ostream& out,
-  const replayer::Resources& r) {
+std::ostream& replayer::operator<<(
+    std::ostream& out,
+    const replayer::Resources& r) {
   out << r.ore << " " << r.gas << " ";
   out << r.used_psi << " " << r.total_psi;
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in,
-  replayer::Resources& r) {
+std::istream& replayer::operator>>(std::istream& in, replayer::Resources& r) {
   in >> r.ore >> r.gas >> r.used_psi >> r.total_psi;
   return in;
 }
 
-std::ostream& replayer::operator<<(std::ostream& out,
-  const replayer::Bullet& o) {
+std::ostream& replayer::operator<<(
+    std::ostream& out,
+    const replayer::Bullet& o) {
   out << o.type << " " << o.x << " " << o.y;
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in,
-  replayer::Bullet& o) {
+std::istream& replayer::operator>>(std::istream& in, replayer::Bullet& o) {
   in >> o.type >> o.x >> o.y;
   return in;
 }
 
-std::ostream& replayer::operator<<(std::ostream& out,
-  const replayer::Frame& o) {
+std::ostream& replayer::operator<<(
+    std::ostream& out,
+    const replayer::Frame& o) {
   out << o.units.size() << " ";
   for (auto& v : o.units) {
     out << v.first << " " << v.second.size() << " ";
@@ -118,8 +114,7 @@ std::ostream& replayer::operator<<(std::ostream& out,
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in,
-  replayer::Frame& o) {
+std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   int nPlayer, nBullets;
 
   in >> nPlayer;

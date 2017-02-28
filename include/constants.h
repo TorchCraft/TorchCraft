@@ -655,27 +655,30 @@ BETTER_ENUM(
     Unknown,
     MAX)
 
-BETTER_ENUM(UnitSize, int,
+BETTER_ENUM(
+    UnitSize,
+    int,
     // corresponds to BWAPI::UnitSizeTypes::Enum
     Independent = 0,
     Small = 1,
     Medium = 2,
-    Large = 3
-)
+    Large = 3)
 
-BETTER_ENUM(DamageType, int,
+BETTER_ENUM(
+    DamageType,
+    int,
     // corresponds to BWAPI::DamageTypes::Enum
     Independent = 0,
     Explosive = 1,
     Concussive = 2,
     Normal = 3,
     Ignore_Armor = 4,
-    None = 5
-)
+    None = 5)
 
 constexpr int XYPixelsPerWalktile = 8;
 constexpr int XYPixelsPerBuildtile = 32;
-constexpr int XYWalktilesPerBuildtile = XYPixelsPerBuildtile / XYPixelsPerWalktile;
+constexpr int XYWalktilesPerBuildtile =
+    XYPixelsPerBuildtile / XYPixelsPerWalktile;
 constexpr double HitProbRangedUphillDoodad = 0.53125;
 constexpr double HitProbRanged = 0.99609375;
 
@@ -821,7 +824,7 @@ struct hash<torchcraft::BW::UnitType> {
   typedef torchcraft::BW::UnitType argument_type;
   typedef std::size_t result_type;
   result_type operator()(argument_type const& s) const {
-		return std::hash<torchcraft::BW::UnitType::_integral>{}(s._to_integral());
+    return std::hash<torchcraft::BW::UnitType::_integral>{}(s._to_integral());
   }
 };
 } // namespace std

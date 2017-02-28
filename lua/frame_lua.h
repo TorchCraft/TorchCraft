@@ -11,9 +11,9 @@
 
 extern "C" {
 #include <TH/TH.h>
+#include <lauxlib.h>
 #include <lua.h>
 #include <luaT.h>
-#include <lauxlib.h>
 #include <lualib.h>
 }
 
@@ -47,15 +47,13 @@ void pushUnit(lua_State* L, const torchcraft::replayer::Unit& unit);
 void toFrame(lua_State* L, int id, torchcraft::replayer::Frame& res);
 void pushFrame(lua_State* L, const torchcraft::replayer::Frame& res);
 
-const struct luaL_Reg frame_m [] = {
-  {"__gc", gcFrame},
-  {"clone", frameClone},
-  {"combine", frameCombine},
-  {"toTable", frameToTable},
-  {"toString", frameToString},
-  {"getUnits", frameGetUnits},
-  {"getResources", frameGetResources},
-  {"getNumPlayers", frameGetNumPlayers},
-  {"getNumUnits", frameGetNumUnits},
-  {nullptr, nullptr}
-};
+const struct luaL_Reg frame_m[] = {{"__gc", gcFrame},
+                                   {"clone", frameClone},
+                                   {"combine", frameCombine},
+                                   {"toTable", frameToTable},
+                                   {"toString", frameToString},
+                                   {"getUnits", frameGetUnits},
+                                   {"getResources", frameGetResources},
+                                   {"getNumPlayers", frameGetNumPlayers},
+                                   {"getNumUnits", frameGetNumUnits},
+                                   {nullptr, nullptr}};

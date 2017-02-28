@@ -23,7 +23,7 @@ extern "C" {
 #include "frame_lua.h"
 #include "gamestore.h"
 #include "imgmanager.h"
-#include "replayer.h"
+#include "replayer_lua.h"
 #include "state_lua.h"
 
 using torchcraft::replayer::GameStore;

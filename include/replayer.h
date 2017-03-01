@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -13,95 +13,101 @@ extern "C" {
 #include <TH/TH.h>
 }
 
-#include <vector>
-#include <iostream>
-#include <fstream>
 #include <cstdio>
+#include <fstream>
+#include <iostream>
+#include <vector>
 
-#include "refcount.h"
 #include "frame.h"
+#include "refcount.h"
 
 namespace torchcraft {
-  namespace replayer {
+namespace replayer {
 
-    struct Map{
-      THByteTensor* data;
-      Map(){ data = nullptr;}
-      ~Map() { if (data != nullptr) THByteTensor_free(data); }
-    };
+struct Map {
+  THByteTensor* data;
+  Map() {
+    data = nullptr;
+  }
+  ~Map() {
+    if (data != nullptr)
+      THByteTensor_free(data);
+  }
+};
 
-    class Replayer : public RefCounted {
-      private:
-        std::vector<Frame*> frames;
-        std::unordered_map<int32_t, int32_t> numUnits;
-        Map map;
+class Replayer : public RefCounted {
+ private:
+  std::vector<Frame*> frames;
+  std::unordered_map<int32_t, int32_t> numUnits;
+  Map map;
 
-      public:
-        ~Replayer() {
-          for (auto f: frames) {
-            if (f) f->decref();
-          }
+ public:
+  ~Replayer() {
+    for (auto f : frames) {
+      if (f)
+        f->decref();
+    }
+  }
+
+  Frame* getFrame(int i) {
+    if (i < 0 || i >= frames.size())
+      return nullptr;
+    return frames[i];
+  }
+  void push(Frame* f) {
+    f->incref();
+    frames.push_back(f);
+  }
+  size_t size() const {
+    return frames.size();
+  }
+
+  void setNumUnits() {
+    for (const auto f : frames) {
+      for (auto u : f->units) {
+        auto s = u.second.size();
+        auto i = u.first;
+        if (numUnits.count(i) == 0) {
+          numUnits[i] = s;
+        } else if (s > numUnits[i]) {
+          numUnits[i] = s;
         }
+      }
+    }
+  }
 
-        Frame* getFrame(int i) {
-          if (i < 0 || i >= frames.size()) return nullptr;
-          return frames[i];
-        }
-        void push(Frame* f) {
-          f->incref();
-          frames.push_back(f);
-        }
-        size_t size() const {
-          return frames.size();
-        }
+  int32_t getNumUnits(const int32_t& key) const {
+    if (numUnits.find(key) == numUnits.end())
+      return -1;
+    return numUnits.at(key);
+  }
 
-        void setNumUnits() {
-          for(const auto f : frames){
-            for(auto u : f->units){
-              auto s = u.second.size();
-              auto i = u.first;
-              if(numUnits.count(i) == 0) {
-                numUnits[i] = s;
-              }
-              else if(s > numUnits[i]){
-                numUnits[i] = s;
-              }
-            }
-          }
-        }
+  void setMap(THByteTensor* data) {
+    // free existing map if needed
+    if (map.data != nullptr) {
+      THByteTensor_free(map.data);
+    }
+    map.data = THByteTensor_newWithTensor(data);
+  }
 
-        int32_t getNumUnits(const int32_t& key) const {
-          if (numUnits.find(key) == numUnits.end()) return -1;
-          return numUnits.at(key);
-        }
+  void setMap(uint32_t h, uint32_t w, uint8_t* d) {
+    // free existing map if needed
+    if (map.data != nullptr) {
+      THByteTensor_free(map.data);
+    }
+    auto storage = THByteStorage_newWithData(d, h * w); // refcount 1
+    map.data = THByteTensor_newWithStorage2d(storage, 0, h, w, w, 1);
+    // storage has been retained by map.data, so decrease refcount back to 1
+    THByteStorage_free(storage);
+  }
 
-        void setMap(THByteTensor* data) {
-          // free existing map if needed
-          if (map.data != nullptr) {
-            THByteTensor_free(map.data);
-          }
-          map.data = THByteTensor_newWithTensor(data);
-        }
+  THByteTensor* getMap() {
+    return map.data;
+  }
 
-        void setMap(uint32_t h, uint32_t w, uint8_t* d) {
-          // free existing map if needed
-          if (map.data != nullptr) {
-            THByteTensor_free(map.data);
-          }
-          auto storage = THByteStorage_newWithData(d, h * w); // refcount 1
-          map.data = THByteTensor_newWithStorage2d(storage, 0, h, w, w, 1);
-          // storage has been retained by map.data, so decrease refcount back to 1
-          THByteStorage_free(storage);
-        }
+  friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
+  friend std::istream& operator>>(std::istream& in, Replayer& o);
+};
 
-        THByteTensor* getMap(){
-          return map.data;
-        }
-
-        friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
-        friend std::istream& operator>>(std::istream& in, Replayer& o);
-    };
-
-  } // namespace replayer
+} // namespace replayer
 } // namespace torchcraft
-

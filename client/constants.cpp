@@ -14,7 +14,8 @@
 namespace {
 
 template <typename T>
-std::unordered_map<torchcraft::BW::UnitType, int> buildTotalPriceMap(const T& prices) {
+std::unordered_map<torchcraft::BW::UnitType, int> buildTotalPriceMap(
+    const T& prices) {
   std::unordered_map<torchcraft::BW::UnitType, int> total;
   using torchcraft::BW::data::KeyIndex;
 

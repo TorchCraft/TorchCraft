@@ -224,8 +224,8 @@ int freeState(lua_State* L) {
 }
 
 int gcState(lua_State* L) {
-  auto s =
-      static_cast<torchcraft::State**>(luaL_checkudata(L, 1, "torchcraft.State"));
+  auto s = static_cast<torchcraft::State**>(
+      luaL_checkudata(L, 1, "torchcraft.State"));
   assert(*s != nullptr);
   (*s)->decref();
   *s = nullptr;
@@ -375,8 +375,8 @@ std::set<BW::UnitType> getConsideredTypes(lua_State* L, int index) {
   lua_pushvalue(L, index);
   lua_pushnil(L);
   while (lua_next(L, -2) != 0) {
-    auto ut =
-        torchcraft::BW::UnitType::_from_integral_nothrow(luaL_checkinteger(L, -1));
+    auto ut = torchcraft::BW::UnitType::_from_integral_nothrow(
+        luaL_checkinteger(L, -1));
     if (!ut) {
       luaL_error(L, "Invalid unit type: %d", lua_tointeger(L, -1));
     }

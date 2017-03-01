@@ -3,16 +3,16 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
 #pragma once
 
 extern "C" {
+#include <lauxlib.h>
 #include <lua.h>
 #include <luaT.h>
-#include <lauxlib.h>
 #include <lualib.h>
 }
 
@@ -35,17 +35,14 @@ extern "C" int replayerPush(lua_State* L);
 extern "C" int replayerGetNumUnits(lua_State* L);
 extern "C" int replayerSetNumUnits(lua_State* L);
 
-
-//const struct luaL_Reg replayer_m [] = {
-const struct luaL_Reg replayer_m [] = {
-  {"__gc", gcReplayer},
-  {"save", replayerSave},
-  {"getNumFrames", replayerGetNumFrames},
-  {"getFrame", replayerGetFrame},
-  {"setNumUnits", replayerSetNumUnits},
-  {"getNumUnits", replayerGetNumUnits},
-  {"setMap", replayerSetMap},
-  {"getMap", replayerGetMap},
-  {"push", replayerPush},
-  {nullptr, nullptr}
-};
+// const struct luaL_Reg replayer_m [] = {
+const struct luaL_Reg replayer_m[] = {{"__gc", gcReplayer},
+                                      {"save", replayerSave},
+                                      {"getNumFrames", replayerGetNumFrames},
+                                      {"getFrame", replayerGetFrame},
+                                      {"setNumUnits", replayerSetNumUnits},
+                                      {"getNumUnits", replayerGetNumUnits},
+                                      {"setMap", replayerSetMap},
+                                      {"getMap", replayerGetMap},
+                                      {"push", replayerPush},
+                                      {nullptr, nullptr}};

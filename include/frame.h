@@ -223,6 +223,8 @@ inline bool orderUnitByiD(Unit a, Unit b) {
   return (a.id < b.id);
 }
 
+bool frameEq(Frame* f1, Frame* f2);
+
 } // namespace detail
 
 class FrameDiff {

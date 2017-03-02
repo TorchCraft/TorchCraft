@@ -37,6 +37,7 @@ torchcraft::Client::Command parseCommand(const std::string& str) {
       try {
         comm.args.push_back(std::stoi(arg));
       } catch (std::invalid_argument& e) {
+        comm.args.push_back(-1);
         comm.str = arg;
       }
     }

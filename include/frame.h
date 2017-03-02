@@ -90,6 +90,9 @@ struct Action { // corresponds to a torchcraft message
   int32_t aid;
 };
 
+std::ostream& operator<<(std::ostream& out, const Action& o);
+std::istream& operator>>(std::istream& in, Action& o);
+
 class Frame : public RefCounted {
  public:
   // The keys of these hash tables are the players' ids.
@@ -195,8 +198,59 @@ class Frame : public RefCounted {
     reward = next_frame.reward;
     is_terminal = next_frame.is_terminal;
   }
-};
+}; // class Frame
 std::ostream& operator<<(std::ostream& out, const Frame& o);
 std::istream& operator>>(std::istream& in, Frame& o);
+
+// Frame diffs
+class FrameDiff;
+
+namespace detail {
+class UnitDiff {
+ public:
+  int id;
+  std::vector<int32_t> var_ids;
+  std::vector<int32_t> var_diffs;
+  std::vector<int32_t> order_ids;
+  std::vector<int32_t> order_diffs;
+  int32_t order_size;
+  double velocityX, velocityY;
+};
+
+Frame* add(Frame* frame, FrameDiff* diff);
+
+inline bool orderUnitByiD(Unit a, Unit b) {
+  return (a.id < b.id);
+}
+
+bool frameEq(Frame* f1, Frame* f2);
+
+} // namespace detail
+
+class FrameDiff {
+ public:
+  std::vector<int32_t> pids;
+  std::vector<std::vector<detail::UnitDiff>> units;
+  // These are unlikely to be the same, so we just copy.
+  std::unordered_map<int32_t, std::vector<Action>> actions;
+  std::unordered_map<int32_t, Resources> resources;
+  std::vector<Bullet> bullets;
+  int reward;
+  int is_terminal;
+};
+
+// These diffing functions will order the IDs of units in each frame, and thus
+// is not const.
+FrameDiff frame_diff(Frame& lhs, Frame& rhs);
+FrameDiff frame_diff(Frame* lhs, Frame* rhs);
+Frame* frame_undiff(FrameDiff& lhs, Frame& rhs);
+Frame* frame_undiff(Frame& lhs, FrameDiff& rhs);
+Frame* frame_undiff(FrameDiff* lhs, Frame* rhs);
+Frame* frame_undiff(Frame* lhs, FrameDiff* rhs);
+
+std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
+std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);
+std::istream& operator>>(std::istream& in, FrameDiff& o);
+std::istream& operator>>(std::istream& in, detail::UnitDiff& o);
 } // namespace replayer
 } // namespace torchcraft

@@ -71,8 +71,6 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
   o.setMap(height, width, data);
   size_t nFrames;
   in >> nFrames;
-  if (nFrames < 0)
-    throw std::runtime_error("Corrupted replay: nFrames < 0");
   o.frames.resize(nFrames);
   for (size_t i = 0; i < nFrames; i++) {
     if (o.keyframe == 0) {

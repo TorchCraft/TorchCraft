@@ -54,7 +54,7 @@ class Replayer : public RefCounted {
   }
 
   Frame* getFrame(size_t i) {
-    if (i < 0 || i >= frames.size())
+    if (i >= frames.size())
       return nullptr;
     return frames[i];
   }

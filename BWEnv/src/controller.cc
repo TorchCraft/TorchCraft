@@ -377,6 +377,22 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
   {
     switch (command)
     {
+    case Commands::DRAW_LINE:
+    case Commands::DRAW_UNIT_LINE:
+    case Commands::DRAW_UNIT_POS_LINE:
+    case Commands::DRAW_CIRCLE:
+    case Commands::DRAW_UNIT_CIRCLE: {
+      static std::unordered_map<int, int> argcount = {
+        {Commands::DRAW_LINE, 5}, {Commands::DRAW_UNIT_LINE, 3},
+        {Commands::DRAW_UNIT_POS_LINE, 4}, {Commands::DRAW_CIRCLE, 4},
+        {Commands::DRAW_UNIT_CIRCLE, 3},
+      };
+      check_args(argcount[command]);
+      std::vector<int> cmd({command});
+      cmd.insert(cmd.end(), args.begin(), args.end());
+      draw_cmds_.push_back(cmd);
+      return;
+    }
     case Commands::COMMAND_USER:
       auto type = args[0];
       auto second = args.begin() + 1;
@@ -498,11 +514,59 @@ void Controller::clearLastFrame()
   }
 }
 
+void Controller::executeDrawCommands()
+{
+  for (const auto& cmd : draw_cmds_) {
+    switch (cmd[0]) {
+      case Commands::DRAW_LINE:
+        BWAPI::Broodwar->drawLineMap(cmd.at(1), cmd.at(2), cmd.at(3),
+          cmd.at(4), cmd.at(5));
+        break;
+      case Commands::DRAW_UNIT_LINE: {
+        auto unit1 = BWAPI::Broodwar->getUnit(cmd.at(1));
+        auto unit2 = BWAPI::Broodwar->getUnit(cmd.at(2));
+        if (unit1 != nullptr && unit2 != nullptr &&
+          unit1->exists() && unit2->exists()) {
+          BWAPI::Broodwar->drawLineMap(unit1->getPosition(),
+            unit2->getPosition(), cmd.at(3));
+        }
+        break;
+      }
+      case Commands::DRAW_UNIT_POS_LINE: {
+        auto unit = BWAPI::Broodwar->getUnit(cmd.at(1));
+        if (unit != nullptr && unit->exists()) {
+          auto pos = unit->getPosition();
+          BWAPI::Broodwar->drawLineMap(pos.x, pos.y, cmd.at(2), cmd.at(3),
+            cmd.at(4));
+        }
+        break;
+      }
+      case Commands::DRAW_CIRCLE:
+        BWAPI::Broodwar->drawCircleMap(cmd.at(1), cmd.at(2), cmd.at(3),
+          cmd.at(4));
+        break;
+      case Commands::DRAW_UNIT_CIRCLE: {
+        auto unit = BWAPI::Broodwar->getUnit(cmd.at(1));
+        if (unit != nullptr && unit->exists()) {
+          BWAPI::Broodwar->drawCircleMap(unit->getPosition(), cmd.at(2), cmd.at(3));
+        }
+        break;
+      }
+    }
+  }
+}
+
 void Controller::onFrame()
 {
   // Display the game frame rate as text in the upper left area of the screen
   BWAPI::Broodwar->drawTextScreen(200, 0, "FPS: %d", BWAPI::Broodwar->getFPS());
   BWAPI::Broodwar->drawTextScreen(200, 20, "Average FPS: %f", BWAPI::Broodwar->getAverageFPS());
+  try {
+    executeDrawCommands();
+  } catch (std::exception& e) {
+    Utils::bwlog(output_log, "Error drawing client annotations: %s", e.what());
+  }
+
 
   // Called once every game frame
   // if more than ~2 hours worth of SC for the game, reboot the game
@@ -640,6 +704,7 @@ void Controller::onFrame()
     this->zmq_server->sendFrame(&this->tcframe_);
 
     // And receive new commands
+    draw_cmds_.clear();
     this->zmq_server->receiveMessage();
 
     if (battle_ended) {

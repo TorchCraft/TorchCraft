@@ -221,8 +221,8 @@ void Controller::setupHandshake()
 void Controller::handleCommand(int command, const std::vector<int>& args,
   const std::string& str)
 {
-  auto check_args = [&](uint32_t n) {
-    if (args.size() < n) throw(std::runtime_error("Not enough arguments."));
+  auto check_args = [&](int command, uint32_t n) {
+    if (args.size() < n) throw(std::runtime_error("Not enough arguments for command " + std::to_string(command)));
   };
   auto check_unit = [&](int id) {
     auto res = BWAPI::Broodwar->getUnit(id);
@@ -263,7 +263,7 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
   }
   else if (command <= Commands::SET_MULTI)
   {
-    check_args(1);
+    check_args(command, 1);
     switch (command) {
     case Commands::SET_SPEED:
       Utils::bwlog(output_log, "Set game speed: %d", args[0]);
@@ -303,7 +303,7 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
   }
   else if (command <= Commands::COMMAND_UNIT_PROTECTED)
   {
-    check_args(2);
+    check_args(command, 2);
     auto unit = check_unit(args[0]);
     auto cmd_type = args[1];
     auto target = (args.size() >= 3 ? BWAPI::Broodwar->getUnit(args[2]) : nullptr);

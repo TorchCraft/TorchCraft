@@ -10,6 +10,7 @@
 #include <sstream>
 #include <fstream>
 #include <codecvt>
+#include <regex>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -124,12 +125,13 @@ void Utils::overwriteConfig(const std::wstring& sc_path_,
   std::ifstream ini(path);
 
   std::string line;
+  std::regex regex("\\s*" + prefix + "\\s*=.*");
 
   bool found = false;
 
   while (getline(ini, line))
   {
-    if (!line.compare(0, prefix.size(), prefix)){
+    if (std::regex_match(line, regex)) {
       filedata.push_back(prefix + " = " + arg);
       found = true;
     }

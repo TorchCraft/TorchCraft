@@ -10,6 +10,10 @@
 #ifndef TORCHCRAFT_UTILS_H_
 #define TORCHCRAFT_UTILS_H_
 
+#include <cstdint>
+#include <vector>
+
+
 namespace Utils
 {
 std::wstring getEnvValue(const wchar_t* env);
@@ -30,6 +34,7 @@ void overwriteConfig(const std::wstring& sc_path_,
 
 // require BWAPI thread
 void bwlog(std::ofstream& output_log, std::string format, ...);
+std::vector<uint8_t> mapToVector();
 std::string mapToTensorStr();
 bool checkTimeInGame();
 std::string ws2s(const std::wstring& ws);

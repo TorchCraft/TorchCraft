@@ -21,7 +21,10 @@
 #include "config_manager.h"
 #include "recorder.h"
 
+#include "messages_generated.h"
+
 class ZMQ_server;
+namespace replayer = torchcraft::replayer;
 
 enum Commands {
   // without args
@@ -33,6 +36,12 @@ enum Commands {
   COMMAND_UNIT, COMMAND_UNIT_PROTECTED,
   // variable arguments
   COMMAND_USER,
+  // BAWPI drawing routins
+  DRAW_LINE,          // x1, y1, x2, y2, color
+  DRAW_UNIT_LINE,     // uid1, uid2, color
+  DRAW_UNIT_POS_LINE, // uid. x2, y2, color
+  DRAW_CIRCLE,        // x, y, radius, color
+  DRAW_UNIT_CIRCLE,   // uid, radiu, color
   // last command id
   COMMAND_END
 };
@@ -56,6 +65,7 @@ public:
   void endGame();
   void gameCleanUp();
   void clearLastFrame();
+  void executeDrawCommands();
   void onFrame();
   void packBullets(replayer::Frame& f);
   void packResources(replayer::Frame& f, BWAPI::PlayerInterface* player);
@@ -91,6 +101,8 @@ private:
   bool too_long_play_ = false;
   bool exit_process_ = false;
   bool with_image_ = false;
+  std::vector<std::vector<int>> draw_cmds_;
+  torchcraft::fbs::FrameT tcframe_;
 };
 
 #endif // TORCHCRAFT_CONTROL_H_

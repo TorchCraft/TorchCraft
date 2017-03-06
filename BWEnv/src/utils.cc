@@ -10,6 +10,7 @@
 #include <sstream>
 #include <fstream>
 #include <codecvt>
+#include <regex>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -124,12 +125,13 @@ void Utils::overwriteConfig(const std::wstring& sc_path_,
   std::ifstream ini(path);
 
   std::string line;
+  std::regex regex("\\s*" + prefix + "\\s*=.*");
 
   bool found = false;
 
   while (getline(ini, line))
   {
-    if (!line.compare(0, prefix.size(), prefix)){
+    if (std::regex_match(line, regex)) {
       filedata.push_back(prefix + " = " + arg);
       found = true;
     }
@@ -176,6 +178,22 @@ void Utils::bwlog(std::ofstream& output_log,
   if (BWAPI::BWAPIClient.isConnected() && DISPLAY_LOG)
     BWAPI::Broodwar->vPrintf(format.c_str(), args);
   va_end(args);
+}
+
+std::vector<uint8_t> Utils::mapToVector()
+{
+  std::vector<uint8_t> v;
+  for (int x = 0; x < BWAPI::Broodwar->mapHeight() * 4; ++x) {
+    for (int y = 0; y < BWAPI::Broodwar->mapWidth() * 4; ++y) {
+      if (BWAPI::Broodwar->isWalkable(x, y)) {
+        v.push_back(BWAPI::Broodwar->getGroundHeight(x / 4, y / 4));
+      } else {
+        v.push_back(-1);
+      }
+      // TODO add isBuildable?
+    }
+  }
+  return v;
 }
 
 std::string Utils::mapToTensorStr()

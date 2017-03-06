@@ -59,8 +59,7 @@ tc.initial_map = 'Maps/BroodWar/micro/m5v5_c_far.scm'
 
 tc.window_pos = {200, 200}
 tc.window_size = {320, 240}
-tc.mode.micro_battles = micro_game
-tc.mode.replay = false
+tc.micro_battles = micro_game
 
 tc:init(hostname, port)
 local update = tc:connect(port)
@@ -77,6 +76,7 @@ tc:send({table.concat({
                       }, ':')})
 
 print("\nMap name: ", tc.state.map_name)
+assert(tc.state.replay == false)
 
 -- ~~~~~~~~~~~~~~ LOOP ~~~~~~~~~~~~~~~
 
@@ -105,14 +105,14 @@ while not tc.state.game_ended do
     if tc.state.game_ended then
         break
 
-    elseif microgame and tc.state.battle_just_ended then
+    elseif micro_game and tc.state.battle_just_ended then
         battles_game = battles_game + 1
         frames_in_battle = 0
         if battles_game >= max_battles then -- this is an example
             actions = {tc.command(tc.quit)}
         end
 
-    elseif microgame and tc.state.waiting_for_restart then
+    elseif micro_game and tc.state.waiting_for_restart then
         -- do nothing
 
     else

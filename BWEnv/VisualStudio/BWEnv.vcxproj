@@ -92,7 +92,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../replayer/;$(SolutionDir)/../include/czmq/include;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;$(SolutionDir)/../fbs/;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -118,7 +118,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../replayer/;$(SolutionDir)/../include/czmq/include;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -147,7 +147,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../replayer/;$(SolutionDir)/../include/czmq/include;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USRDLL;BWENV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -177,7 +177,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../replayer/;$(SolutionDir)/../include/czmq/include;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_WINDOWS;_USRDLL;BWENV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>
@@ -221,7 +221,7 @@
     <ClCompile Include="..\src\zmq_server.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\replayer\frame.h" />
+    <ClInclude Include="..\..\include\frame.h" />
     <ClInclude Include="..\include\config_manager.h" />
     <ClInclude Include="..\include\controller.h" />
     <ClInclude Include="..\include\module.h" />

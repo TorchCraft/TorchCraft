@@ -8,26 +8,24 @@ From the current directory:
 
 `docker build -f no-cuda/Dockerfile -t torchcraft .`
 
-or if you want CUDA (TODO):
+or if you want CUDA, install the [nvidia docker](https://github.com/NVIDIA/nvidia-docker) plugin first and:
 
-`docker build -f cuda/Dockerfile -t torchcraft .`
+`docker build -f cuda/Dockerfile -t cutorchcraft .`
 
 To run the client:
 
 ```
-# Start your VNC Server. This will run as a daemon in the background
-docker run -d --name display -e VNC_PASSWORD=newPW -p 5900:5900 suchja/x11server
-# Run the Torchcraft docker image
-docker run --rm --privileged -it --link display:xserver --volumes-from display torchcraft /bin/bash
+docker run --rm --privileged -it -p 5900:5900 torchcraft bash
+# For a docker image with CUDA support:
+nvidia-docker run --rm --privileged -it -p 5900:5900 cutorchcraft bash
 # Setup wine
 wine wineboot --init
 winetricks -q vcrun2013
 ```
 
 Use your favorite VNC client to connect to the docker image. For example, with
-TigerVNC, do `vncviewer localhost:0`. If the daemon of suchja/x11server is ever
-closed, you must find the id with `docker ps -a`, remove it with `docker rm $ID`
-and restart the server with the above command.
+TigerVNC, do `vncviewer localhost:0`. The password is `mot2pass` for the VNC
+connection.
 
 ## Install StarCraft
 
@@ -46,7 +44,7 @@ and restart the server with the above command.
    `cd ~/TorchCraft/examples && th simple_dll.lua -t localhost`
    
 
-The sudo password to the image is 'starcraft'
+The sudo password to the image is `starcraft`
    
 ## Saving and reloading
 This is a good time to [save a copy of your image](http://stackoverflow.com/questions/24482822/how-to-share-my-docker-image-without-using-the-docker-hub) in case it gets corrupted, so you don't have to go through that process again.
@@ -55,12 +53,15 @@ This is a good time to [save a copy of your image](http://stackoverflow.com/ques
 ```
 # Note the ID of the docker container you just made
 docker ps -a
-docker export $ID -o torchcraft.docker
+docker commit $ID
+# Note the ID of the image you just created
+# Optionally, tag it with something else
+docker tag $IMAGE_ID torchcraft:my_version
+docker save $IMAGE_ID -o torchcraft.docker
 ```
 
 ### Importing
 ```
-docker import torchcraft.docker
-# Note the output ID, which can also be found with `docker images`
-docker run --user torchcraft --rm --privileged -it --link display:xserver --volumes-from display $ID bash
+docker load -i torchcraft.docker
+docker run --rm --privileged -it -p 5900:5900 torchcraft:my_version bash
 ```

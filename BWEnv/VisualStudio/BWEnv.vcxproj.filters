@@ -59,7 +59,7 @@
     <ClInclude Include="..\include\recorder.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\replayer\frame.h">
+    <ClInclude Include="..\..\include\frame.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\user_actions.h">

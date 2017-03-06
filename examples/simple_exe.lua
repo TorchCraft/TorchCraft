@@ -58,8 +58,7 @@ local nloop = 1
 local maps = {'Maps/BroodWar/micro/dragoons_zealots.scm',
               'Maps/BroodWar/micro/m5v5_c_far.scm'}
 
-tc.mode.micro_battles = true
-tc.mode.replay = false
+tc.micro_battles = true
 -- This overwrites whatever is in bwapi.ini
 tc.initial_map = maps[2]
 
@@ -70,6 +69,7 @@ local update = tc:connect(port)
 if DEBUG > 1 then
     print('Received init: ', update)
 end
+assert(tc.state.replay == false)
 
 -- first message to BWAPI's side is setting up variables
 local setup = {

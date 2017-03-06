@@ -3,7 +3,7 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
@@ -15,8 +15,8 @@
 
 namespace Gdiplus
 {
-using std::min;
-using std::max;
+  using std::min;
+  using std::max;
 };
 
 #include <gdiplus.h>
@@ -110,13 +110,17 @@ void Recorder::saveImage()
 std::string* Recorder::getScreenData(std::string mode_grab, std::string mode_window,
   std::string custom_window_cut)
 {
-  std::string* bin_data = new std::string("");
+  std::string* bin_data = nullptr;
   getBWScreen(mode_window, custom_window_cut);
 
   if (mode_grab == "raw")
   {
     HBITMAPToPixels_();
     bin_data = new std::string(reinterpret_cast<char*>(&last_image[0]), last_image.size());
+  }
+  else
+  {
+    bin_data = new std::string("");
   }
   if (mode_grab == "compressed")
   {

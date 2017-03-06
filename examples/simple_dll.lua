@@ -57,8 +57,7 @@ local total_battles = 0
 local maps = {'Maps/BroodWar/micro/dragoons_zealots.scm',
               'Maps/BroodWar/micro/m5v5_c_far.scm'}
 
-tc.mode.micro_battles = MICRO_MODE
-tc.mode.replay = false
+tc.micro_battles = MICRO_MODE
 local nrestarts = -1
 
 while total_battles < 40 do
@@ -78,6 +77,7 @@ while total_battles < 40 do
     if DEBUG > 1 then
         print('Received init: ', update)
     end
+    assert(tc.state.replay == false)
 
     -- first message to BWAPI's side is setting up variables
     local setup = {
@@ -147,7 +147,7 @@ while total_battles < 40 do
                             {tc.unittypes.Terran_Command_Center}))
                             if pos ~= nil then pos = pos.position end
                             if pos ~= nil and not utils.is_in(ut.order,
-                                tc.command2order[tc.unitcommandtypes.Build]) 
+                                tc.command2order[tc.unitcommandtypes.Build])
                                 and not utils.is_in(ut.order,
                                 tc.command2order[tc.unitcommandtypes.Right_Click_Position]) then
                                 table.insert(actions,
@@ -162,7 +162,7 @@ while total_battles < 40 do
                                   tc.command2order[tc.unitcommandtypes.Build])
                                   and not utils.is_in(ut.order,
                                   tc.command2order[tc.unitcommandtypes.Right_Click_Position]) then
-                                -- avoid spamming the order is the unit is already 
+                                -- avoid spamming the order is the unit is already
                                 -- following the right order or building!
                                 local target = get_closest(ut.position,
                                     tc:filter_type(tc.state.units_neutral,

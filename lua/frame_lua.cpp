@@ -3,27 +3,27 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
 #include "frame_lua.h"
 
-using namespace replayer;
 using namespace std;
+using namespace torchcraft::replayer;
 
 // Utility
 
 Frame* checkFrame(lua_State* L, int id) {
-  void *f = luaL_checkudata(L, id, "torchcraft.Frame");
+  void* f = luaL_checkudata(L, id, "torchcraft.Frame");
   luaL_argcheck(L, f != nullptr, id, "'frame' expected");
-  return *(Frame**) f;
+  return *(Frame**)f;
 }
 
 // Frame construtors & destructors
 
 extern "C" int gcFrame(lua_State* L) {
-  Frame**f = (Frame **) luaL_checkudata(L, 1, "torchcraft.Frame");
+  Frame** f = (Frame**)luaL_checkudata(L, 1, "torchcraft.Frame");
 
   assert(*f != nullptr);
   (*f)->decref();
@@ -33,10 +33,10 @@ extern "C" int gcFrame(lua_State* L) {
 }
 
 extern "C" int frameFromTable(lua_State* L) {
-  Frame *f = new Frame();
+  Frame* f = new Frame();
   toFrame(L, 1, *f);
 
-  auto f2 = (replayer::Frame **)lua_newuserdata(L, sizeof(replayer::Frame *));
+  auto f2 = (Frame**)lua_newuserdata(L, sizeof(Frame*));
   *f2 = f;
 
   luaL_getmetatable(L, "torchcraft.Frame");
@@ -48,7 +48,7 @@ extern "C" int frameFromTable(lua_State* L) {
 extern "C" int frameFromString(lua_State* L) {
   auto str = luaL_checkstring(L, 1);
 
-  Frame **f = (Frame **)lua_newuserdata(L, sizeof(Frame *));
+  Frame** f = (Frame**)lua_newuserdata(L, sizeof(Frame*));
   *f = new Frame();
   std::istringstream is(str);
   is >> (**f);
@@ -60,10 +60,10 @@ extern "C" int frameFromString(lua_State* L) {
 }
 
 extern "C" int frameClone(lua_State* L) {
-  Frame *f = checkFrame(L);
+  Frame* f = checkFrame(L);
   pushFrame(L, *f);
 
-  Frame **f2 = (Frame **)lua_newuserdata(L, sizeof(Frame *));
+  Frame** f2 = (Frame**)lua_newuserdata(L, sizeof(Frame*));
   *f2 = new Frame(*f);
 
   luaL_getmetatable(L, "torchcraft.Frame");
@@ -76,7 +76,7 @@ extern "C" int frameClone(lua_State* L) {
 
 void setInt(lua_State* L, const char* key, int v) {
   lua_pushstring(L, key);
-  lua_pushnumber(L, (lua_Number) v);
+  lua_pushnumber(L, (lua_Number)v);
   lua_settable(L, -3);
 }
 
@@ -87,13 +87,10 @@ void setBool(lua_State* L, const char* key, bool v) {
 }
 
 // put's table[key] on top of the stack. don't forget to pop !
-void getField(lua_State* L, const char* key) {
+bool getField(lua_State* L, const char* key) {
   lua_pushstring(L, key);
   lua_gettable(L, -2);
-  luaL_argcheck(
-    L, !lua_isnil(L, -1), 1,
-    (string("no key ") + key + string(" found in table.")).c_str()
-    );
+  return (!lua_isnil(L, -1));
 };
 
 int getInt(lua_State* L, const char* key) {
@@ -132,12 +129,12 @@ void toFrame(lua_State* L, int id, Frame& res) {
       actions.push_back(Action());
       auto& action = actions.back();
       action.uid = lua_tointeger(L, -2);
-      //top of the stack {aid=aid, action={}}
+      // top of the stack {aid=aid, action={}}
       action.aid = getInt(L, "aid");
       getField(L, "action");
       size_t sizeAction = lua_objlen(L, -1);
       action.action.resize(sizeAction);
-      for(size_t j = 0; j < sizeAction; j++) {
+      for (size_t j = 0; j < sizeAction; j++) {
         lua_rawgeti(L, -1, j + 1);
         action.action[j] = lua_tointeger(L, -1);
         lua_pop(L, 1);
@@ -202,10 +199,10 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.airRange = getInt(L, "awrange");
       unit.resources = getInt(L, "resource");
 
-      //commands
+      // commands
       getField(L, "orders");
       lua_pushnil(L);
-      while(lua_next(L, -2) != 0) {
+      while (lua_next(L, -2) != 0) {
         luaL_checktype(L, -2, LUA_TNUMBER);
         unit.orders.push_back(Order());
 
@@ -224,7 +221,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
 
         lua_pop(L, 1);
       }
-      lua_pop(L, 1);  // pop orders
+      lua_pop(L, 1); // pop orders
 
       getField(L, "velocity");
       lua_rawgeti(L, -1, 1);
@@ -245,15 +242,25 @@ void toFrame(lua_State* L, int id, Frame& res) {
 
   // resources is a table {[playerid] = {ore=O, gas=G,
   //                                     used_psi=U, total_psi=T}, ...}
-  getField(L, "resources");
-  // iterate through player ids
-  lua_pushnil(L);
-  while (lua_next(L, -2) != 0) { // -1 is the key, -2 is the table
-    luaL_checktype(L, -2, LUA_TNUMBER);
-    int playerId = lua_tointeger(L, -2);
-    Resources r = {getInt(L, "ore"), getInt(L, "gas"),
-                   getInt(L, "used_psi"), getInt(L, "total_psi")};
-    res.resources[playerId] = r;
+  bool success = getField(L, "resources");
+  if (success) {
+    // iterate through player ids
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) { // -1 is the key, -2 is the table
+      luaL_checktype(L, -2, LUA_TNUMBER);
+      int playerId = lua_tointeger(L, -2);
+      Resources r = {getInt(L, "ore"),
+                     getInt(L, "gas"),
+                     getInt(L, "used_psi"),
+                     getInt(L, "total_psi")};
+      res.resources[playerId] = r;
+      lua_pop(L, 1);
+    }
+  } else { // Empty resources if not provided
+    for (const auto& idandlst : res.units) {
+      Resources r = {0, 0, 0, 0};
+      res.resources[idandlst.first] = r;
+    }
   }
   lua_pop(L, 1); // pop the resources table
 }
@@ -268,12 +275,12 @@ void pushResources(lua_State* L, const Resources& resources) {
 
 void pushUnit(lua_State* L, const Unit& unit) {
   lua_newtable(L);
-  //position
+  // position
   lua_pushstring(L, "position");
   lua_newtable(L);
-  lua_pushnumber(L, (lua_Number) unit.x);
+  lua_pushnumber(L, (lua_Number)unit.x);
   lua_rawseti(L, -2, 1);
-  lua_pushnumber(L, (lua_Number) unit.y);
+  lua_pushnumber(L, (lua_Number)unit.y);
   lua_rawseti(L, -2, 2);
   lua_settable(L, -3);
 
@@ -314,40 +321,44 @@ void pushUnit(lua_State* L, const Unit& unit) {
 
     lua_pushstring(L, "targetpos");
     lua_newtable(L);
-    lua_pushnumber(L, (lua_Number) unit.orders[i].targetX);
+    lua_pushnumber(L, (lua_Number)unit.orders[i].targetX);
     lua_rawseti(L, -2, 1);
-    lua_pushnumber(L, (lua_Number) unit.orders[i].targetY);
+    lua_pushnumber(L, (lua_Number)unit.orders[i].targetY);
     lua_rawseti(L, -2, 2);
     lua_settable(L, -3);
 
-    lua_rawseti(L, -2, i+1);
+    lua_rawseti(L, -2, i + 1);
   }
   lua_settable(L, -3);
 
   // For compatibility {
   // This block can be removed safely once Lua code no longer depends
   // on the order, target and targetpos fields of units.
-  Order o = { 0 /* frame number is not important */,
-              189 /* BWAPI::Orders::Enum::None */, -1, -1, -1 };
-  if (!unit.orders.empty()) o = unit.orders.back();
+  Order o = {0 /* frame number is not important */,
+             189 /* BWAPI::Orders::Enum::None */,
+             -1,
+             -1,
+             -1};
+  if (!unit.orders.empty())
+    o = unit.orders.back();
 
   setInt(L, "order", o.type);
   setInt(L, "target", o.targetId);
 
   lua_pushstring(L, "targetpos");
   lua_newtable(L);
-  lua_pushnumber(L, (lua_Number) o.targetX);
+  lua_pushnumber(L, (lua_Number)o.targetX);
   lua_rawseti(L, -2, 1);
-  lua_pushnumber(L, (lua_Number) o.targetY);
+  lua_pushnumber(L, (lua_Number)o.targetY);
   lua_rawseti(L, -2, 2);
   lua_settable(L, -3);
   // }
 
   lua_pushstring(L, "velocity");
   lua_newtable(L);
-  lua_pushnumber(L, (lua_Number) unit.velocityX);
+  lua_pushnumber(L, (lua_Number)unit.velocityX);
   lua_rawseti(L, -2, 1);
-  lua_pushnumber(L, (lua_Number) unit.velocityY);
+  lua_pushnumber(L, (lua_Number)unit.velocityY);
   lua_rawseti(L, -2, 2);
   lua_settable(L, -3);
 
@@ -368,14 +379,14 @@ void pushFrame(lua_State* L, const Frame& res) {
       lua_newtable(L);
 
       lua_pushstring(L, "aid");
-      lua_pushnumber(L, (lua_Number) action.aid);
+      lua_pushnumber(L, (lua_Number)action.aid);
       lua_settable(L, -3);
 
       lua_pushstring(L, "action");
       lua_newtable(L);
       int idCommand = 1;
       for (auto commandArg : action.action) {
-        lua_pushnumber(L, (lua_Number) commandArg);
+        lua_pushnumber(L, (lua_Number)commandArg);
         lua_rawseti(L, -2, idCommand++);
       }
       lua_settable(L, -3);
@@ -410,7 +421,7 @@ void pushFrame(lua_State* L, const Frame& res) {
 }
 
 extern "C" int frameGetUnits(lua_State* L) {
-  Frame *f = checkFrame(L);
+  Frame* f = checkFrame(L);
   size_t playerId = luaL_checkint(L, 2);
 
   // create an array of tables (units)
@@ -421,7 +432,7 @@ extern "C" int frameGetUnits(lua_State* L) {
     return 1;
 
   for (const auto& unit : f->units.at(playerId)) {
-    lua_pushnumber(L, (lua_Number) unit.id);
+    lua_pushnumber(L, (lua_Number)unit.id);
     pushUnit(L, unit);
     lua_settable(L, -3);
   }
@@ -430,7 +441,7 @@ extern "C" int frameGetUnits(lua_State* L) {
 }
 
 extern "C" int frameGetResources(lua_State* L) {
-  Frame *f = checkFrame(L);
+  Frame* f = checkFrame(L);
   size_t playerId = luaL_checkint(L, 2);
   if (f->resources.find(playerId) == f->resources.end())
     return 1;
@@ -440,35 +451,34 @@ extern "C" int frameGetResources(lua_State* L) {
 }
 
 extern "C" int frameGetNumUnits(lua_State* L) {
-  Frame *f = checkFrame(L);
+  Frame* f = checkFrame(L);
   size_t n = 0;
   if (lua_isnoneornil(L, 2)) {
     for (const auto& units : f->units) {
       n += units.second.size();
     }
-  }
-  else {
+  } else {
     n = f->units[luaL_checkint(L, 2)].size();
   }
-  lua_pushnumber(L, (lua_Number) n);
+  lua_pushnumber(L, (lua_Number)n);
   return 1;
 }
 
 extern "C" int frameGetNumPlayers(lua_State* L) {
-  Frame *f = checkFrame(L);
-  lua_pushnumber(L, (lua_Number) f->units.size());
+  Frame* f = checkFrame(L);
+  lua_pushnumber(L, (lua_Number)f->units.size());
   return 1;
 }
 
 extern "C" int frameToTable(lua_State* L) {
-  Frame *f = checkFrame(L);
+  Frame* f = checkFrame(L);
   pushFrame(L, *f);
 
   return 1;
 }
 
 extern "C" int frameToString(lua_State* L) {
-  Frame *f = checkFrame(L);
+  Frame* f = checkFrame(L);
   std::ostringstream out;
   out << (*f);
 
@@ -478,8 +488,8 @@ extern "C" int frameToString(lua_State* L) {
 }
 
 extern "C" int frameCombine(lua_State* L) {
-  Frame *f = checkFrame(L);
-  Frame *f2 = checkFrame(L, 2);
+  Frame* f = checkFrame(L);
+  Frame* f2 = checkFrame(L, 2);
 
   f->combine(*f2);
 

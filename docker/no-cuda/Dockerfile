@@ -5,22 +5,23 @@ MAINTAINER Zeming Lin <zlin@fb.com>
 
 # first create user and group for all the X Window stuff
 # required to do this first so we have consistent uid/gid between server and client container
-RUN addgroup --system xusers \
+RUN addgroup --system torchcraft \
   && adduser \
     --home /home/torchcraft \
     --disabled-password \
     --shell /bin/bash \
     --gecos "user for running an torcraft application" \
-    --ingroup xusers \
+    --ingroup torchcraft \
     --quiet \
     torchcraft
+
 # Install packages required for connecting against X Server
 RUN apt-get update && apt-get install -y --no-install-recommends \
+  xvfb \
   xauth \
-  && rm -rf /var/lib/apt/lists/*
-
-ADD https://raw.githubusercontent.com/suchja/x11client/master/docker-entrypoint.sh /entrypoint.sh
-RUN chmod 777 /entrypoint.sh
+  x11vnc \
+  x11-utils \
+  x11-xserver-utils
 
 # Install packages for building the image
 RUN apt-get update -y \
@@ -60,6 +61,12 @@ WORKDIR /home/torchcraft
 
 RUN echo "alias winegui='wine explorer /desktop=DockerDesktop,1024x768'" > /home/torchcraft/.bash_aliases
 
+ENV DISPLAY :0.0
+RUN echo "#!/bin/bash" >> /entrypoint.sh
+RUN echo "Xvfb :0 -auth ~/.Xauthority -screen 0 1024x768x24 >>~/xvfb.log 2>&1 &" >> /entrypoint.sh
+RUN echo "x11vnc -forever -passwd mot2pass -display :0 >> ~/xvnc.log 2>&1 &" >> /entrypoint.sh
+RUN echo "exec \"\$@\"" >> /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 
 ### Starcraft stuff ###
@@ -67,7 +74,7 @@ RUN echo "alias winegui='wine explorer /desktop=DockerDesktop,1024x768'" > /home
 ENV LUA_PATH='/root/.luarocks/share/lua/5.1/?.lua;/root/.luarocks/share/lua/5.1/?/init.lua;/root/torch/install/share/lua/5.1/?.lua;/root/torch/install/share/lua/5.1/?/init.lua;./?.l
 ENV LUA_CPATH='/root/.luarocks/lib/lua/5.1/?.so;/root/torch/install/lib/lua/5.1/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so'
 ENV PATH=/root/torch/install/bin:$PATH
-ENV LD_LIBRARY_PATH=/root/torch/install/lib:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH=/root/torch/install/lib:$LD_LIBRARY_PATH 
 ENV DYLD_LIBRARY_PATH=/root/torch/install/lib:$DYLD_LIBRARY_PATH
 ENV LUA_CPATH='/root/torch/install/lib/?.so;'$LUA_CPATH
 
@@ -77,14 +84,13 @@ RUN cd ./TorchCraft; luarocks make *.rockspec
 RUN curl -L http://ftp.blizzard.com/pub/broodwar/patches/PC/BW-1161.exe -o /home/torchcraft/BW-1161.exe
 RUN curl -L https://github.com/bwapi/bwapi/releases/download/v4.1.2/BWAPI_412_Setup.exe -o /home/torchcraft/BWAPI_412_Setup.exe
 
-RUN chown -R torchcraft:xusers /root
+RUN chown -R torchcraft:torchcraft /root
 RUN chmod -R 777 /root
-RUN chown -R torchcraft:xusers /home/torchcraft/TorchCraft
+RUN chown -R torchcraft:torchcraft /home/torchcraft/TorchCraft
 RUN chmod -R 777 /home/torchcraft/TorchCraft
 
 USER torchcraft
 ADD common/* ./
 RUN echo ". /root/torch/install/bin/torch-activate" >> ~/.bashrc
-RUN echo "export DISPLAY=xserver:0" >> ~/.bashrc
 
 ENTRYPOINT ["/entrypoint.sh"]

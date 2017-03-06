@@ -57,7 +57,14 @@ BETTER_ENUM(
     // For documentation about args, see usercommandtypes
     CommandUser = 16,
 
-    MAX = 17)
+    // BWAPI drawing routines
+    DrawLine = 17, //  x1, y1, x2, y2, color index
+    DrawUnitLine = 18, // uid1, uid2, color index
+    DrawUnitPosLine = 19, // uid, x2, y2, color index
+    DrawCircle = 20, //  x, y, radius, color index
+    DrawUnitCircle = 21, // uid, radius, color index
+
+    MAX = 22)
 
 BETTER_ENUM(
     UserCommandType,
@@ -72,7 +79,7 @@ BETTER_ENUM(
     Move_Screen_To_Pos = 4, // arguments: (x, y)
     Right_Click = 5, // arguments: (x, y)
 
-    USER_COMMAND_END = 7)
+    USER_COMMAND_END = 6)
 
 BETTER_ENUM(
     UnitCommandType,
@@ -674,6 +681,22 @@ BETTER_ENUM(
     Normal = 3,
     Ignore_Armor = 4,
     None = 5)
+
+BETTER_ENUM(
+    Color,
+    int,
+    Black = 0,
+    Brown = 19,
+    Grey = 74,
+    Red = 111,
+    Green = 117,
+    Cyan = 128,
+    Yellow = 135,
+    Teal = 159,
+    Purple = 164,
+    Blue = 165,
+    Orange = -179,
+    White = 255)
 
 constexpr int XYPixelsPerWalktile = 8;
 constexpr int XYPixelsPerBuildtile = 32;

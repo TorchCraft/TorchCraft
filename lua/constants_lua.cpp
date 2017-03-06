@@ -324,6 +324,8 @@ void registerConstants(lua_State* L, int index) {
   lua_setfield(L, -2, "unitsizes");
   pushTable<BW::DamageType>(L);
   lua_setfield(L, -2, "dmgtypes");
+  pushTable<BW::Color>(L);
+  lua_setfield(L, -2, "colors");
 
   lua_newtable(L);
   for (auto t : BW::UnitType::_values()) {

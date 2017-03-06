@@ -387,7 +387,7 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
         {Commands::DRAW_UNIT_POS_LINE, 4}, {Commands::DRAW_CIRCLE, 4},
         {Commands::DRAW_UNIT_CIRCLE, 3},
       };
-      check_args(argcount[command]);
+      check_args(command, argcount[command]);
       std::vector<int> cmd({command});
       cmd.insert(cmd.end(), args.begin(), args.end());
       draw_cmds_.push_back(cmd);

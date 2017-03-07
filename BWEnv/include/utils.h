@@ -24,7 +24,8 @@ void launchSCWithBWheadless(const std::wstring& sc_path_,
   const std::wstring& tc_path_);
 void launchSCWithInjectory(const std::wstring& sc_path_,
   const std::wstring& tc_path);
-void launchSCCustom(const std::wstring& command);
+void launchSCCustom(const std::wstring& sc_path_,
+  const std::wstring& command);
 void killStarCraft();
 
 // map changing related stuff

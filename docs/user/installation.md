@@ -38,6 +38,10 @@ Installation of TorchCraft is based on your platform and whether you are using A
 
 - Download latest release at https://github.com/bwapi/bwapi/releases.
 - Install this in `$STARCRAFT\BWAPI`.
+- Note: If your BWAPI fails to load, you'll have to set an environment variable:
+  Right click on My Computer -> Properties -> 
+  Advanced System Settings -> Environment Variables. Add `BWAPI_DIR` to be where
+  you installed it, likely something like `C:\StarCraft\BWAPI`.
 
 
 ### TorchCraft, common prerequisites:

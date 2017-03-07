@@ -38,10 +38,6 @@ Installation of TorchCraft is based on your platform and whether you are using A
 
 - Download latest release at https://github.com/bwapi/bwapi/releases.
 - Install this in `$STARCRAFT\BWAPI`.
-- Note: If your BWAPI fails to load, you'll have to set an environment variable:
-  Right click on My Computer -> Properties -> 
-  Advanced System Settings -> Environment Variables. Add `BWAPI_DIR` to be where
-  you installed it, likely something like `C:\StarCraft\BWAPI`.
 
 
 ### TorchCraft, common prerequisites:
@@ -79,6 +75,11 @@ Now you only need one of the following two methods, either AIModule (DLL) or AIC
 
   > We recommend Git Bash for windows: https://git-for-windows.github.io/).
 
+- Set the `BWAPI_DIR` environment variable:
+  - Right click on My Computer -> Properties -> 
+    Advanced System Settings -> Environment Variables. Add `BWAPI_DIR` to be where
+    you installed it, likely something like `C:\StarCraft\BWAPI`.
+  - Restart the OS to apply the variable to the system.
 - Open `$STARCRAFT/TorchCraft/BWEnv/VisualStudio/BWEnv.sln` and start hacking.
 - Compile in `Release` mode for the AIClient (you will get a `BWEnv.exe` ) and in `DLL-Release` mode for the AIModule (you will get a `BWEnv.dll` ).
 

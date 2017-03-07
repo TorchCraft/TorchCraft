@@ -918,7 +918,10 @@ void Controller::launchStarCraft()
   }
   else if (config_->launcher == "custom")
   {
-    // TODO
+    std::string custom_launcher = config_->custom_launcher;
+    std::wstring command(custom_launcher.length(), L' ');
+    std::copy(custom_launcher.begin(), custom_launcher.end(), command.begin());
+    Utils::launchSCCustom(sc_path_, command);
   }
   else {
     // TODO decide what to do here

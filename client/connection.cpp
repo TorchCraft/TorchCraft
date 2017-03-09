@@ -31,6 +31,7 @@ Connection::Connection(
   ss << "tcp://" << hostname << ":" << port;
   sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
   sock_.setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_.setsockopt(ZMQ_IPV6, 1);
   sock_.connect(ss.str());
 } // Connection
 

@@ -100,6 +100,6 @@ In a terminal or CLI, type:
 
     $ git clone git@github.com:torchcraft/torchcraft.git --recursive
     $ cd torchcraft
-    $ luarocks make torchcraft-1.1-0.rockspec
+    $ luarocks make *.rockspec
     $ cd examples/
     $ th simple_{exe|dll}.lua -t $server_ip # depending on if you launched the exe or dll

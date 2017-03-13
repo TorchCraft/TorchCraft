@@ -83,16 +83,16 @@ function torchcraft:connect(port, timeoutMs)
 
     self.state = self.client.state
 
-    local ok, setup = pcall(self.client:init({
+    local ok, setup = pcall(function() return self.client:init({
         initial_map = self.initial_map,
         window_size = self.window_size,
         window_pos = self.window_pos,
         micro_battles = self.micro_battles,
         only_consider_types = self.only_consider_types,
-    }))
+    }) end)
     -- reset client's connection to leave TC object in a consistent state
     if not ok then
-        local ok, err = pcall(self.client:close())
+        local ok, err = pcall(function() self.client:close() end)
         if not ok then
             error('Error closing connection on init failure:\n' ..
                 'init failure: ' .. setup .. ',\n' ..

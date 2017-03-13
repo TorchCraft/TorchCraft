@@ -105,9 +105,10 @@ void Utils::launchSCWithInjectory(const std::wstring& sc_path_, const std::wstri
   starcraftInject(command, sc_path_, true);
 }
 
-void Utils::launchSCCustom(const std::wstring& command)
+void Utils::launchSCCustom(const std::wstring& sc_path_, const std::wstring& command)
 {
-  // TODO
+  std::cout << std::string(command.begin(), command.end()) << std::endl;
+  starcraftInject(command, sc_path_, false);
 }
 
 void Utils::killStarCraft()

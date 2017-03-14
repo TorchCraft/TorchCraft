@@ -201,7 +201,7 @@ void Controller::setupHandshake()
   torchcraft::fbs::HandshakeServerT handshake;
   handshake.lag_frames = BWAPI::Broodwar->getLatencyFrames();
   handshake.map_data = Utils::mapToVector();
-  handshake.map_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapHeight() * 4, BWAPI::Broodwar->mapWidth() * 4));
+  handshake.map_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapWidth() * 4, BWAPI::Broodwar->mapHeight() * 4));
   handshake.map_name = BWAPI::Broodwar->mapFileName();
   handshake.neutral_id = BWAPI::Broodwar->neutral()->getID();
   if (BWAPI::Broodwar->isReplay()) {

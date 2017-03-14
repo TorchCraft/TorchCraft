@@ -83,7 +83,7 @@ int pushMember(
       auto storage = THByteStorage_newWithData(s->map_data.data(), s0 * s1);
       THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
       THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
-      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, s1, s1, 1);
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {
       lua_pushnil(L);

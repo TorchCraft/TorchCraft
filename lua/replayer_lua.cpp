@@ -88,6 +88,20 @@ extern "C" int replayerGetFrame(lua_State* L) {
   return 1;
 }
 
+extern "C" int replayerSetKeyFrame(lua_State* L) {
+  auto r = checkReplayer(L);
+  auto kf = luaL_checkint(L, 2);
+  r->setKeyFrame(kf);
+  return 0;
+}
+
+extern "C" int replayerGetKeyFrame(lua_State* L) {
+  auto r = checkReplayer(L);
+  auto n = r->getKeyFrame();
+  lua_pushnumber(L, n);
+  return 1;
+}
+
 extern "C" int replayerGetNumUnits(lua_State* L) {
   auto r = checkReplayer(L);
   auto id = luaL_checkint(L, 2);

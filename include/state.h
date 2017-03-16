@@ -27,6 +27,14 @@ struct EndGame;
 
 namespace torchcraft {
 
+// Aliases for basic replayer types provided for convenience
+typedef replayer::Unit Unit;
+typedef replayer::Order Order;
+typedef replayer::Resources Resources;
+typedef replayer::Bullet Bullet;
+typedef replayer::Action Action;
+typedef replayer::Frame Frame;
+
 class State : public RefCounted {
  public:
   // setup
@@ -39,7 +47,7 @@ class State : public RefCounted {
   bool replay;
 
   // game state
-  replayer::Frame* frame; // this will allow for easy reset (XXX)
+  Frame* frame; // this will allow for easy reset (XXX)
   std::string frame_string;
   std::vector<int> deaths;
   int frame_from_bwapi;
@@ -82,7 +90,7 @@ class State : public RefCounted {
   //   that have died since the last update.
   // - In micro mode and with frame skipping, deaths are only applied until the
   //   battle is considered finished, i.e. it corresponds to aliveUnits.
-  std::unordered_map<int32_t, std::vector<replayer::Unit>> units;
+  std::unordered_map<int32_t, std::vector<Unit>> units;
 
   State(
       bool microBattles = false,

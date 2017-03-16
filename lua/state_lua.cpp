@@ -15,8 +15,6 @@
 
 #include "frame_lua.h"
 
-namespace replayer = torchcraft::replayer;
-
 namespace {
 
 inline torchcraft::State* checkState(lua_State* L, int index = 1) {
@@ -97,7 +95,7 @@ int pushMember(
   } else if (m == "replay") {
     lua_pushboolean(L, s->replay);
   } else if (m == "frame") {
-    auto f = (replayer::Frame**)lua_newuserdata(L, sizeof(replayer::Frame*));
+    auto f = (torchcraft::Frame**)lua_newuserdata(L, sizeof(torchcraft::Frame*));
     *f = s->frame;
     (*f)->incref();
     luaL_getmetatable(L, "torchcraft.Frame");
@@ -179,7 +177,7 @@ void pushFrameMember(
   lua_call(L, 2, 1);
 }
 
-void pushUnits(lua_State* L, const std::vector<replayer::Unit>& units) {
+void pushUnits(lua_State* L, const std::vector<torchcraft::Unit>& units) {
   lua_createtable(L, units.size(), 0);
   for (const auto& u : units) {
     pushUnit(L, u);

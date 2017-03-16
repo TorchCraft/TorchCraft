@@ -15,7 +15,7 @@ namespace torchcraft {
 
 State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
     : RefCounted(),
-      frame(new replayer::Frame()),
+      frame(new Frame()),
       microBattles_(microBattles),
       onlyConsiderTypes_(std::move(onlyConsiderTypes)) {
   reset();
@@ -233,7 +233,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
             std::remove_if(
                 us.second.begin(),
                 us.second.end(),
-                [this](const replayer::Unit& unit) {
+                [this](const Unit& unit) {
                   return aliveUnits.find(unit.id) == aliveUnits.end();
                 }),
             us.second.end());
@@ -249,7 +249,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
   for (const auto& fus : frame->units) {
     auto player = fus.first;
     if (units.find(player) == units.end()) {
-      units.emplace(player, std::vector<replayer::Unit>());
+      units.emplace(player, std::vector<Unit>());
     } else {
       units[player].clear();
     }
@@ -258,7 +258,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
         fus.second.begin(),
         fus.second.end(),
         std::back_inserter(units[player]),
-        [this, player](const replayer::Unit& unit) {
+        [this, player](const Unit& unit) {
           auto ut = torchcraft::BW::UnitType::_from_integral_nothrow(unit.type);
           return (
               // Unit is of known type (or enemy unit)

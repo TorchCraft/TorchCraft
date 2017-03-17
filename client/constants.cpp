@@ -17,12 +17,11 @@ template <typename T>
 std::unordered_map<torchcraft::BW::UnitType, int> buildTotalPriceMap(
     const T& prices) {
   std::unordered_map<torchcraft::BW::UnitType, int> total;
-  using torchcraft::BW::data::KeyIndex;
 
   // Production prices for producers
   for (auto ut : torchcraft::BW::UnitType::_values()) {
     if (!torchcraft::BW::unitProductions(ut).empty()) {
-      total[ut] = prices[KeyIndex.at(ut._to_string())];
+      total[ut] = prices[ut];
     }
   }
 
@@ -32,14 +31,13 @@ std::unordered_map<torchcraft::BW::UnitType, int> buildTotalPriceMap(
       int price;
       if (torchcraft::BW::isBuilding(producer) ||
           producer == +torchcraft::BW::UnitType::Zerg_Larva) {
-        price = prices[KeyIndex.at(ut._to_string())];
+        price = prices[ut];
       } else if (
           ut == +torchcraft::BW::UnitType::Protoss_Archon ||
           ut == +torchcraft::BW::UnitType::Protoss_Dark_Archon) {
-        price = 2 * prices[KeyIndex.at(producer._to_string())];
+        price = 2 * prices[producer];
       } else {
-        price = prices[KeyIndex.at(producer._to_string())] +
-            prices[KeyIndex.at(ut._to_string())];
+        price = prices[producer] + prices[ut];
       }
       total[ut] = price;
     }

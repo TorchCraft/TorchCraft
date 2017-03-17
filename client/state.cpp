@@ -31,6 +31,9 @@ void State::reset() {
   map_data.clear();
   map_data_size[0] = 0;
   map_data_size[1] = 0;
+  buildable_data.clear();
+  buildable_data_size[0] = 0;
+  buildable_data_size[1] = 0;
   map_name.clear();
   frame_string.clear();
   frame->clear();
@@ -71,6 +74,17 @@ std::vector<std::string> State::update(
           handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
     map_data_size[0] = handshake->map_size()->x();
     map_data_size[1] = handshake->map_size()->y();
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
+    buildable_data.assign(
+        handshake->buildable_data()->begin(), handshake->buildable_data()->end());
+    upd.emplace_back("buildable_data");
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_SIZE)) {
+    buildable_data_size[0] = handshake->buildable_size()->x();
+    buildable_data_size[1] = handshake->buildable_size()->y();
   }
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_MAP_NAME)) {

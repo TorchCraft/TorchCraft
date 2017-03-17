@@ -43,6 +43,7 @@ int push2DIntegerArray(
 const std::set<std::string> stateMembers = {
     "lag_frames",
     "map_data",
+    "buildable_data",
     "map_name",
     "player_id",
     "neutral_id",
@@ -81,6 +82,20 @@ int pushMember(
       auto storage = THByteStorage_newWithData(s->map_data.data(), s0 * s1);
       THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
       THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
+      luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
+    } else {
+      lua_pushnil(L);
+    }
+  } else if (m == "buildable_data") {
+    if (!s->buildable_data.empty()) {
+      auto s0 = s->buildable_data_size[0];
+      auto s1 = s->buildable_data_size[1];
+      auto storage = THByteStorage_newWithSize(s0 * s1);
+      auto data = THByteStorage_data(storage);
+      for (size_t i = 0; i < s->buildable_data.size(); i++) {
+        data[i] = s->buildable_data[i];
+      }
       auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {

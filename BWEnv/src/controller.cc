@@ -202,6 +202,8 @@ void Controller::setupHandshake()
   handshake.lag_frames = BWAPI::Broodwar->getLatencyFrames();
   handshake.map_data = Utils::mapToVector();
   handshake.map_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapWidth() * 4, BWAPI::Broodwar->mapHeight() * 4));
+  handshake.buildable_data = Utils::buildableToVector();
+  handshake.buildable_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight()));
   handshake.map_name = BWAPI::Broodwar->mapFileName();
   handshake.neutral_id = BWAPI::Broodwar->neutral()->getID();
   if (BWAPI::Broodwar->isReplay()) {
@@ -835,6 +837,13 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     + utype.airWeapon().damageBonus()
     * player->getUpgradeLevel(utype.airWeapon().upgradeType()))
     * utype.maxAirHits() * utype.airWeapon().damageFactor();
+  // store visibility from each player in a separate bit
+  int32_t visible = 0;
+  for (auto player: BWAPI::Broodwar->getPlayers()) {
+    if (player->getID() >= 0) {
+      visible |= (u->isVisible(player) << player->getID());
+    }
+  }
 
   frame.units[player->getID()].push_back({
     u->getID(), x_wt, y_wt,
@@ -842,7 +851,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getShields(), utype.maxShields(), u->getEnergy(),
     player->weaponDamageCooldown(utype),
     u->getGroundWeaponCooldown(), u->getAirWeaponCooldown(),
-    u->isIdle(), u->isVisible(),
+    u->isIdle(), u->isDetected(), visible,
     utype.getID(),
     player->armor(utype),
     player->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields),

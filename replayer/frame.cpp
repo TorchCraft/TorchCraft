@@ -17,12 +17,12 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
       << o.max_health << " " << o.shield << " " << o.max_shield << " "
       << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
-      << " " << o.idle << " " << o.detected << " " << o.visible << " " << o.type
-      << " " << o.armor << " " << o.shieldArmor << " " << o.size << " "
-      << o.pixel_x << " " << o.pixel_y << " " << o.pixel_size_x << " "
-      << o.pixel_size_y << " " << o.groundATK << " " << o.airATK << " "
-      << o.groundDmgType << " " << o.airDmgType << " " << o.groundRange << " "
-      << o.airRange << " ";
+      << " " << o.idle << " " << o.detected << " " << o.lifted << " "
+      << o.visible << " " << o.type << " " << o.armor << " " << o.shieldArmor
+      << " " << o.size << " " << o.pixel_x << " " << o.pixel_y << " "
+      << o.pixel_size_x << " " << o.pixel_size_y << " " << o.groundATK << " "
+      << o.airATK << " " << o.groundDmgType << " " << o.airDmgType << " "
+      << o.groundRange << " " << o.airRange << " ";
 
   out << o.orders.size() << " ";
   for (auto& c : o.orders) {
@@ -39,10 +39,10 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
 std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >>
       o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.idle >>
-      o.detected >> o.visible >> o.type >> o.armor >> o.shieldArmor >> o.size >>
-      o.pixel_x >> o.pixel_y >> o.pixel_size_x >> o.pixel_size_y >>
-      o.groundATK >> o.airATK >> o.groundDmgType >> o.airDmgType >>
-      o.groundRange >> o.airRange;
+      o.detected >> o.lifted >> o.visible >> o.type >> o.armor >>
+      o.shieldArmor >> o.size >> o.pixel_x >> o.pixel_y >> o.pixel_size_x >>
+      o.pixel_size_y >> o.groundATK >> o.airATK >> o.groundDmgType >>
+      o.airDmgType >> o.groundRange >> o.airRange;
 
   int n_orders;
   in >> n_orders;
@@ -243,7 +243,8 @@ namespace detail = replayer::detail;
   F(airRange, 25)      \
   F(playerId, 26)      \
   F(resources, 27)     \
-  F(detected, 28)
+  F(detected, 28)      \
+  F(lifted, 29)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \

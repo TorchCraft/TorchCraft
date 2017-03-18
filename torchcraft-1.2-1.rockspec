@@ -1,8 +1,8 @@
 package = "TorchCraft"
-version = "1.1-1"
+version = "1.2-1"
 source = {
     url = "git://github.com/torchcraft/torchcraft",
-    tag = "v1.1-1",
+    tag = "v1.2-1",
 }
 description = {
     summary = "Connects Torch to StarCraft through BWAPI",

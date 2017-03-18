@@ -306,6 +306,8 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
   int32_t player_id;
   int32_t neutral_id;
   int32_t battle_frame_count;
+  std::vector<bool> buildable_data;
+  std::unique_ptr<Vec2> buildable_size;
   HandshakeServerT()
     : lag_frames(0),
       is_replay(false),
@@ -324,7 +326,9 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_IS_REPLAY = 12,
     VT_PLAYER_ID = 14,
     VT_NEUTRAL_ID = 16,
-    VT_BATTLE_FRAME_COUNT = 18
+    VT_BATTLE_FRAME_COUNT = 18,
+    VT_BUILDABLE_DATA = 20,
+    VT_BUILDABLE_SIZE = 22
   };
   int32_t lag_frames() const { return GetField<int32_t>(VT_LAG_FRAMES, 0); }
   bool mutate_lag_frames(int32_t _lag_frames) { return SetField(VT_LAG_FRAMES, _lag_frames); }
@@ -342,6 +346,10 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_neutral_id(int32_t _neutral_id) { return SetField(VT_NEUTRAL_ID, _neutral_id); }
   int32_t battle_frame_count() const { return GetField<int32_t>(VT_BATTLE_FRAME_COUNT, 0); }
   bool mutate_battle_frame_count(int32_t _battle_frame_count) { return SetField(VT_BATTLE_FRAME_COUNT, _battle_frame_count); }
+  const flatbuffers::Vector<uint8_t> *buildable_data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_BUILDABLE_DATA); }
+  flatbuffers::Vector<uint8_t> *mutable_buildable_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_BUILDABLE_DATA); }
+  const Vec2 *buildable_size() const { return GetStruct<const Vec2 *>(VT_BUILDABLE_SIZE); }
+  Vec2 *mutable_buildable_size() { return GetStruct<Vec2 *>(VT_BUILDABLE_SIZE); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_LAG_FRAMES) &&
@@ -354,6 +362,9 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_PLAYER_ID) &&
            VerifyField<int32_t>(verifier, VT_NEUTRAL_ID) &&
            VerifyField<int32_t>(verifier, VT_BATTLE_FRAME_COUNT) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_BUILDABLE_DATA) &&
+           verifier.Verify(buildable_data()) &&
+           VerifyField<Vec2>(verifier, VT_BUILDABLE_SIZE) &&
            verifier.EndTable();
   }
   HandshakeServerT *UnPack(const flatbuffers::resolver_function_t *resolver = nullptr) const;
@@ -371,10 +382,12 @@ struct HandshakeServerBuilder {
   void add_player_id(int32_t player_id) { fbb_.AddElement<int32_t>(HandshakeServer::VT_PLAYER_ID, player_id, 0); }
   void add_neutral_id(int32_t neutral_id) { fbb_.AddElement<int32_t>(HandshakeServer::VT_NEUTRAL_ID, neutral_id, 0); }
   void add_battle_frame_count(int32_t battle_frame_count) { fbb_.AddElement<int32_t>(HandshakeServer::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0); }
+  void add_buildable_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data) { fbb_.AddOffset(HandshakeServer::VT_BUILDABLE_DATA, buildable_data); }
+  void add_buildable_size(const Vec2 *buildable_size) { fbb_.AddStruct(HandshakeServer::VT_BUILDABLE_SIZE, buildable_size); }
   HandshakeServerBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   HandshakeServerBuilder &operator=(const HandshakeServerBuilder &);
   flatbuffers::Offset<HandshakeServer> Finish() {
-    auto o = flatbuffers::Offset<HandshakeServer>(fbb_.EndTable(start_, 8));
+    auto o = flatbuffers::Offset<HandshakeServer>(fbb_.EndTable(start_, 10));
     return o;
   }
 };
@@ -387,8 +400,12 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
     bool is_replay = false,
     int32_t player_id = 0,
     int32_t neutral_id = 0,
-    int32_t battle_frame_count = 0) {
+    int32_t battle_frame_count = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data = 0,
+    const Vec2 *buildable_size = 0) {
   HandshakeServerBuilder builder_(_fbb);
+  builder_.add_buildable_size(buildable_size);
+  builder_.add_buildable_data(buildable_data);
   builder_.add_battle_frame_count(battle_frame_count);
   builder_.add_neutral_id(neutral_id);
   builder_.add_player_id(player_id);
@@ -408,8 +425,10 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(flatbuff
     bool is_replay = false,
     int32_t player_id = 0,
     int32_t neutral_id = 0,
-    int32_t battle_frame_count = 0) {
-  return CreateHandshakeServer(_fbb, lag_frames, map_data ? _fbb.CreateVector<uint8_t>(*map_data) : 0, map_size, map_name ? _fbb.CreateString(map_name) : 0, is_replay, player_id, neutral_id, battle_frame_count);
+    int32_t battle_frame_count = 0,
+    const std::vector<uint8_t> *buildable_data = nullptr,
+    const Vec2 *buildable_size = 0) {
+  return CreateHandshakeServer(_fbb, lag_frames, map_data ? _fbb.CreateVector<uint8_t>(*map_data) : 0, map_size, map_name ? _fbb.CreateString(map_name) : 0, is_replay, player_id, neutral_id, battle_frame_count, buildable_data ? _fbb.CreateVector<uint8_t>(*buildable_data) : 0, buildable_size);
 }
 
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT *_o, const flatbuffers::rehasher_function_t *rehasher = nullptr);
@@ -881,6 +900,8 @@ inline HandshakeServerT *HandshakeServer::UnPack(const flatbuffers::resolver_fun
   { auto _e = player_id(); _o->player_id = _e; };
   { auto _e = neutral_id(); _o->neutral_id = _e; };
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
+  { auto _e = buildable_data(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->buildable_data.push_back(_e->Get(_i)!=0); } } };
+  { auto _e = buildable_size(); if (_e) _o->buildable_size = std::unique_ptr<Vec2>(new Vec2(*_e)); };
   return _o;
 }
 
@@ -898,7 +919,9 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
     _o->is_replay,
     _o->player_id,
     _o->neutral_id,
-    _o->battle_frame_count);
+    _o->battle_frame_count,
+    _o->buildable_data.size() ? _fbb.CreateVector(_o->buildable_data) : 0,
+    _o->buildable_size ? _o->buildable_size.get() : 0);
 }
 
 inline CommandsT *Commands::UnPack(const flatbuffers::resolver_function_t *resolver) const {

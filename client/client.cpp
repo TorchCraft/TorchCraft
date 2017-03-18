@@ -283,4 +283,22 @@ bool Client::receive(std::vector<std::string>& updates) {
   return true;
 }
 
+bool Client::poll(long timeout) {
+  clearError();
+  if (!conn_) {
+    error_ = "No active connection";
+    return false;
+  }
+
+  if (!conn_->poll(timeout)) {
+    std::stringstream ss;
+    ss << "Error during poll: " << conn_->errmsg() << " ("
+       << conn_->errnum() << ")";
+    error_ = ss.str();
+    return false;
+  }
+
+  return true;
+}
+
 } // namespace torchcraft

@@ -109,6 +109,10 @@ class Client {
   /// @return true if the receive operation succeeded, false otherwise
   bool receive(std::vector<std::string>& updates);
 
+  /// Blocks until a message is available for receive().
+  /// @return false on failure (timeout or lost connectivity), true otherwise
+  bool poll(long timeout = -1);
+
   std::string error() const {
     return error_;
   }

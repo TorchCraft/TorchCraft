@@ -184,40 +184,27 @@ void Utils::bwlog(std::ofstream& output_log,
 std::vector<uint8_t> Utils::mapToVector()
 {
   std::vector<uint8_t> v;
-  for (int x = 0; x < BWAPI::Broodwar->mapHeight() * 4; ++x) {
-    for (int y = 0; y < BWAPI::Broodwar->mapWidth() * 4; ++y) {
+  for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
+    for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
       if (BWAPI::Broodwar->isWalkable(x, y)) {
         v.push_back(BWAPI::Broodwar->getGroundHeight(x / 4, y / 4));
       } else {
         v.push_back(-1);
       }
-      // TODO add isBuildable?
     }
   }
   return v;
 }
 
-std::string Utils::mapToTensorStr()
+std::vector<bool> Utils::buildableToVector()
 {
-  std::stringstream r;
-  r << "torch.ByteTensor({";
-  for (int x = 0; x < BWAPI::Broodwar->mapHeight() * 4; ++x)
-  {
-    r << "{";
-    for (int y = 0; y < BWAPI::Broodwar->mapWidth() * 4; ++y)
-    {
-      if (BWAPI::Broodwar->isWalkable(x, y)) {
-        r << BWAPI::Broodwar->getGroundHeight(x / 4, y / 4) << ",";
-      }
-      else {
-        r << "-1,";
-      }
-      // TODO add isBuildable?
+  std::vector<bool> v;
+  for (int y = 0; y < BWAPI::Broodwar->mapHeight(); ++y) {
+    for (int x = 0; x < BWAPI::Broodwar->mapWidth(); ++x) {
+      v.push_back(BWAPI::Broodwar->isBuildable(x, y));
     }
-    r << "},";
   }
-  r << "})";
-  return r.str();
+  return v;
 }
 
 bool Utils::checkTimeInGame()

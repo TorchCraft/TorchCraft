@@ -15,8 +15,6 @@
 
 #include "frame_lua.h"
 
-namespace replayer = torchcraft::replayer;
-
 namespace {
 
 inline torchcraft::State* checkState(lua_State* L, int index = 1) {
@@ -45,6 +43,7 @@ int push2DIntegerArray(
 const std::set<std::string> stateMembers = {
     "lag_frames",
     "map_data",
+    "buildable_data",
     "map_name",
     "player_id",
     "neutral_id",
@@ -83,7 +82,21 @@ int pushMember(
       auto storage = THByteStorage_newWithData(s->map_data.data(), s0 * s1);
       THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
       THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
-      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, s1, s1, 1);
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
+      luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
+    } else {
+      lua_pushnil(L);
+    }
+  } else if (m == "buildable_data") {
+    if (!s->buildable_data.empty()) {
+      auto s0 = s->buildable_data_size[0];
+      auto s1 = s->buildable_data_size[1];
+      auto storage = THByteStorage_newWithSize(s0 * s1);
+      auto data = THByteStorage_data(storage);
+      for (size_t i = 0; i < s->buildable_data.size(); i++) {
+        data[i] = s->buildable_data[i];
+      }
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {
       lua_pushnil(L);
@@ -97,7 +110,7 @@ int pushMember(
   } else if (m == "replay") {
     lua_pushboolean(L, s->replay);
   } else if (m == "frame") {
-    auto f = (replayer::Frame**)lua_newuserdata(L, sizeof(replayer::Frame*));
+    auto f = (torchcraft::Frame**)lua_newuserdata(L, sizeof(torchcraft::Frame*));
     *f = s->frame;
     (*f)->incref();
     luaL_getmetatable(L, "torchcraft.Frame");
@@ -179,7 +192,7 @@ void pushFrameMember(
   lua_call(L, 2, 1);
 }
 
-void pushUnits(lua_State* L, const std::vector<replayer::Unit>& units) {
+void pushUnits(lua_State* L, const std::vector<torchcraft::Unit>& units) {
   lua_createtable(L, units.size(), 0);
   for (const auto& u : units) {
     pushUnit(L, u);

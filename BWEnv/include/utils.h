@@ -36,7 +36,7 @@ void overwriteConfig(const std::wstring& sc_path_,
 // require BWAPI thread
 void bwlog(std::ofstream& output_log, std::string format, ...);
 std::vector<uint8_t> mapToVector();
-std::string mapToTensorStr();
+std::vector<bool> buildableToVector();
 bool checkTimeInGame();
 std::string ws2s(const std::wstring& ws);
 std::wstring s2ws(const std::string& s);

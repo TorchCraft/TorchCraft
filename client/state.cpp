@@ -15,7 +15,7 @@ namespace torchcraft {
 
 State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
     : RefCounted(),
-      frame(new replayer::Frame()),
+      frame(new Frame()),
       microBattles_(microBattles),
       onlyConsiderTypes_(std::move(onlyConsiderTypes)) {
   reset();
@@ -31,6 +31,9 @@ void State::reset() {
   map_data.clear();
   map_data_size[0] = 0;
   map_data_size[1] = 0;
+  buildable_data.clear();
+  buildable_data_size[0] = 0;
+  buildable_data_size[1] = 0;
   map_name.clear();
   frame_string.clear();
   frame->clear();
@@ -71,6 +74,17 @@ std::vector<std::string> State::update(
           handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
     map_data_size[0] = handshake->map_size()->x();
     map_data_size[1] = handshake->map_size()->y();
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
+    buildable_data.assign(
+        handshake->buildable_data()->begin(), handshake->buildable_data()->end());
+    upd.emplace_back("buildable_data");
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_SIZE)) {
+    buildable_data_size[0] = handshake->buildable_size()->x();
+    buildable_data_size[1] = handshake->buildable_size()->y();
   }
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_MAP_NAME)) {
@@ -233,7 +247,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
             std::remove_if(
                 us.second.begin(),
                 us.second.end(),
-                [this](const replayer::Unit& unit) {
+                [this](const Unit& unit) {
                   return aliveUnits.find(unit.id) == aliveUnits.end();
                 }),
             us.second.end());
@@ -249,7 +263,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
   for (const auto& fus : frame->units) {
     auto player = fus.first;
     if (units.find(player) == units.end()) {
-      units.emplace(player, std::vector<replayer::Unit>());
+      units.emplace(player, std::vector<Unit>());
     } else {
       units[player].clear();
     }
@@ -258,7 +272,7 @@ void State::postUpdate(std::vector<std::string>& upd) {
         fus.second.begin(),
         fus.second.end(),
         std::back_inserter(units[player]),
-        [this, player](const replayer::Unit& unit) {
+        [this, player](const Unit& unit) {
           auto ut = torchcraft::BW::UnitType::_from_integral_nothrow(unit.type);
           return (
               // Unit is of known type (or enemy unit)

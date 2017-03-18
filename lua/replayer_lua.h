@@ -28,18 +28,21 @@ extern "C" int loadReplayer(lua_State* L);
 extern "C" int replayerSave(lua_State* L);
 extern "C" int replayerGetNumFrames(lua_State* L);
 extern "C" int replayerGetFrame(lua_State* L);
-extern "C" int replayerSetNumUnits(lua_State* L);
 extern "C" int replayerSetMap(lua_State* L);
 extern "C" int replayerGetMap(lua_State* L);
 extern "C" int replayerPush(lua_State* L);
 extern "C" int replayerGetNumUnits(lua_State* L);
 extern "C" int replayerSetNumUnits(lua_State* L);
+extern "C" int replayerGetKeyFrame(lua_State* L);
+extern "C" int replayerSetKeyFrame(lua_State* L);
 
 // const struct luaL_Reg replayer_m [] = {
 const struct luaL_Reg replayer_m[] = {{"__gc", gcReplayer},
                                       {"save", replayerSave},
                                       {"getNumFrames", replayerGetNumFrames},
                                       {"getFrame", replayerGetFrame},
+                                      {"setKeyFrame", replayerSetKeyFrame},
+                                      {"getKeyFrame", replayerGetKeyFrame},
                                       {"setNumUnits", replayerSetNumUnits},
                                       {"getNumUnits", replayerGetNumUnits},
                                       {"setMap", replayerSetMap},

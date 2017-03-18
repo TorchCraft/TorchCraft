@@ -25,8 +25,8 @@ IF(APPLE)
        LINK_FLAGS "-undefined dynamic_lookup")
 ENDIF()
 SET_TARGET_PROPERTIES(torchcraft PROPERTIES
-    VERSION   1.1.1
-    SOVERSION 1.1.1)
+    VERSION   1.2.1
+    SOVERSION 1.2.1)
 TARGET_LINK_LIBRARIES(torchcraft TH luaT zmq)
 INSTALL(FILES ${headers}
         DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"

@@ -116,16 +116,12 @@ void pushVector(lua_State* L, std::vector<Enum> v) {
 template <typename T>
 void pushStaticValues(lua_State* L, const T m[]) {
   lua_newtable(L);
-  for (size_t i = 0; i < torchcraft::BW::data::NumKeys; i++) {
-    const auto& key = torchcraft::BW::data::Keys[i];
-    pushValue(L, m[i]);
-    lua_setfield(L, -2, key.c_str());
+  for (auto ut : torchcraft::BW::UnitType::_values()) {
+    pushValue(L, m[ut]);
+    lua_setfield(L, -2, ut._to_string());
 
-    auto t = torchcraft::BW::UnitType::_from_string_nothrow(key.c_str());
-    if (t) {
-      pushValue(L, m[i]);
-      lua_rawseti(L, -2, t->_to_integral());
-    }
+    pushValue(L, m[ut]);
+    lua_rawseti(L, -2, ut);
   }
   sealTable(L);
 }

@@ -45,7 +45,7 @@ struct Unit {
   int32_t id, x, y;
   int32_t health, max_health, shield, max_shield, energy;
   int32_t maxCD, groundCD, airCD;
-  bool idle, detected;
+  bool idle, detected, lifted;
   int32_t visible;
   int32_t type, armor, shieldArmor, size;
 

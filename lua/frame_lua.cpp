@@ -180,7 +180,9 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.groundCD = getInt(L, "gwcd");
       unit.airCD = getInt(L, "awcd");
       unit.idle = getBool(L, "idle");
-      unit.visible = getBool(L, "visible");
+      unit.detected = getBool(L, "detected");
+      unit.lifted = getBool(L, "lifted");
+      unit.visible = getInt(L, "visible");
       unit.type = getInt(L, "type");
       unit.armor = getInt(L, "armor");
       unit.shieldArmor = getInt(L, "shieldArmor");
@@ -294,7 +296,9 @@ void pushUnit(lua_State* L, const Unit& unit) {
   setInt(L, "gwcd", unit.groundCD);
   setInt(L, "awcd", unit.airCD);
   setBool(L, "idle", unit.idle);
-  setBool(L, "visible", unit.visible);
+  setBool(L, "detected", unit.detected);
+  setBool(L, "lifted", unit.lifted);
+  setInt(L, "visible", unit.visible);
   setInt(L, "armor", unit.armor);
   setInt(L, "shieldArmor", unit.shieldArmor);
   setInt(L, "gwattack", unit.groundATK);

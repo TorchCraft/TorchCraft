@@ -851,7 +851,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getShields(), utype.maxShields(), u->getEnergy(),
     player->weaponDamageCooldown(utype),
     u->getGroundWeaponCooldown(), u->getAirWeaponCooldown(),
-    u->isIdle(), u->isDetected(), visible,
+    u->isIdle(), u->isDetected(), u->isLifted(), visible,
     utype.getID(),
     player->armor(utype),
     player->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields),

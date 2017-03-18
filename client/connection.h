@@ -60,7 +60,7 @@ class Connection {
   /// @return true if the receive operation succeeded
   bool receive(std::vector<uint8_t>& dest);
 
-  bool poll(int timeout);
+  bool poll(long timeout);
 
   int errnum() const {
     return errnum_;

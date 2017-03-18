@@ -109,7 +109,7 @@ bool Connection::receive(std::vector<uint8_t>& dest) {
   }
 } // receive
 
-bool Connection::poll(int timeout) {
+bool Connection::poll(long timeout) {
   short mask = ZMQ_POLLIN;
   zmq::pollitem_t items[] = {{sock_, 0, mask, 0}};
 

@@ -45,6 +45,7 @@ const std::set<std::string> stateMembers = {
     "map_data",
     "buildable_data",
     "map_name",
+    "start_locations",
     "player_id",
     "neutral_id",
     "replay",
@@ -103,6 +104,17 @@ int pushMember(
     }
   } else if (m == "map_name") {
     lua_pushstring(L, s->map_name.c_str());
+  } else if (m == "start_locations") {
+    lua_createtable(L, s->start_locations.size(), 0);
+    int n = 1;
+    for (auto d : s->start_locations) {
+      lua_createtable(L, 2, 0);
+      lua_pushinteger(L, d.x);
+      lua_setfield(L, -2, "x");
+      lua_pushinteger(L, d.y);
+      lua_setfield(L, -2, "y");
+      lua_rawseti(L, -2, n++);
+    }
   } else if (m == "player_id") {
     lua_pushinteger(L, s->player_id);
   } else if (m == "neutral_id") {

@@ -35,6 +35,7 @@ void State::reset() {
   buildable_data_size[0] = 0;
   buildable_data_size[1] = 0;
   map_name.clear();
+  start_locations.clear();
   frame_string.clear();
   frame->clear();
   deaths.clear();
@@ -90,6 +91,14 @@ std::vector<std::string> State::update(
           handshake, torchcraft::fbs::HandshakeServer::VT_MAP_NAME)) {
     map_name = handshake->map_name()->str();
     upd.emplace_back("map_name");
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_START_LOCATIONS)) {
+    start_locations.clear();
+    for (auto p : *handshake->start_locations()) {
+      start_locations.emplace_back(p->x(), p->y());
+    }
+    upd.emplace_back("start_locations");
   }
   player_id = handshake->player_id();
   upd.emplace_back("player_id");

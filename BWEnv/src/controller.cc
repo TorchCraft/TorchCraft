@@ -213,6 +213,10 @@ void Controller::setupHandshake()
     handshake.player_id = BWAPI::Broodwar->self()->getID();
   }
   handshake.battle_frame_count = battle_frame_count;
+  for (auto loc : BWAPI::Broodwar->getStartLocations()) {
+    BWAPI::WalkPosition walkPos(loc);
+    handshake.start_locations.emplace_back(walkPos.x, walkPos.y);
+  }
 
   this->zmq_server->sendHandshake(&handshake);
 

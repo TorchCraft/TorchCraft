@@ -63,8 +63,10 @@ BETTER_ENUM(
     DrawUnitPosLine = 19, // uid, x2, y2, color index
     DrawCircle = 20, //  x, y, radius, color index
     DrawUnitCircle = 21, // uid, radius, color index
+    DrawText = 22, // x, y plus text arg
+    DrawTextScreen = 23, // x, y plus text arg
 
-    MAX = 22)
+    MAX)
 
 BETTER_ENUM(
     UserCommandType,

@@ -387,16 +387,19 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
     case Commands::DRAW_UNIT_LINE:
     case Commands::DRAW_UNIT_POS_LINE:
     case Commands::DRAW_CIRCLE:
-    case Commands::DRAW_UNIT_CIRCLE: {
+    case Commands::DRAW_UNIT_CIRCLE:
+    case Commands::DRAW_TEXT:
+    case Commands::DRAW_TEXT_SCREEN: {
       static std::unordered_map<int, int> argcount = {
         {Commands::DRAW_LINE, 5}, {Commands::DRAW_UNIT_LINE, 3},
         {Commands::DRAW_UNIT_POS_LINE, 4}, {Commands::DRAW_CIRCLE, 4},
-        {Commands::DRAW_UNIT_CIRCLE, 3},
+        {Commands::DRAW_UNIT_CIRCLE, 3}, {Commands::DRAW_TEXT, 2},
+        {Commands::DRAW_TEXT_SCREEN, 2},
       };
       check_args(command, argcount[command]);
       std::vector<int> cmd({command});
       cmd.insert(cmd.end(), args.begin(), args.end());
-      draw_cmds_.push_back(cmd);
+      draw_cmds_.push_back({cmd, str});
       return;
     }
     case Commands::COMMAND_USER:
@@ -522,7 +525,9 @@ void Controller::clearLastFrame()
 
 void Controller::executeDrawCommands()
 {
-  for (const auto& cmd : draw_cmds_) {
+  for (const auto& cmdpair : draw_cmds_) {
+    auto cmd = cmdpair.first;
+    auto text = cmdpair.second;
     switch (cmd[0]) {
       case Commands::DRAW_LINE:
         BWAPI::Broodwar->drawLineMap(cmd.at(1), cmd.at(2), cmd.at(3),
@@ -558,6 +563,12 @@ void Controller::executeDrawCommands()
         }
         break;
       }
+      case Commands::DRAW_TEXT:
+        BWAPI::Broodwar->drawTextMap(cmd.at(1), cmd.at(2), text.c_str());
+        break;
+      case Commands::DRAW_TEXT_SCREEN:
+        BWAPI::Broodwar->drawTextScreen(cmd.at(1), cmd.at(2), text.c_str());
+        break;
     }
   }
 }

@@ -41,7 +41,9 @@ enum Commands {
   DRAW_UNIT_LINE,     // uid1, uid2, color
   DRAW_UNIT_POS_LINE, // uid. x2, y2, color
   DRAW_CIRCLE,        // x, y, radius, color
-  DRAW_UNIT_CIRCLE,   // uid, radiu, color
+  DRAW_UNIT_CIRCLE,   // uid, radius, color
+  DRAW_TEXT,          // x, y + text
+  DRAW_TEXT_SCREEN,   // x, y + text
   // last command id
   COMMAND_END
 };
@@ -101,7 +103,7 @@ private:
   bool too_long_play_ = false;
   bool exit_process_ = false;
   bool with_image_ = false;
-  std::vector<std::vector<int>> draw_cmds_;
+  std::vector<std::pair<std::vector<int>, std::string>> draw_cmds_;
   torchcraft::fbs::FrameT tcframe_;
 };
 

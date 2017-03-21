@@ -493,6 +493,8 @@ BETTER_ENUM(
     Resource_Mineral_Field_Type_3 = 178,
     Resource_Vespene_Geyser = 188,
     Spell_Dark_Swarm = 202,
+    Special_Pit_Door = 207,
+    Special_Right_Pit_Door = 208,
     MAX = 233)
 
 BETTER_ENUM(

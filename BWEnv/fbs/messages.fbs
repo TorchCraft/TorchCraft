@@ -39,6 +39,7 @@ table HandshakeServer {
   battle_frame_count:int; // if micro_mode == true
   buildable_data:[bool];  // build tile resolution
   buildable_size:Vec2;
+  start_locations:[Vec2];
 }
 
 table Commands {

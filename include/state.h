@@ -37,6 +37,12 @@ typedef replayer::Frame Frame;
 
 class State : public RefCounted {
  public:
+  struct Position {
+    int x, y;
+    Position() : x(0), y(0) {}
+    Position(int x, int y) : x(x), y(y) {}
+  };
+
   // setup
   int lag_frames; // number of frames from order to execution
   std::vector<uint8_t> map_data; // 2D. 255 where not available
@@ -44,6 +50,7 @@ class State : public RefCounted {
   std::vector<bool> buildable_data; // 2D, build tile resolution
   int buildable_data_size[2];
   std::string map_name; // Name on the current map
+  std::vector<Position> start_locations;
   int player_id;
   int neutral_id;
   bool replay;

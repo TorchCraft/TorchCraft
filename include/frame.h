@@ -50,6 +50,7 @@ struct Unit {
     Burrowed            = 1ll <<  9,
     CarryingGas         = 1ll << 10,
     CarryingMinerals    = 1ll << 11,
+    Completed           = 1ll << 13,
     Constructing        = 1ll << 14,
     DefenseMatrixed     = 1ll << 15,
     Detected            = 1ll << 16,

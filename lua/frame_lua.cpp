@@ -22,6 +22,7 @@ std::unordered_map<uint64_t, const char*> flagNames = {
     {Unit::Flags::Burrowed, "burrowed"},
     {Unit::Flags::CarryingGas, "carrying_gas"},
     {Unit::Flags::CarryingMinerals, "carrying_minerals"},
+    {Unit::Flags::Completed, "completed"},
     {Unit::Flags::Constructing, "constructing"},
     {Unit::Flags::DefenseMatrixed, "defense_matrixed"},
     {Unit::Flags::Detected, "detected"},

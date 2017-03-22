@@ -42,10 +42,51 @@ struct Order {
 };
 
 struct Unit {
+  enum Flags : int64_t {
+    BeingConstructed    = 1ll <<  4,
+    BeingGathered       = 1ll <<  5,
+    BeingHealed         = 1ll <<  6,
+    Blind               = 1ll <<  7,
+    Burrowed            = 1ll <<  9,
+    CarryingGas         = 1ll << 10,
+    CarryingMinerals    = 1ll << 11,
+    Constructing        = 1ll << 14,
+    DefenseMatrixed     = 1ll << 15,
+    Detected            = 1ll << 16,
+    Ensnared            = 1ll << 17,
+    GatheringGas        = 1ll << 20,
+    GatheringMinerals   = 1ll << 21,
+    Hallucination       = 1ll << 22,
+    Idle                = 1ll << 24,
+    Interruptible       = 1ll << 25,
+    Irradiated          = 1ll << 27,
+    Lifted              = 1ll << 28,
+    Loaded              = 1ll << 29,
+    LockedDown          = 1ll << 30,
+    Maelstrommed        = 1ll << 31,
+    Morphing            = 1ll << 32,
+    Parasited           = 1ll << 34,
+    Plagued             = 1ll << 36,
+    Powered             = 1ll << 37,
+    Repairing           = 1ll << 38,
+    Researching         = 1ll << 39,
+    Selected            = 1ll << 40,
+    Stasised            = 1ll << 43,
+    Stimmed             = 1ll << 44,
+    Stuck               = 1ll << 45,
+    Targetable          = 1ll << 46,
+    Training            = 1ll << 47,
+    UnderAttack         = 1ll << 48,
+    UnderDarkSwarm      = 1ll << 49,
+    UnderDisruptionWeb  = 1ll << 50,
+    UnderStorm          = 1ll << 51,
+    Upgrading           = 1ll << 52,
+  };
+
   int32_t id, x, y;
   int32_t health, max_health, shield, max_shield, energy;
   int32_t maxCD, groundCD, airCD;
-  bool idle, detected, lifted;
+  int64_t flags;
   int32_t visible;
   int32_t type, armor, shieldArmor, size;
 
@@ -216,6 +257,7 @@ class UnitDiff {
   std::vector<int32_t> order_diffs;
   int32_t order_size;
   double velocityX, velocityY;
+  int64_t flags;
 };
 
 Frame* add(Frame* frame, FrameDiff* diff);

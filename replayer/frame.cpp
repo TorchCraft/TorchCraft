@@ -17,12 +17,11 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
       << o.max_health << " " << o.shield << " " << o.max_shield << " "
       << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
-      << " " << o.idle << " " << o.detected << " " << o.lifted << " "
-      << o.visible << " " << o.type << " " << o.armor << " " << o.shieldArmor
-      << " " << o.size << " " << o.pixel_x << " " << o.pixel_y << " "
-      << o.pixel_size_x << " " << o.pixel_size_y << " " << o.groundATK << " "
-      << o.airATK << " " << o.groundDmgType << " " << o.airDmgType << " "
-      << o.groundRange << " " << o.airRange << " ";
+      << " " << o.flags << " " << o.visible << " " << o.type << " " << o.armor
+      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
+      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
+      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
+      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
 
   out << o.orders.size() << " ";
   for (auto& c : o.orders) {
@@ -38,11 +37,11 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >>
-      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.idle >>
-      o.detected >> o.lifted >> o.visible >> o.type >> o.armor >>
-      o.shieldArmor >> o.size >> o.pixel_x >> o.pixel_y >> o.pixel_size_x >>
-      o.pixel_size_y >> o.groundATK >> o.airATK >> o.groundDmgType >>
-      o.airDmgType >> o.groundRange >> o.airRange;
+      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.flags >>
+      o.visible >> o.type >> o.armor >> o.shieldArmor >> o.size >> o.pixel_x >>
+      o.pixel_y >> o.pixel_size_x >> o.pixel_size_y >> o.groundATK >>
+      o.airATK >> o.groundDmgType >> o.airDmgType >> o.groundRange >>
+      o.airRange;
 
   int n_orders;
   in >> n_orders;
@@ -225,7 +224,6 @@ namespace detail = replayer::detail;
   F(maxCD, 7)          \
   F(groundCD, 8)       \
   F(airCD, 9)          \
-  F(idle, 10)          \
   F(visible, 11)       \
   F(type, 12)          \
   F(armor, 13)         \
@@ -242,9 +240,7 @@ namespace detail = replayer::detail;
   F(groundRange, 24)   \
   F(airRange, 25)      \
   F(playerId, 26)      \
-  F(resources, 27)     \
-  F(detected, 28)      \
-  F(lifted, 29)
+  F(resources, 27)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \
@@ -290,6 +286,7 @@ replayer::FrameDiff replayer::frame_diff(
       du.id = lit.id;
       du.velocityX = lit.velocityX;
       du.velocityY = lit.velocityY;
+      du.flags = lit.flags;
       du.order_size = lit.orders.size();
       if (rit != rhsu.end() &&
           lit.id == rit->id) { // Unit exists in both frames
@@ -370,6 +367,7 @@ replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
       u.id = du.id;
       u.velocityX = du.velocityX;
       u.velocityY = du.velocityY;
+      u.flags = du.flags;
 
       for (size_t k = 0; k < du.var_diffs.size(); k++) {
         switch (du.var_ids[k]) { // assumes int32_t are 0 initted
@@ -445,6 +443,7 @@ std::ostream& replayer::operator<<(
     std::ostream& out,
     const detail::UnitDiff& o) {
   out << o.id << " " << o.velocityX << " " << o.velocityY;
+  out << " " << o.flags;
   out << " " << o.var_ids.size();
   for (size_t i = 0; i < o.var_ids.size(); i++)
     out << " " << o.var_ids[i];
@@ -480,6 +479,7 @@ std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
   size_t nvars, norders;
 
   in >> o.id >> o.velocityX >> o.velocityY;
+  in >> o.flags;
   in >> nvars;
   o.var_ids.resize(nvars);
   o.var_diffs.resize(nvars);
@@ -550,6 +550,7 @@ bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2) {
 #undef _GEN_VAR
       _TEST(_EQV(units, [i].velocityX));
       _TEST(_EQV(units, [i].velocityY));
+      _TEST(_EQV(units, [i].flags));
       _TEST(_EQV(units, [i].orders.size()));
       for (size_t k = 0; k < f1units[i].orders.size(); k++)
         _TEST(_EQV(units, [i].orders[k]));

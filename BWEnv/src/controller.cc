@@ -848,7 +848,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     }
   }
 
-  int64_t flags = 0;
+  uint64_t flags = 0;
   flags |= u->isBeingConstructed() ? replayer::Unit::Flags::BeingConstructed : 0;
   flags |= u->isBeingGathered() ? replayer::Unit::Flags::BeingGathered : 0;
   flags |= u->isBeingHealed() ? replayer::Unit::Flags::BeingHealed : 0;

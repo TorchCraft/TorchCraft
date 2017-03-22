@@ -42,7 +42,7 @@ struct Order {
 };
 
 struct Unit {
-  enum Flags : int64_t {
+  enum Flags : uint64_t {
     BeingConstructed    = 1ll <<  4,
     BeingGathered       = 1ll <<  5,
     BeingHealed         = 1ll <<  6,
@@ -86,7 +86,7 @@ struct Unit {
   int32_t id, x, y;
   int32_t health, max_health, shield, max_shield, energy;
   int32_t maxCD, groundCD, airCD;
-  int64_t flags;
+  uint64_t flags;
   int32_t visible;
   int32_t type, armor, shieldArmor, size;
 

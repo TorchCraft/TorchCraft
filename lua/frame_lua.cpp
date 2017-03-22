@@ -14,7 +14,7 @@ using namespace torchcraft::replayer;
 
 namespace {
 
-std::unordered_map<int64_t, const char*> flagNames = {
+std::unordered_map<uint64_t, const char*> flagNames = {
     {Unit::Flags::BeingConstructed, "being_constructed"},
     {Unit::Flags::BeingGathered, "being_gathered"},
     {Unit::Flags::BeingHealed, "being_healed"},
@@ -130,7 +130,7 @@ void setBool(lua_State* L, const char* key, bool v) {
   lua_settable(L, -3);
 }
 
-void setFlags(lua_State* L, const char* key, int64_t flags) {
+void setFlags(lua_State* L, const char* key, uint64_t flags) {
   lua_pushstring(L, key);
   lua_newtable(L);
   for (auto& it : flagNames) {
@@ -162,9 +162,9 @@ bool getBool(lua_State* L, const char* key) {
   return res;
 };
 
-int64_t getFlags(lua_State* L, const char* key) {
+uint64_t getFlags(lua_State* L, const char* key) {
   getField(L, key);
-  int64_t flags = 0;
+  uint64_t flags = 0;
   for (auto& it : flagNames) {
     flags |= getBool(L, it.second) ? it.first : 0;
   }

@@ -764,18 +764,6 @@ void Controller::packMyUnits(replayer::Frame& f)
     if (!u->exists())
       continue;
 
-    // Ignore the unit if it has one of the following status ailments
-    if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
-      continue;
-
-    // Ignore the unit if it is in one of the following states
-    if (u->isLoaded() || !u->isPowered() || u->isStuck())
-      continue;
-
-    // Ignore the unit if it is incomplete or busy constructing
-    if (!u->isCompleted() || u->isConstructing())
-      continue;
-
     if (u->getHitPoints() > 0) {
       addUnit(u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
     }
@@ -814,8 +802,8 @@ void Controller::packNeutral(replayer::Frame &f)
 * current shield points: integer
 * ground weapon cooldown: integer
 * air weapon cooldown: integer
-* is idle?: boolean
-* is visible?: boolean
+* status flags: integer
+* is visible?: integer
 * some other stuff...
 * see http://bwapi.github.io/class_b_w_a_p_i_1_1_unit_interface.html for all that's available
 */
@@ -849,13 +837,54 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     }
   }
 
+  int64_t flags = 0;
+  flags |= u->isBeingConstructed() ? replayer::Unit::Flags::BeingConstructed : 0;
+  flags |= u->isBeingGathered() ? replayer::Unit::Flags::BeingGathered : 0;
+  flags |= u->isBeingHealed() ? replayer::Unit::Flags::BeingHealed : 0;
+  flags |= u->isBlind() ? replayer::Unit::Flags::Blind : 0;
+  flags |= u->isBurrowed() ? replayer::Unit::Flags::Burrowed : 0;
+  flags |= u->isCarryingGas() ? replayer::Unit::Flags::CarryingGas : 0;
+  flags |= u->isCarryingMinerals() ? replayer::Unit::Flags::CarryingMinerals : 0;
+  flags |= u->isConstructing() ? replayer::Unit::Flags::Constructing : 0;
+  flags |= u->isDefenseMatrixed() ? replayer::Unit::Flags::DefenseMatrixed : 0;
+  flags |= u->isDetected() ? replayer::Unit::Flags::Detected : 0;
+  flags |= u->isEnsnared() ? replayer::Unit::Flags::Ensnared : 0;
+  flags |= u->isGatheringGas() ? replayer::Unit::Flags::GatheringGas : 0;
+  flags |= u->isGatheringMinerals() ? replayer::Unit::Flags::GatheringMinerals : 0;
+  flags |= u->isHallucination() ? replayer::Unit::Flags::Hallucination : 0;
+  flags |= u->isIdle() ? replayer::Unit::Flags::Idle : 0;
+  flags |= u->isInterruptible() ? replayer::Unit::Flags::Interruptible : 0;
+  flags |= u->isIrradiated() ? replayer::Unit::Flags::Irradiated : 0;
+  flags |= u->isLifted() ? replayer::Unit::Flags::Lifted : 0;
+  flags |= u->isLoaded() ? replayer::Unit::Flags::Loaded : 0;
+  flags |= u->isLockedDown() ? replayer::Unit::Flags::LockedDown : 0;
+  flags |= u->isMaelstrommed() ? replayer::Unit::Flags::Maelstrommed : 0;
+  flags |= u->isMorphing() ? replayer::Unit::Flags::Morphing : 0;
+  flags |= u->isParasited() ? replayer::Unit::Flags::Parasited : 0;
+  flags |= u->isPlagued() ? replayer::Unit::Flags::Plagued : 0;
+  flags |= u->isPowered() ? replayer::Unit::Flags::Powered : 0;
+  flags |= u->isRepairing() ? replayer::Unit::Flags::Repairing : 0;
+  flags |= u->isResearching() ? replayer::Unit::Flags::Researching : 0;
+  flags |= u->isSelected() ? replayer::Unit::Flags::Selected : 0;
+  flags |= u->isStasised() ? replayer::Unit::Flags::Stasised : 0;
+  flags |= u->isStimmed() ? replayer::Unit::Flags::Stimmed : 0;
+  flags |= u->isStuck() ? replayer::Unit::Flags::Stuck : 0;
+  flags |= u->isTargetable() ? replayer::Unit::Flags::Targetable : 0;
+  flags |= u->isTraining() ? replayer::Unit::Flags::Training : 0;
+  flags |= u->isUnderAttack() ? replayer::Unit::Flags::UnderAttack : 0;
+  flags |= u->isUnderDarkSwarm() ? replayer::Unit::Flags::UnderDarkSwarm : 0;
+  flags |= u->isUnderDisruptionWeb() ? replayer::Unit::Flags::UnderDisruptionWeb : 0;
+  flags |= u->isUnderStorm() ? replayer::Unit::Flags::UnderStorm : 0;
+  flags |= u->isUpgrading() ? replayer::Unit::Flags::Upgrading : 0;
+
   frame.units[player->getID()].push_back({
     u->getID(), x_wt, y_wt,
     u->getHitPoints(), utype.maxHitPoints(),
     u->getShields(), utype.maxShields(), u->getEnergy(),
     player->weaponDamageCooldown(utype),
     u->getGroundWeaponCooldown(), u->getAirWeaponCooldown(),
-    u->isIdle(), u->isDetected(), u->isLifted(), visible,
+    flags,
+    visible,
     utype.getID(),
     player->armor(utype),
     player->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields),
@@ -873,7 +902,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getVelocityX(),
     u->getVelocityY(),
     unit_player,
-    u->getResources()
+    u->getResources(),
   });
 
   // Add curent order to order list

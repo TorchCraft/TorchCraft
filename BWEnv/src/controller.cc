@@ -856,6 +856,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
   flags |= u->isBurrowed() ? replayer::Unit::Flags::Burrowed : 0;
   flags |= u->isCarryingGas() ? replayer::Unit::Flags::CarryingGas : 0;
   flags |= u->isCarryingMinerals() ? replayer::Unit::Flags::CarryingMinerals : 0;
+  flags |= u->isCompleted() ? replayer::Unit::Flags::Completed : 0;
   flags |= u->isConstructing() ? replayer::Unit::Flags::Constructing : 0;
   flags |= u->isDefenseMatrixed() ? replayer::Unit::Flags::DefenseMatrixed : 0;
   flags |= u->isDetected() ? replayer::Unit::Flags::Detected : 0;

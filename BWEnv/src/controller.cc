@@ -924,6 +924,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     player->weaponMaxRange(utype.groundWeapon()) / pixelsPerWalkTile,
     player->weaponMaxRange(utype.airWeapon()) / pixelsPerWalkTile,
     std::vector<replayer::Order>(),
+    replayer::UnitCommand(),
     u->getVelocityX(),
     u->getVelocityY(),
     unit_player,
@@ -949,6 +950,21 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     targetpos.isValid() ? targetpos.x / pixelsPerWalkTile : -1,
     targetpos.isValid() ? targetpos.y / pixelsPerWalkTile : -1
   });
+
+  // Set last command
+  auto& command = frame.units[player->getID()].back().command;
+  auto lastCommand = u->getLastCommand();
+  targetpos = lastCommand.getTargetPosition();
+  command.frame = u->getLastCommandFrame();
+  command.type = lastCommand.type.getID();
+  if (lastCommand.target) {
+    command.targetId = lastCommand.target->getID();
+  } else {
+    command.targetId = -1;
+  }
+  command.targetX = targetpos.isValid() ? targetpos.x / pixelsPerWalkTile : -1;
+  command.targetY = targetpos.isValid() ? targetpos.y / pixelsPerWalkTile : -1;
+  command.extra = lastCommand.extra;
 }
 
 void Controller::handleEvents()

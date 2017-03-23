@@ -29,6 +29,10 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
         << c.targetX << " " << c.targetY << " ";
   }
 
+  out << o.command.frame << " " << o.command.type << " " << o.command.targetId
+      << " " << o.command.targetX << " " << o.command.targetY << " "
+      << o.command.extra << " ";
+
   out << o.velocityX << " " << o.velocityY;
   out << " " << o.playerId;
   out << " " << o.resources;
@@ -52,6 +56,9 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
     in >> o.orders[i].first_frame >> o.orders[i].type >> o.orders[i].targetId >>
         o.orders[i].targetX >> o.orders[i].targetY;
   }
+
+  in >> o.command.frame >> o.command.type >> o.command.targetId >>
+      o.command.targetX >> o.command.targetY >> o.command.extra;
 
   in >> o.velocityX >> o.velocityY;
   in >> o.playerId;
@@ -213,34 +220,40 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
 
 namespace detail = replayer::detail;
 // This macro maps the member variables of Unit to some IDs
-#define _DOALL(F)      \
-  F(x, 0)              \
-  F(y, 1)              \
-  F(health, 2)         \
-  F(max_health, 3)     \
-  F(shield, 4)         \
-  F(max_shield, 5)     \
-  F(energy, 6)         \
-  F(maxCD, 7)          \
-  F(groundCD, 8)       \
-  F(airCD, 9)          \
-  F(visible, 11)       \
-  F(type, 12)          \
-  F(armor, 13)         \
-  F(shieldArmor, 14)   \
-  F(size, 15)          \
-  F(pixel_x, 16)       \
-  F(pixel_y, 17)       \
-  F(pixel_size_x, 18)  \
-  F(pixel_size_y, 19)  \
-  F(groundATK, 20)     \
-  F(airATK, 21)        \
-  F(groundDmgType, 22) \
-  F(airDmgType, 23)    \
-  F(groundRange, 24)   \
-  F(airRange, 25)      \
-  F(playerId, 26)      \
-  F(resources, 27)
+#define _DOALL(F)         \
+  F(x, 0)                 \
+  F(y, 1)                 \
+  F(health, 2)            \
+  F(max_health, 3)        \
+  F(shield, 4)            \
+  F(max_shield, 5)        \
+  F(energy, 6)            \
+  F(maxCD, 7)             \
+  F(groundCD, 8)          \
+  F(airCD, 9)             \
+  F(visible, 11)          \
+  F(type, 12)             \
+  F(armor, 13)            \
+  F(shieldArmor, 14)      \
+  F(size, 15)             \
+  F(pixel_x, 16)          \
+  F(pixel_y, 17)          \
+  F(pixel_size_x, 18)     \
+  F(pixel_size_y, 19)     \
+  F(groundATK, 20)        \
+  F(airATK, 21)           \
+  F(groundDmgType, 22)    \
+  F(airDmgType, 23)       \
+  F(groundRange, 24)      \
+  F(airRange, 25)         \
+  F(playerId, 26)         \
+  F(resources, 27)        \
+  F(command.frame, 28)    \
+  F(command.type, 29)     \
+  F(command.targetId, 30) \
+  F(command.targetX, 31)  \
+  F(command.targetY, 32)  \
+  F(command.extra, 33)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \

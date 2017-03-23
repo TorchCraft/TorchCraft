@@ -39,7 +39,7 @@ void buildHandshakeMessage(
     const torchcraft::Client::Options& opts,
     const std::string* uid = nullptr) {
   torchcraft::fbs::HandshakeClientT hsc;
-  hsc.protocol = 17;
+  hsc.protocol = 18;
   hsc.map = opts.initial_map;
   if (opts.window_size[0] >= 0) {
     hsc.window_size.reset(

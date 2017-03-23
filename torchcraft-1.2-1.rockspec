@@ -15,8 +15,6 @@ description = {
 }
 dependencies = {
     "penlight",
-    "tds",
-    "lua-cjson",
     "torch >= 7.0",
 }
 build = {

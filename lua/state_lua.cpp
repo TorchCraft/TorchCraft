@@ -42,7 +42,8 @@ int push2DIntegerArray(
 
 const std::set<std::string> stateMembers = {
     "lag_frames",
-    "map_data",
+    "ground_height_data",
+    "walkable_data",
     "buildable_data",
     "map_name",
     "start_locations",
@@ -76,11 +77,11 @@ int pushMember(
     int index = 1) {
   if (m == "lag_frames") {
     lua_pushinteger(L, s->lag_frames);
-  } else if (m == "map_data") {
-    if (!s->map_data.empty()) {
-      auto s0 = s->map_data_size[0];
-      auto s1 = s->map_data_size[1];
-      auto storage = THByteStorage_newWithData(s->map_data.data(), s0 * s1);
+  } else if (m == "ground_height_data") {
+    if (!s->ground_height_data.empty()) {
+      auto s0 = s->map_size[0];
+      auto s1 = s->map_size[1];
+      auto storage = THByteStorage_newWithData(s->ground_height_data.data(), s0 * s1);
       THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
       THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
       auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
@@ -88,10 +89,24 @@ int pushMember(
     } else {
       lua_pushnil(L);
     }
+  } else if (m == "walkable_data") {
+    if (!s->walkable_data.empty()) {
+      auto s0 = s->map_size[0];
+      auto s1 = s->map_size[1];
+      auto storage = THByteStorage_newWithSize(s0 * s1);
+      auto data = THByteStorage_data(storage);
+      for (size_t i = 0; i < s->buildable_data.size(); i++) {
+        data[i] = s->walkable_data[i];
+      }
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
+      luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
+    } else {
+      lua_pushnil(L);
+    }
   } else if (m == "buildable_data") {
     if (!s->buildable_data.empty()) {
-      auto s0 = s->buildable_data_size[0];
-      auto s1 = s->buildable_data_size[1];
+      auto s0 = s->map_size[0];
+      auto s1 = s->map_size[1];
       auto storage = THByteStorage_newWithSize(s0 * s1);
       auto data = THByteStorage_data(storage);
       for (size_t i = 0; i < s->buildable_data.size(); i++) {

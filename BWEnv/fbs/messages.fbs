@@ -30,15 +30,15 @@ table HandshakeClient {
 
 table HandshakeServer {
   lag_frames:int;
-  map_data:[ubyte];       // walk tile resolution
-  map_size:Vec2;
+  map_size:Vec2;                // walk tile x and y
+  ground_height_data:[ubyte];   // walk tile resolution of ground heights
+  walkable_data:[bool];         // walk tile resolution of walkability
   map_name:string;
   is_replay:bool;
-  player_id:int;          // if is_replay == false
-  neutral_id:int;         // if is_replay == false
-  battle_frame_count:int; // if micro_mode == true
-  buildable_data:[bool];  // build tile resolution
-  buildable_size:Vec2;
+  player_id:int;                // if is_replay == false
+  neutral_id:int;               // if is_replay == false
+  battle_frame_count:int;       // if micro_mode == true
+  buildable_data:[bool];        // walk tile resolution of buildability
   start_locations:[Vec2];
 }
 

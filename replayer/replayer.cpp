@@ -8,6 +8,7 @@
  */
 
 #include "replayer.h"
+#include <bitset>
 
 namespace replayer = torchcraft::replayer;
 
@@ -22,11 +23,7 @@ std::ostream& replayer::operator<<(
 
   if (o.keyframe != 0) out << 0 << " " << o.keyframe << " ";
   out << height << " " << width << " ";
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      out << data[y * width + x] << " ";
-    }
-  }
+  out.write((const char *)data, height * width); // Write map data as raw bytes
 
   auto kf = o.keyframe == 0 ? 1 : o.keyframe;
   out << o.frames.size() << " ";
@@ -63,12 +60,9 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
   if (height <= 0 || width <= 0)
     throw std::runtime_error("Corrupted replay: invalid map size");
   uint8_t* data = (uint8_t*)THAlloc(sizeof(uint8_t) * height * width);
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      in >> data[y * width + x];
-    }
-  }
-  o.setMap(height, width, data);
+  in.ignore(1); // Ignores next space
+  in.read((char*)data, height * width); // Read some raw bytes
+  o.setRawMap(height, width, data);
   size_t nFrames;
   in >> nFrames;
   o.frames.resize(nFrames);
@@ -101,4 +95,80 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
   }
 
   return in;
+}
+
+void replayer::Replayer::setMap(THByteTensor* walkability,
+    THByteTensor* ground_height, THByteTensor* buildability,
+    std::vector<int>& start_loc_x, std::vector<int>& start_loc_y) {
+  walkability = THByteTensor_newContiguous(walkability);
+  ground_height = THByteTensor_newContiguous(ground_height);
+  buildability = THByteTensor_newContiguous(buildability);
+  replayer::Replayer::setMap(
+      THByteTensor_size(walkability, 0), THByteTensor_size(walkability, 1),
+      THByteTensor_data(walkability),
+      THByteTensor_data(ground_height),
+      THByteTensor_data(buildability),
+      start_loc_x, start_loc_y);
+  THByteTensor_free(walkability);
+  THByteTensor_free(ground_height);
+  THByteTensor_free(buildability);
+}
+
+#define WALKABILITY_SHIFT 0
+#define BUILDABILITY_SHIFT 1
+#define HEIGHT_SHIFT 2
+// height is 0-5, hence 3 bits
+#define START_LOC_SHIFT 5
+
+
+void replayer::Replayer::setMap(int32_t h, int32_t w,
+    uint8_t* walkability, uint8_t* ground_height, uint8_t* buildability,
+    std::vector<int>& start_loc_x, std::vector<int>& start_loc_y) {
+  if (map.data != nullptr) {
+    THByteTensor_free(map.data);
+  }
+  map.data = THByteTensor_newWithSize2d(h, w);
+  for (int y = 0; y < h; y++) {
+    for (int x = 0; x < w; x++) {
+      uint8_t v_w = walkability[y * w + x] & 1;
+      uint8_t v_b = buildability[y * w + x] & 1;
+      // Ground height only goes up to 5
+      uint8_t v_g = ground_height[y * w + x] & 0b111;
+      uint8_t packed = (v_w << WALKABILITY_SHIFT) |
+        (v_b << BUILDABILITY_SHIFT) |
+        (v_g << HEIGHT_SHIFT);
+      THTensor_fastSet2d(map.data, y, x, packed);
+    }
+  }
+  for (int i=0; i<start_loc_x.size(); i++) {
+    auto x = start_loc_x[i];
+    auto y = start_loc_y[i];
+    auto v = THTensor_fastGet2d(map.data, y, x) | (1 << START_LOC_SHIFT);
+    THTensor_fastSet2d(map.data, y, x, v);
+  }
+}
+
+void replayer::Replayer::getMap(THByteTensor* walkability,
+    THByteTensor* ground_height, THByteTensor* buildability,
+    std::vector<int>& start_loc_x, std::vector<int>& start_loc_y) {
+  auto h = THByteTensor_size(map.data, 0);
+  auto w = THByteTensor_size(map.data, 1);
+  THByteTensor_resizeAs(walkability, map.data);
+  THByteTensor_resizeAs(ground_height, map.data);
+  THByteTensor_resizeAs(buildability, map.data);
+  start_loc_x.clear();
+  start_loc_y.clear();
+  for (int y = 0; y < h; y++) {
+    for (int x = 0; x < w; x++) {
+      uint8_t v = THTensor_fastGet2d(map.data, y, x);
+      THTensor_fastSet2d(walkability, y, x, (v >> WALKABILITY_SHIFT) & 1);
+      THTensor_fastSet2d(buildability, y, x, (v >> BUILDABILITY_SHIFT) & 1);
+      THTensor_fastSet2d(ground_height, y, x, (v >> HEIGHT_SHIFT) & 0b111);
+      bool is_start = ((v >> START_LOC_SHIFT) & 1) == 1;
+      if (is_start) {
+        start_loc_x.push_back(x);
+        start_loc_y.push_back(y);
+      }
+    }
+  }
 }

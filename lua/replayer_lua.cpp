@@ -118,18 +118,52 @@ extern "C" int replayerSetNumUnits(lua_State* L) {
 }
 
 extern "C" int replayerSetMap(lua_State* L) {
+  // arguments are (walkability, ground_height, buildability, start_locs)
   auto r = checkReplayer(L);
-  THByteTensor* map = reinterpret_cast<THByteTensor*>(
+  THByteTensor* walkmap = reinterpret_cast<THByteTensor*>(
       luaT_checkudata(L, 2, "torch.ByteTensor"));
-  r->setMap(map);
+  THByteTensor* heightmap = reinterpret_cast<THByteTensor*>(
+      luaT_checkudata(L, 3, "torch.ByteTensor"));
+  THByteTensor* buildmap = reinterpret_cast<THByteTensor*>(
+      luaT_checkudata(L, 4, "torch.ByteTensor"));
+  if (!lua_istable(L, 5))
+    luaL_error(L, "bad argument #%d (argument must be table)", 5);
+  std::vector<int> start_loc_x, start_loc_y;
+  for (int i=1; ; i++) {
+    lua_rawgeti(L, 5, i);
+    if (lua_isnil(L, -1)) break;
+    if (!lua_istable(L, -1))
+      luaL_error(L, "start location element %d should be a table", i);
+    luaT_getfieldcheckint(L, -1, "x");
+    luaT_getfieldcheckint(L, -2, "y");
+    start_loc_x.push_back(luaL_checkint(L, -2));
+    start_loc_y.push_back(luaL_checkint(L, -1));
+    lua_pop(L, 2);
+  }
+  r->setMap(walkmap, heightmap, buildmap, start_loc_x, start_loc_y);
   return 0;
 }
 
 extern "C" int replayerGetMap(lua_State* L) {
   auto r = checkReplayer(L);
-  THByteTensor_retain(r->getMap());
-  luaT_pushudata(L, r->getMap(), "torch.ByteTensor");
-  return 1;
+  THByteTensor* walkmap = THByteTensor_new();
+  THByteTensor* heightmap = THByteTensor_new();
+  THByteTensor* buildmap = THByteTensor_new();
+  std::vector<int> start_loc_x, start_loc_y;
+  r->getMap(walkmap, heightmap, buildmap, start_loc_x, start_loc_y);
+  luaT_pushudata(L, walkmap, "torch.ByteTensor");
+  luaT_pushudata(L, heightmap, "torch.ByteTensor");
+  luaT_pushudata(L, buildmap, "torch.ByteTensor");
+  lua_createtable(L, start_loc_x.size(), 0);
+  for (int i=0; i<start_loc_x.size(); i++) {
+    lua_createtable(L, 2, 0);
+    lua_pushinteger(L, start_loc_x[i]);
+    lua_setfield(L, -2, "x");
+    lua_pushinteger(L, start_loc_y[i]);
+    lua_setfield(L, -2, "y");
+    lua_rawseti(L, -2, i+1);
+  }
+  return 4;
 }
 
 extern "C" int replayerGetNumFrames(lua_State* L) {

@@ -28,12 +28,11 @@ State::~State() {
 void State::reset() {
   replay = false;
   lag_frames = 0;
-  map_data.clear();
-  map_data_size[0] = 0;
-  map_data_size[1] = 0;
+  map_size[0] = 0;
+  map_size[1] = 0;
+  ground_height_data.clear();
+  walkable_data.clear();
   buildable_data.clear();
-  buildable_data_size[0] = 0;
-  buildable_data_size[1] = 0;
   map_name.clear();
   start_locations.clear();
   frame_string.clear();
@@ -66,15 +65,16 @@ std::vector<std::string> State::update(
   lag_frames = handshake->lag_frames();
   upd.emplace_back("lag_frames");
   if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_MAP_DATA)) {
-    map_data.assign(
-        handshake->map_data()->begin(), handshake->map_data()->end());
-    upd.emplace_back("map_data");
+          handshake, torchcraft::fbs::HandshakeServer::VT_GROUND_HEIGHT_DATA)) {
+    ground_height_data.assign(
+        handshake->ground_height_data()->begin(), handshake->ground_height_data()->end());
+    upd.emplace_back("ground_height_data");
   }
   if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
-    map_data_size[0] = handshake->map_size()->x();
-    map_data_size[1] = handshake->map_size()->y();
+        handshake, torchcraft::fbs::HandshakeServer::VT_WALKABLE_DATA)) {
+    walkable_data.assign(
+        handshake->walkable_data()->begin(), handshake->walkable_data()->end());
+    upd.emplace_back("walkable_data");
   }
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
@@ -83,9 +83,9 @@ std::vector<std::string> State::update(
     upd.emplace_back("buildable_data");
   }
   if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_SIZE)) {
-    buildable_data_size[0] = handshake->buildable_size()->x();
-    buildable_data_size[1] = handshake->buildable_size()->y();
+        handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
+    map_size[0] = handshake->map_size()->x();
+    map_size[1] = handshake->map_size()->y();
   }
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_MAP_NAME)) {

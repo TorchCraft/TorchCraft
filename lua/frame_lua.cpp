@@ -501,3 +501,12 @@ extern "C" int frameCombine(lua_State* L) {
   lua_pushvalue(L, 1);
   return 1;
 }
+
+extern "C" int frameDeepEq(lua_State* L) {
+  Frame* f = checkFrame(L);
+  Frame* f2 = checkFrame(L, 2);
+
+  bool good = detail::frameEq(f, f2);
+  lua_pushboolean(L, good);
+  return 1;
+}

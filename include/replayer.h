@@ -92,15 +92,15 @@ class Replayer : public RefCounted {
     return numUnits.at(key);
   }
 
-  void setMap(THByteTensor* data) {
-    // free existing map if needed
-    if (map.data != nullptr) {
-      THByteTensor_free(map.data);
-    }
-    map.data = THByteTensor_newWithTensor(data);
-  }
+  void setMap(THByteTensor* walkability, THByteTensor* ground_height,
+      THByteTensor* buildability,
+      std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
 
-  void setMap(uint32_t h, uint32_t w, uint8_t* d) {
+  void setMap(int32_t h, int32_t w,
+      uint8_t* walkability, uint8_t* ground_height, uint8_t* buildability,
+      std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
+
+  void setRawMap(uint32_t h, uint32_t w, uint8_t* d) {
     // free existing map if needed
     if (map.data != nullptr) {
       THByteTensor_free(map.data);
@@ -111,9 +111,13 @@ class Replayer : public RefCounted {
     THByteStorage_free(storage);
   }
 
-  THByteTensor* getMap() {
+  THByteTensor* getRawMap() {
     return map.data;
   }
+
+  void getMap(THByteTensor* walkability, THByteTensor* ground_height,
+      THByteTensor* buildability,
+      std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
 
   friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
   friend std::istream& operator>>(std::istream& in, Replayer& o);

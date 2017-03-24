@@ -290,7 +290,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.airRange = getInt(L, "awrange");
       unit.resources = getInt(L, "resource");
 
-      // commands
+      // orders
       getField(L, "orders");
       lua_pushnil(L);
       while (lua_next(L, -2) != 0) {
@@ -313,6 +313,22 @@ void toFrame(lua_State* L, int id, Frame& res) {
         lua_pop(L, 1);
       }
       lua_pop(L, 1); // pop orders
+
+      // command
+      getField(L, "command");
+      unit.command.frame = getInt(L, "frame");
+      unit.command.type = getInt(L, "type");
+      unit.command.targetId = getInt(L, "target");
+      unit.command.extra = getInt(L, "extra");
+      getField(L, "targetpos");
+      lua_rawgeti(L, -1, 1);
+      unit.command.targetX = lua_tonumber(L, -1);
+      lua_pop(L, 1);
+      lua_rawgeti(L, -1, 2);
+      unit.command.targetY = lua_tonumber(L, -1);
+      lua_pop(L, 1); // pop targetY
+      lua_pop(L, 1); // pop targetpos
+      lua_pop(L, 1); // pop command
 
       getField(L, "velocity");
       lua_rawgeti(L, -1, 1);
@@ -423,6 +439,22 @@ void pushUnit(lua_State* L, const Unit& unit) {
 
     lua_rawseti(L, -2, i + 1);
   }
+  lua_settable(L, -3);
+
+  // command
+  lua_pushstring(L, "command");
+  lua_newtable(L);
+  setInt(L, "frame", unit.command.frame);
+  setInt(L, "type", unit.command.type);
+  setInt(L, "target", unit.command.targetId);
+  setInt(L, "extra", unit.command.extra);
+  lua_pushstring(L, "targetpos");
+  lua_newtable(L);
+  lua_pushnumber(L, (lua_Number)unit.command.targetX);
+  lua_rawseti(L, -2, 1);
+  lua_pushnumber(L, (lua_Number)unit.command.targetY);
+  lua_rawseti(L, -2, 2);
+  lua_settable(L, -3);
   lua_settable(L, -3);
 
   // For compatibility {

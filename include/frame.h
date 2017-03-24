@@ -36,12 +36,50 @@ struct Order {
   int32_t targetX, targetY;
 
   bool operator==(const Order& o) const {
+    // Ignore first_frame
     return type == o.type && targetId == o.targetId && targetX == o.targetX &&
         targetY == o.targetY;
   }
 };
 
+struct UnitCommand {
+  int32_t frame;
+  int32_t type; // see BWAPI::UnitCommandType::Enum
+  int32_t targetId;
+  int32_t targetX, targetY;
+  int32_t extra;
+
+  bool operator==(const UnitCommand& c) const {
+    // Ignore frame
+    return type == c.type && targetId == c.targetId && targetX == c.targetX &&
+        targetY == c.targetY && extra == c.extra;
+  }
+};
+
 struct Unit {
+  int32_t id, x, y;
+  int32_t health, max_health, shield, max_shield, energy;
+  int32_t maxCD, groundCD, airCD;
+  uint64_t flags;
+  int32_t visible;
+  int32_t type, armor, shieldArmor, size;
+
+  int32_t pixel_x, pixel_y;
+  int32_t pixel_size_x, pixel_size_y;
+
+  int32_t groundATK, airATK;
+  int32_t groundDmgType, airDmgType;
+  int32_t groundRange, airRange;
+
+  std::vector<Order> orders;
+  UnitCommand command;
+
+  double velocityX, velocityY;
+
+  int32_t playerId;
+
+  int32_t resources;
+
   enum Flags : uint64_t {
     Accelerating        = 1ll <<  0,
     Attacking           = 1ll <<  1,
@@ -96,28 +134,6 @@ struct Unit {
     UnderStorm          = 1ll << 50,
     Upgrading           = 1ll << 51,
   };
-
-  int32_t id, x, y;
-  int32_t health, max_health, shield, max_shield, energy;
-  int32_t maxCD, groundCD, airCD;
-  uint64_t flags;
-  int32_t visible;
-  int32_t type, armor, shieldArmor, size;
-
-  int32_t pixel_x, pixel_y;
-  int32_t pixel_size_x, pixel_size_y;
-
-  int32_t groundATK, airATK;
-  int32_t groundDmgType, airDmgType;
-  int32_t groundRange, airRange;
-
-  std::vector<Order> orders;
-
-  double velocityX, velocityY;
-
-  int32_t playerId;
-
-  int32_t resources;
 };
 
 std::ostream& operator<<(std::ostream& out, const Unit& o);

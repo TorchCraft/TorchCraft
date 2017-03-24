@@ -6,9 +6,13 @@ IF(LUAROCKS_PREFIX)
     MESSAGE(STATUS "Prefix inferred from Luarocks: ${CMAKE_INSTALL_PREFIX}")
 ENDIF()
 FIND_PACKAGE(Torch REQUIRED)
-#SET(BUILD_STATIC yes)
+FIND_PACKAGE(PkgConfig REQUIRED)
+PKG_CHECK_MODULES(ZSTD libzstd)
 
 SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -fPIC -O2")
+IF(ZSTD_FOUND)
+    ADD_DEFINITIONS(-DWITH_ZSTD)
+ENDIF()
 
 INCLUDE_DIRECTORIES(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -28,6 +32,10 @@ SET_TARGET_PROPERTIES(torchcraft PROPERTIES
     VERSION   1.2.1
     SOVERSION 1.2.1)
 TARGET_LINK_LIBRARIES(torchcraft TH luaT zmq)
+IF(ZSTD_FOUND)
+    # Use the static library since we're using "advanced/experimental" features
+    TARGET_LINK_LIBRARIES(torchcraft ${ZSTD_LIBDIR}/libzstd.a)
+ENDIF()
 INSTALL(FILES ${headers}
         DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"
 )

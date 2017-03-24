@@ -10,6 +10,10 @@
 #include "replayer.h"
 #include <bitset>
 
+#ifdef WITH_ZSTD
+#include "zstdstream.h"
+#endif
+
 namespace torchcraft {
 namespace replayer {
 
@@ -182,6 +186,34 @@ void Replayer::getMap(
         start_loc_y.push_back(y);
       }
     }
+  }
+}
+
+void Replayer::load(const std::string& path) {
+#ifdef WITH_ZSTD
+  zstd::ifstream in(path);
+#else
+  std::ifstream in(path);
+#endif
+  in >> *this;
+  in.close();
+}
+
+void Replayer::save(const std::string& path, bool compressed) {
+#ifndef WITH_ZSTD
+  compressed = false;
+#endif
+
+  if (compressed) {
+#ifdef WITH_ZSTD
+    zstd::ofstream out(path);
+    out << *this;
+    out.close();
+#endif
+  } else {
+    std::ofstream out(path);
+    out << *this;
+    out.close();
   }
 }
 

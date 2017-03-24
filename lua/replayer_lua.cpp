@@ -7,6 +7,10 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#ifdef WITH_ZSTD
+#include "zstdstream.h"
+#endif
+
 #include "replayer_lua.h"
 
 #include "frame_lua.h"
@@ -36,7 +40,12 @@ extern "C" int gcReplayer(lua_State* L) {
 
 extern "C" int loadReplayer(lua_State* L) {
   auto path = luaL_checkstring(L, 1);
+#ifdef WITH_ZSTD
+  // zstd::ifstream will auto-detect compressed data
+  zstd::ifstream in(path);
+#else
   std::ifstream in(path);
+#endif
   luaL_argcheck(L, in, 1, "Invalid load path");
 
   Replayer* rep = nullptr;
@@ -64,10 +73,26 @@ extern "C" int loadReplayer(lua_State* L) {
 extern "C" int replayerSave(lua_State* L) {
   auto r = checkReplayer(L);
   auto path = luaL_checkstring(L, 2);
-  std::ofstream out(path);
-  luaL_argcheck(L, out, 2, "invalid save path");
-  out << *r;
-  out.close();
+  bool compressed = false;
+#ifdef WITH_ZSTD
+  if (lua_gettop(L) > 2) {
+    compressed = lua_toboolean(L, 3);
+  }
+#endif
+
+  if (compressed) {
+#ifdef WITH_ZSTD
+    zstd::ofstream out(path);
+    luaL_argcheck(L, out, 2, "invalid save path");
+    out << *r;
+    out.close();
+#endif
+  } else {
+    std::ofstream out(path);
+    luaL_argcheck(L, out, 2, "invalid save path");
+    out << *r;
+    out.close();
+  }
   return 0;
 }
 

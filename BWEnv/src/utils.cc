@@ -184,8 +184,8 @@ void Utils::bwlog(std::ofstream& output_log,
 std::vector<uint8_t> Utils::groundHeightToVector()
 {
   std::vector<uint8_t> v;
-  for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
-    for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
+  for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
+    for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
       v.push_back(BWAPI::Broodwar->getGroundHeight(x/4, y/4));
     }
   }
@@ -194,20 +194,20 @@ std::vector<uint8_t> Utils::groundHeightToVector()
 
 std::vector<bool> Utils::walkableToVector()
 {
-	std::vector<bool> v;
-	for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
-		for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
-			v.push_back(BWAPI::Broodwar->isWalkable(x, y));
-		}
-	}
-	return v;
+  std::vector<bool> v;
+  for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
+    for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
+      v.push_back(BWAPI::Broodwar->isWalkable(x, y));
+    }
+  }
+  return v;
 }
 
 std::vector<bool> Utils::buildableToVector()
 {
   std::vector<bool> v;
-  for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
-    for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
+  for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
+    for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
       v.push_back(BWAPI::Broodwar->isBuildable(x/4, y/4));
     }
   }

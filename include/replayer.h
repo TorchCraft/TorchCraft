@@ -100,13 +100,13 @@ class Replayer : public RefCounted {
       uint8_t* walkability, uint8_t* ground_height, uint8_t* buildability,
       std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
 
-  void setRawMap(uint32_t h, uint32_t w, uint8_t* d) {
+  void setRawMap(uint32_t w, uint32_t h, uint8_t* d) {
     // free existing map if needed
     if (map.data != nullptr) {
       THByteTensor_free(map.data);
     }
     auto storage = THByteStorage_newWithData(d, h * w); // refcount 1
-    map.data = THByteTensor_newWithStorage2d(storage, 0, h, w, w, 1);
+    map.data = THByteTensor_newWithStorage2d(storage, 0, w, h, h, 1);
     // storage has been retained by map.data, so decrease refcount back to 1
     THByteStorage_free(storage);
   }

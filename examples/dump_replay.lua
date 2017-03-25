@@ -69,18 +69,24 @@ tc:close()
 
 local savedRep = replayer.loadReplayer(savePath)
 walkmap, heightmap, buildmap, startloc = savedRep:getMap()
-if (walkmap:ne(map.walkable_data):sum() ~= 0) then
-  print("Walkability map doesn't match!, replayer is bugged!")
-  return
+
+function checkMap(ret, correct, desc, outname)
+  if ret:ne(correct):sum() ~= 0 then
+    print(desc .. " map doesn't match!, replayer is bugged!")
+  end
+  local mf = io.open(outname, 'w')
+  local max = ret:max()
+  mf:write("P2 " .. walkmap:size(2) .. " " .. walkmap:size(1) .. " " .. max .. "\n")
+  for y = 1, ret:size(1) do
+    for x = 1, ret:size(2) do
+      mf:write(ret[y][x] .. " ")
+    end
+    mf:write('\n')
+  end
 end
-if (heightmap:ne(map.ground_height_data):sum() ~= 0) then
-  print("Ground Height map doesn't match!, replayer is bugged!")
-  return
-end
-if (buildmap:ne(map.buildable_data):sum() ~= 0) then
-  print("Buildability map doesn't match!, replayer is bugged!")
-  return
-end
+checkMap(walkmap, map.walkable_data, "Walkability", "/tmp/walkmap.pgm")
+checkMap(heightmap, map.ground_height_data, "Ground Height", "/tmp/heightmap.pgm")
+checkMap(buildmap, map.buildable_data, "Buildability", "/tmp/buildmap.pgm")
 
 if #startloc ~= #map.start_locations then
   print("Not the same number of start locations, replayer is bugged")

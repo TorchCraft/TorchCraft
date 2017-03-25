@@ -42,18 +42,14 @@ tc:receive()
 map = tc.state
 
 local game = replayer.newReplayer()
-print(map.start_locations)
 game:setMap(map.walkable_data, map.ground_height_data, map.buildable_data, map.start_locations)
 print('Dumping '..map.map_name)
 
 local is_ok, err = false, nil
-local n = 0
 while not tc.state.game_ended do
   is_ok, err = pcall(function () return tc:receive() end)
   if not is_ok then break end
   game:push(tc.state.frame)
-  n = n + 1
-  if n > 500 then break end
 end
 
 print("Game ended....")
@@ -75,23 +71,6 @@ local savedRep = replayer.loadReplayer(savePath)
 walkmap, heightmap, buildmap, startloc = savedRep:getMap()
 if (walkmap:ne(map.walkable_data):sum() ~= 0) then
   print("Walkability map doesn't match!, replayer is bugged!")
-  print("Writing out map to /tmp/bad.pgm and /tmp/good.pgm ...")
-  local bad = io.open("/tmp/bad.pgm", 'w')
-  local good = io.open("/tmp/good.pgm", 'w')
-  bad:write("P2 " .. walkmap:size(1) .. " " .. walkmap:size(2) .. " 1\n")
-  good:write("P2 " .. walkmap:size(1) .. " " .. walkmap:size(2) .. " 1\n")
-  for y = 1, walkmap:size(2) do
-    for x = 1, walkmap:size(1) do
-      bad:write(walkmap[x][y] .. " ")
-    end
-    bad:write("\n")
-  end
-  for y = 1, walkmap:size(2) do
-    for x = 1, walkmap:size(1) do
-      good:write(map.walkable_data[x][y] .. " ")
-    end
-    good:write("\n")
-  end
   return
 end
 if (heightmap:ne(map.ground_height_data):sum() ~= 0) then

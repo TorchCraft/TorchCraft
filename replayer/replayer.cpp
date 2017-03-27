@@ -10,26 +10,32 @@
 #include "replayer.h"
 #include <bitset>
 
-namespace replayer = torchcraft::replayer;
+#ifdef WITH_ZSTD
+#include "zstdstream.h"
+#endif
+
+namespace torchcraft {
+namespace replayer {
 
 // Serialization
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Replayer& o) {
+std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   auto height = THByteTensor_size(o.map.data, 0);
   auto width = THByteTensor_size(o.map.data, 1);
   auto data = THByteTensor_data(o.map.data);
 
-  if (o.keyframe != 0) out << 0 << " " << o.keyframe << " ";
+  if (o.keyframe != 0)
+    out << 0 << " " << o.keyframe << " ";
   out << height << " " << width << " ";
-  out.write((const char *)data, height * width); // Write map data as raw bytes
+  out.write((const char*)data, height * width); // Write map data as raw bytes
 
   auto kf = o.keyframe == 0 ? 1 : o.keyframe;
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
-    if (i % kf == 0) out << *o.frames[i] << " ";
-    else out << replayer::frame_diff(o.frames[i], o.frames[i - 1]) << " ";
+    if (i % kf == 0)
+      out << *o.frames[i] << " ";
+    else
+      out << frame_diff(o.frames[i], o.frames[i - 1]) << " ";
   }
 
   out << o.numUnits.size() << " ";
@@ -40,7 +46,7 @@ std::ostream& replayer::operator<<(
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
+std::istream& operator>>(std::istream& in, Replayer& o) {
   // WARNING: cases were observed where this operator left a Replayer
   // that was in a corrupted state, and would produce a segfault
   // if we tried to delete it.
@@ -50,7 +56,8 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
   int32_t height, width;
   in >> diffed;
 
-  if (diffed == 0) in >> o.keyframe >> height >> width;
+  if (diffed == 0)
+    in >> o.keyframe >> height >> width;
   else {
     height = diffed;
     in >> width;
@@ -70,16 +77,14 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
     if (o.keyframe == 0) {
       o.frames[i] = new Frame();
       in >> *o.frames[i];
-    }
-    else {
+    } else {
       if (i % o.keyframe == 0) {
         o.frames[i] = new Frame();
         in >> *o.frames[i];
-      }
-      else {
-        replayer::FrameDiff du;
+      } else {
+        FrameDiff du;
         in >> du;
-        o.frames[i] = replayer::frame_undiff(&du, o.frames[i-1]);
+        o.frames[i] = frame_undiff(&du, o.frames[i - 1]);
       }
     }
   }
@@ -97,18 +102,23 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Replayer& o) {
   return in;
 }
 
-void replayer::Replayer::setMap(THByteTensor* walkability,
-    THByteTensor* ground_height, THByteTensor* buildability,
-    std::vector<int>& start_loc_x, std::vector<int>& start_loc_y) {
+void Replayer::setMap(
+    THByteTensor* walkability,
+    THByteTensor* ground_height,
+    THByteTensor* buildability,
+    std::vector<int>& start_loc_x,
+    std::vector<int>& start_loc_y) {
   walkability = THByteTensor_newContiguous(walkability);
   ground_height = THByteTensor_newContiguous(ground_height);
   buildability = THByteTensor_newContiguous(buildability);
-  replayer::Replayer::setMap(
-      THByteTensor_size(walkability, 0), THByteTensor_size(walkability, 1),
+  Replayer::setMap(
+      THByteTensor_size(walkability, 0),
+      THByteTensor_size(walkability, 1),
       THByteTensor_data(walkability),
       THByteTensor_data(ground_height),
       THByteTensor_data(buildability),
-      start_loc_x, start_loc_y);
+      start_loc_x,
+      start_loc_y);
   THByteTensor_free(walkability);
   THByteTensor_free(ground_height);
   THByteTensor_free(buildability);
@@ -120,10 +130,14 @@ void replayer::Replayer::setMap(THByteTensor* walkability,
 // height is 0-5, hence 3 bits
 #define START_LOC_SHIFT 5
 
-
-void replayer::Replayer::setMap(int32_t h, int32_t w,
-    uint8_t* walkability, uint8_t* ground_height, uint8_t* buildability,
-    std::vector<int>& start_loc_x, std::vector<int>& start_loc_y) {
+void Replayer::setMap(
+    int32_t h,
+    int32_t w,
+    uint8_t* walkability,
+    uint8_t* ground_height,
+    uint8_t* buildability,
+    std::vector<int>& start_loc_x,
+    std::vector<int>& start_loc_y) {
   if (map.data != nullptr) {
     THByteTensor_free(map.data);
   }
@@ -135,12 +149,11 @@ void replayer::Replayer::setMap(int32_t h, int32_t w,
       // Ground height only goes up to 5
       uint8_t v_g = ground_height[y * w + x] & 0b111;
       uint8_t packed = (v_w << WALKABILITY_SHIFT) |
-        (v_b << BUILDABILITY_SHIFT) |
-        (v_g << HEIGHT_SHIFT);
+          (v_b << BUILDABILITY_SHIFT) | (v_g << HEIGHT_SHIFT);
       THTensor_fastSet2d(map.data, y, x, packed);
     }
   }
-  for (int i=0; i<start_loc_x.size(); i++) {
+  for (int i = 0; i < start_loc_x.size(); i++) {
     auto x = start_loc_x[i];
     auto y = start_loc_y[i];
     auto v = THTensor_fastGet2d(map.data, y, x) | (1 << START_LOC_SHIFT);
@@ -148,9 +161,12 @@ void replayer::Replayer::setMap(int32_t h, int32_t w,
   }
 }
 
-void replayer::Replayer::getMap(THByteTensor* walkability,
-    THByteTensor* ground_height, THByteTensor* buildability,
-    std::vector<int>& start_loc_x, std::vector<int>& start_loc_y) {
+void Replayer::getMap(
+    THByteTensor* walkability,
+    THByteTensor* ground_height,
+    THByteTensor* buildability,
+    std::vector<int>& start_loc_x,
+    std::vector<int>& start_loc_y) {
   auto h = THByteTensor_size(map.data, 0);
   auto w = THByteTensor_size(map.data, 1);
   THByteTensor_resizeAs(walkability, map.data);
@@ -172,3 +188,38 @@ void replayer::Replayer::getMap(THByteTensor* walkability,
     }
   }
 }
+
+void Replayer::load(const std::string& path) {
+#ifdef WITH_ZSTD
+  zstd::ifstream in(path);
+#else
+  std::ifstream in(path);
+#endif
+  in >> *this;
+  in.close();
+}
+
+void Replayer::save(const std::string& path, bool compressed) {
+#ifndef WITH_ZSTD
+  if (compressed) {
+    std::cerr << "Warning: no Zstd support; disabling "
+              << "compression for saved replay" << std::endl;
+    compressed = false;
+  }
+#endif
+
+  if (compressed) {
+#ifdef WITH_ZSTD
+    zstd::ofstream out(path);
+    out << *this;
+    out.close();
+#endif
+  } else {
+    std::ofstream out(path);
+    out << *this;
+    out.close();
+  }
+}
+
+} // namespace replayer
+} // namespace torchcraft

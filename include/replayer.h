@@ -121,6 +121,9 @@ class Replayer : public RefCounted {
 
   friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
   friend std::istream& operator>>(std::istream& in, Replayer& o);
+
+  void load(const std::string& path);
+  void save(const std::string& path, bool compressed = false);
 };
 
 } // namespace replayer

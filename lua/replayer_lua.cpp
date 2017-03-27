@@ -74,9 +74,14 @@ extern "C" int replayerSave(lua_State* L) {
   auto r = checkReplayer(L);
   auto path = luaL_checkstring(L, 2);
   bool compressed = false;
-#ifdef WITH_ZSTD
   if (lua_gettop(L) > 2) {
     compressed = lua_toboolean(L, 3);
+  }
+#ifndef WITH_ZSTD
+  if (compressed) {
+    std::cerr << "Warning: no Zstd support; disabling "
+              << "compression for saved replay" << std::endl;
+    compressed = false;
   }
 #endif
 

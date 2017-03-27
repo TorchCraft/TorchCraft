@@ -201,7 +201,11 @@ void Replayer::load(const std::string& path) {
 
 void Replayer::save(const std::string& path, bool compressed) {
 #ifndef WITH_ZSTD
-  compressed = false;
+  if (compressed) {
+    std::cerr << "Warning: no Zstd support; disabling "
+              << "compression for saved replay" << std::endl;
+    compressed = false;
+  }
 #endif
 
   if (compressed) {

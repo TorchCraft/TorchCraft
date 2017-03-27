@@ -42,18 +42,14 @@ tc:receive()
 map = tc.state
 
 local game = replayer.newReplayer()
-print(map.start_locations)
 game:setMap(map.walkable_data, map.ground_height_data, map.buildable_data, map.start_locations)
 print('Dumping '..map.map_name)
 
 local is_ok, err = false, nil
-local n = 0
 while not tc.state.game_ended do
   is_ok, err = pcall(function () return tc:receive() end)
   if not is_ok then break end
   game:push(tc.state.frame)
-  n = n + 1
-  if n > 500 then break end
 end
 
 print("Game ended....")
@@ -73,35 +69,24 @@ tc:close()
 
 local savedRep = replayer.loadReplayer(savePath)
 walkmap, heightmap, buildmap, startloc = savedRep:getMap()
-if (walkmap:ne(map.walkable_data):sum() ~= 0) then
-  print("Walkability map doesn't match!, replayer is bugged!")
-  print("Writing out map to /tmp/bad.pgm and /tmp/good.pgm ...")
-  local bad = io.open("/tmp/bad.pgm", 'w')
-  local good = io.open("/tmp/good.pgm", 'w')
-  bad:write("P2 " .. walkmap:size(1) .. " " .. walkmap:size(2) .. " 1\n")
-  good:write("P2 " .. walkmap:size(1) .. " " .. walkmap:size(2) .. " 1\n")
-  for y = 1, walkmap:size(2) do
-    for x = 1, walkmap:size(1) do
-      bad:write(walkmap[x][y] .. " ")
-    end
-    bad:write("\n")
+
+function checkMap(ret, correct, desc, outname)
+  if ret:ne(correct):sum() ~= 0 then
+    print(desc .. " map doesn't match!, replayer is bugged!")
   end
-  for y = 1, walkmap:size(2) do
-    for x = 1, walkmap:size(1) do
-      good:write(map.walkable_data[x][y] .. " ")
+  local mf = io.open(outname, 'w')
+  local max = ret:max()
+  mf:write("P2 " .. walkmap:size(2) .. " " .. walkmap:size(1) .. " " .. max .. "\n")
+  for y = 1, ret:size(1) do
+    for x = 1, ret:size(2) do
+      mf:write(ret[y][x] .. " ")
     end
-    good:write("\n")
+    mf:write('\n')
   end
-  return
 end
-if (heightmap:ne(map.ground_height_data):sum() ~= 0) then
-  print("Ground Height map doesn't match!, replayer is bugged!")
-  return
-end
-if (buildmap:ne(map.buildable_data):sum() ~= 0) then
-  print("Buildability map doesn't match!, replayer is bugged!")
-  return
-end
+checkMap(walkmap, map.walkable_data, "Walkability", "/tmp/walkmap.pgm")
+checkMap(heightmap, map.ground_height_data, "Ground Height", "/tmp/heightmap.pgm")
+checkMap(buildmap, map.buildable_data, "Buildability", "/tmp/buildmap.pgm")
 
 if #startloc ~= #map.start_locations then
   print("Not the same number of start locations, replayer is bugged")

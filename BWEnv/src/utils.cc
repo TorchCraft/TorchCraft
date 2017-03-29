@@ -192,20 +192,20 @@ std::vector<uint8_t> Utils::groundHeightToVector()
   return v;
 }
 
-std::vector<bool> Utils::walkableToVector()
+std::vector<uint8_t> Utils::walkableToVector()
 {
-	std::vector<bool> v;
-	for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
-		for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
-			v.push_back(BWAPI::Broodwar->isWalkable(x, y));
-		}
-	}
-	return v;
+  std::vector<uint8_t> v;
+  for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
+    for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
+      v.push_back(BWAPI::Broodwar->isWalkable(x, y));
+    }
+  }
+  return v;
 }
 
-std::vector<bool> Utils::buildableToVector()
+std::vector<uint8_t> Utils::buildableToVector()
 {
-  std::vector<bool> v;
+  std::vector<uint8_t> v;
   for (int y = 0; y < BWAPI::Broodwar->mapHeight() * 4; ++y) {
     for (int x = 0; x < BWAPI::Broodwar->mapWidth() * 4; ++x) {
       v.push_back(BWAPI::Broodwar->isBuildable(x/4, y/4));

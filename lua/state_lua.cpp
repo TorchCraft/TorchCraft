@@ -93,11 +93,9 @@ int pushMember(
     if (!s->walkable_data.empty()) {
       auto s0 = s->map_size[0];
       auto s1 = s->map_size[1];
-      auto storage = THByteStorage_newWithSize(s0 * s1);
-      auto data = THByteStorage_data(storage);
-      for (size_t i = 0; i < s->buildable_data.size(); i++) {
-        data[i] = s->walkable_data[i];
-      }
+      auto storage = THByteStorage_newWithData(s->walkable_data.data(), s0 * s1);
+      THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
+      THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
       auto tensor = THByteTensor_newWithStorage2d(storage, 0, s1, s0, s0, 1);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {
@@ -107,11 +105,9 @@ int pushMember(
     if (!s->buildable_data.empty()) {
       auto s0 = s->map_size[0];
       auto s1 = s->map_size[1];
-      auto storage = THByteStorage_newWithSize(s0 * s1);
-      auto data = THByteStorage_data(storage);
-      for (size_t i = 0; i < s->buildable_data.size(); i++) {
-        data[i] = s->buildable_data[i];
-      }
+      auto storage = THByteStorage_newWithData(s->buildable_data.data(), s0 * s1);
+      THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
+      THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
       auto tensor = THByteTensor_newWithStorage2d(storage, 0, s1, s0, s0, 1);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {

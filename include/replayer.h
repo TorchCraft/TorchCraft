@@ -20,6 +20,7 @@ extern "C" {
 
 #include "frame.h"
 #include "refcount.h"
+#include "state.h"
 
 namespace torchcraft {
 namespace replayer {
@@ -91,6 +92,8 @@ class Replayer : public RefCounted {
       return -1;
     return numUnits.at(key);
   }
+
+  void setMapFromState(torchcraft::State* state);
 
   void setMap(
       THByteTensor* walkability,

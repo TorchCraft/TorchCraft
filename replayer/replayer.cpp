@@ -161,6 +161,24 @@ void Replayer::setMap(
   }
 }
 
+void Replayer::setMapFromState(torchcraft::State* state) {
+  auto w = state->map_size[0];
+  auto h = state->map_size[1];
+  std::vector<int> start_loc_x, start_loc_y;
+  for (auto pos : state->start_locations) {
+    start_loc_x.push_back(pos.x);
+    start_loc_y.push_back(pos.y);
+  }
+  Replayer::setMap(
+      h,
+      w,
+      state->walkable_data.data(),
+      state->ground_height_data.data(),
+      state->buildable_data.data(),
+      start_loc_x,
+      start_loc_y);
+}
+
 void Replayer::getMap(
     THByteTensor* walkability,
     THByteTensor* ground_height,

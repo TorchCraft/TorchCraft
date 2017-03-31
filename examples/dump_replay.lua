@@ -42,7 +42,7 @@ tc:receive()
 map = tc.state
 
 local game = replayer.newReplayer()
-game:setMap(map.walkable_data, map.ground_height_data, map.buildable_data, map.start_locations)
+game:setMap(map)
 print('Dumping '..map.map_name)
 
 local is_ok, err = false, nil

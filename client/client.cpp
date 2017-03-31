@@ -205,7 +205,10 @@ bool Client::send(const std::vector<Command>& commands) {
     error_ = ss.str();
     return false;
   }
+
   sent_ = true;
+  lastCommands_ = commands;
+  lastCommandsStatus_.clear();
   return true;
 }
 
@@ -242,10 +245,18 @@ bool Client::receive(std::vector<std::string>& updates) {
   }
 
   switch (msg->msg_type()) {
-    case torchcraft::fbs::Any::Frame:
-      updates = state_->update(
-          reinterpret_cast<const torchcraft::fbs::Frame*>(msg->msg()));
+    case torchcraft::fbs::Any::Frame: {
+      auto frameMsg =
+          reinterpret_cast<const torchcraft::fbs::Frame*>(msg->msg());
+      if (flatbuffers::IsFieldPresent(
+              frameMsg, torchcraft::fbs::Frame::VT_COMMANDS_STATUS)) {
+        lastCommandsStatus_.assign(
+            frameMsg->commands_status()->begin(),
+            frameMsg->commands_status()->end());
+      }
+      updates = state_->update(frameMsg);
       break;
+    }
     case torchcraft::fbs::Any::EndGame:
       updates = state_->update(
           reinterpret_cast<const torchcraft::fbs::EndGame*>(msg->msg()));
@@ -292,8 +303,8 @@ bool Client::poll(long timeout) {
 
   if (!conn_->poll(timeout)) {
     std::stringstream ss;
-    ss << "Error during poll: " << conn_->errmsg() << " ("
-       << conn_->errnum() << ")";
+    ss << "Error during poll: " << conn_->errmsg() << " (" << conn_->errnum()
+       << ")";
     error_ = ss.str();
     return false;
   }

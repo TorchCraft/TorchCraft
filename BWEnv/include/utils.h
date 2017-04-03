@@ -37,8 +37,8 @@ void overwriteConfig(const std::wstring& sc_path_,
 void bwlog(std::ofstream& output_log, std::string format, ...);
 // These all operater on walktiles
 std::vector<uint8_t> groundHeightToVector();
-std::vector<bool> walkableToVector();
-std::vector<bool> buildableToVector();
+std::vector<uint8_t> walkableToVector();
+std::vector<uint8_t> buildableToVector();
 bool checkTimeInGame();
 std::string ws2s(const std::wstring& ws);
 std::wstring s2ws(const std::string& s);

@@ -59,7 +59,7 @@ if not is_ok then
 else
   print("Saving to " .. savePath)
   game:setKeyFrame(-1)
-  game:save(savePath)
+  game:save(savePath, true)
   print('Done dumping replay')
   tc:send({table.concat({tc.command(tc.quit)}, ":")})
 end
@@ -106,6 +106,7 @@ for _, p in ipairs(startloc) do
     return
   end
 end
+local first = game:getFrame(1)
 for i=1, game:getNumFrames() do
   local f1 = game:getFrame(i)
   local f2 = savedRep:getFrame(i)
@@ -113,6 +114,13 @@ for i=1, game:getNumFrames() do
   if not good then
     print("Saving failed! Frame " .. i .. " doesn't match replay")
     return
+  end
+  if i > 240 then
+    local eq = f1:deepEq(first, false) -- false suppresses debug info
+    if eq then
+      print("Why is frame " .. i .. " the exact same as frame 1?")
+      return
+    end
   end
 end
 print("Saving succeeded!")

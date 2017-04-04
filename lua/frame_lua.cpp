@@ -625,10 +625,15 @@ extern "C" int frameCombine(lua_State* L) {
 }
 
 extern "C" int frameDeepEq(lua_State* L) {
+  // Optional third argument supresses debug info if it's false
   Frame* f = checkFrame(L);
   Frame* f2 = checkFrame(L, 2);
-
-  bool good = detail::frameEq(f, f2);
+  bool good;
+  if (lua_isnil(L, 3)) {
+    good = detail::frameEq(f, f2);
+  } else {
+    good = detail::frameEq(f, f2, lua_toboolean(L, 3));
+  }
   lua_pushboolean(L, good);
   return 1;
 }

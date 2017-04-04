@@ -59,8 +59,8 @@ class Replayer : public RefCounted {
     return frames[i];
   }
   void push(Frame* f) {
-    f->incref();
-    frames.push_back(f);
+    auto new_frame = new Frame(f);
+    frames.push_back(new_frame);
   }
   void setKeyFrame(int32_t x) {
     keyframe = x < 0 ? frames.size() + 1 : (uint32_t)x;
@@ -92,13 +92,21 @@ class Replayer : public RefCounted {
     return numUnits.at(key);
   }
 
-  void setMap(THByteTensor* walkability, THByteTensor* ground_height,
+  void setMap(
+      THByteTensor* walkability,
+      THByteTensor* ground_height,
       THByteTensor* buildability,
-      std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
+      std::vector<int>& start_loc_x,
+      std::vector<int>& start_loc_y);
 
-  void setMap(int32_t h, int32_t w,
-      uint8_t* walkability, uint8_t* ground_height, uint8_t* buildability,
-      std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
+  void setMap(
+      int32_t h,
+      int32_t w,
+      uint8_t* walkability,
+      uint8_t* ground_height,
+      uint8_t* buildability,
+      std::vector<int>& start_loc_x,
+      std::vector<int>& start_loc_y);
 
   void setRawMap(uint32_t h, uint32_t w, uint8_t* d) {
     // free existing map if needed
@@ -115,9 +123,12 @@ class Replayer : public RefCounted {
     return map.data;
   }
 
-  void getMap(THByteTensor* walkability, THByteTensor* ground_height,
+  void getMap(
+      THByteTensor* walkability,
+      THByteTensor* ground_height,
       THByteTensor* buildability,
-      std::vector<int>& start_loc_x, std::vector<int>& start_loc_y);
+      std::vector<int>& start_loc_x,
+      std::vector<int>& start_loc_y);
 
   friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
   friend std::istream& operator>>(std::istream& in, Replayer& o);

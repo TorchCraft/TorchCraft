@@ -512,15 +512,16 @@ std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
 
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
-#define _TESTMSG(COND, MSG)        \
-  if (!(COND)) {                   \
-    std::cerr << MSG << std::endl; \
-    return false;                  \
+#define _TESTMSG(COND, MSG)          \
+  if (!(COND)) {                     \
+    if (debug)                       \
+      std::cerr << MSG << std::endl; \
+    return false;                    \
   } else
 #define _TEST(COND) _TESTMSG(COND, "(" STRINGIFY(COND) ") not satisfied")
 #define _EQV(VAR, CODE) (f1##VAR) CODE == (f2##VAR)CODE
 #define _EQ(CODE) (f1) CODE == (f2)CODE
-bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2) {
+bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2, bool debug) {
   _TEST(_EQ(->reward));
   _TEST(_EQ(->is_terminal));
   _TEST(_EQ(->bullets.size()));

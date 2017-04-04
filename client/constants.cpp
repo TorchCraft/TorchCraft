@@ -210,7 +210,8 @@ std::vector<Order> commandToOrders(UnitCommandType id) {
     case UnitCommandType::Build:
       return {Order::PlaceBuilding,
               Order::BuildNydusExit,
-              Order::CreateProtossBuilding};
+              Order::CreateProtossBuilding,
+              Order::ConstructingBuilding};
     case UnitCommandType::Right_Click_Unit:
       return {Order::MoveToMinerals,
               Order::MoveToGas,

@@ -114,7 +114,7 @@ class Replayer : public RefCounted {
       THByteTensor_free(map.data);
     }
     auto storage = THByteStorage_newWithData(d, h * w); // refcount 1
-    map.data = THByteTensor_newWithStorage2d(storage, 0, h, w, w, 1);
+    map.data     = THByteTensor_newWithStorage2d(storage, 0, h, w, w, 1);
     // storage has been retained by map.data, so decrease refcount back to 1
     THByteStorage_free(storage);
   }

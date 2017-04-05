@@ -500,6 +500,7 @@ struct FrameT : public flatbuffers::NativeTable {
   std::vector<int32_t> deaths;
   int32_t frame_from_bwapi;
   int32_t battle_frame_count;
+  std::vector<int8_t> commands_status;
   std::string img_mode;
   std::unique_ptr<Vec2> screen_position;
   std::vector<uint8_t> visibility;
@@ -518,12 +519,13 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_DEATHS = 6,
     VT_FRAME_FROM_BWAPI = 8,
     VT_BATTLE_FRAME_COUNT = 10,
-    VT_IMG_MODE = 12,
-    VT_SCREEN_POSITION = 14,
-    VT_VISIBILITY = 16,
-    VT_VISIBILITY_SIZE = 18,
-    VT_IMG_DATA = 20,
-    VT_IMG_SIZE = 22
+    VT_COMMANDS_STATUS = 12,
+    VT_IMG_MODE = 14,
+    VT_SCREEN_POSITION = 16,
+    VT_VISIBILITY = 18,
+    VT_VISIBILITY_SIZE = 20,
+    VT_IMG_DATA = 22,
+    VT_IMG_SIZE = 24
   };
   const flatbuffers::Vector<uint8_t> *data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA); }
   flatbuffers::Vector<uint8_t> *mutable_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_DATA); }
@@ -533,6 +535,8 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_frame_from_bwapi(int32_t _frame_from_bwapi) { return SetField(VT_FRAME_FROM_BWAPI, _frame_from_bwapi); }
   int32_t battle_frame_count() const { return GetField<int32_t>(VT_BATTLE_FRAME_COUNT, 0); }
   bool mutate_battle_frame_count(int32_t _battle_frame_count) { return SetField(VT_BATTLE_FRAME_COUNT, _battle_frame_count); }
+  const flatbuffers::Vector<int8_t> *commands_status() const { return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_COMMANDS_STATUS); }
+  flatbuffers::Vector<int8_t> *mutable_commands_status() { return GetPointer<flatbuffers::Vector<int8_t> *>(VT_COMMANDS_STATUS); }
   const flatbuffers::String *img_mode() const { return GetPointer<const flatbuffers::String *>(VT_IMG_MODE); }
   flatbuffers::String *mutable_img_mode() { return GetPointer<flatbuffers::String *>(VT_IMG_MODE); }
   const Vec2 *screen_position() const { return GetStruct<const Vec2 *>(VT_SCREEN_POSITION); }
@@ -553,6 +557,8 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(deaths()) &&
            VerifyField<int32_t>(verifier, VT_FRAME_FROM_BWAPI) &&
            VerifyField<int32_t>(verifier, VT_BATTLE_FRAME_COUNT) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_COMMANDS_STATUS) &&
+           verifier.Verify(commands_status()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_IMG_MODE) &&
            verifier.Verify(img_mode()) &&
            VerifyField<Vec2>(verifier, VT_SCREEN_POSITION) &&
@@ -575,6 +581,7 @@ struct FrameBuilder {
   void add_deaths(flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths) { fbb_.AddOffset(Frame::VT_DEATHS, deaths); }
   void add_frame_from_bwapi(int32_t frame_from_bwapi) { fbb_.AddElement<int32_t>(Frame::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0); }
   void add_battle_frame_count(int32_t battle_frame_count) { fbb_.AddElement<int32_t>(Frame::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0); }
+  void add_commands_status(flatbuffers::Offset<flatbuffers::Vector<int8_t>> commands_status) { fbb_.AddOffset(Frame::VT_COMMANDS_STATUS, commands_status); }
   void add_img_mode(flatbuffers::Offset<flatbuffers::String> img_mode) { fbb_.AddOffset(Frame::VT_IMG_MODE, img_mode); }
   void add_screen_position(const Vec2 *screen_position) { fbb_.AddStruct(Frame::VT_SCREEN_POSITION, screen_position); }
   void add_visibility(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> visibility) { fbb_.AddOffset(Frame::VT_VISIBILITY, visibility); }
@@ -584,7 +591,7 @@ struct FrameBuilder {
   FrameBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   FrameBuilder &operator=(const FrameBuilder &);
   flatbuffers::Offset<Frame> Finish() {
-    auto o = flatbuffers::Offset<Frame>(fbb_.EndTable(start_, 10));
+    auto o = flatbuffers::Offset<Frame>(fbb_.EndTable(start_, 11));
     return o;
   }
 };
@@ -594,6 +601,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths = 0,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int8_t>> commands_status = 0,
     flatbuffers::Offset<flatbuffers::String> img_mode = 0,
     const Vec2 *screen_position = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> visibility = 0,
@@ -607,6 +615,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
   builder_.add_visibility(visibility);
   builder_.add_screen_position(screen_position);
   builder_.add_img_mode(img_mode);
+  builder_.add_commands_status(commands_status);
   builder_.add_battle_frame_count(battle_frame_count);
   builder_.add_frame_from_bwapi(frame_from_bwapi);
   builder_.add_deaths(deaths);
@@ -619,13 +628,14 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(flatbuffers::FlatBufferBuild
     const std::vector<int32_t> *deaths = nullptr,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
+    const std::vector<int8_t> *commands_status = nullptr,
     const char *img_mode = nullptr,
     const Vec2 *screen_position = 0,
     const std::vector<uint8_t> *visibility = nullptr,
     const Vec2 *visibility_size = 0,
     const std::vector<uint8_t> *img_data = nullptr,
     const Vec2 *img_size = 0) {
-  return CreateFrame(_fbb, data ? _fbb.CreateVector<uint8_t>(*data) : 0, deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0, frame_from_bwapi, battle_frame_count, img_mode ? _fbb.CreateString(img_mode) : 0, screen_position, visibility ? _fbb.CreateVector<uint8_t>(*visibility) : 0, visibility_size, img_data ? _fbb.CreateVector<uint8_t>(*img_data) : 0, img_size);
+  return CreateFrame(_fbb, data ? _fbb.CreateVector<uint8_t>(*data) : 0, deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0, frame_from_bwapi, battle_frame_count, commands_status ? _fbb.CreateVector<int8_t>(*commands_status) : 0, img_mode ? _fbb.CreateString(img_mode) : 0, screen_position, visibility ? _fbb.CreateVector<uint8_t>(*visibility) : 0, visibility_size, img_data ? _fbb.CreateVector<uint8_t>(*img_data) : 0, img_size);
 }
 
 inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *rehasher = nullptr);
@@ -961,6 +971,7 @@ inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *resolver) c
   { auto _e = deaths(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->deaths.push_back(_e->Get(_i)); } } };
   { auto _e = frame_from_bwapi(); _o->frame_from_bwapi = _e; };
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
+  { auto _e = commands_status(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->commands_status.push_back(_e->Get(_i)); } } };
   { auto _e = img_mode(); if (_e) _o->img_mode = _e->str(); };
   { auto _e = screen_position(); if (_e) _o->screen_position = std::unique_ptr<Vec2>(new Vec2(*_e)); };
   { auto _e = visibility(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->visibility.push_back(_e->Get(_i)); } } };
@@ -981,6 +992,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
     _o->deaths.size() ? _fbb.CreateVector(_o->deaths) : 0,
     _o->frame_from_bwapi,
     _o->battle_frame_count,
+    _o->commands_status.size() ? _fbb.CreateVector(_o->commands_status) : 0,
     _o->img_mode.size() ? _fbb.CreateString(_o->img_mode) : 0,
     _o->screen_position ? _o->screen_position.get() : 0,
     _o->visibility.size() ? _fbb.CreateVector(_o->visibility) : 0,

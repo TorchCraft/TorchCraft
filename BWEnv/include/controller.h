@@ -48,6 +48,20 @@ enum Commands {
   COMMAND_END
 };
 
+enum CommandStatus : int8_t {
+  SUCCESS = 0,
+  // Positive numbers correspond to
+  // BWAPI error codes from BWAPI::Errors::Enum | BWAPI_ERROR
+  // (since an error code of 0 also signals an error in BWAPI)
+  BWAPI_ERROR_MASK = 0x40,
+  UNKNOWN_ERROR = -1,
+  UNKNOWN_COMMAND = -2,
+  MISSING_ARGUMENTS = -3,
+  TOO_MANY_COMMANDS = -4,
+  INVALID_UNIT = -5,
+  PROTECTED = -6,
+};
+
 class Controller
 {
 public:
@@ -58,9 +72,10 @@ public:
   void loop();
   void initGame();
   void setupHandshake();
-  void handleCommand(int command, const std::vector<int>& args,
+  int8_t handleCommand(int command, const std::vector<int>& args,
     const std::string& str);
-  void handleUserCommand(int command, const std::vector<int>& args);
+  int8_t handleUserCommand(int command, const std::vector<int>& args);
+  void setCommandsStatus(std::vector<int8_t> status);
   BWAPI::Position getPositionFromWalkTiles(int x, int y);
   BWAPI::TilePosition getTilePositionFromWalkTiles(int x, int y);
   int getAttackFrames(int unitID);

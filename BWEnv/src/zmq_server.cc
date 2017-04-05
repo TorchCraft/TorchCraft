@@ -194,9 +194,11 @@ void ZMQ_server::receiveMessage()
       handleReconnect(
           reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
       break;
-    case torchcraft::fbs::Any::Commands:
-      handleCommands(reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
+    case torchcraft::fbs::Any::Commands: {
+      auto status = handleCommands(reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
+      controller->setCommandsStatus(status);
       break;
+    }
     default:
       zchunk_destroy(&chunk);
       throw runtime_error(
@@ -234,25 +236,36 @@ void ZMQ_server::handleReconnect(const torchcraft::fbs::HandshakeClient* handsha
     controller->setupHandshake();
 }
 
-void ZMQ_server::handleCommands(const torchcraft::fbs::Commands* comms) {
+std::vector<int8_t> ZMQ_server::handleCommands(const torchcraft::fbs::Commands* comms) {
+  // Results: 0 = success, error code otherwise
+  std::vector<int8_t> results;
+
   if (!flatbuffers::IsFieldPresent(comms, torchcraft::fbs::Commands::VT_COMMANDS)) {
-    return;
+    return results;
   }
   auto commands = comms->commands();
-  Utils::bwlog(controller->output_log, "(%d) Received %d commands", BWAPI::Broodwar->getFrameCount(), commands->size());
+  if (commands->size() > 0) {
+    Utils::bwlog(controller->output_log, "(%d) Received %d commands", BWAPI::Broodwar->getFrameCount(), commands->size());
+  }
 
   int count = 0;
   for (auto comm : *commands) {
     if (count >= ZMQ_server::max_commands) {
+      results.insert(results.end(), commands->size() - results.size(), CommandStatus::TOO_MANY_COMMANDS);
       break;
     }
+    int8_t res;
     try {
       std::vector<int> args(comm->args()->data(), comm->args()->data() + comm->args()->size());
-      controller->handleCommand(comm->code(), args, comm->str()->str());
-    } catch (runtime_error& e) {
+      res = controller->handleCommand(comm->code(), args, comm->str()->str());
+    } catch (std::exception& e) {
       Utils::bwlog(controller->output_log, "Exception : %s", e.what());
+      res = CommandStatus::UNKNOWN_ERROR;
     }
+    results.push_back(res);
+    count++;
   }
+  return results;
 }
 
 int ZMQ_server::getPort()

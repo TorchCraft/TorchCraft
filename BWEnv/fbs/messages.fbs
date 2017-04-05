@@ -47,10 +47,11 @@ table Commands {
 }
 
 table Frame {
-  data:[ubyte]; // serialized frame data
+  data:[ubyte];                 // serialized frame data
   deaths:[int];
   frame_from_bwapi:int;
   battle_frame_count:int;
+  commands_status:[byte];       // Status for previous commands (zero == success)
   
   // if with_image
   img_mode:string;

@@ -121,6 +121,13 @@ class Client {
     return error_;
   }
 
+  std::vector<Command> lastCommands() const {
+    return lastCommands_;
+  }
+  std::vector<int8_t> lastCommandsStatus() const {
+    return lastCommandsStatus_;
+  }
+
   State* state() const {
     return state_;
   }
@@ -136,6 +143,8 @@ class Client {
   bool sent_;
   std::string error_;
   std::string uid_;
+  std::vector<Command> lastCommands_;
+  std::vector<int8_t> lastCommandsStatus_;
 };
 
 } // namespace torchcraft

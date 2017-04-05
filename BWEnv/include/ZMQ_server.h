@@ -41,7 +41,7 @@ public:
   void sendError(const torchcraft::fbs::ErrorT *error);
   void receiveMessage();
   void handleReconnect(const torchcraft::fbs::HandshakeClient* handshake);
-  void handleCommands(const torchcraft::fbs::Commands* commands);
+  std::vector<int8_t> handleCommands(const torchcraft::fbs::Commands* commands);
   int getPort();
 };
 

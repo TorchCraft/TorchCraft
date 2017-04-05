@@ -272,11 +272,11 @@ replayer::FrameDiff replayer::frame_diff(
     replayer::Frame* lhs,
     replayer::Frame* rhs) {
   replayer::FrameDiff df;
-  df.reward      = lhs->reward;
+  df.reward = lhs->reward;
   df.is_terminal = lhs->is_terminal;
-  df.bullets     = lhs->bullets;
-  df.actions     = lhs->actions;
-  df.resources   = lhs->resources;
+  df.bullets = lhs->bullets;
+  df.actions = lhs->actions;
+  df.resources = lhs->resources;
   for (auto it : lhs->units) { // Iterates across number of players
     df.pids.push_back(it.first);
 
@@ -296,11 +296,11 @@ replayer::FrameDiff replayer::frame_diff(
         rit++;
       ul.emplace_back();
       detail::UnitDiff& du = ul.back();
-      du.id                = lit.id;
-      du.velocityX         = lit.velocityX;
-      du.velocityY         = lit.velocityY;
-      du.flags             = lit.flags;
-      du.order_size        = lit.orders.size();
+      du.id = lit.id;
+      du.velocityX = lit.velocityX;
+      du.velocityY = lit.velocityY;
+      du.flags = lit.flags;
+      du.order_size = lit.orders.size();
       if (rit != rhsu.end() &&
           lit.id == rit->id) { // Unit exists in both frames
         int32_t buffer = 0;
@@ -350,14 +350,14 @@ replayer::FrameDiff replayer::frame_diff(
 }
 
 replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
-  auto f         = new replayer::Frame();
-  f->reward      = df->reward;
+  auto f = new replayer::Frame();
+  f->reward = df->reward;
   f->is_terminal = df->is_terminal;
-  f->bullets     = df->bullets;
-  f->actions     = df->actions;
-  f->resources   = df->resources;
+  f->bullets = df->bullets;
+  f->actions = df->actions;
+  f->resources = df->resources;
   for (size_t i = 0; i < df->pids.size(); i++) {
-    auto pid      = df->pids[i];
+    auto pid = df->pids[i];
     f->units[pid] = std::vector<replayer::Unit>();
 
     auto f_units = frame->units.find(pid) == frame->units.end()
@@ -377,10 +377,10 @@ replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
         f->units[pid].emplace_back();
 
       replayer::Unit& u = f->units[pid].back();
-      u.id              = du.id;
-      u.velocityX       = du.velocityX;
-      u.velocityY       = du.velocityY;
-      u.flags           = du.flags;
+      u.id = du.id;
+      u.velocityX = du.velocityX;
+      u.velocityY = du.velocityY;
+      u.flags = du.flags;
 
       for (size_t k = 0; k < du.var_diffs.size(); k++) {
         switch (du.var_ids[k]) { // assumes int32_t are 0 initted

@@ -81,6 +81,7 @@ struct Unit {
   int32_t resources;
 
   enum Flags : uint64_t {
+    // clang-format off
     Accelerating       = 1ll << 0,
     Attacking          = 1ll << 1,
     AttackFrame        = 1ll << 2,
@@ -133,6 +134,7 @@ struct Unit {
     UnderDisruptionWeb = 1ll << 49,
     UnderStorm         = 1ll << 50,
     Upgrading          = 1ll << 51,
+    // clang-format on
   };
 };
 
@@ -176,7 +178,7 @@ class Frame : public RefCounted {
   int is_terminal;
 
   Frame() : RefCounted() {
-    reward      = 0;
+    reward = 0;
     is_terminal = 0;
   }
 
@@ -186,7 +188,7 @@ class Frame : public RefCounted {
         actions(o.actions),
         resources(o.resources),
         bullets(o.bullets) {
-    reward      = o.reward;
+    reward = o.reward;
     is_terminal = o.is_terminal;
   }
 
@@ -196,7 +198,7 @@ class Frame : public RefCounted {
         actions(o->actions),
         resources(o->resources),
         bullets(o->bullets) {
-    reward      = o->reward;
+    reward = o->reward;
     is_terminal = o->is_terminal;
   }
 
@@ -205,7 +207,7 @@ class Frame : public RefCounted {
     actions.clear();
     resources.clear();
     bullets.clear();
-    reward      = 0;
+    reward = 0;
     is_terminal = 0;
   }
 
@@ -233,7 +235,7 @@ class Frame : public RefCounted {
   void combine(const Frame& next_frame) {
     // For units, accumulate presence and commands
     for (auto& player : next_frame.units) {
-      auto& player_id    = player.first;
+      auto& player_id = player.first;
       auto& player_units = player.second;
 
       if (units.count(player_id) == 0) {
@@ -262,23 +264,23 @@ class Frame : public RefCounted {
               ords.push_back(ord);
             }
           }
-          units[player_id][i]        = unit;
+          units[player_id][i] = unit;
           units[player_id][i].orders = std::move(ords);
         }
       }
       // For resources: keep the ones of the next frame
       if (next_frame.resources.find(player_id) != next_frame.resources.end()) {
-        auto next_res                  = next_frame.resources.at(player_id);
-        resources[player_id].ore       = next_res.ore;
-        resources[player_id].gas       = next_res.gas;
-        resources[player_id].used_psi  = next_res.used_psi;
+        auto next_res = next_frame.resources.at(player_id);
+        resources[player_id].ore = next_res.ore;
+        resources[player_id].gas = next_res.gas;
+        resources[player_id].used_psi = next_res.used_psi;
         resources[player_id].total_psi = next_res.total_psi;
       }
     }
     // For other stuff, simply keep that of next_frame
-    actions     = next_frame.actions;
-    bullets     = next_frame.bullets;
-    reward      = next_frame.reward;
+    actions = next_frame.actions;
+    bullets = next_frame.bullets;
+    reward = next_frame.reward;
     is_terminal = next_frame.is_terminal;
   }
 }; // class Frame

@@ -360,7 +360,7 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
         x, y, extra))) {
         Utils::bwlog(output_log, "Commanding unit failed! Error: %s",
           BWAPI::Broodwar->getLastError().c_str());
-        return CommandStatus::BWAPI_ERROR;
+        return CommandStatus::BWAPI_ERROR_MASK | BWAPI::Broodwar->getLastError().getID();
       }
       return CommandStatus::SUCCESS;
     case Commands::COMMAND_UNIT_PROTECTED:
@@ -386,7 +386,7 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
           target, x, y, extra))) {
           Utils::bwlog(output_log, "Commanding unit failed! Error: %s",
             BWAPI::Broodwar->getLastError().c_str());
-          status = CommandStatus::BWAPI_ERROR;
+          status = CommandStatus::BWAPI_ERROR_MASK | BWAPI::Broodwar->getLastError().getID();
         } else {
           status = CommandStatus::SUCCESS;
         }

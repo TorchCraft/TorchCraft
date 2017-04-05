@@ -48,15 +48,18 @@ enum Commands {
   COMMAND_END
 };
 
-enum CommandStatus {
-  UNKNOWN_ERROR = -1,
+enum CommandStatus : int8_t {
   SUCCESS = 0,
-  BWAPI_ERROR = 1,
-  UNKNOWN_COMMAND = 2,
-  MISSING_ARGUMENTS = 3,
-  TOO_MANY_COMMANDS = 4,
-  INVALID_UNIT = 5,
-  PROTECTED = 6,
+  // Positive numbers correspond to
+  // BWAPI error codes from BWAPI::Errors::Enum | BWAPI_ERROR
+  // (since an error code of 0 also signals an error in BWAPI)
+  BWAPI_ERROR_MASK = 0x40,
+  UNKNOWN_ERROR = -1,
+  UNKNOWN_COMMAND = -2,
+  MISSING_ARGUMENTS = -3,
+  TOO_MANY_COMMANDS = -4,
+  INVALID_UNIT = -5,
+  PROTECTED = -6,
 };
 
 class Controller

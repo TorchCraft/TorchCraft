@@ -925,6 +925,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     player->weaponMaxRange(utype.airWeapon()) / pixelsPerWalkTile,
     std::vector<replayer::Order>(),
     replayer::UnitCommand(),
+    u->getTrainingQueue().size(),
     u->getVelocityX(),
     u->getVelocityY(),
     unit_player,

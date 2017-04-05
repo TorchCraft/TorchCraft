@@ -73,6 +73,7 @@ struct Unit {
 
   std::vector<Order> orders;
   UnitCommand command;
+  int32_t trainingQueueSize;
 
   double velocityX, velocityY;
 

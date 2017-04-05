@@ -1,7 +1,7 @@
 ---
 AccessModifierOffset: -1
 AlignAfterOpenBracket: AlwaysBreak
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
 AlignEscapedNewlinesLeft: true
 AlignOperands: false

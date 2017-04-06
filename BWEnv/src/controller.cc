@@ -962,7 +962,7 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getResources(),
   });
 
-  // Add curent order to order list
+  // Add curent orders to order list
   // (we keep Orders::None orders as their timing marks the moment where
   //  previous order stops)
   int targetid = -1;
@@ -981,6 +981,16 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     targetpos.isValid() ? targetpos.x / pixelsPerWalkTile : -1,
     targetpos.isValid() ? targetpos.y / pixelsPerWalkTile : -1
   });
+
+  if (u->getSecondaryOrder() != BWAPI::Orders::Nothing) {
+    frame.units[player->getID()].back().orders.push_back({
+      BWAPI::Broodwar->getFrameCount(),
+      u->getSecondaryOrder().getID(),
+      -1,
+      -1,
+      -1,
+    });
+  }
 
   // Set last command
   auto& command = frame.units[player->getID()].back().command;

@@ -22,9 +22,11 @@ class get_pybind_include(object):
         import pybind11
         return pybind11.get_include(self.user)
 
+
 sources = list(chain(
     glob('*.cpp'),
     glob('../replayer/*.cpp'),
+    glob('../client/*.cpp'),
 ))
 print(sources)
 
@@ -37,6 +39,7 @@ ext_modules = [
             get_pybind_include(),
             get_pybind_include(user=True),
             "../include",
+            "../",
             # TODO Dynamically search for this somehow???
             expanduser("~/torch/install/include"),
         ],
@@ -44,7 +47,7 @@ ext_modules = [
         define_macros=[('WITH_ZSTD', None)],
         # TODO Dynamically search for this somehow???
         library_dirs=[expanduser("~/torch/install/lib")],
-        libraries=['TH', 'zstd'],
+        libraries=['TH', 'zstd', 'zmq'],
         language='c++'
     ),
 ]

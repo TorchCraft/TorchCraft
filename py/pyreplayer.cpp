@@ -72,60 +72,72 @@ void init_replayer(py::module& m) {
           u.flags &= (~flag);
       });
 
-  py::enum_<Unit::Flags>(unit, "Flags")
-      .value("Accelerating", Unit::Flags::Accelerating)
-      .value("Attacking", Unit::Flags::Attacking)
-      .value("AttackFrame", Unit::Flags::AttackFrame)
-      .value("BeingConstructed", Unit::Flags::BeingConstructed)
-      .value("BeingGathered", Unit::Flags::BeingGathered)
-      .value("BeingHealed", Unit::Flags::BeingHealed)
-      .value("Blind", Unit::Flags::Blind)
-      .value("Braking", Unit::Flags::Braking)
-      .value("Burrowed", Unit::Flags::Burrowed)
-      .value("CarryingGas", Unit::Flags::CarryingGas)
-      .value("CarryingMinerals", Unit::Flags::CarryingMinerals)
-      .value("Cloaked", Unit::Flags::Cloaked)
-      .value("Completed", Unit::Flags::Completed)
-      .value("Constructing", Unit::Flags::Constructing)
-      .value("DefenseMatrixed", Unit::Flags::DefenseMatrixed)
-      .value("Detected", Unit::Flags::Detected)
-      .value("Ensnared", Unit::Flags::Ensnared)
-      .value("Flying", Unit::Flags::Flying)
-      .value("Following", Unit::Flags::Following)
-      .value("GatheringGas", Unit::Flags::GatheringGas)
-      .value("GatheringMinerals", Unit::Flags::GatheringMinerals)
-      .value("Hallucination", Unit::Flags::Hallucination)
-      .value("HoldingPosition", Unit::Flags::HoldingPosition)
-      .value("Idle", Unit::Flags::Idle)
-      .value("Interruptible", Unit::Flags::Interruptible)
-      .value("Invincible", Unit::Flags::Invincible)
-      .value("Irradiated", Unit::Flags::Irradiated)
-      .value("Lifted", Unit::Flags::Lifted)
-      .value("Loaded", Unit::Flags::Loaded)
-      .value("LockedDown", Unit::Flags::LockedDown)
-      .value("Maelstrommed", Unit::Flags::Maelstrommed)
-      .value("Morphing", Unit::Flags::Morphing)
-      .value("Moving", Unit::Flags::Moving)
-      .value("Parasited", Unit::Flags::Parasited)
-      .value("Patrolling", Unit::Flags::Patrolling)
-      .value("Plagued", Unit::Flags::Plagued)
-      .value("Powered", Unit::Flags::Powered)
-      .value("Repairing", Unit::Flags::Repairing)
-      .value("Researching", Unit::Flags::Researching)
-      .value("Selected", Unit::Flags::Selected)
-      .value("Sieged", Unit::Flags::Sieged)
-      .value("StartingAttack", Unit::Flags::StartingAttack)
-      .value("Stasised", Unit::Flags::Stasised)
-      .value("Stimmed", Unit::Flags::Stimmed)
-      .value("Stuck", Unit::Flags::Stuck)
-      .value("Targetable", Unit::Flags::Targetable)
-      .value("Training", Unit::Flags::Training)
-      .value("UnderAttack", Unit::Flags::UnderAttack)
-      .value("UnderDarkSwarm", Unit::Flags::UnderDarkSwarm)
-      .value("UnderDisruptionWeb", Unit::Flags::UnderDisruptionWeb)
-      .value("UnderStorm", Unit::Flags::UnderStorm)
-      .value("Upgrading", Unit::Flags::Upgrading)
-      .export_values();
+  std::string tmp;
+#define DO_FLAG(FLAG)                                                   \
+  tmp = fromCamelCaseToLower(#FLAG);                                    \
+  unit.def_property(                                                    \
+      tmp.c_str(),                                                      \
+      [](Unit* self) { return (self->flags & Unit::Flags::FLAG) > 0; }, \
+      [](Unit* self, bool value) {                                      \
+        if (value)                                                      \
+          self->flags |= Unit::Flags::FLAG;                             \
+        else                                                            \
+          self->flags &= (~Unit::Flags::FLAG);                          \
+      })
+
+  DO_FLAG(Accelerating);
+  DO_FLAG(Attacking);
+  DO_FLAG(AttackFrame);
+  DO_FLAG(BeingConstructed);
+  DO_FLAG(BeingGathered);
+  DO_FLAG(BeingHealed);
+  DO_FLAG(Blind);
+  DO_FLAG(Braking);
+  DO_FLAG(Burrowed);
+  DO_FLAG(CarryingGas);
+  DO_FLAG(CarryingMinerals);
+  DO_FLAG(Cloaked);
+  DO_FLAG(Completed);
+  DO_FLAG(Constructing);
+  DO_FLAG(DefenseMatrixed);
+  DO_FLAG(Detected);
+  DO_FLAG(Ensnared);
+  DO_FLAG(Flying);
+  DO_FLAG(Following);
+  DO_FLAG(GatheringGas);
+  DO_FLAG(GatheringMinerals);
+  DO_FLAG(Hallucination);
+  DO_FLAG(HoldingPosition);
+  DO_FLAG(Idle);
+  DO_FLAG(Interruptible);
+  DO_FLAG(Invincible);
+  DO_FLAG(Irradiated);
+  DO_FLAG(Lifted);
+  DO_FLAG(Loaded);
+  DO_FLAG(LockedDown);
+  DO_FLAG(Maelstrommed);
+  DO_FLAG(Morphing);
+  DO_FLAG(Moving);
+  DO_FLAG(Parasited);
+  DO_FLAG(Patrolling);
+  DO_FLAG(Plagued);
+  DO_FLAG(Powered);
+  DO_FLAG(Repairing);
+  DO_FLAG(Researching);
+  DO_FLAG(Selected);
+  DO_FLAG(Sieged);
+  DO_FLAG(StartingAttack);
+  DO_FLAG(Stasised);
+  DO_FLAG(Stimmed);
+  DO_FLAG(Stuck);
+  DO_FLAG(Targetable);
+  DO_FLAG(Training);
+  DO_FLAG(UnderAttack);
+  DO_FLAG(UnderDarkSwarm);
+  DO_FLAG(UnderDisruptionWeb);
+  DO_FLAG(UnderStorm);
+  DO_FLAG(Upgrading);
+#undef DO_FLAG
 
   py::class_<Resources>(m_sub, "Resources")
       .def(py::init<>())
@@ -148,6 +160,7 @@ void init_replayer(py::module& m) {
 
   py::class_<Frame>(m_sub, "Frame")
       .def(py::init<>())
+      .def(py::init<Frame*>())
       .def_readwrite("units", &Frame::units)
       .def_readwrite("actions", &Frame::actions)
       .def_readwrite("resources", &Frame::resources)

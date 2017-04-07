@@ -18,3 +18,23 @@ PYBIND11_PLUGIN(torchcraft) {
 
   return m.ptr();
 }
+
+// Utils
+//
+std::string fromCamelCaseToLower(const std::string& s) {
+  if (s == "MAX") {
+    return s;
+  }
+
+  std::ostringstream ss;
+  auto it = s.begin();
+  ss << char(tolower(*it++));
+  while (it != s.end()) {
+    if (isupper(*it)) {
+      ss << '_' << char(tolower(*it++));
+    } else {
+      ss << *it++;
+    }
+  }
+  return ss.str();
+}

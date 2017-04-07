@@ -6,24 +6,6 @@
 
 using namespace torchcraft;
 
-std::string fromCamelCaseToLower(const std::string& s) {
-  if (s == "MAX") {
-    return s;
-  }
-
-  std::ostringstream ss;
-  auto it = s.begin();
-  ss << char(tolower(*it++));
-  while (it != s.end()) {
-    if (isupper(*it)) {
-      ss << '_' << char(tolower(*it++));
-    } else {
-      ss << *it++;
-    }
-  }
-  return ss.str();
-}
-
 // We have to use a class for BetterEnums
 template <typename Enum, typename F>
 void setEnumDict(py::module& module, const std::string& name, F map) {

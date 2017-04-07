@@ -26,7 +26,7 @@ std::string fromCamelCaseToLower(const std::string& s) {
 
 // We have to use a class for BetterEnums
 template <typename Enum, typename F>
-void setEnumDict(py::module &module, const std::string &name, F map) {
+void setEnumDict(py::module& module, const std::string& name, F map) {
   py::module mod = module.def_submodule(name.c_str());
   py::dict dict;
   for (auto v : Enum::_values()) {
@@ -39,14 +39,15 @@ void setEnumDict(py::module &module, const std::string &name, F map) {
 }
 
 template <typename Enum>
-void setEnumDict(py::module &module, const std::string &name) {
+void setEnumDict(py::module& module, const std::string& name) {
   setEnumDict<Enum>(module, name, [](const std::string& s) { return s; });
 }
 
 template <typename Enum>
 std::vector<int32_t> getEnumVector(std::vector<Enum> v) {
   std::vector<int32_t> lst;
-  for (size_t i = 0; i < v.size(); i++) lst.push_back(v[i]._to_integral());
+  for (size_t i = 0; i < v.size(); i++)
+    lst.push_back(v[i]._to_integral());
   return lst;
 }
 
@@ -60,11 +61,12 @@ py::dict getStaticValues(const T m[]) {
   return dict;
 }
 
-void init_constants(py::module &torchcraft) {
+void init_constants(py::module& torchcraft) {
   py::module constants = torchcraft.def_submodule("Constants");
   setEnumDict<BW::Command>(constants, "commands", fromCamelCaseToLower);
   for (auto v : BW::Command::_values())
-    constants.attr(fromCamelCaseToLower(v._to_string()).c_str()) = v._to_integral();
+    constants.attr(fromCamelCaseToLower(v._to_string()).c_str()) =
+        v._to_integral();
   setEnumDict<BW::UnitCommandType>(constants, "unitcommandtypes");
   setEnumDict<BW::Order>(constants, "orders");
   setEnumDict<BW::TechType>(constants, "techtypes");
@@ -98,20 +100,25 @@ void init_constants(py::module &torchcraft) {
   for (auto t : BW::UnitCommandType::_values()) {
     for (auto o : BW::commandToOrders(t)) {
       auto i = o._to_integral();
-      if (o2c.find(i) == o2c.end()) o2c[i] = std::vector<int32_t>();
+      if (o2c.find(i) == o2c.end())
+        o2c[i] = std::vector<int32_t>();
       o2c[i].push_back(t._to_integral());
     }
   }
   constants.attr("order2command") = o2c;
 
   constants.def("isbuilding", [](int32_t id) {
-      return BW::isBuilding(BW::UnitType::_from_integral(id)); });
+    return BW::isBuilding(BW::UnitType::_from_integral(id));
+  });
   constants.def("isworker", [](int32_t id) {
-      return BW::isWorker(BW::UnitType::_from_integral(id)); });
+    return BW::isWorker(BW::UnitType::_from_integral(id));
+  });
   constants.def("is_mineral_field", [](int32_t id) {
-      return BW::isMineralField(BW::UnitType::_from_integral(id)); });
+    return BW::isMineralField(BW::UnitType::_from_integral(id));
+  });
   constants.def("is_gas_geyser", [](int32_t id) {
-      return BW::isGasGeyser(BW::UnitType::_from_integral(id)); });
+    return BW::isGasGeyser(BW::UnitType::_from_integral(id));
+  });
 
   py::dict sv;
   sv["canAttack"] = getStaticValues(BW::data::CanAttack);

@@ -46,9 +46,13 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("aliveUnitsConsidered", &State::aliveUnitsConsidered)
       .def_readwrite("units", &State::units)
       .def_readonly("frame", &State::frame)
-      .def(py::init<bool, std::set<BW::UnitType>>(),
+      .def(
+          py::init<bool, std::set<BW::UnitType>>(),
           py::arg("microBattles") = false,
           py::arg("onlyConsideredTypes") = std::set<BW::UnitType>())
-      .def_property("only_consider_types", &State::onlyConsiderTypes, &State::setOnlyConsiderTypes)
+      .def_property(
+          "only_consider_types",
+          &State::onlyConsiderTypes,
+          &State::setOnlyConsiderTypes)
       .def("reset", &State::reset);
 }

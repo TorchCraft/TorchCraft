@@ -5,11 +5,11 @@
 #define READPAIR(TYP, VAR) \
   [](TYP* self) { return py::make_tuple(self->VAR[0], self->VAR[1]); }
 
-#define WRITEPAIR(TYP, VAR, INNER)              \
-  [](TYP* self, std::pair<INNER, INNER> VAR) {  \
-  self->VAR[0] = VAR.first;                     \
-  self->VAR[1] = VAR.second;                    \
-}
+#define WRITEPAIR(TYP, VAR, INNER)             \
+  [](TYP* self, std::pair<INNER, INNER> VAR) { \
+    self->VAR[0] = VAR.first;                  \
+    self->VAR[1] = VAR.second;                 \
+  }
 
 #define RWPAIR(TYP, VAR, INNER) READPAIR(TYP, VAR), WRITEPAIR(TYP, VAR, INNER)
 

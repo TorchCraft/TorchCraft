@@ -2,10 +2,10 @@
 
 #include "client.h"
 
-void init_replayer(py::module &);
-void init_constants(py::module &);
-void init_state(py::module &);
-void init_client(py::module &);
+void init_replayer(py::module&);
+void init_constants(py::module&);
+void init_state(py::module&);
+void init_client(py::module&);
 
 PYBIND11_PLUGIN(torchcraft) {
   torchcraft::init();

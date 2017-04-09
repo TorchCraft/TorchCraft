@@ -18,6 +18,7 @@ void init_state(py::module& torchcraft) {
           [](State* self) {
             return py::make_tuple(self->map_size[0], self->map_size[1]);
           })
+      // TODO Maybe expose these _data arrays as THTensors.
       .def_readwrite("ground_height_data", &State::ground_height_data)
       .def_readwrite("walkable_data", &State::walkable_data)
       .def_readwrite("buildable_data", &State::buildable_data)

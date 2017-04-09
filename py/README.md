@@ -1,8 +1,8 @@
 # Torchcraft
 
-This the alpha version of pytorchcraft v1.2.1, and current is parity with the
-develop branch of torchcraft. There might be bugs, and a few missing features.
-Please report them when they come up!
+This the alpha version of pytorchcraft v1.2.1alpha, and current is parity with
+the develop branch of torchcraft. There might be bugs, and a few missing
+features.  Please report them when they come up!
 
 ## What's here:
 - Direct C++ bindings to client/*.cpp, plus a few python extras

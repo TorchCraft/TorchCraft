@@ -1,2 +1,0 @@
-local tc = {}
-return tc

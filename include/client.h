@@ -49,6 +49,8 @@ class Client {
         : code(code), args(args) {}
     Command(int code, std::string str, std::initializer_list<int>&& args)
         : code(code), args(args), str(std::move(str)) {}
+    Command(int code, std::string str, std::vector<int>& args)
+      : code(code), args(args), str(std::move(str)) {}
     template <typename... Args>
     Command(int code, int a, Args&&... args)
         : Command(code, {a, std::forward<Args>(args)...}) {}

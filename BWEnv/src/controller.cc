@@ -20,14 +20,22 @@
 
 Controller::Controller(bool is_client) {
   this->is_client = is_client;
+#ifdef _WIN32
   sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"C:/StarCraft/");
+#else
+  sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"./");
+#endif
   const std::wstring tc_default_path = std::wstring(sc_path_).append(L"/TorchCraft/");
   tc_path_ = Utils::envToWstring(L"TORCHCRAFT_DIR", tc_default_path.c_str());
 
   // TODO when ZMQ is persistent, remember to send first map information
 
   config_ = std::make_unique<ConfigManager>();
+#ifdef _WIN32
   config_->loadConfig("C:/StarCraft/bwapi-data/torchcraft.ini");
+#else
+  config_->loadConfig("./bwapi-data/torchcraft.ini");
+#endif
 
   recorder_ = std::make_unique<Recorder>(config_->img_save_path);
 

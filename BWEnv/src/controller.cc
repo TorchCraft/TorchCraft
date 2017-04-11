@@ -265,8 +265,14 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
       BWAPI::Broodwar->restartGame();
       // Wait to finish game and start a new one if we're in the client...
       if (BWAPI::BWAPIClient.isConnected()) {
-        while (BWAPI::Broodwar->isInGame()) BWAPI::BWAPIClient.update();
-        while (!BWAPI::Broodwar->isInGame()) BWAPI::BWAPIClient.update();
+        while (BWAPI::Broodwar->isInGame()) {
+          BWAPI::BWAPIClient.update();
+          handleEvents();
+        }
+        while (!BWAPI::Broodwar->isInGame()) {
+          BWAPI::BWAPIClient.update();
+          handleEvents();
+        }
       }
       return CommandStatus::SUCCESS;
     case Commands::MAP_HACK: // remove fog of war, can only be done in onStart (at init)

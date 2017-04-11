@@ -1063,7 +1063,7 @@ void Controller::setMap(const std::string& relative_path)
   if (BWAPI::BroodwarPtr)
     if (!BWAPI::Broodwar->setMap(path + "/" + relative_path)) {
       Utils::bwlog(output_log, "Set map to %s failed! Error: %s",
-        path + "/" + relative_path,
+        (path + "/" + relative_path).c_str(),
         BWAPI::Broodwar->getLastError().c_str());
     }
 }

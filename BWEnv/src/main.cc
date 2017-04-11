@@ -17,7 +17,7 @@ int main(int argc, const char* argv[])
   std::cout << "Compiled on "
     << __DATE__ << ", " << __TIME__ << "." << std::endl;
 
-  Controller c = Controller(true);
+  Controller c(true);
 
   if (!c.connect_server())
     return 1;

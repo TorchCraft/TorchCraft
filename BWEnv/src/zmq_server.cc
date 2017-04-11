@@ -8,8 +8,9 @@
  */
 
 #include <BWAPI.h>
-
+#ifdef _WIN32
 #include <winsock2.h>
+#endif
 #include "zmq_server.h"
 #include "controller.h"
 #include <utils.h>
@@ -25,11 +26,11 @@ void sendFBObject(zsock_t* sock, const T* obj) {
   flatbuffers::FlatBufferBuilder fbb;
   auto payload = T::TableType::Pack(fbb, obj);
   auto root = torchcraft::fbs::CreateMessage(
-      fbb, torchcraft::fbs::AnyTraits<T::TableType>::enum_value, payload.Union());
+      fbb, torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value, payload.Union());
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 
   if (zsock_send(sock, "b", fbb.GetBufferPointer(), fbb.GetSize()) != 0) {
-    throw exception("ZMQ_server::send(): zmq_send failed.");
+    throw runtime_error("ZMQ_server::send(): zmq_send failed.");
   }
 }
 
@@ -64,28 +65,32 @@ void ZMQ_server::connect()
   }
   else {
     int success = -1;
+#ifdef _WIN32
     DWORD reuse = 1;
+#endif
     while (success == -1) {
       stringstream url;
       url << "tcp://*:" << this->port;
       zsock_destroy(&this->server_sock);
       this->server_sock = zsock_new(ZMQ_REP);
+#ifdef _WIN32
       if (setsockopt(zsock_fd(this->server_sock), SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) != 0) {
         std::cout << "SO_REUSEADDR setsockopt failed with " << WSAGetLastError() << std::endl;
       }
-      success = zsock_bind(this->server_sock, url.str().c_str());
+#endif
+      success = zsock_bind(this->server_sock, "%s", url.str().c_str());
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
   }
   if (this->server_sock == nullptr) {
-    throw exception("No more free ports for ZMQ server socket.");
+    throw runtime_error("No more free ports for ZMQ server socket.");
   }
 
   this->server_sock_connected = true;
 
   zchunk_t *chunk;
   if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
-    throw exception("ZMQ_server::connect(): zmq_recv failed.");
+    throw runtime_error("ZMQ_server::connect(): zmq_recv failed.");
   }
 
   if (zchunk_size(chunk) == 0) {
@@ -94,7 +99,7 @@ void ZMQ_server::connect()
     sendError(&err);
     zchunk_destroy(&chunk);
     if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
-      throw exception("ZMQ_server::connect(): zsock_recv failed.");
+      throw runtime_error("ZMQ_server::connect(): zsock_recv failed.");
     }
   }
 
@@ -103,7 +108,7 @@ void ZMQ_server::connect()
   flatbuffers::Verifier verifier(data, size);
   if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
     zchunk_destroy(&chunk);
-    throw exception("ZMQ_server::connect(): invalid message.");
+    throw runtime_error("ZMQ_server::connect(): invalid message.");
   }
 
   auto msg = torchcraft::fbs::GetMessage(data);
@@ -180,7 +185,7 @@ void ZMQ_server::receiveMessage()
   flatbuffers::Verifier verifier(data, size);
   if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
     zchunk_destroy(&chunk);
-    throw exception("ZMQ_server::receiveMessage(): invalid message.");
+    throw runtime_error("ZMQ_server::receiveMessage(): invalid message.");
   }
 
   auto msg = torchcraft::fbs::GetMessage(data);
@@ -195,10 +200,10 @@ void ZMQ_server::receiveMessage()
           reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
       break;
     case torchcraft::fbs::Any::Commands: {
-      auto status = handleCommands(reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
+    auto status = handleCommands(reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
       controller->setCommandsStatus(status);
       break;
-    }
+  }
     default:
       zchunk_destroy(&chunk);
       throw runtime_error(
@@ -261,6 +266,7 @@ std::vector<int8_t> ZMQ_server::handleCommands(const torchcraft::fbs::Commands* 
     } catch (std::exception& e) {
       Utils::bwlog(controller->output_log, "Exception : %s", e.what());
       res = CommandStatus::UNKNOWN_ERROR;
+      throw;
     }
     results.push_back(res);
     count++;

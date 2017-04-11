@@ -36,7 +36,7 @@ private:
   std::string readString_(const char* section,
     const char* key,
     const char* defaultVal);
-  int ConfigManager::readInt_(const char* section,
+  int readInt_(const char* section,
     const char* key,
     int defaultVal);
   bool readBool_(const char* section,

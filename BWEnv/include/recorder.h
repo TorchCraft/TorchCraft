@@ -3,12 +3,14 @@
  * All rights reserved.
  *
  * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant 
+ * LICENSE file in the root directory of this source tree. An additional grant
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
 #ifndef RECORDER_H
 #define RECORDER_H
+
+#ifdef _WIN32
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -71,5 +73,19 @@ private:
 
 void testPixel(std::vector<uint8_t>& v, int index);
 void testPixels(std::vector<uint8_t>& v);
+
+#else
+
+class Recorder {
+public:
+  uint32_t width = 0;
+  uint32_t height = 0;
+  Recorder(std::string) {}
+  std::string* getScreenData(std::string mode_grab, std::string mode_window, std::string custom_window_cut) {
+    return new std::string("");
+  }
+};
+
+#endif
 
 #endif // !RECORDER_H

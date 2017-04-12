@@ -20,14 +20,22 @@
 
 Controller::Controller(bool is_client) {
   this->is_client = is_client;
+#ifdef _WIN32
   sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"C:/StarCraft/");
+#else
+  sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"./");
+#endif
   const std::wstring tc_default_path = std::wstring(sc_path_).append(L"/TorchCraft/");
   tc_path_ = Utils::envToWstring(L"TORCHCRAFT_DIR", tc_default_path.c_str());
 
   // TODO when ZMQ is persistent, remember to send first map information
 
   config_ = std::make_unique<ConfigManager>();
+#ifdef _WIN32
   config_->loadConfig("C:/StarCraft/bwapi-data/torchcraft.ini");
+#else
+  config_->loadConfig("./bwapi-data/torchcraft.ini");
+#endif
 
   recorder_ = std::make_unique<Recorder>(config_->img_save_path);
 
@@ -257,8 +265,14 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
       BWAPI::Broodwar->restartGame();
       // Wait to finish game and start a new one if we're in the client...
       if (BWAPI::BWAPIClient.isConnected()) {
-        while (BWAPI::Broodwar->isInGame()) BWAPI::BWAPIClient.update();
-        while (!BWAPI::Broodwar->isInGame()) BWAPI::BWAPIClient.update();
+        while (BWAPI::Broodwar->isInGame()) {
+          BWAPI::BWAPIClient.update();
+          handleEvents();
+        }
+        while (!BWAPI::Broodwar->isInGame()) {
+          BWAPI::BWAPIClient.update();
+          handleEvents();
+        }
       }
       return CommandStatus::SUCCESS;
     case Commands::MAP_HACK: // remove fog of war, can only be done in onStart (at init)
@@ -1063,7 +1077,7 @@ void Controller::setMap(const std::string& relative_path)
   if (BWAPI::BroodwarPtr)
     if (!BWAPI::Broodwar->setMap(path + "/" + relative_path)) {
       Utils::bwlog(output_log, "Set map to %s failed! Error: %s",
-        path + "/" + relative_path,
+        (path + "/" + relative_path).c_str(),
         BWAPI::Broodwar->getLastError().c_str());
     }
 }

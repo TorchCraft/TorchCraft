@@ -8,7 +8,6 @@
  */
 
 #include <iostream>
-#include <propidl.h>
 #include <config_manager.h>
 #include <algorithm>
 #include <sstream>

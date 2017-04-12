@@ -47,4 +47,8 @@ std::wstring s2ws(const std::string& s);
 extern bool DISPLAY_LOG;
 }
 
+std::string readIni(const char* filename, const char* section, const char* key);
+uint32_t GetPrivateProfileStringA(const char* section, const char* key, const char* def, char* out, uint32_t size, const char* filename);
+uint32_t GetPrivateProfileIntA(const char* section, const char* key, int def, const char* filename);
+
 #endif // TORCHCRAFT_UTILS_H_

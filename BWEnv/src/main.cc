@@ -17,12 +17,16 @@ int main(int argc, const char* argv[])
   std::cout << "Compiled on "
     << __DATE__ << ", " << __TIME__ << "." << std::endl;
 
-  Controller c(true);
+  try {
+    Controller c(true);
 
-  if (!c.connect_server())
-    return 1;
+    if (!c.connect_server())
+      return 1;
 
-  c.loop();
+    c.loop();
+  } catch (const std::exception& e) {
+    std::cout << "exception: " << e.what() << std::endl;
+  }
 
   return 0;
 }

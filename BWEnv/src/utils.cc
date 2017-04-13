@@ -295,9 +295,9 @@ std::string readIni(const std::string& filename, const std::string& section, con
 }
 
 std::string readIniString(const std::string& section, const std::string& key, const std::string& default_, const std::string& filename) {
-	auto s = readIni(filename, section, key);
-	if (s.empty()) s = default_;
-	return s;
+  auto s = readIni(filename, section, key);
+  if (s.empty()) s = default_;
+  return s;
 }
 
 int readIniInt(const std::string& section, const std::string& key, int default_, const std::string& filename) {

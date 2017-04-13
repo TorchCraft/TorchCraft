@@ -88,10 +88,7 @@ std::string ConfigManager::readString_(const char* section,
     val = Utils::ws2s(ws);
   }
   else {
-    char* temp = new char[255];
-    GetPrivateProfileStringA(section, key, defaultVal, temp, 255, current_path_.c_str());
-    val = temp;
-    delete[] temp;
+    val = readIniString(section, key, defaultVal, current_path_);
   }
   return val;
 }
@@ -110,7 +107,7 @@ int ConfigManager::readInt_(const char* section,
     val = std::stoi(Utils::ws2s(ws));
   }
   else {
-    val = GetPrivateProfileIntA(section, key, defaultVal, current_path_.c_str());
+    val = readIniInt(section, key, defaultVal, current_path_);
   }
   return val;
 }

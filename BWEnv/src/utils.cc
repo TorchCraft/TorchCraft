@@ -268,7 +268,6 @@ std::string readIni(const std::string& filename, const std::string& section, con
       while (c != e && *c != ']' && *c != '\n') {
         ++c;
       }
-      if (size_t(c - n) == section.size() && !memcmp(n, section.c_str(), section.size())) correct_section = true;
       if (c != e) ++c;
     } else {
       const char* n = c;
@@ -276,7 +275,6 @@ std::string readIni(const std::string& filename, const std::string& section, con
         ++c;
       }
       if (c != e) {
-        if (correct_section && size_t(c - n) == key.size() && !memcmp(n, key.c_str(), key.size())) {
           while (c != e && whitespace()) ++c;
           if (c != e && *c == '=') {
             ++c;

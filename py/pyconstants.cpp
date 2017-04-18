@@ -37,7 +37,9 @@ template <typename T>
 py::dict getStaticValues(const T m[]) {
   py::dict dict;
   for (auto ut : BW::UnitType::_values()) {
-    dict[ut._to_string()] = m[ut];
+    if (ut._to_integral() == BW::UnitType::MAX)
+      continue;
+    dict[py::str(ut._to_string())] = m[ut];
     dict[py::int_(ut._to_integral())] = m[ut];
   }
   return dict;
@@ -61,6 +63,8 @@ void init_constants(py::module& torchcraft) {
 
   py::dict produces, producedby;
   for (auto t : BW::UnitType::_values()) {
+    if (t._to_integral() == BW::UnitType::MAX)
+      continue;
     auto v = BW::unitProductions(t);
     if (!v.empty())
       produces[py::int_(t._to_integral())] = getEnumVector(std::move(v));

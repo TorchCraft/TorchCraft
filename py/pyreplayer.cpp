@@ -3,6 +3,7 @@
 #include "frame.h"
 #include "replayer.h"
 
+#include <pybind11/numpy.h>
 #include <pybind11/operators.h>
 using namespace torchcraft::replayer;
 
@@ -179,6 +180,49 @@ void init_replayer(py::module& m) {
       .def("getKeyFrame", &Replayer::getKeyFrame)
       .def("setNumUnits", &Replayer::setNumUnits)
       .def("getNumUnits", &Replayer::getNumUnits)
+      .def("setMapFromState", &Replayer::setMapFromState)
+      // TODO set map not from state
+      .def(
+          "getMap",
+          [](Replayer* self) {
+#define WALKABILITY_SHIFT 0
+#define BUILDABILITY_SHIFT 1
+#define HEIGHT_SHIFT 2
+// height is 0-5, hence 3 bits
+#define START_LOC_SHIFT 5
+
+            // TODO Figure out how to return a THTensor... Copying the code
+            // avoids an extra copy operation
+            auto map = self->getRawMap();
+            auto h = THByteTensor_size(map, 0);
+            auto w = THByteTensor_size(map, 1);
+            auto walkability = py::array_t<uint8_t>({h, w});
+            auto ground_height = py::array_t<uint8_t>({h, w});
+            auto buildability = py::array_t<uint8_t>({h, w});
+            auto w_data = walkability.mutable_unchecked<2>();
+            auto g_data = ground_height.mutable_unchecked<2>();
+            auto b_data = buildability.mutable_unchecked<2>();
+
+            std::vector<std::pair<int, int>> start_loc;
+            for (int y = 0; y < h; y++) {
+              for (int x = 0; x < w; x++) {
+                uint8_t v = THTensor_fastGet2d(map, y, x);
+                w_data(y, x) = (v >> WALKABILITY_SHIFT) & 1;
+                b_data(y, x) = (v >> BUILDABILITY_SHIFT) & 1;
+                g_data(y, x) = (v >> HEIGHT_SHIFT) & 0b111;
+                bool is_start = ((v >> START_LOC_SHIFT) & 1) == 1;
+                if (is_start)
+                  start_loc.emplace_back(x, y);
+              }
+            }
+
+            py::dict ret;
+            ret[py::str("walkability")] = walkability;
+            ret[py::str("buildability")] = buildability;
+            ret[py::str("ground_height")] = ground_height;
+            ret[py::str("start_locations")] = start_loc;
+            return ret;
+          })
       .def(
           "save",
           &Replayer::save,

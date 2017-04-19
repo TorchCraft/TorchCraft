@@ -265,7 +265,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
             "inconsistent values for 'idle' in unit.flags for %d",
             unit.id);
       }
-      if (getBool(L, "detected") != bool(unit.flags & Unit::Flags::Idle)) {
+      if (getBool(L, "detected") != bool(unit.flags & Unit::Flags::Detected)) {
         luaL_error(
             L,
             "inconsistent values for 'detected' unit.flags for %d",

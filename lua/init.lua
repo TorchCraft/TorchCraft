@@ -41,7 +41,9 @@ torchcraft.only_consider_types = {}
 torchcraft.field_size = {640, 370}   -- size of the field view in pixels (approximately)
 --[[
     state will get its content updated from bwapi, it will have
-    * map_data            : [torch.ByteTensor] 2D. 255 (-1) where not walkable
+    * ground_height_data  : [torch.ByteTensor] 2D. 255 (-1) where not walkable
+    * walkable_data       : [torch.ByteTensor] 2D.
+    * buildable_data      : [torch.ByteTensor] 2D.
     * map_name            : [string] Name on the current map
     * img_mode            : [string] Image mode selected (can be empty, raw, compress)
     * lag_frames          : [int] number of frames from order to execution

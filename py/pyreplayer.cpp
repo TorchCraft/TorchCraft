@@ -233,6 +233,7 @@ void init_replayer(py::module& m) {
           py::arg("compressed") = true);
 
   m_sub.def("load", [](const std::string& path) {
+    py::gil_scoped_release release;
     auto rep = new Replayer();
     rep->load(path);
     return rep;

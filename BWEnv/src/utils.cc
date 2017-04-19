@@ -235,8 +235,8 @@ std::wstring Utils::s2ws(const std::string& s)
   return converterX.from_bytes(s);
 }
 
-std::string readIni(const char* filename, const char* section, const char* key) {
-  FILE* f = fopen(filename, "rb");
+std::string readIni(const std::string& filename, const std::string& section, const std::string& key) {
+  FILE* f = fopen(filename.c_str(), "rb");
   if (!f) return {};
   std::vector<char> data;
   fseek(f, 0, SEEK_END);
@@ -245,7 +245,7 @@ std::string readIni(const char* filename, const char* section, const char* key) 
   fseek(f, 0, SEEK_SET);
   fread(data.data(), filesize, 1, f);
   fclose(f);
-  bool correct_section = !section || !*section;
+  bool correct_section = section.empty();
   const char* c = data.data();
   const char* e = c + data.size();
   auto whitespace = [&]() {
@@ -256,8 +256,6 @@ std::string readIni(const char* filename, const char* section, const char* key) 
       return false;
     }
   };
-  size_t section_strlen = strlen(section);
-  size_t key_strlen = strlen(key);
   while (c != e) {
     while (c != e && (whitespace() || *c == '\n')) ++c;
     if (c == e) break;
@@ -270,7 +268,7 @@ std::string readIni(const char* filename, const char* section, const char* key) 
       while (c != e && *c != ']' && *c != '\n') {
         ++c;
       }
-      if (size_t(c - n) == section_strlen && !memcmp(n, section, section_strlen)) correct_section = true;
+      if (!section.compare(0, section.size(), n, c - n)) correct_section = true;
       if (c != e) ++c;
     } else {
       const char* n = c;
@@ -278,7 +276,7 @@ std::string readIni(const char* filename, const char* section, const char* key) 
         ++c;
       }
       if (c != e) {
-        if (correct_section && size_t(c - n) == key_strlen && !memcmp(n, key, key_strlen)) {
+        if (correct_section && !key.compare(0, key.size(), n, c - n)) {
           while (c != e && whitespace()) ++c;
           if (c != e && *c == '=') {
             ++c;
@@ -296,21 +294,16 @@ std::string readIni(const char* filename, const char* section, const char* key) 
   return {};
 }
 
-uint32_t GetPrivateProfileStringA(const char* section, const char* key, const char* def, char* out, uint32_t size, const char* filename) {
-  if (size == 0) return 0;
+std::string readIniString(const std::string& section, const std::string& key, const std::string& default_, const std::string& filename) {
   auto s = readIni(filename, section, key);
-  if (s.empty()) s = def;
-  if (size > s.size() + 1) size = s.size() + 1;
-  memcpy(out, s.data(), size - 1);
-  out[size - 1] = 0;
-  return size - 1;
+  if (s.empty()) s = default_;
+  return s;
 }
 
-uint32_t GetPrivateProfileIntA(const char* section, const char* key, int def, const char* filename) {
+int readIniInt(const std::string& section, const std::string& key, int default_, const std::string& filename) {
   auto s = readIni(filename, section, key);
-  if (s.empty()) return def;
-  return (uint32_t)std::strtoull(s.c_str(), nullptr, 0);
+  if (s.empty()) return default_;
+  return (int)std::atoi(s.c_str());
 }
-
 
 bool Utils::DISPLAY_LOG = false;

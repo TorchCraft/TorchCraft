@@ -197,8 +197,8 @@ void init_replayer(py::module& m) {
             // TODO Figure out how to return a THTensor... Copying the code
             // avoids an extra copy operation
             auto map = self->getRawMap();
-            auto h = THByteTensor_size(map, 0);
-            auto w = THByteTensor_size(map, 1);
+            auto h = (uint64_t)THByteTensor_size(map, 0);
+            auto w = (uint64_t)THByteTensor_size(map, 1);
             auto walkability = py::array_t<uint8_t>({h, w});
             auto ground_height = py::array_t<uint8_t>({h, w});
             auto buildability = py::array_t<uint8_t>({h, w});

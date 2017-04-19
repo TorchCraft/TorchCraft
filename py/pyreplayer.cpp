@@ -174,7 +174,10 @@ void init_replayer(py::module& m) {
   py::class_<Replayer>(m_sub, "Replayer")
       .def(py::init<>())
       .def("__len__", &Replayer::size)
-      .def("getFrame", &Replayer::getFrame)
+      .def(
+          "getFrame",
+          &Replayer::getFrame,
+          py::return_value_policy::reference_internal)
       .def("push", &Replayer::push)
       .def("setKeyFrame", &Replayer::setKeyFrame)
       .def("getKeyFrame", &Replayer::getKeyFrame)

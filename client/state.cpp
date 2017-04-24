@@ -55,6 +55,8 @@ void State::reset() {
   aliveUnits.clear();
   aliveUnitsConsidered.clear();
   units.clear();
+
+  numUpdates++;
 }
 
 std::vector<std::string> State::update(
@@ -227,6 +229,8 @@ bool State::setRawImage(const torchcraft::fbs::Frame* frame) {
 }
 
 void State::postUpdate(std::vector<std::string>& upd) {
+  numUpdates++;
+
   if (microBattles_) {
     if (battle_just_ended) {
       upd.emplace_back("battle_just_ended");

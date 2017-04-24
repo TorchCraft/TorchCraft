@@ -101,6 +101,10 @@ class State : public RefCounted {
   //   battle is considered finished, i.e. it corresponds to aliveUnits.
   std::unordered_map<int32_t, std::vector<Unit>> units;
 
+  // Total number of updates received since creation (resets are counted as
+  // well).
+  uint64_t numUpdates = 0;
+
   State(
       bool microBattles = false,
       std::set<BW::UnitType> onlyConsiderTypes = std::set<BW::UnitType>());

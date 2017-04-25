@@ -1034,6 +1034,7 @@ void Controller::handleEvents()
     case BWAPI::EventType::MatchEnd:
       this->game_ended = true;
       this->is_winner = e.isWinner();
+      this->battle_frame_count = 0;
       break;
     default:
       break;

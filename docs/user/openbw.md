@@ -32,8 +32,6 @@ The easiest is to run bwenv from the StarCraft folder (since the mpq files will 
 
 ./bwapi-data/bwapi.ini and ./bwapi-data/torchcraft.ini must also exist, and can be copied from TorchCraft/config, by eg. `cp -r ~/TorchCraft/config ~/StarCraft/bwapi-data`
 
-Note: assume_on needs to be set to false on torchcraft.ini. Otherwise you will get an error about the current setting 
-
 `~/StarCraft# ~/TorchCraft/BWEnv/build/bwenv` will run OpenBW and TorchCraft should be able to connect to it (you might need to use 127.0.0.1 instead of localhost as hostname).
 
 bwapi.ini, torchcraft.ini configuration and environment variables is the same as usual.

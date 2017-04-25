@@ -111,8 +111,10 @@ void Utils::launchSCCustom(const std::wstring& sc_path_, const std::wstring& com
 void Utils::killStarCraft()
 {
   BWAPI::BWAPIClient.disconnect();
+#ifndef OPENBW_BWAPI
 #ifdef _WIN32
   system("taskkill /F /T /IM StarCraft.exe");
+#endif
 #endif
 }
 

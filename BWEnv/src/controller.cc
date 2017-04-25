@@ -1044,6 +1044,9 @@ void Controller::handleEvents()
 
 void Controller::launchStarCraft()
 {
+#ifdef OPENBW_BWAPI
+  return;
+#endif
   if (config_->assume_on)
     return;
 

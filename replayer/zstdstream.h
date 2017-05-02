@@ -222,8 +222,7 @@ class istreambuf : public std::streambuf {
       setg(inbuf_.data(), inbuf_.data(), inbuf_.data() + inavail_);
     }
 
-    return gptr() == egptr() ? traits_type::eof()
-                             : traits_type::to_int_type(*gptr());
+    return traits_type::to_int_type(*gptr());
   }
 
  private:

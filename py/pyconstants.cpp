@@ -17,7 +17,7 @@ void setEnumDict(py::module& module, const std::string& name, F map) {
     dict[py::int_(v._to_integral())] = py::str(str);
     mod.attr(py::str(str)) = py::int_(v._to_integral());
   }
-  module.attr("_dict") = dict;
+  mod.attr("_dict") = dict;
 }
 
 template <typename Enum>

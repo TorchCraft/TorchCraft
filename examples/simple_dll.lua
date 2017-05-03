@@ -136,7 +136,7 @@ while total_battles < 40 do
                         if ut.type == tc.unittypes.Terran_Barracks then
                             table.insert(actions,
                             tc.command(tc.command_unit, uid, tc.cmd.Train,
-                            tc.unittypes.Terran_Marine))
+                            0, 0, 0, tc.unittypes.Terran_Marine))
                         end
                     elseif tc:isworker(ut.type) then
                         if tc.state.resources_myself.ore >= 150

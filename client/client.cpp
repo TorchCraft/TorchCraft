@@ -8,6 +8,7 @@
  */
 
 #include <iostream>
+#include <mutex>
 #include <random>
 #include <sstream>
 
@@ -79,12 +80,17 @@ void buildCommandMessage(
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 }
 
+std::once_flag initFlag; // For protecting doInit(); see init() below
+void doInit() {
+  torchcraft::BW::data::init();
+}
+
 } // namespace
 
 namespace torchcraft {
 
 void init() {
-  torchcraft::BW::data::init();
+  std::call_once(initFlag, doInit);
 }
 
 //============================= LIFECYCLE ====================================

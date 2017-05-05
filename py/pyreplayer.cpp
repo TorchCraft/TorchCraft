@@ -184,7 +184,41 @@ void init_replayer(py::module& m) {
       .def("setNumUnits", &Replayer::setNumUnits)
       .def("getNumUnits", &Replayer::getNumUnits)
       .def("setMapFromState", &Replayer::setMapFromState)
-      // TODO set map not from state
+      .def(
+          "setMap",
+          [](Replayer* self, py::dict inp) {
+            py::object wobj = inp["walkability"];
+            py::object bobj = inp["buildability"];
+            py::object gobj = inp["ground_height"];
+            auto walkability = static_cast<py::array_t<uint8_t>*>(&wobj);
+            auto buildability = static_cast<py::array_t<uint8_t>*>(&bobj);
+            auto ground_height = static_cast<py::array_t<uint8_t>*>(&gobj);
+            auto w_data = walkability->unchecked<2>();
+            auto g_data = ground_height->unchecked<2>();
+            auto b_data = buildability->unchecked<2>();
+            std::vector<uint8_t> winp, ginp, binp;
+
+            uint64_t h = w_data.shape(0);
+            uint64_t w = w_data.shape(1);
+
+            for (size_t y = 0; y < h; y++) {
+              for (size_t x = 0; x < w; x++) {
+                winp.push_back(w_data(y, x));
+                ginp.push_back(g_data(y, x));
+                binp.push_back(b_data(y, x));
+              }
+            }
+
+            auto start_loc =
+                inp["start_locations"].cast<std::vector<std::pair<int, int>>>();
+            std::vector<int> slx, sly;
+            for (auto p : start_loc) {
+              slx.push_back(p.first);
+              sly.push_back(p.second);
+            }
+
+            self->setMap(h, w, winp.data(), ginp.data(), binp.data(), slx, sly);
+          })
       .def(
           "getMap",
           [](Replayer* self) {
@@ -196,7 +230,7 @@ void init_replayer(py::module& m) {
 
             // TODO Figure out how to return a THTensor... Copying the code
             // avoids an extra copy operation
-            auto map = self->getRawMap();
+            const auto map = self->getRawMap();
             auto h = (uint64_t)THByteTensor_size(map, 0);
             auto w = (uint64_t)THByteTensor_size(map, 1);
             auto walkability = py::array_t<uint8_t>({h, w});
@@ -207,8 +241,8 @@ void init_replayer(py::module& m) {
             auto b_data = buildability.mutable_unchecked<2>();
 
             std::vector<std::pair<int, int>> start_loc;
-            for (int y = 0; y < h; y++) {
-              for (int x = 0; x < w; x++) {
+            for (size_t y = 0; y < h; y++) {
+              for (size_t x = 0; x < w; x++) {
                 uint8_t v = THTensor_fastGet2d(map, y, x);
                 w_data(y, x) = (v >> WALKABILITY_SHIFT) & 1;
                 b_data(y, x) = (v >> BUILDABILITY_SHIFT) & 1;

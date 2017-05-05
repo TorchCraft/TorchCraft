@@ -213,6 +213,8 @@ void Replayer::load(const std::string& path) {
 #else
   std::ifstream in(path);
 #endif
+  if (!in.good())
+    throw std::runtime_error("Cannot open file to load replay");
   in >> *this;
   in.close();
 }
@@ -229,11 +231,15 @@ void Replayer::save(const std::string& path, bool compressed) {
   if (compressed) {
 #ifdef WITH_ZSTD
     zstd::ofstream out(path);
+    if (!out.good())
+      throw std::runtime_error("Cannot open file to save replay");
     out << *this;
     out.close();
 #endif
   } else {
     std::ofstream out(path);
+    if (!out.good())
+      throw std::runtime_error("Cannot open file to save replay");
     out << *this;
     out.close();
   }

@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <fstream>
+#include <stdexcept>
 #include <vector>
 
 // Required to access ZSTD_isFrame()

@@ -26,7 +26,7 @@ namespace zstd {
 // Custom exception for zstd error codes
 class exception : public std::exception {
  public:
-  exception(int code) : msg_("zstd: ") {
+  explicit exception(int code) : msg_("zstd: ") {
     msg_ += ZSTD_getErrorName(code);
   }
 
@@ -50,7 +50,7 @@ class cstream {
  public:
   static const int defaultLevel = 5;
 
-  cstream(int level = defaultLevel) : ended_(false) {
+  explicit cstream(int level = defaultLevel) : ended_(false) {
     cstr_ = ZSTD_createCStream();
     if (cstr_ == nullptr) {
     }
@@ -83,8 +83,6 @@ class cstream {
 // Provides stream decompression functionality
 class dstream {
  public:
-  static const int defaultLevel = 3;
-
   dstream() {
     dstr_ = ZSTD_createDStream();
     if (dstr_ == nullptr) {
@@ -107,7 +105,7 @@ class dstream {
 // Zstd stream for compression. Data is written in a single big frame.
 class ostreambuf : public std::streambuf {
  public:
-  ostreambuf(std::streambuf* sbuf, int level = cstream::defaultLevel)
+  explicit ostreambuf(std::streambuf* sbuf, int level = cstream::defaultLevel)
       : sbuf_(sbuf), str_(level) {
     inbuf_.resize(ZSTD_CStreamInSize());
     outbuf_.resize(ZSTD_CStreamOutSize());
@@ -179,7 +177,7 @@ class ostreambuf : public std::streambuf {
 // will simply copy it.
 class istreambuf : public std::streambuf {
  public:
-  istreambuf(std::streambuf* sbuf, int level = cstream::defaultLevel)
+  explicit istreambuf(std::streambuf* sbuf, int level = cstream::defaultLevel)
       : sbuf_(sbuf) {
     inbuf_.resize(ZSTD_DStreamInSize());
     inhint_ = inbuf_.size();
@@ -244,7 +242,7 @@ class istreambuf : public std::streambuf {
 template <typename T>
 class fsholder {
  public:
-  fsholder(
+  explicit fsholder(
       const std::string& path,
       std::ios_base::openmode mode = std::ios_base::out)
       : fs_(path, mode) {}
@@ -256,7 +254,7 @@ class fsholder {
 // Output file stream that writes Zstd-compressed data
 class ofstream : private fsholder<std::ofstream>, public std::ostream {
  public:
-  ofstream(
+  explicit ofstream(
       const std::string& path,
       std::ios_base::openmode mode = std::ios_base::out)
       : fsholder<std::ofstream>(path, mode | std::ios_base::binary),
@@ -283,7 +281,7 @@ class ofstream : private fsholder<std::ofstream>, public std::ostream {
 // Input file stream for Zstd-compressed data
 class ifstream : private fsholder<std::ifstream>, public std::istream {
  public:
-  ifstream(
+  explicit ifstream(
       const std::string& path,
       std::ios_base::openmode mode = std::ios_base::in)
       : fsholder<std::ifstream>(path, mode | std::ios_base::binary),

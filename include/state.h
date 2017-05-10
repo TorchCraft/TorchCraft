@@ -105,7 +105,7 @@ class State : public RefCounted {
   // well).
   uint64_t numUpdates = 0;
 
-  State(
+  explicit State(
       bool microBattles = false,
       std::set<BW::UnitType> onlyConsiderTypes = std::set<BW::UnitType>());
   ~State();

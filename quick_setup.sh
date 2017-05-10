@@ -11,8 +11,8 @@ fi
 
 SC_DIR=${STARCRAFT_DIR:-$SC_DIR}
 if [ ! -e $SC_DIR ]; then
-	echo "Cannot find StarCraft directory, try setting $STARCRAFT_DIR"
-	exit 1
+    echo "Cannot find StarCraft directory, try setting $STARCRAFT_DIR"
+    exit 1
 fi
 
 cd $SC_DIR

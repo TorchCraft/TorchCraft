@@ -40,7 +40,7 @@ INSTALL(FILES ${headers}
         DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"
 )
 INSTALL(TARGETS torchcraft
-		LIBRARY DESTINATION ${Torch_INSTALL_LIB})
+    LIBRARY DESTINATION ${Torch_INSTALL_LIB})
 
 # The lua module, including a lua wrapper for the general client library
 FILE(GLOB luasrc *.lua)

@@ -295,7 +295,7 @@ int newState(lua_State* L) {
   return pushState(L);
 }
 
-int pushState(lua_State* L, torchcraft::State* state) {
+int pushState(lua_State* L, torchcraft::State* state, bool copy) {
   auto s = (torchcraft::State**)lua_newuserdata(L, sizeof(torchcraft::State*));
   if (state == nullptr) {
     if (lua_gettop(L) == 1) {
@@ -306,9 +306,11 @@ int pushState(lua_State* L, torchcraft::State* state) {
       *s = new torchcraft::State(
           lua_toboolean(L, 2), torchcraft::getConsideredTypes(L, 3));
     }
-  } else {
+  } else if (!copy) {
     *s = state;
     state->incref();
+  } else {
+    *s = new torchcraft::State(*state);
   }
 
   luaL_getmetatable(L, "torchcraft.State");
@@ -415,6 +417,18 @@ int setconsiderState(lua_State* L) {
   }
   s->setOnlyConsiderTypes(torchcraft::getConsideredTypes(L));
   return 0;
+}
+
+int cloneState(lua_State* L) {
+  auto s = checkState(L);
+  pushState(L, s, true);
+
+  // Deep-copy uservalues
+  lua_getuservalue(L, -1); // of new state
+  lua_getuservalue(L, -3); // of old state
+  torchcraft::lua::deepCopyTable(L);
+  lua_pop(L, 2);
+  return 1;
 }
 
 // index represents the index of the state userdata on the stack

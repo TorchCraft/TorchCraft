@@ -202,6 +202,26 @@ class Frame : public RefCounted {
     is_terminal = o->is_terminal;
   }
 
+  Frame(Frame&& o)
+      : RefCounted() {
+    swap(*this, o);
+  }
+
+  friend void swap(Frame& a, Frame& b) {
+    using std::swap;
+    swap(a.units, b.units);
+    swap(a.actions, b.actions);
+    swap(a.resources, b.resources);
+    swap(a.bullets, b.bullets);
+    swap(a.reward, b.reward);
+    swap(a.is_terminal, b.is_terminal);
+  }
+
+  Frame& operator=(Frame other) {
+    swap(*this, other);
+    return *this;
+  }
+
   void clear() {
     units.clear();
     actions.clear();

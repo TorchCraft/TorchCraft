@@ -17,7 +17,7 @@ extern "C" {
 #include <lua.h>
 
 int newState(lua_State* L);
-int pushState(lua_State* L, torchcraft::State* s = nullptr);
+int pushState(lua_State* L, torchcraft::State* s = nullptr, bool copy = false);
 int pushUpdatesState(
     lua_State* L,
     std::vector<std::string>& updates,
@@ -29,6 +29,7 @@ int newindexState(lua_State* L);
 int resetState(lua_State* L);
 int totableState(lua_State* L);
 int setconsiderState(lua_State* L);
+int cloneState(lua_State* L);
 
 const struct luaL_Reg state_m[] = {
     {"__gc", gcState},
@@ -37,6 +38,7 @@ const struct luaL_Reg state_m[] = {
     {"reset", resetState},
     {"toTable", totableState},
     {"setOnlyConsiderTypes", setconsiderState},
+    {"clone", cloneState},
     {nullptr, nullptr},
 };
 

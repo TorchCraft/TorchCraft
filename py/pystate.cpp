@@ -55,5 +55,6 @@ void init_state(py::module& torchcraft) {
           "only_consider_types",
           &State::onlyConsiderTypes,
           &State::setOnlyConsiderTypes)
-      .def("reset", &State::reset);
+      .def("reset", &State::reset)
+      .def("clone", [](State* self) { return new State(*self); });
 }

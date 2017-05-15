@@ -76,5 +76,5 @@ void init_client(py::module& torchcraft) {
           })
       .def("poll", &Client::poll)
       .def("error", &Client::error)
-      .def("state", &Client::state);
+      .def("state", &Client::state, py::return_value_policy::reference);
 }

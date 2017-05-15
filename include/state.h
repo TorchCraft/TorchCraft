@@ -108,9 +108,11 @@ class State : public RefCounted {
   explicit State(
       bool microBattles = false,
       std::set<BW::UnitType> onlyConsiderTypes = std::set<BW::UnitType>());
+  State(const State& other);
+  State(State&& other);
   ~State();
-  State(const State&) = delete;
-  State& operator=(const State&) = delete;
+  State& operator=(State other);
+  friend void swap(State& a, State& b);
 
   bool microBattles() const {
     return microBattles_;

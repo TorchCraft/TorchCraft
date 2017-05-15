@@ -38,7 +38,8 @@ void init_client(py::module& torchcraft) {
           },
           py::arg("window_size") = std::make_tuple(-1, -1),
           py::arg("window_pos") = std::make_tuple(-1, -1),
-          py::arg("micro_battles") = false)
+          py::arg("micro_battles") = false,
+          py::return_value_policy::reference_internal)
       .def(
           "send",
           [](Client* self, std::vector<std::vector<py::object>> commands) {
@@ -73,8 +74,10 @@ void init_client(py::module& torchcraft) {
                   std::string("Receive failure: ") + self->error());
             }
             return self->state();
-          })
+          },
+          py::return_value_policy::reference_internal)
       .def("poll", &Client::poll)
       .def("error", &Client::error)
-      .def("state", &Client::state, py::return_value_policy::reference_internal);
+      .def(
+          "state", &Client::state, py::return_value_policy::reference_internal);
 }

@@ -177,7 +177,7 @@ class ostreambuf : public std::streambuf {
 // will simply copy it.
 class istreambuf : public std::streambuf {
  public:
-  explicit istreambuf(std::streambuf* sbuf, int level = cstream::defaultLevel)
+  explicit istreambuf(std::streambuf* sbuf)
       : sbuf_(sbuf) {
     inbuf_.resize(ZSTD_DStreamInSize());
     inhint_ = inbuf_.size();
@@ -189,38 +189,44 @@ class istreambuf : public std::streambuf {
       return traits_type::eof();
     }
 
-    if (inpos_ >= inavail_) {
-      inavail_ = sbuf_->sgetn(inbuf_.data(), inhint_);
-      if (inavail_ == 0) {
-        return traits_type::eof();
+    while (true) {
+      if (inpos_ >= inavail_) {
+        inavail_ = sbuf_->sgetn(inbuf_.data(), inhint_);
+        if (inavail_ == 0) {
+          return traits_type::eof();
+        }
+        inpos_ = 0;
       }
-      inpos_ = 0;
-    }
 
-    // Check whether data is actually compressed
-    if (!detected_) {
-      compressed_ = ZSTD_isFrame(inbuf_.data(), inavail_);
-      detected_ = true;
+      // Check whether data is actually compressed
+      if (!detected_) {
+        compressed_ = ZSTD_isFrame(inbuf_.data(), inavail_);
+        detected_ = true;
+        if (compressed_) {
+          outbuf_.resize(ZSTD_DStreamOutSize());
+        }
+      }
+
       if (compressed_) {
-        outbuf_.resize(ZSTD_DStreamOutSize());
+        // Consume input
+        ZSTD_inBuffer input = {inbuf_.data(), inavail_, inpos_};
+        ZSTD_outBuffer output = {outbuf_.data(), outbuf_.size(), 0};
+        auto ret = str_.decompress(&output, &input);
+        inhint_ = std::min(ret, inbuf_.size());
+        inpos_ = input.pos;
+        if (output.pos == 0 && inhint_ > 0 && inpos_ >= inavail_) {
+          // Zstd did not decompress anything but requested more data
+          continue;
+        }
+        setg(outbuf_.data(), outbuf_.data(), outbuf_.data() + output.pos);
+      } else {
+        // Re-use inbuf_ to avoid extra copy
+        inpos_ = inavail_;
+        setg(inbuf_.data(), inbuf_.data(), inbuf_.data() + inavail_);
       }
-    }
 
-    if (compressed_) {
-      // Consume input
-      ZSTD_inBuffer input = {inbuf_.data(), inavail_, inpos_};
-      ZSTD_outBuffer output = {outbuf_.data(), outbuf_.size(), 0};
-      auto ret = str_.decompress(&output, &input);
-      check(ret);
-      inhint_ = std::min(ret, inbuf_.size());
-      inpos_ = input.pos;
-      setg(outbuf_.data(), outbuf_.data(), outbuf_.data() + output.pos);
-    } else {
-      // Re-use inbuf_ to avoid extra copy
-      inpos_ = inavail_;
-      setg(inbuf_.data(), inbuf_.data(), inbuf_.data() + inavail_);
+      break;
     }
-
     return traits_type::to_int_type(*gptr());
   }
 

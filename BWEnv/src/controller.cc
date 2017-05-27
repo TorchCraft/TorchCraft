@@ -434,7 +434,7 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
       draw_cmds_.push_back({cmd, str});
       return CommandStatus::SUCCESS;
     }
-    case Commands::COMMAND_USER:
+    case Commands::COMMAND_USER: {
       auto type = args[0];
       auto second = args.begin() + 1;
       auto last = args.end();
@@ -442,6 +442,60 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
 
       return handleUserCommand(type, user_args);
     }
+    case Commands::COMMAND_OPENBW: {
+      // includes type
+      static std::unordered_map<int, int> obw_argcount = {
+        {OBWCommands::KILL_UNIT, 3}, {OBWCommands::SPAWN_UNIT, 5},
+      };
+      if (!check_args(obw_argcount[command])) return status;
+      auto type = args[0];
+      auto second = args.begin() + 1;
+      auto last = args.end();
+      std::vector<int> user_args(second, last);
+
+      return handleOpenBWCommand(type, user_args);
+    }
+    }
+    Utils::bwlog(output_log, "Invalid command: %d", command);
+    return CommandStatus::UNKNOWN_COMMAND;
+  }
+}
+
+int8_t Controller::handleOpenBWCommand(int, command, const std::vector<int>& args)
+{
+  #ifndef OPENBW_BWAPI
+  status = CommandStatus::OPENBW_NOT_IN_USE;
+  return status;
+  #endif
+
+  switch (command)
+  {
+  case OBWCommands::KILL_UNIT: {
+    auto u = BWAPI::Broodwar->getUnit(args[2])
+    if (u == nullptr)
+    {
+      status = CommandStatus::INVALID_UNIT;
+      return false;
+    }
+    BWAPI::Broodwar->killUnit(u);
+    return CommandStatus::SUCCESS;
+  }
+  case OBWCommands::SPAWN_UNIT: {
+    auto p = BWAPI::Broodwar->getPlayer(args[0]);
+    if (p == nullptr)
+      {
+        status = CommandStatus::INVALID_PLAYER;
+        return false;
+      }
+    auto pos = BWAPI::Position(args[2], args[3]);
+    auto u = BWAPI::Broodwar->createUnit(p, args[1], pos);
+    if (u == nullptr)
+      {
+        status = CommandStatus::OPENBW_UNSUCCESSFUL_COMMAND;
+        return false;
+      }
+    return CommandStatus::SUCCESS;
+  }
   }
   Utils::bwlog(output_log, "Invalid command: %d", command);
   return CommandStatus::UNKNOWN_COMMAND;

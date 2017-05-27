@@ -70,14 +70,14 @@ BETTER_ENUM(
     MAX)
 
 BETTER_ENUM(
-				OpenBWCommandType,
-				int,
-				// two args
-				KillUnit = 0, // uid
-				// four args
-				SpawnUnit = 1, // playerid, type, x, y
+    OpenBWCommandType,
+    int,
+    // two args
+    KillUnit = 0, // uid
+    // four args
+    SpawnUnit = 1, // playerid, type, x, y
 
-				OPENBW_COMMAND_END = 2)
+    OPENBW_COMMAND_END = 2)
 
 BETTER_ENUM(
     UserCommandType,

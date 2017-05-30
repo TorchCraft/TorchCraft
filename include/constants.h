@@ -56,7 +56,7 @@ BETTER_ENUM(
     // arguments: (command, args)
     // For documentation about args, see usercommandtypes
     CommandUser = 16,
-		CommandOpenBW = 17,
+		CommandOpenbw = 17,
 
     // BWAPI drawing routines
     DrawLine = 18, //  x1, y1, x2, y2, color index

@@ -464,14 +464,13 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
 int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args)
 {
   int8_t status = CommandStatus::OPENBW_NOT_IN_USE;
-
   #ifndef OPENBW_BWAPI
   return status;
   #else
   switch (command)
   {
   case OBWCommands::KILL_UNIT: {
-    auto u = BWAPI::Broodwar->getUnit(args[2]);
+    auto u = BWAPI::Broodwar->getUnit(args[0]);
     if (u == nullptr)
     {
       status = CommandStatus::INVALID_UNIT;

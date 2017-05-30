@@ -463,9 +463,8 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
 
 int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args)
 {
-  int8_t status = CommandStatus::OPENBW_NOT_IN_USE;
   #ifndef OPENBW_BWAPI
-  return status;
+  return CommandStatus::OPENBW_NOT_IN_USE;
   #else
   switch (command)
   {
@@ -473,8 +472,7 @@ int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args
     auto u = BWAPI::Broodwar->getUnit(args[0]);
     if (u == nullptr)
     {
-      status = CommandStatus::INVALID_UNIT;
-      return false;
+      return CommandStatus::INVALID_UNIT;
     }
     BWAPI::Broodwar->killUnit(u);
     return CommandStatus::SUCCESS;
@@ -483,15 +481,13 @@ int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args
     auto p = BWAPI::Broodwar->getPlayer(args[0]);
     if (p == nullptr)
       {
-        status = CommandStatus::INVALID_PLAYER;
-        return false;
+        return CommandStatus::INVALID_PLAYER;
       }
     auto pos = BWAPI::Position(args[2], args[3]);
     auto u = BWAPI::Broodwar->createUnit(p, args[1], pos);
     if (u == nullptr)
       {
-        status = CommandStatus::OPENBW_UNSUCCESSFUL_COMMAND;
-        return false;
+        return CommandStatus::OPENBW_UNSUCCESSFUL_COMMAND;
       }
     return CommandStatus::SUCCESS;
   }

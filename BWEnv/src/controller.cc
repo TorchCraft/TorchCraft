@@ -435,6 +435,12 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
       return CommandStatus::SUCCESS;
     }
     case Commands::COMMAND_USER: {
+      static std::unordered_map<int, int> argcount = {
+        {UserCommands::MOVE_SCREEN_UP, 2}, {UserCommands::MOVE_SCREEN_DOWN, 2},
+        {UserCommands::MOVE_SCREEN_LEFT, 2}, {UserCommands::MOVE_SCREEN_RIGHT, 2},
+        {UserCommands::MOVE_SCREEN_TO_POS, 3}, {UserCommands::RIGHT_CLICK, 5},
+      };
+      if (!check_args(argcount[command])) return status;
       auto type = args[0];
       auto second = args.begin() + 1;
       auto last = args.end();
@@ -499,50 +505,27 @@ int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args
 
 int8_t Controller::handleUserCommand(int command, const std::vector<int>& args)
 {
-  int8_t status = CommandStatus::SUCCESS;
-  auto check_args = [&](uint32_t n) {
-    if (args.size() < n) {
-      Utils::bwlog(output_log, "Missing arguments: expected %d, got %d", n, args.size());
-      status = CommandStatus::MISSING_ARGUMENTS;
-      return false;
-    }
-    return true;
-  };
-
-  // one argument
-  if (command <= UserCommands::MOVE_SCREEN_RIGHT)
+  switch (command)
   {
-    if (!check_args(1)) return status;
-    switch (command)
-    {
-    case UserCommands::MOVE_SCREEN_UP:
-      user_actions::moveScreenUp(args[0]);
-      return CommandStatus::SUCCESS;
-    case UserCommands::MOVE_SCREEN_DOWN:
-      user_actions::moveScreenDown(args[0]);
-      return CommandStatus::SUCCESS;
-    case UserCommands::MOVE_SCREEN_LEFT:
-      user_actions::moveScreenLeft(args[0]);
-      return CommandStatus::SUCCESS;
-    case UserCommands::MOVE_SCREEN_RIGHT:
-      user_actions::moveScreenRight(args[0]);
-      return CommandStatus::SUCCESS;
-    }
-  }
-  else if (command < UserCommands::USER_COMMAND_END)
-  {
-    switch (command)
-    {
-    case UserCommands::MOVE_SCREEN_TO_POS:
-      if (!check_args(2)) return status;
-      user_actions::moveScreenToPos(args[0], args[1]);
-      return CommandStatus::SUCCESS;
-    case UserCommands::RIGHT_CLICK:
-      if (!check_args(4)) return status;
-      user_actions::rightClickPos(args[0], args[1], args[2],
-        args[3] == 0 ? false : true);
-      return CommandStatus::SUCCESS;
-    }
+  case UserCommands::MOVE_SCREEN_UP:
+    user_actions::moveScreenUp(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_DOWN:
+    user_actions::moveScreenDown(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_LEFT:
+    user_actions::moveScreenLeft(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_RIGHT:
+    user_actions::moveScreenRight(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_TO_POS:
+    user_actions::moveScreenToPos(args[0], args[1]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::RIGHT_CLICK:
+    user_actions::rightClickPos(args[0], args[1], args[2],
+                                args[3] == 0 ? false : true);
+    return CommandStatus::SUCCESS;
   }
   Utils::bwlog(output_log, "Invalid user command: %d", command);
   return CommandStatus::UNKNOWN_COMMAND;

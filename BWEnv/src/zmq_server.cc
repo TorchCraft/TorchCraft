@@ -237,7 +237,7 @@ void ZMQ_server::handleReconnect(const torchcraft::fbs::HandshakeClient* handsha
 
   // if we aren't in client mode it means that game has started already
   // so we can go ahead with handshake
-  if (!controller->is_client)
+  if (!controller->is_client || (BWAPI::BWAPIClient.isConnected() && BWAPI::Broodwar->isInGame()))
     controller->setupHandshake();
 }
 

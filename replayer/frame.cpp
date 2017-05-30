@@ -180,7 +180,7 @@ void readTail(
   if (nBullets < 0)
     throw std::runtime_error("Corrupted replay: nBullets < 0");
   if (nBullets > 10000)
-    throw std::runtime_error("Corrupted replay: nBullets > 10000");
+    throw std::runtime_error("Corrupted replay: nBullets > 500");
   bullets.resize(nBullets);
   for (int32_t i = 0; i < nBullets; i++) {
     in >> bullets[i];

@@ -51,6 +51,8 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> n_orders;
   if (n_orders < 0)
     throw std::runtime_error("Corrupted replay: n_orders < 0");
+  if (n_orders > 10000)
+    throw std::runtime_error("Corrupted replay: n_orders > 10000");
   o.orders.resize(n_orders);
   for (int i = 0; i < n_orders; i++) {
     in >> o.orders[i].first_frame >> o.orders[i].type >> o.orders[i].targetId >>
@@ -147,11 +149,15 @@ void readTail(
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: actions nPlayer < 0");
+  if (nPlayer > 9)
+    throw std::runtime_error("Corrupted replay: actions nPlayer > 9");
   for (int32_t i = 0; i < nPlayer; i++) {
     int32_t idPlayer, nActions;
     in >> idPlayer >> nActions;
     if (nActions < 0)
       throw std::runtime_error("Corrupted replay: nActions < 0");
+    if (nActions > 10000)
+      throw std::runtime_error("Corrupted replay: nActions > 10000");
     actions[idPlayer] = std::vector<replayer::Action>();
     actions[idPlayer].resize(nActions);
     for (int32_t j = 0; j < nActions; j++) {
@@ -162,6 +168,8 @@ void readTail(
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: resources nPlayer < 0");
+  if (nPlayer > 9)
+    throw std::runtime_error("Corrupted replay: resources nPlayer > 9");
   for (int32_t i = 0; i < nPlayer; i++) {
     int32_t idPlayer;
     in >> idPlayer;
@@ -171,6 +179,8 @@ void readTail(
   in >> nBullets;
   if (nBullets < 0)
     throw std::runtime_error("Corrupted replay: nBullets < 0");
+  if (nBullets > 10000)
+    throw std::runtime_error("Corrupted replay: nBullets > 500");
   bullets.resize(nBullets);
   for (int32_t i = 0; i < nBullets; i++) {
     in >> bullets[i];
@@ -200,11 +210,15 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: units nPlayer < 0");
+  if (nPlayer > 9)
+    throw std::runtime_error("Corrupted replay: units nPlayer > 9");
   for (int32_t i = 0; i < nPlayer; i++) {
     int idPlayer, nUnits;
     in >> idPlayer >> nUnits;
     if (nUnits < 0)
       throw std::runtime_error("Corrupted replay: nUnits < 0");
+    if (nUnits > 10000)
+      throw std::runtime_error("Corrupted replay: nUnits > 10000");
     o.units[idPlayer] = std::vector<replayer::Unit>();
     o.units[idPlayer].resize(nUnits);
     for (int32_t j = 0; j < nUnits; j++) {

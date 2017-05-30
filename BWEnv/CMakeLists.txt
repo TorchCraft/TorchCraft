@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_path(OPENBW_DIR bwgame.h mini-openbwapi
   PATHS
   ENV OPENBW_DIR
-  ../../../tsc-bw
-  ../../tsc-bw
-  ../tsc-bw
+  ../../../openbw
+  ../../openbw
+  ../openbw
 )
 
 if (NOT OPENBW_DIR)

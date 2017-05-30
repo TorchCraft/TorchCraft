@@ -456,22 +456,22 @@ int8_t Controller::handleCommand(int command, const std::vector<int>& args,
       return handleOpenBWCommand(type, user_args);
     }
     }
-    Utils::bwlog(output_log, "Invalid command: %d", command);
-    return CommandStatus::UNKNOWN_COMMAND;
   }
+  Utils::bwlog(output_log, "Invalid command: %d", command);
+  return CommandStatus::UNKNOWN_COMMAND;
 }
 
-int8_t Controller::handleOpenBWCommand(int, command, const std::vector<int>& args)
+int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args)
 {
-  #ifndef OPENBW_BWAPI
-  status = CommandStatus::OPENBW_NOT_IN_USE;
-  return status;
-  #endif
+  int8_t status = CommandStatus::OPENBW_NOT_IN_USE;
 
+  #ifndef OPENBW_BWAPI
+  return status;
+  #else
   switch (command)
   {
   case OBWCommands::KILL_UNIT: {
-    auto u = BWAPI::Broodwar->getUnit(args[2])
+    auto u = BWAPI::Broodwar->getUnit(args[2]);
     if (u == nullptr)
     {
       status = CommandStatus::INVALID_UNIT;
@@ -499,6 +499,7 @@ int8_t Controller::handleOpenBWCommand(int, command, const std::vector<int>& arg
   }
   Utils::bwlog(output_log, "Invalid command: %d", command);
   return CommandStatus::UNKNOWN_COMMAND;
+  #endif
 }
 
 int8_t Controller::handleUserCommand(int command, const std::vector<int>& args)

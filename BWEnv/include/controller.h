@@ -54,7 +54,7 @@ enum OBWCommands {
   KILL_UNIT,
   // four args
   SPAWN_UNIT,
-}
+};
 
 enum CommandStatus : int8_t {
   SUCCESS = 0,

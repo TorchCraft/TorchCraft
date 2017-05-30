@@ -52,6 +52,8 @@ void init_constants(py::module& torchcraft) {
     constants.attr(fromCamelCaseToLower(v._to_string()).c_str()) =
         v._to_integral();
   setEnumDict<BW::UnitCommandType>(constants, "unitcommandtypes");
+  setEnumDict<BW::OpenBWCommandType>(constants, "openbwcommandtypes");
+  setEnumDict<BW::UserCommandType>(constants, "usercommandtypes");
   setEnumDict<BW::Order>(constants, "orders");
   setEnumDict<BW::TechType>(constants, "techtypes");
   setEnumDict<BW::UnitType>(constants, "unittypes");

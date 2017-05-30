@@ -36,6 +36,7 @@ enum Commands {
   COMMAND_UNIT, COMMAND_UNIT_PROTECTED,
   // variable arguments
   COMMAND_USER,
+  COMMAND_OPENBW,
   // BAWPI drawing routins
   DRAW_LINE,          // x1, y1, x2, y2, color
   DRAW_UNIT_LINE,     // uid1, uid2, color
@@ -46,6 +47,13 @@ enum Commands {
   DRAW_TEXT_SCREEN,   // x, y + text
   // last command id
   COMMAND_END
+};
+
+enum OBWCommands {
+  // two args
+  KILL_UNIT,
+  // four args
+  SPAWN_UNIT,
 };
 
 enum CommandStatus : int8_t {
@@ -60,6 +68,9 @@ enum CommandStatus : int8_t {
   TOO_MANY_COMMANDS = -4,
   INVALID_UNIT = -5,
   PROTECTED = -6,
+  OPENBW_NOT_IN_USE = -7,
+  INVALID_PLAYER = -8,
+  OPENBW_UNSUCCESSFUL_COMMAND = -9,  // TODO reconsider whether we want this
 };
 
 class Controller
@@ -75,6 +86,7 @@ public:
   int8_t handleCommand(int command, const std::vector<int>& args,
     const std::string& str);
   int8_t handleUserCommand(int command, const std::vector<int>& args);
+  int8_t handleOpenBWCommand(int command, const std::vector<int>& args);
   void setCommandsStatus(std::vector<int8_t> status);
   BWAPI::Position getPositionFromWalkTiles(int x, int y);
   BWAPI::TilePosition getTilePositionFromWalkTiles(int x, int y);

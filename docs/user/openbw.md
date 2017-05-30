@@ -13,13 +13,13 @@ These can be installed on ubuntu with apt install libczmq-dev libsdl2-dev
 ### Compile
 
 ```
-git clone https://github.com/TorchCraft/TorchCraft.git
-git clone https://github.com/tscmoo/tsc-bw.git
-cd TorchCraft/BWEnv
-mkdir build
-cd build
-OPENBW_DIR=../../../tsc-bw cmake .. -DOPENBW_ENABLE_UI=ON
-make
+$ git clone https://github.com/TorchCraft/TorchCraft.git
+$ git clone https://github.com/openbw/openbw.git
+$ cd TorchCraft/BWEnv
+$ mkdir build
+$ cd build
+$ OPENBW_DIR=../../../openbw cmake .. -DOPENBW_ENABLE_UI=ON
+$ make
 ```
 This should build a bwenv executable. If you omit the -DOPENBW_ENABLE_UI=ON part, then openbw will be built with no graphics support, and SDL2 will not be required.
 Otherwise, to get any on screen visualization TorchCraft needs to send the set_gui command, eg `tc.command(tc.set_gui, 1)`. The examples do this. If it is omitted, or if `tc.command(tc.set_gui, 0)` is run then nothing will appear on screen.

@@ -302,6 +302,8 @@ void registerConstants(lua_State* L, int index) {
 
   pushTable<BW::Command>(L, fromCamelCaseToLower);
   lua_setfield(L, -2, "commands");
+  pushTable<BW::OpenBWCommandType>(L);
+  lua_setfield(L, -2, "openbwcommandtypes");
   pushTable<BW::UserCommandType>(L);
   lua_setfield(L, -2, "usercommandtypes");
   pushTable<BW::UnitCommandType>(L);

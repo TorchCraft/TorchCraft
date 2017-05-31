@@ -33,6 +33,7 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
       << " " << o.command.targetX << " " << o.command.targetY << " "
       << o.command.extra << " ";
 
+  out << o.trainingQueueSize << " ";
   out << o.velocityX << " " << o.velocityY;
   out << " " << o.playerId;
   out << " " << o.resources;
@@ -62,6 +63,7 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> o.command.frame >> o.command.type >> o.command.targetId >>
       o.command.targetX >> o.command.targetY >> o.command.extra;
 
+  in >> o.trainingQueueSize;
   in >> o.velocityX >> o.velocityY;
   in >> o.playerId;
   in >> o.resources;
@@ -267,7 +269,8 @@ namespace detail = replayer::detail;
   F(command.targetId, 30) \
   F(command.targetX, 31)  \
   F(command.targetY, 32)  \
-  F(command.extra, 33)
+  F(command.extra, 33)    \
+  F(trainingQueueSize, 34)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \

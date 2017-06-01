@@ -78,6 +78,8 @@ void ZMQ_server::connect()
       if (setsockopt(zsock_fd(this->server_sock), SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) != 0) {
         std::cout << "SO_REUSEADDR setsockopt failed with " << WSAGetLastError() << std::endl;
       }
+#else
+      zsock_set_ipv6(this->server_sock, 1);
 #endif
       success = zsock_bind(this->server_sock, "%s", url.str().c_str());
       std::this_thread::sleep_for(std::chrono::seconds(1));

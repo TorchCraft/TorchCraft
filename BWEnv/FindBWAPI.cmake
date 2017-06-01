@@ -1,0 +1,16 @@
+# This defines
+# BWAPI_FOUND - if BWAPI was found
+# BWAPI_INCLUDE_DIRS - include directories
+# BWAPI_LIBRARIES - libraries to link to
+
+find_path(BWAPI_INCLUDE_DIR BWAPI.h PATHS ${BWAPI_DIR} ENV BWAPI_DIR PATH_SUFFIXES include)
+find_library(BWAPI_LIBRARY BWAPILIB PATHS ${BWAPI_DIR} ENV BWAPI_DIR PATH_SUFFIXES lib)
+find_library(BWAPIClient_LIBRARY BWAPIClient PATHS ${BWAPI_DIR} ENV BWAPI_DIR PATH_SUFFIXES lib)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(BWAPI DEFAULT_MSG BWAPI_LIBRARY BWAPI_INCLUDE_DIR)
+
+mark_as_advanced(BWAPI_INCLUDE_DIR BWAPI_LIBRARY)
+
+set(BWAPI_INCLUDE_DIRS ${BWAPI_INCLUDE_DIR})
+set(BWAPI_LIBRARIES ${BWAPI_LIBRARY} ${BWAPIClient_LIBRARY})

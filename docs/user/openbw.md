@@ -27,4 +27,4 @@ For detailed instructions on using BWAPILauncher, see https://github.com/openbw/
 TL;DR is run BWAPILauncher from the StarCraft folder, settings are the same as usual (bwapi-data/bwapi.ini and bwapi-data/torchcraft.ini. These can be copied from TorchCraft/config/).
 
 BWAPI settings can be specified through environment variables, eg
-`BWAPI_CONFIG_AI__AU=/the/path/to/build/BWEnv.so BWAPILauncher`
+`BWAPI_CONFIG_AI__AI=/the/path/to/build/BWEnv.so BWAPILauncher`

@@ -7,7 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#include "Module.h"
+#include "module.h"
 #include <controller.h>
 
 Module::~Module()

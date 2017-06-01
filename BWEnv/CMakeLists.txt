@@ -1,31 +1,42 @@
 cmake_minimum_required(VERSION 3.1)
+project(BWEnv)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_path(OPENBW_DIR bwgame.h mini-openbwapi
-  PATHS
-  ENV OPENBW_DIR
-  ../../../openbw
-  ../../openbw
-  ../openbw
-)
+set(CMAKE_SHARED_LIBRARY_PREFIX "")
 
-if (NOT OPENBW_DIR)
-  message(FATAL_ERROR "Couldn't find openbw. Specify the path to it with OPENBW_DIR environment variable (git clone https://github.com/tscmoo/tsc-bw)")
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+
+if (USE_MINI_OPENBWAPI)
+  find_path(OPENBW_DIR bwgame.h mini-openbwapi
+    PATHS
+    ENV OPENBW_DIR
+    ../../../openbw
+    ../../openbw
+    ../openbw
+  )
+  
+  if (NOT OPENBW_DIR)
+    message(FATAL_ERROR "Couldn't find openbw. Specify the path to it with OPENBW_DIR environment variable")
+  endif()
+  
+  add_subdirectory(${OPENBW_DIR}/mini-openbwapi mini-openbwapi)
+  
+  set(BWAPI_INCLUDE_DIRS ${OPENBW_DIR}/mini-openbwapi)
+  set(BWAPI_LIBRARIES mini-openbwapi)
+else()
+  find_package(BWAPI REQUIRED)
 endif()
-
-add_subdirectory(${OPENBW_DIR}/mini-openbwapi mini-openbwapi)
 
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/fbs
   ${CMAKE_CURRENT_SOURCE_DIR}/../include
-  ${OPENBW_DIR}/mini-openbwapi
+  ${BWAPI_INCLUDE_DIRS}
 )
 
-add_executable(bwenv
-  src/main.cc
+add_library(BWEnvObj OBJECT
   src/config_manager.cc
   src/controller.cc
   src/user_actions.cc
@@ -34,7 +45,27 @@ add_executable(bwenv
   ../replayer/frame.cpp
 )
 
-target_link_libraries(bwenv
+set_property(TARGET BWEnvObj PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+if (NOT USE_MINI_OPENBWAPI)
+  add_library(BWEnv SHARED
+    src/dll.cc
+    src/module.cc
+    $<TARGET_OBJECTS:BWEnvObj>
+  )
+  
+  target_link_libraries(BWEnv
+    czmq
+    ${BWAPI_LIBRARIES}
+  )
+endif()
+
+add_executable(BWEnvClient
+  src/main.cc
+  $<TARGET_OBJECTS:BWEnvObj>
+)
+
+target_link_libraries(BWEnvClient
   czmq
-  mini-openbwapi
+  ${BWAPI_LIBRARIES}
 )

@@ -6,7 +6,7 @@ from itertools import chain
 import sys
 import setuptools
 
-__version__ = '1.2.1alpha'
+__version__ = '1.3.0beta'
 
 
 class get_pybind_include(object):

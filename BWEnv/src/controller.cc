@@ -20,14 +20,22 @@
 
 Controller::Controller(bool is_client) {
   this->is_client = is_client;
+#ifdef _WIN32
   sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"C:/StarCraft/");
+#else
+  sc_path_ = Utils::envToWstring(L"STARCRAFT_DIR", L"./");
+#endif
   const std::wstring tc_default_path = std::wstring(sc_path_).append(L"/TorchCraft/");
   tc_path_ = Utils::envToWstring(L"TORCHCRAFT_DIR", tc_default_path.c_str());
 
   // TODO when ZMQ is persistent, remember to send first map information
 
   config_ = std::make_unique<ConfigManager>();
+#ifdef _WIN32
   config_->loadConfig("C:/StarCraft/bwapi-data/torchcraft.ini");
+#else
+  config_->loadConfig("./bwapi-data/torchcraft.ini");
+#endif
 
   recorder_ = std::make_unique<Recorder>(config_->img_save_path);
 
@@ -200,10 +208,10 @@ void Controller::setupHandshake()
 {
   torchcraft::fbs::HandshakeServerT handshake;
   handshake.lag_frames = BWAPI::Broodwar->getLatencyFrames();
-  handshake.map_data = Utils::mapToVector();
-  handshake.map_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapWidth() * 4, BWAPI::Broodwar->mapHeight() * 4));
+  handshake.map_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapWidth()*4, BWAPI::Broodwar->mapHeight()*4));
+  handshake.ground_height_data = Utils::groundHeightToVector();
+  handshake.walkable_data = Utils::walkableToVector();
   handshake.buildable_data = Utils::buildableToVector();
-  handshake.buildable_size.reset(new torchcraft::fbs::Vec2(BWAPI::Broodwar->mapWidth(), BWAPI::Broodwar->mapHeight()));
   handshake.map_name = BWAPI::Broodwar->mapFileName();
   handshake.neutral_id = BWAPI::Broodwar->neutral()->getID();
   if (BWAPI::Broodwar->isReplay()) {
@@ -213,6 +221,10 @@ void Controller::setupHandshake()
     handshake.player_id = BWAPI::Broodwar->self()->getID();
   }
   handshake.battle_frame_count = battle_frame_count;
+  for (auto loc : BWAPI::Broodwar->getStartLocations()) {
+    BWAPI::WalkPosition walkPos(loc);
+    handshake.start_locations.emplace_back(walkPos.x, walkPos.y);
+  }
 
   this->zmq_server->sendHandshake(&handshake);
 
@@ -220,93 +232,110 @@ void Controller::setupHandshake()
   this->zmq_server->receiveMessage();
 }
 
-void Controller::handleCommand(int command, const std::vector<int>& args,
+int8_t Controller::handleCommand(int command, const std::vector<int>& args,
   const std::string& str)
 {
-  auto check_args = [&](int command, uint32_t n) {
-    if (args.size() < n) throw(std::runtime_error("Not enough arguments for command " + std::to_string(command)));
+  int8_t status = CommandStatus::SUCCESS;
+  auto check_args = [&](uint32_t n) {
+    if (args.size() < n) {
+      Utils::bwlog(output_log, "Missing arguments for command %d: expected %d, got %d",
+        command, n, args.size());
+      status = CommandStatus::MISSING_ARGUMENTS;
+      return false;
+    }
+    return true;
   };
   auto check_unit = [&](int id) {
     auto res = BWAPI::Broodwar->getUnit(id);
-    if (res) return res;
-    throw(std::runtime_error("Bad unit id."));
+    if (res == nullptr) {
+      status = CommandStatus::INVALID_UNIT;
+    }
+    return res;
   };
+
   if (command <= Commands::NOOP)
   {
     switch (command) {
     case Commands::QUIT: // quit game
       Utils::bwlog(output_log, "LEAVING GAME!");
       BWAPI::Broodwar->leaveGame();
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::RESTART: // restart game
       Utils::bwlog(output_log, "RESTARTING GAME!");
       BWAPI::Broodwar->restartGame();
       // Wait to finish game and start a new one if we're in the client...
       if (BWAPI::BWAPIClient.isConnected()) {
-        while (BWAPI::Broodwar->isInGame()) BWAPI::BWAPIClient.update();
-        while (!BWAPI::Broodwar->isInGame()) BWAPI::BWAPIClient.update();
+        while (BWAPI::Broodwar->isInGame()) {
+          BWAPI::BWAPIClient.update();
+          handleEvents();
+        }
+        while (!BWAPI::Broodwar->isInGame()) {
+          BWAPI::BWAPIClient.update();
+          handleEvents();
+        }
       }
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::MAP_HACK: // remove fog of war, can only be done in onStart (at init)
       Utils::bwlog(output_log, "Removing fog of war.");
       BWAPI::Broodwar->enableFlag(BWAPI::Flag::CompleteMapInformation);
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::REQUEST_IMAGE:
       Utils::bwlog(output_log, "Requesting image.");
       this->with_image_ = true;
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::EXIT_PROCESS:
       Utils::bwlog(output_log, "Qutting game... Good-bye!");
       this->exit_process_ = true;
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::NOOP:
-      return;
+      return CommandStatus::SUCCESS;
     }
   }
   else if (command <= Commands::SET_MULTI)
   {
-    check_args(command, 1);
+    if (!check_args(1)) return status;
     switch (command) {
     case Commands::SET_SPEED:
       Utils::bwlog(output_log, "Set game speed: %d", args[0]);
       BWAPI::Broodwar->setLocalSpeed(args[0]);
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_LOG:
       Utils::bwlog(output_log, "Set logCommands to: %d", args[0]);
       logCommands = args[0] != 0;
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_GUI:
       Utils::bwlog(output_log, "Set GUI to: %d", args[0]);
       BWAPI::Broodwar->setGUI(args[0] != 0);
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_FRAMESKIP:
       Utils::bwlog(output_log, "Set frameskip to: %d", args[0]);
       BWAPI::Broodwar->setFrameSkip(args[0]);
       // this->frameskips = args[0];
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_CMD_OPTIM:
       Utils::bwlog(output_log, "Set command optimization level to: %d", args[0]);
       BWAPI::Broodwar->setCommandOptimizationLevel(args[0]);
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_COMBINE_FRAMES:
       Utils::bwlog(output_log, "Set combine frames to: %d", args[0]);
       this->combine_frames = args[0];
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_MAP:
       setMap(str);
-      return;
+      return CommandStatus::SUCCESS;
     case Commands::SET_MULTI:
       Utils::bwlog(output_log, "Set multiplayer: %d", args[0]);
       std::string string = args[0] ? "LAN" : "SINGLE_PLAYER";
       Utils::overwriteConfig(sc_path_, "auto_menu", string);
       Utils::overwriteConfig(sc_path_, "lan_mode", "Local PC");
-      return;
+      return CommandStatus::SUCCESS;
     }
   }
   else if (command <= Commands::COMMAND_UNIT_PROTECTED)
   {
-    check_args(command, 2);
+    if (!check_args(2)) return status;
     auto unit = check_unit(args[0]);
+    if (unit == nullptr) return status;
     auto cmd_type = args[1];
     auto target = (args.size() >= 3 ? BWAPI::Broodwar->getUnit(args[2]) : nullptr);
     BWAPI::Position position = BWAPI::Positions::Invalid;
@@ -342,37 +371,44 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
         args[0], cmd_type, target,
         x, y, extra);
       if (!unit->issueCommand(BWAPI::UnitCommand(unit, cmd_type, target,
-        x, y, extra))
-        ) Utils::bwlog(output_log, "Commanding unit failed! Error: %s",
-        BWAPI::Broodwar->getLastError().c_str());
-      return;
+        x, y, extra))) {
+        Utils::bwlog(output_log, "Commanding unit failed! Error: %s",
+          BWAPI::Broodwar->getLastError().c_str());
+        return CommandStatus::BWAPI_ERROR_MASK | BWAPI::Broodwar->getLastError().getID();
+      }
+      return CommandStatus::SUCCESS;
     case Commands::COMMAND_UNIT_PROTECTED:
-      const char *status = "OK";
+      const char *msg = "OK";
+      status = CommandStatus::PROTECTED;
       if (target != nullptr && unit->getTarget() == target) {
-        status = "CANCELED (already targetted)";
+        msg = "CANCELED (already targetted)";
       }
       else if (target != nullptr
         && unit->getOrderTarget() == target) {
-        status = "CANCELED (already targetted 2)";
+        msg = "CANCELED (already targetted 2)";
       }
       else if (unit->isAttackFrame()) {
-        status = "CANCELED (attack frame)";
+        msg = "CANCELED (attack frame)";
       }
       else if (unit->getOrder() == BWAPI::Orders::AttackUnit
         && unit->getLastCommandFrame() + getAttackFrames(args[0])
         >= BWAPI::Broodwar->getFrameCount()) {
-        status = "CANCELED (still attacking)";
+        msg = "CANCELED (still attacking)";
       }
       else {
         if (!unit->issueCommand(BWAPI::UnitCommand(unit, cmd_type,
-          target, x, y, extra))
-          ) Utils::bwlog(output_log, "Commanding unit failed! Error: %s",
-          BWAPI::Broodwar->getLastError().c_str());
+          target, x, y, extra))) {
+          Utils::bwlog(output_log, "Commanding unit failed! Error: %s",
+            BWAPI::Broodwar->getLastError().c_str());
+          status = CommandStatus::BWAPI_ERROR_MASK | BWAPI::Broodwar->getLastError().getID();
+        } else {
+          status = CommandStatus::SUCCESS;
+        }
       }
       Utils::bwlog(output_log, "Unit:%d command (%d, %d, (%d, %d), %d) %s",
         args[0], cmd_type, args[2],
-        x, y, extra, status);
-      return;
+        x, y, extra, msg);
+      return status;
     }
   }
   else if (command < Commands::COMMAND_END)
@@ -383,73 +419,121 @@ void Controller::handleCommand(int command, const std::vector<int>& args,
     case Commands::DRAW_UNIT_LINE:
     case Commands::DRAW_UNIT_POS_LINE:
     case Commands::DRAW_CIRCLE:
-    case Commands::DRAW_UNIT_CIRCLE: {
+    case Commands::DRAW_UNIT_CIRCLE:
+    case Commands::DRAW_TEXT:
+    case Commands::DRAW_TEXT_SCREEN: {
       static std::unordered_map<int, int> argcount = {
         {Commands::DRAW_LINE, 5}, {Commands::DRAW_UNIT_LINE, 3},
         {Commands::DRAW_UNIT_POS_LINE, 4}, {Commands::DRAW_CIRCLE, 4},
-        {Commands::DRAW_UNIT_CIRCLE, 3},
+        {Commands::DRAW_UNIT_CIRCLE, 3}, {Commands::DRAW_TEXT, 2},
+        {Commands::DRAW_TEXT_SCREEN, 2},
       };
-      check_args(command, argcount[command]);
+      if (!check_args(argcount[command])) return status;
       std::vector<int> cmd({command});
       cmd.insert(cmd.end(), args.begin(), args.end());
-      draw_cmds_.push_back(cmd);
-      return;
+      draw_cmds_.push_back({cmd, str});
+      return CommandStatus::SUCCESS;
     }
-    case Commands::COMMAND_USER:
+    case Commands::COMMAND_USER: {
+      static std::unordered_map<int, int> argcount = {
+        {UserCommands::MOVE_SCREEN_UP, 2}, {UserCommands::MOVE_SCREEN_DOWN, 2},
+        {UserCommands::MOVE_SCREEN_LEFT, 2}, {UserCommands::MOVE_SCREEN_RIGHT, 2},
+        {UserCommands::MOVE_SCREEN_TO_POS, 3}, {UserCommands::RIGHT_CLICK, 5},
+      };
+      if (!check_args(argcount[command])) return status;
       auto type = args[0];
       auto second = args.begin() + 1;
       auto last = args.end();
       std::vector<int> user_args(second, last);
 
-      handleUserCommand(type, user_args);
-      return;
+      return handleUserCommand(type, user_args);
+    }
+    case Commands::COMMAND_OPENBW: {
+      // includes type
+      static std::unordered_map<int, int> obw_argcount = {
+        {OBWCommands::KILL_UNIT, 3}, {OBWCommands::SPAWN_UNIT, 5},
+      };
+      if (!check_args(obw_argcount[command])) return status;
+      auto type = args[0];
+      auto second = args.begin() + 1;
+      auto last = args.end();
+      std::vector<int> user_args(second, last);
+
+      return handleOpenBWCommand(type, user_args);
+    }
     }
   }
   Utils::bwlog(output_log, "Invalid command: %d", command);
+  return CommandStatus::UNKNOWN_COMMAND;
 }
 
-void Controller::handleUserCommand(int command, const std::vector<int>& args)
+int8_t Controller::handleOpenBWCommand(int command, const std::vector<int>& args)
 {
-  auto check_args = [&](uint32_t n) {
-    if (args.size() < n) throw(std::runtime_error("Not enough arguments."));
-  };
-
-  // one argument
-  if (command <= UserCommands::MOVE_SCREEN_RIGHT)
+  #ifndef OPENBW_BWAPI
+  return CommandStatus::OPENBW_NOT_IN_USE;
+  #else
+  switch (command)
   {
-    check_args(1);
-    switch (command)
+  case OBWCommands::KILL_UNIT: {
+    auto u = BWAPI::Broodwar->getUnit(args[0]);
+    if (u == nullptr)
     {
-    case UserCommands::MOVE_SCREEN_UP:
-      user_actions::moveScreenUp(args[0]);
-      return;
-    case UserCommands::MOVE_SCREEN_DOWN:
-      user_actions::moveScreenDown(args[0]);
-      return;
-    case UserCommands::MOVE_SCREEN_LEFT:
-      user_actions::moveScreenLeft(args[0]);
-      return;
-    case UserCommands::MOVE_SCREEN_RIGHT:
-      user_actions::moveScreenRight(args[0]);
-      return;
+      return CommandStatus::INVALID_UNIT;
     }
+    BWAPI::Broodwar->killUnit(u);
+    return CommandStatus::SUCCESS;
   }
-  else if (command < UserCommands::USER_COMMAND_END)
+  case OBWCommands::SPAWN_UNIT: {
+    auto p = BWAPI::Broodwar->getPlayer(args[0]);
+    if (p == nullptr)
+      {
+        return CommandStatus::INVALID_PLAYER;
+      }
+    auto pos = BWAPI::Position(args[2], args[3]);
+    auto u = BWAPI::Broodwar->createUnit(p, args[1], pos);
+    if (u == nullptr)
+      {
+        return CommandStatus::OPENBW_UNSUCCESSFUL_COMMAND;
+      }
+    return CommandStatus::SUCCESS;
+  }
+  }
+  Utils::bwlog(output_log, "Invalid command: %d", command);
+  return CommandStatus::UNKNOWN_COMMAND;
+  #endif
+}
+
+int8_t Controller::handleUserCommand(int command, const std::vector<int>& args)
+{
+  switch (command)
   {
-    switch (command)
-    {
-    case UserCommands::MOVE_SCREEN_TO_POS:
-      check_args(2);
-      user_actions::moveScreenToPos(args[0], args[1]);
-      return;
-    case UserCommands::RIGHT_CLICK:
-      check_args(4);
-      user_actions::rightClickPos(args[0], args[1], args[2],
-        args[3] == 0 ? false : true);
-      return;
-    }
+  case UserCommands::MOVE_SCREEN_UP:
+    user_actions::moveScreenUp(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_DOWN:
+    user_actions::moveScreenDown(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_LEFT:
+    user_actions::moveScreenLeft(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_RIGHT:
+    user_actions::moveScreenRight(args[0]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::MOVE_SCREEN_TO_POS:
+    user_actions::moveScreenToPos(args[0], args[1]);
+    return CommandStatus::SUCCESS;
+  case UserCommands::RIGHT_CLICK:
+    user_actions::rightClickPos(args[0], args[1], args[2],
+                                args[3] == 0 ? false : true);
+    return CommandStatus::SUCCESS;
   }
   Utils::bwlog(output_log, "Invalid user command: %d", command);
+  return CommandStatus::UNKNOWN_COMMAND;
+}
+
+void Controller::setCommandsStatus(std::vector<int8_t> status)
+{
+  tcframe_.commands_status = status;
 }
 
 BWAPI::Position Controller::getPositionFromWalkTiles(int x, int y)
@@ -518,7 +602,9 @@ void Controller::clearLastFrame()
 
 void Controller::executeDrawCommands()
 {
-  for (const auto& cmd : draw_cmds_) {
+  for (const auto& cmdpair : draw_cmds_) {
+    auto cmd = cmdpair.first;
+    auto text = cmdpair.second;
     switch (cmd[0]) {
       case Commands::DRAW_LINE:
         BWAPI::Broodwar->drawLineMap(cmd.at(1), cmd.at(2), cmd.at(3),
@@ -554,6 +640,12 @@ void Controller::executeDrawCommands()
         }
         break;
       }
+      case Commands::DRAW_TEXT:
+        BWAPI::Broodwar->drawTextMap(cmd.at(1), cmd.at(2), text.c_str());
+        break;
+      case Commands::DRAW_TEXT_SCREEN:
+        BWAPI::Broodwar->drawTextScreen(cmd.at(1), cmd.at(2), text.c_str());
+        break;
     }
   }
 }
@@ -707,6 +799,7 @@ void Controller::onFrame()
 
     // And receive new commands
     draw_cmds_.clear();
+    tcframe_.commands_status.clear();
     this->zmq_server->receiveMessage();
 
     if (battle_ended) {
@@ -760,18 +853,6 @@ void Controller::packMyUnits(replayer::Frame& f)
     if (!u->exists())
       continue;
 
-    // Ignore the unit if it has one of the following status ailments
-    if (u->isLockedDown() || u->isMaelstrommed() || u->isStasised())
-      continue;
-
-    // Ignore the unit if it is in one of the following states
-    if (u->isLoaded() || !u->isPowered() || u->isStuck())
-      continue;
-
-    // Ignore the unit if it is incomplete or busy constructing
-    if (!u->isCompleted() || u->isConstructing())
-      continue;
-
     if (u->getHitPoints() > 0) {
       addUnit(u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
     }
@@ -810,8 +891,8 @@ void Controller::packNeutral(replayer::Frame &f)
 * current shield points: integer
 * ground weapon cooldown: integer
 * air weapon cooldown: integer
-* is idle?: boolean
-* is visible?: boolean
+* status flags: integer
+* is visible?: integer
 * some other stuff...
 * see http://bwapi.github.io/class_b_w_a_p_i_1_1_unit_interface.html for all that's available
 */
@@ -845,13 +926,68 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     }
   }
 
+  uint64_t flags = 0;
+  flags |= u->isAccelerating() ? replayer::Unit::Flags::Accelerating : 0;
+  flags |= u->isAttacking() ? replayer::Unit::Flags::Attacking : 0;
+  flags |= u->isAttackFrame() ? replayer::Unit::Flags::AttackFrame : 0;
+  flags |= u->isBeingConstructed() ? replayer::Unit::Flags::BeingConstructed : 0;
+  flags |= u->isBeingGathered() ? replayer::Unit::Flags::BeingGathered : 0;
+  flags |= u->isBeingHealed() ? replayer::Unit::Flags::BeingHealed : 0;
+  flags |= u->isBlind() ? replayer::Unit::Flags::Blind : 0;
+  flags |= u->isBraking() ? replayer::Unit::Flags::Braking : 0;
+  flags |= u->isBurrowed() ? replayer::Unit::Flags::Burrowed : 0;
+  flags |= u->isCarryingGas() ? replayer::Unit::Flags::CarryingGas : 0;
+  flags |= u->isCarryingMinerals() ? replayer::Unit::Flags::CarryingMinerals : 0;
+  flags |= u->isCloaked() ? replayer::Unit::Flags::Cloaked : 0;
+  flags |= u->isCompleted() ? replayer::Unit::Flags::Completed : 0;
+  flags |= u->isConstructing() ? replayer::Unit::Flags::Constructing : 0;
+  flags |= u->isDefenseMatrixed() ? replayer::Unit::Flags::DefenseMatrixed : 0;
+  flags |= u->isDetected() ? replayer::Unit::Flags::Detected : 0;
+  flags |= u->isEnsnared() ? replayer::Unit::Flags::Ensnared : 0;
+  flags |= u->isFlying() ? replayer::Unit::Flags::Flying : 0;
+  flags |= u->isFollowing() ? replayer::Unit::Flags::Following : 0;
+  flags |= u->isGatheringGas() ? replayer::Unit::Flags::GatheringGas : 0;
+  flags |= u->isGatheringMinerals() ? replayer::Unit::Flags::GatheringMinerals : 0;
+  flags |= u->isHallucination() ? replayer::Unit::Flags::Hallucination : 0;
+  flags |= u->isHoldingPosition() ? replayer::Unit::Flags::HoldingPosition : 0;
+  flags |= u->isIdle() ? replayer::Unit::Flags::Idle : 0;
+  flags |= u->isInterruptible() ? replayer::Unit::Flags::Interruptible : 0;
+  flags |= u->isInvincible() ? replayer::Unit::Flags::Invincible : 0;
+  flags |= u->isIrradiated() ? replayer::Unit::Flags::Irradiated : 0;
+  flags |= u->isLifted() ? replayer::Unit::Flags::Lifted : 0;
+  flags |= u->isLoaded() ? replayer::Unit::Flags::Loaded : 0;
+  flags |= u->isLockedDown() ? replayer::Unit::Flags::LockedDown : 0;
+  flags |= u->isMaelstrommed() ? replayer::Unit::Flags::Maelstrommed : 0;
+  flags |= u->isMorphing() ? replayer::Unit::Flags::Morphing : 0;
+  flags |= u->isMoving() ? replayer::Unit::Flags::Moving : 0;
+  flags |= u->isParasited() ? replayer::Unit::Flags::Parasited : 0;
+  flags |= u->isPatrolling() ? replayer::Unit::Flags::Patrolling : 0;
+  flags |= u->isPlagued() ? replayer::Unit::Flags::Plagued : 0;
+  flags |= u->isPowered() ? replayer::Unit::Flags::Powered : 0;
+  flags |= u->isRepairing() ? replayer::Unit::Flags::Repairing : 0;
+  flags |= u->isResearching() ? replayer::Unit::Flags::Researching : 0;
+  flags |= u->isSelected() ? replayer::Unit::Flags::Selected : 0;
+  flags |= u->isSieged() ? replayer::Unit::Flags::Sieged : 0;
+  flags |= u->isStartingAttack() ? replayer::Unit::Flags::StartingAttack : 0;
+  flags |= u->isStasised() ? replayer::Unit::Flags::Stasised : 0;
+  flags |= u->isStimmed() ? replayer::Unit::Flags::Stimmed : 0;
+  flags |= u->isStuck() ? replayer::Unit::Flags::Stuck : 0;
+  flags |= u->isTargetable() ? replayer::Unit::Flags::Targetable : 0;
+  flags |= u->isTraining() ? replayer::Unit::Flags::Training : 0;
+  flags |= u->isUnderAttack() ? replayer::Unit::Flags::UnderAttack : 0;
+  flags |= u->isUnderDarkSwarm() ? replayer::Unit::Flags::UnderDarkSwarm : 0;
+  flags |= u->isUnderDisruptionWeb() ? replayer::Unit::Flags::UnderDisruptionWeb : 0;
+  flags |= u->isUnderStorm() ? replayer::Unit::Flags::UnderStorm : 0;
+  flags |= u->isUpgrading() ? replayer::Unit::Flags::Upgrading : 0;
+
   frame.units[player->getID()].push_back({
     u->getID(), x_wt, y_wt,
     u->getHitPoints(), utype.maxHitPoints(),
     u->getShields(), utype.maxShields(), u->getEnergy(),
     player->weaponDamageCooldown(utype),
     u->getGroundWeaponCooldown(), u->getAirWeaponCooldown(),
-    u->isIdle(), u->isDetected(), u->isLifted(), visible,
+    flags,
+    visible,
     utype.getID(),
     player->armor(utype),
     player->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields),
@@ -866,13 +1002,14 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     player->weaponMaxRange(utype.groundWeapon()) / pixelsPerWalkTile,
     player->weaponMaxRange(utype.airWeapon()) / pixelsPerWalkTile,
     std::vector<replayer::Order>(),
+    replayer::UnitCommand(),
     u->getVelocityX(),
     u->getVelocityY(),
     unit_player,
-    u->getResources()
+    u->getResources(),
   });
 
-  // Add curent order to order list
+  // Add curent orders to order list
   // (we keep Orders::None orders as their timing marks the moment where
   //  previous order stops)
   int targetid = -1;
@@ -891,6 +1028,31 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     targetpos.isValid() ? targetpos.x / pixelsPerWalkTile : -1,
     targetpos.isValid() ? targetpos.y / pixelsPerWalkTile : -1
   });
+
+  if (u->getSecondaryOrder() != BWAPI::Orders::Nothing) {
+    frame.units[player->getID()].back().orders.push_back({
+      BWAPI::Broodwar->getFrameCount(),
+      u->getSecondaryOrder().getID(),
+      -1,
+      -1,
+      -1,
+    });
+  }
+
+  // Set last command
+  auto& command = frame.units[player->getID()].back().command;
+  auto lastCommand = u->getLastCommand();
+  targetpos = lastCommand.getTargetPosition();
+  command.frame = u->getLastCommandFrame();
+  command.type = lastCommand.type.getID();
+  if (lastCommand.target) {
+    command.targetId = lastCommand.target->getID();
+  } else {
+    command.targetId = -1;
+  }
+  command.targetX = targetpos.isValid() ? targetpos.x / pixelsPerWalkTile : -1;
+  command.targetY = targetpos.isValid() ? targetpos.y / pixelsPerWalkTile : -1;
+  command.extra = lastCommand.extra;
 }
 
 void Controller::handleEvents()
@@ -905,6 +1067,7 @@ void Controller::handleEvents()
     case BWAPI::EventType::MatchEnd:
       this->game_ended = true;
       this->is_winner = e.isWinner();
+      this->battle_frame_count = 0;
       break;
     default:
       break;
@@ -914,6 +1077,9 @@ void Controller::handleEvents()
 
 void Controller::launchStarCraft()
 {
+#ifdef OPENBW_BWAPI
+  return;
+#endif
   if (config_->assume_on)
     return;
 
@@ -948,7 +1114,7 @@ void Controller::setMap(const std::string& relative_path)
   if (BWAPI::BroodwarPtr)
     if (!BWAPI::Broodwar->setMap(path + "/" + relative_path)) {
       Utils::bwlog(output_log, "Set map to %s failed! Error: %s",
-        path + "/" + relative_path,
+        (path + "/" + relative_path).c_str(),
         BWAPI::Broodwar->getLastError().c_str());
     }
 }

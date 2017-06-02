@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#include <stdexcept>
 #include <BWAPI.h>
 
 #include "user_actions.h"
@@ -60,7 +61,7 @@ void rightClickPos(int unit_id, int x, int y, bool queue)
 
   if (!(u->exists() || u->isBeingConstructed())
     || !u->canRightClickPosition(true))
-    throw std::exception("Unable to take action on the unit");
+    throw std::runtime_error("Unable to take action on the unit");
 
   u->rightClick(p);
 }

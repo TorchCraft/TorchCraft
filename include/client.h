@@ -44,17 +44,23 @@ class Client {
 
     Command() {}
     Command(int code) : code(code) {}
+    Command(int code, std::string str) : code(code), str(std::move(str)) {}
     Command(int code, std::initializer_list<int>&& args)
         : code(code), args(args) {}
-    template <typename... Ints>
-    Command(int code, Ints&&... args)
-        : Command(code, {std::forward<Ints>(args)...}) {}
-    Command(int code, std::string str) : code(code), str(std::move(str)) {}
+    Command(int code, std::string str, std::initializer_list<int>&& args)
+        : code(code), args(args), str(std::move(str)) {}
+    Command(int code, std::string str, std::vector<int>& args)
+      : code(code), args(args), str(std::move(str)) {}
+    template <typename... Args>
+    Command(int code, int a, Args&&... args)
+        : Command(code, {a, std::forward<Args>(args)...}) {}
+    template <typename... Args>
+    Command(int code, std::string str, Args&&... args)
+        : Command(code, std::move(str), {std::forward<Args>(args)...}) {}
   };
 
  public:
   // LIFECYCLE
-
   Client();
   ~Client();
   Client(const Client&) = delete;
@@ -117,6 +123,13 @@ class Client {
     return error_;
   }
 
+  std::vector<Command> lastCommands() const {
+    return lastCommands_;
+  }
+  std::vector<int8_t> lastCommandsStatus() const {
+    return lastCommandsStatus_;
+  }
+
   State* state() const {
     return state_;
   }
@@ -132,6 +145,8 @@ class Client {
   bool sent_;
   std::string error_;
   std::string uid_;
+  std::vector<Command> lastCommands_;
+  std::vector<int8_t> lastCommandsStatus_;
 };
 
 } // namespace torchcraft

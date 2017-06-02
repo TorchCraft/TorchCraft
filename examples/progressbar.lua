@@ -9,11 +9,10 @@
 local tablex = require 'pl.tablex'
 local torch = require 'torch'
 local progress = torch.class('ProgressBar')
-local tds=require 'tds'
 local Threads = require 'threads'
 
 function progress:__init(id)
-    self.stringstore = tds.hash()
+    self.stringstore = {}
     self.mutex_id = id
 end
 

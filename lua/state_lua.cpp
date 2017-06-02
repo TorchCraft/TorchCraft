@@ -42,9 +42,11 @@ int push2DIntegerArray(
 
 const std::set<std::string> stateMembers = {
     "lag_frames",
-    "map_data",
+    "ground_height_data",
+    "walkable_data",
     "buildable_data",
     "map_name",
+    "start_locations",
     "player_id",
     "neutral_id",
     "replay",
@@ -67,6 +69,12 @@ const std::set<std::string> stateMembers = {
     "only_consider_types",
 };
 
+void updateUserValueAndPush(
+    lua_State* L,
+    torchcraft::State* s,
+    const std::string& m,
+    int index);
+
 // index represents the index of the state userdata on the stack
 int pushMember(
     lua_State* L,
@@ -75,34 +83,58 @@ int pushMember(
     int index = 1) {
   if (m == "lag_frames") {
     lua_pushinteger(L, s->lag_frames);
-  } else if (m == "map_data") {
-    if (!s->map_data.empty()) {
-      auto s0 = s->map_data_size[0];
-      auto s1 = s->map_data_size[1];
-      auto storage = THByteStorage_newWithData(s->map_data.data(), s0 * s1);
+  } else if (m == "ground_height_data") {
+    if (!s->ground_height_data.empty()) {
+      auto s0 = s->map_size[0];
+      auto s1 = s->map_size[1];
+      auto storage =
+          THByteStorage_newWithData(s->ground_height_data.data(), s0 * s1);
       THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
       THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
-      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s1, s0, s0, 1);
+      luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
+    } else {
+      lua_pushnil(L);
+    }
+  } else if (m == "walkable_data") {
+    if (!s->walkable_data.empty()) {
+      auto s0 = s->map_size[0];
+      auto s1 = s->map_size[1];
+      auto storage =
+          THByteStorage_newWithData(s->walkable_data.data(), s0 * s1);
+      THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
+      THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s1, s0, s0, 1);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {
       lua_pushnil(L);
     }
   } else if (m == "buildable_data") {
     if (!s->buildable_data.empty()) {
-      auto s0 = s->buildable_data_size[0];
-      auto s1 = s->buildable_data_size[1];
-      auto storage = THByteStorage_newWithSize(s0 * s1);
-      auto data = THByteStorage_data(storage);
-      for (size_t i = 0; i < s->buildable_data.size(); i++) {
-        data[i] = s->buildable_data[i];
-      }
-      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s0, 1, s1, s0);
+      auto s0 = s->map_size[0];
+      auto s1 = s->map_size[1];
+      auto storage =
+          THByteStorage_newWithData(s->buildable_data.data(), s0 * s1);
+      THByteStorage_clearFlag(storage, TH_STORAGE_RESIZABLE);
+      THByteStorage_clearFlag(storage, TH_STORAGE_FREEMEM);
+      auto tensor = THByteTensor_newWithStorage2d(storage, 0, s1, s0, s0, 1);
       luaT_pushudata(L, (void*)tensor, "torch.ByteTensor");
     } else {
       lua_pushnil(L);
     }
   } else if (m == "map_name") {
     lua_pushstring(L, s->map_name.c_str());
+  } else if (m == "start_locations") {
+    lua_createtable(L, s->start_locations.size(), 0);
+    int n = 1;
+    for (auto d : s->start_locations) {
+      lua_createtable(L, 2, 0);
+      lua_pushinteger(L, d.x);
+      lua_setfield(L, -2, "x");
+      lua_pushinteger(L, d.y);
+      lua_setfield(L, -2, "y");
+      lua_rawseti(L, -2, n++);
+    }
   } else if (m == "player_id") {
     lua_pushinteger(L, s->player_id);
   } else if (m == "neutral_id") {
@@ -110,7 +142,8 @@ int pushMember(
   } else if (m == "replay") {
     lua_pushboolean(L, s->replay);
   } else if (m == "frame") {
-    auto f = (torchcraft::Frame**)lua_newuserdata(L, sizeof(torchcraft::Frame*));
+    auto f =
+        (torchcraft::Frame**)lua_newuserdata(L, sizeof(torchcraft::Frame*));
     *f = s->frame;
     (*f)->incref();
     luaL_getmetatable(L, "torchcraft.Frame");
@@ -174,9 +207,7 @@ int pushMember(
       lua_rawseti(L, -2, i++);
     }
   } else {
-    lua_getuservalue(L, index);
-    lua_getfield(L, -1, m.c_str());
-    lua_remove(L, -2);
+    updateUserValueAndPush(L, s, m, index);
   }
   return 1;
 }
@@ -200,13 +231,71 @@ void pushUnits(lua_State* L, const std::vector<torchcraft::Unit>& units) {
   }
 }
 
+void updateUserValueAndPush(
+    lua_State* L,
+    torchcraft::State* s,
+    const std::string& m,
+    int index) {
+  lua_getuservalue(L, index);
+
+  // Still up to date?
+  lua_getfield(L, -1, "__numUpdates");
+  if (lua_tointeger(L, -1) == s->numUpdates) {
+    lua_pop(L, 1);
+    lua_getfield(L, -1, m.c_str());
+    lua_remove(L, -2);
+    return;
+  }
+  lua_pop(L, 1);
+
+  // Update
+  auto myself = s->player_id;
+  if (!s->replay) {
+    pushUnits(L, s->units[myself]);
+    lua_setfield(L, -2, "units_myself");
+    pushUnits(L, s->units[1 - myself]);
+    lua_setfield(L, -2, "units_enemy");
+    pushFrameMember(L, s, frameGetResources, myself);
+    lua_setfield(L, -2, "resources_myself");
+  } else { // if replay
+    auto nplayers = s->units.size();
+    lua_newtable(L);
+    for (size_t p = 0; p < nplayers; p++) {
+      if (p != s->neutral_id) {
+        pushUnits(L, s->units[p]);
+        lua_rawseti(L, -2, p);
+      }
+    }
+    lua_setfield(L, -2, "units");
+
+    lua_newtable(L);
+    for (size_t p = 0; p < nplayers; p++) {
+      if (p != s->neutral_id) {
+        pushFrameMember(L, s, frameGetResources, p);
+        lua_rawseti(L, -2, p);
+      }
+    }
+    lua_setfield(L, -2, "resources");
+  }
+
+  pushUnits(L, s->units[s->neutral_id]);
+  lua_setfield(L, -2, "units_neutral");
+
+  lua_pushinteger(L, s->numUpdates);
+  lua_setfield(L, -2, "__numUpdates");
+
+  // Access requested uservalue member
+  lua_getfield(L, -1, m.c_str());
+  lua_remove(L, -2);
+}
+
 } // namespace
 
 int newState(lua_State* L) {
   return pushState(L);
 }
 
-int pushState(lua_State* L, torchcraft::State* state) {
+int pushState(lua_State* L, torchcraft::State* state, bool copy) {
   auto s = (torchcraft::State**)lua_newuserdata(L, sizeof(torchcraft::State*));
   if (state == nullptr) {
     if (lua_gettop(L) == 1) {
@@ -217,15 +306,19 @@ int pushState(lua_State* L, torchcraft::State* state) {
       *s = new torchcraft::State(
           lua_toboolean(L, 2), torchcraft::getConsideredTypes(L, 3));
     }
-  } else {
+  } else if (!copy) {
     *s = state;
     state->incref();
+  } else {
+    *s = new torchcraft::State(*state);
   }
 
   luaL_getmetatable(L, "torchcraft.State");
   lua_setmetatable(L, -2);
 
   lua_newtable(L);
+  lua_pushinteger(L, -1);
+  lua_setfield(L, -2, "__numUpdates");
   lua_setuservalue(L, -2);
   return 1;
 }
@@ -279,6 +372,8 @@ int resetState(lua_State* L) {
   s->reset();
 
   lua_getuservalue(L, 1);
+  lua_pushinteger(L, -1);
+  lua_setfield(L, -2, "__numUpdates");
   for (auto f : {"units",
                  "resources",
                  "units_myself",
@@ -299,7 +394,7 @@ int totableState(lua_State* L) {
 
   // Add members that are always present
   for (auto m : stateMembers) {
-    pushMember(L, s, m);
+    pushMember(L, s, m, -2);
     lua_setfield(L, -2, m.c_str());
   }
 
@@ -324,6 +419,19 @@ int setconsiderState(lua_State* L) {
   return 0;
 }
 
+int cloneState(lua_State* L) {
+  auto s = checkState(L);
+  pushState(L, s, true);
+
+  // Deep-copy uservalues
+  lua_getuservalue(L, -1); // of new state
+  lua_getuservalue(L, -3); // of old state
+  torchcraft::lua::deepCopyTable(L);
+  lua_pop(L, 2);
+  return 1;
+}
+
+// index represents the index of the state userdata on the stack
 int pushUpdatesState(
     lua_State* L,
     std::vector<std::string>& updates,
@@ -332,46 +440,9 @@ int pushUpdatesState(
   auto s = checkState(L, -1);
   lua_newtable(L);
   for (auto u : updates) {
-    pushMember(L, s, u);
+    pushMember(L, s, u, -2);
     lua_setfield(L, -2, u.c_str());
   }
-
-  // Update Lua-side values
-  // TODO: Could also be done in some post-receive update hook?
-  auto myself = s->player_id;
-  lua_getuservalue(L, -2);
-  if (!s->replay) {
-    pushUnits(L, s->units[myself]);
-    lua_setfield(L, -2, "units_myself");
-    pushUnits(L, s->units[1 - myself]);
-    lua_setfield(L, -2, "units_enemy");
-    pushFrameMember(L, s, frameGetResources, myself);
-    lua_setfield(L, -2, "resources_myself");
-  } else { // if replay
-    auto nplayers = s->units.size();
-    lua_newtable(L);
-    for (size_t p = 0; p < nplayers; p++) {
-      if (p != s->neutral_id) {
-        pushUnits(L, s->units[p]);
-        lua_rawseti(L, -2, p);
-      }
-    }
-    lua_setfield(L, -2, "units");
-
-    lua_newtable(L);
-    for (size_t p = 0; p < nplayers; p++) {
-      if (p != s->neutral_id) {
-        pushFrameMember(L, s, frameGetResources, p);
-        lua_rawseti(L, -2, p);
-      }
-    }
-    lua_setfield(L, -2, "resources");
-  }
-
-  pushUnits(L, s->units[s->neutral_id]);
-  lua_setfield(L, -2, "units_neutral");
-
-  lua_pop(L, 1); // remove uservalue
   lua_remove(L, -2); // remove state copy
   return 1;
 }

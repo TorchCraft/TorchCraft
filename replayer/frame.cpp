@@ -17,18 +17,21 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
       << o.max_health << " " << o.shield << " " << o.max_shield << " "
       << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
-      << " " << o.idle << " " << o.detected << " " << o.lifted << " "
-      << o.visible << " " << o.type << " " << o.armor << " " << o.shieldArmor
-      << " " << o.size << " " << o.pixel_x << " " << o.pixel_y << " "
-      << o.pixel_size_x << " " << o.pixel_size_y << " " << o.groundATK << " "
-      << o.airATK << " " << o.groundDmgType << " " << o.airDmgType << " "
-      << o.groundRange << " " << o.airRange << " ";
+      << " " << o.flags << " " << o.visible << " " << o.type << " " << o.armor
+      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
+      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
+      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
+      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
 
   out << o.orders.size() << " ";
   for (auto& c : o.orders) {
     out << c.first_frame << " " << c.type << " " << c.targetId << " "
         << c.targetX << " " << c.targetY << " ";
   }
+
+  out << o.command.frame << " " << o.command.type << " " << o.command.targetId
+      << " " << o.command.targetX << " " << o.command.targetY << " "
+      << o.command.extra << " ";
 
   out << o.velocityX << " " << o.velocityY;
   out << " " << o.playerId;
@@ -38,21 +41,26 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >>
-      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.idle >>
-      o.detected >> o.lifted >> o.visible >> o.type >> o.armor >>
-      o.shieldArmor >> o.size >> o.pixel_x >> o.pixel_y >> o.pixel_size_x >>
-      o.pixel_size_y >> o.groundATK >> o.airATK >> o.groundDmgType >>
-      o.airDmgType >> o.groundRange >> o.airRange;
+      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.flags >>
+      o.visible >> o.type >> o.armor >> o.shieldArmor >> o.size >> o.pixel_x >>
+      o.pixel_y >> o.pixel_size_x >> o.pixel_size_y >> o.groundATK >>
+      o.airATK >> o.groundDmgType >> o.airDmgType >> o.groundRange >>
+      o.airRange;
 
   int n_orders;
   in >> n_orders;
   if (n_orders < 0)
     throw std::runtime_error("Corrupted replay: n_orders < 0");
+  if (n_orders > 10000)
+    throw std::runtime_error("Corrupted replay: n_orders > 10000");
   o.orders.resize(n_orders);
   for (int i = 0; i < n_orders; i++) {
     in >> o.orders[i].first_frame >> o.orders[i].type >> o.orders[i].targetId >>
         o.orders[i].targetX >> o.orders[i].targetY;
   }
+
+  in >> o.command.frame >> o.command.type >> o.command.targetId >>
+      o.command.targetX >> o.command.targetY >> o.command.extra;
 
   in >> o.velocityX >> o.velocityY;
   in >> o.playerId;
@@ -141,11 +149,15 @@ void readTail(
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: actions nPlayer < 0");
+  if (nPlayer > 9)
+    throw std::runtime_error("Corrupted replay: actions nPlayer > 9");
   for (int32_t i = 0; i < nPlayer; i++) {
     int32_t idPlayer, nActions;
     in >> idPlayer >> nActions;
     if (nActions < 0)
       throw std::runtime_error("Corrupted replay: nActions < 0");
+    if (nActions > 10000)
+      throw std::runtime_error("Corrupted replay: nActions > 10000");
     actions[idPlayer] = std::vector<replayer::Action>();
     actions[idPlayer].resize(nActions);
     for (int32_t j = 0; j < nActions; j++) {
@@ -156,6 +168,8 @@ void readTail(
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: resources nPlayer < 0");
+  if (nPlayer > 9)
+    throw std::runtime_error("Corrupted replay: resources nPlayer > 9");
   for (int32_t i = 0; i < nPlayer; i++) {
     int32_t idPlayer;
     in >> idPlayer;
@@ -165,6 +179,8 @@ void readTail(
   in >> nBullets;
   if (nBullets < 0)
     throw std::runtime_error("Corrupted replay: nBullets < 0");
+  if (nBullets > 10000)
+    throw std::runtime_error("Corrupted replay: nBullets > 500");
   bullets.resize(nBullets);
   for (int32_t i = 0; i < nBullets; i++) {
     in >> bullets[i];
@@ -194,11 +210,15 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: units nPlayer < 0");
+  if (nPlayer > 9)
+    throw std::runtime_error("Corrupted replay: units nPlayer > 9");
   for (int32_t i = 0; i < nPlayer; i++) {
     int idPlayer, nUnits;
     in >> idPlayer >> nUnits;
     if (nUnits < 0)
       throw std::runtime_error("Corrupted replay: nUnits < 0");
+    if (nUnits > 10000)
+      throw std::runtime_error("Corrupted replay: nUnits > 10000");
     o.units[idPlayer] = std::vector<replayer::Unit>();
     o.units[idPlayer].resize(nUnits);
     for (int32_t j = 0; j < nUnits; j++) {
@@ -214,37 +234,40 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
 
 namespace detail = replayer::detail;
 // This macro maps the member variables of Unit to some IDs
-#define _DOALL(F)      \
-  F(x, 0)              \
-  F(y, 1)              \
-  F(health, 2)         \
-  F(max_health, 3)     \
-  F(shield, 4)         \
-  F(max_shield, 5)     \
-  F(energy, 6)         \
-  F(maxCD, 7)          \
-  F(groundCD, 8)       \
-  F(airCD, 9)          \
-  F(idle, 10)          \
-  F(visible, 11)       \
-  F(type, 12)          \
-  F(armor, 13)         \
-  F(shieldArmor, 14)   \
-  F(size, 15)          \
-  F(pixel_x, 16)       \
-  F(pixel_y, 17)       \
-  F(pixel_size_x, 18)  \
-  F(pixel_size_y, 19)  \
-  F(groundATK, 20)     \
-  F(airATK, 21)        \
-  F(groundDmgType, 22) \
-  F(airDmgType, 23)    \
-  F(groundRange, 24)   \
-  F(airRange, 25)      \
-  F(playerId, 26)      \
-  F(resources, 27)     \
-  F(detected, 28)      \
-  F(lifted, 29)
+#define _DOALL(F)         \
+  F(x, 0)                 \
+  F(y, 1)                 \
+  F(health, 2)            \
+  F(max_health, 3)        \
+  F(shield, 4)            \
+  F(max_shield, 5)        \
+  F(energy, 6)            \
+  F(maxCD, 7)             \
+  F(groundCD, 8)          \
+  F(airCD, 9)             \
+  F(visible, 11)          \
+  F(type, 12)             \
+  F(armor, 13)            \
+  F(shieldArmor, 14)      \
+  F(size, 15)             \
+  F(pixel_x, 16)          \
+  F(pixel_y, 17)          \
+  F(pixel_size_x, 18)     \
+  F(pixel_size_y, 19)     \
+  F(groundATK, 20)        \
+  F(airATK, 21)           \
+  F(groundDmgType, 22)    \
+  F(airDmgType, 23)       \
+  F(groundRange, 24)      \
+  F(airRange, 25)         \
+  F(playerId, 26)         \
+  F(resources, 27)        \
+  F(command.frame, 28)    \
+  F(command.type, 29)     \
+  F(command.targetId, 30) \
+  F(command.targetX, 31)  \
+  F(command.targetY, 32)  \
+  F(command.extra, 33)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \
@@ -290,6 +313,7 @@ replayer::FrameDiff replayer::frame_diff(
       du.id = lit.id;
       du.velocityX = lit.velocityX;
       du.velocityY = lit.velocityY;
+      du.flags = lit.flags;
       du.order_size = lit.orders.size();
       if (rit != rhsu.end() &&
           lit.id == rit->id) { // Unit exists in both frames
@@ -370,6 +394,7 @@ replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
       u.id = du.id;
       u.velocityX = du.velocityX;
       u.velocityY = du.velocityY;
+      u.flags = du.flags;
 
       for (size_t k = 0; k < du.var_diffs.size(); k++) {
         switch (du.var_ids[k]) { // assumes int32_t are 0 initted
@@ -445,6 +470,7 @@ std::ostream& replayer::operator<<(
     std::ostream& out,
     const detail::UnitDiff& o) {
   out << o.id << " " << o.velocityX << " " << o.velocityY;
+  out << " " << o.flags;
   out << " " << o.var_ids.size();
   for (size_t i = 0; i < o.var_ids.size(); i++)
     out << " " << o.var_ids[i];
@@ -480,6 +506,7 @@ std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
   size_t nvars, norders;
 
   in >> o.id >> o.velocityX >> o.velocityY;
+  in >> o.flags;
   in >> nvars;
   o.var_ids.resize(nvars);
   o.var_diffs.resize(nvars);
@@ -499,15 +526,16 @@ std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
 
 #define STRINGIFY2(X) #X
 #define STRINGIFY(X) STRINGIFY2(X)
-#define _TESTMSG(COND, MSG)        \
-  if (!(COND)) {                   \
-    std::cerr << MSG << std::endl; \
-    return false;                  \
+#define _TESTMSG(COND, MSG)          \
+  if (!(COND)) {                     \
+    if (debug)                       \
+      std::cerr << MSG << std::endl; \
+    return false;                    \
   } else
 #define _TEST(COND) _TESTMSG(COND, "(" STRINGIFY(COND) ") not satisfied")
 #define _EQV(VAR, CODE) (f1##VAR) CODE == (f2##VAR)CODE
 #define _EQ(CODE) (f1) CODE == (f2)CODE
-bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2) {
+bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2, bool debug) {
   _TEST(_EQ(->reward));
   _TEST(_EQ(->is_terminal));
   _TEST(_EQ(->bullets.size()));
@@ -550,6 +578,7 @@ bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2) {
 #undef _GEN_VAR
       _TEST(_EQV(units, [i].velocityX));
       _TEST(_EQV(units, [i].velocityY));
+      _TEST(_EQV(units, [i].flags));
       _TEST(_EQV(units, [i].orders.size()));
       for (size_t k = 0; k < f1units[i].orders.size(); k++)
         _TEST(_EQV(units, [i].orders[k]));

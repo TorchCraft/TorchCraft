@@ -37,13 +37,20 @@ typedef replayer::Frame Frame;
 
 class State : public RefCounted {
  public:
+  struct Position {
+    int x, y;
+    Position() : x(0), y(0) {}
+    Position(int x, int y) : x(x), y(y) {}
+  };
+
   // setup
   int lag_frames; // number of frames from order to execution
-  std::vector<uint8_t> map_data; // 2D. 255 where not available
-  int map_data_size[2];
-  std::vector<bool> buildable_data; // 2D, build tile resolution
-  int buildable_data_size[2];
+  int map_size[2];  // build tile resolution
+  std::vector<uint8_t> ground_height_data; // 2D. build tile resolution
+  std::vector<uint8_t> walkable_data; // 2D, walk tile resolution (build x 4)
+  std::vector<uint8_t> buildable_data; // 2D, build tile resolution
   std::string map_name; // Name on the current map
+  std::vector<Position> start_locations;
   int player_id;
   int neutral_id;
   bool replay;
@@ -94,12 +101,18 @@ class State : public RefCounted {
   //   battle is considered finished, i.e. it corresponds to aliveUnits.
   std::unordered_map<int32_t, std::vector<Unit>> units;
 
-  State(
+  // Total number of updates received since creation (resets are counted as
+  // well).
+  uint64_t numUpdates = 0;
+
+  explicit State(
       bool microBattles = false,
       std::set<BW::UnitType> onlyConsiderTypes = std::set<BW::UnitType>());
+  State(const State& other);
+  State(State&& other);
   ~State();
-  State(const State&) = delete;
-  State& operator=(const State&) = delete;
+  State& operator=(State other);
+  friend void swap(State& a, State& b);
 
   bool microBattles() const {
     return microBattles_;

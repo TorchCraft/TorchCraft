@@ -12,7 +12,7 @@
 
 #include <cstdint>
 #include <vector>
-
+#include <string>
 
 namespace Utils
 {
@@ -35,8 +35,10 @@ void overwriteConfig(const std::wstring& sc_path_,
 
 // require BWAPI thread
 void bwlog(std::ofstream& output_log, std::string format, ...);
-std::vector<uint8_t> mapToVector();
-std::vector<bool> buildableToVector();
+// These all operater on walktiles
+std::vector<uint8_t> groundHeightToVector();
+std::vector<uint8_t> walkableToVector();
+std::vector<uint8_t> buildableToVector();
 bool checkTimeInGame();
 std::string ws2s(const std::wstring& ws);
 std::wstring s2ws(const std::string& s);
@@ -44,5 +46,9 @@ std::wstring s2ws(const std::string& s);
 // Let's consider making a Utils class at some point
 extern bool DISPLAY_LOG;
 }
+
+std::string readIni(const std::string& filename, const std::string& section, const std::string& key);
+std::string readIniString(const std::string& section, const std::string& key, const std::string& default_, const std::string& filename);
+int readIniInt(const std::string& section, const std::string& key, int default_, const std::string& filename);
 
 #endif // TORCHCRAFT_UTILS_H_

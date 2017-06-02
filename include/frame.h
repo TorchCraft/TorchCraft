@@ -36,8 +36,23 @@ struct Order {
   int32_t targetX, targetY;
 
   bool operator==(const Order& o) const {
+    // Ignore first_frame
     return type == o.type && targetId == o.targetId && targetX == o.targetX &&
         targetY == o.targetY;
+  }
+};
+
+struct UnitCommand {
+  int32_t frame;
+  int32_t type; // see BWAPI::UnitCommandType::Enum
+  int32_t targetId;
+  int32_t targetX, targetY;
+  int32_t extra;
+
+  bool operator==(const UnitCommand& c) const {
+    // Ignore frame
+    return type == c.type && targetId == c.targetId && targetX == c.targetX &&
+        targetY == c.targetY && extra == c.extra;
   }
 };
 
@@ -45,7 +60,7 @@ struct Unit {
   int32_t id, x, y;
   int32_t health, max_health, shield, max_shield, energy;
   int32_t maxCD, groundCD, airCD;
-  bool idle, detected, lifted;
+  uint64_t flags;
   int32_t visible;
   int32_t type, armor, shieldArmor, size;
 
@@ -57,12 +72,70 @@ struct Unit {
   int32_t groundRange, airRange;
 
   std::vector<Order> orders;
+  UnitCommand command;
 
   double velocityX, velocityY;
 
   int32_t playerId;
 
   int32_t resources;
+
+  enum Flags : uint64_t {
+    // clang-format off
+    Accelerating       = 1ll << 0,
+    Attacking          = 1ll << 1,
+    AttackFrame        = 1ll << 2,
+    BeingConstructed   = 1ll << 3,
+    BeingGathered      = 1ll << 4,
+    BeingHealed        = 1ll << 5,
+    Blind              = 1ll << 6,
+    Braking            = 1ll << 7,
+    Burrowed           = 1ll << 8,
+    CarryingGas        = 1ll << 9,
+    CarryingMinerals   = 1ll << 10,
+    Cloaked            = 1ll << 11,
+    Completed          = 1ll << 12,
+    Constructing       = 1ll << 13,
+    DefenseMatrixed    = 1ll << 14,
+    Detected           = 1ll << 15,
+    Ensnared           = 1ll << 16,
+    Flying             = 1ll << 17,
+    Following          = 1ll << 18,
+    GatheringGas       = 1ll << 19,
+    GatheringMinerals  = 1ll << 20,
+    Hallucination      = 1ll << 21,
+    HoldingPosition    = 1ll << 22,
+    Idle               = 1ll << 23,
+    Interruptible      = 1ll << 24,
+    Invincible         = 1ll << 25,
+    Irradiated         = 1ll << 26,
+    Lifted             = 1ll << 27,
+    Loaded             = 1ll << 28,
+    LockedDown         = 1ll << 29,
+    Maelstrommed       = 1ll << 30,
+    Morphing           = 1ll << 31,
+    Moving             = 1ll << 32,
+    Parasited          = 1ll << 33,
+    Patrolling         = 1ll << 34,
+    Plagued            = 1ll << 35,
+    Powered            = 1ll << 36,
+    Repairing          = 1ll << 37,
+    Researching        = 1ll << 38,
+    Selected           = 1ll << 39,
+    Sieged             = 1ll << 40,
+    StartingAttack     = 1ll << 41,
+    Stasised           = 1ll << 42,
+    Stimmed            = 1ll << 43,
+    Stuck              = 1ll << 44,
+    Targetable         = 1ll << 45,
+    Training           = 1ll << 46,
+    UnderAttack        = 1ll << 47,
+    UnderDarkSwarm     = 1ll << 48,
+    UnderDisruptionWeb = 1ll << 49,
+    UnderStorm         = 1ll << 50,
+    Upgrading          = 1ll << 51,
+    // clang-format on
+  };
 };
 
 std::ostream& operator<<(std::ostream& out, const Unit& o);
@@ -108,6 +181,7 @@ class Frame : public RefCounted {
     reward = 0;
     is_terminal = 0;
   }
+
   Frame(const Frame& o)
       : RefCounted(),
         units(o.units),
@@ -116,6 +190,36 @@ class Frame : public RefCounted {
         bullets(o.bullets) {
     reward = o.reward;
     is_terminal = o.is_terminal;
+  }
+
+  Frame(const Frame* o)
+      : RefCounted(),
+        units(o->units),
+        actions(o->actions),
+        resources(o->resources),
+        bullets(o->bullets) {
+    reward = o->reward;
+    is_terminal = o->is_terminal;
+  }
+
+  Frame(Frame&& o)
+      : RefCounted() {
+    swap(*this, o);
+  }
+
+  friend void swap(Frame& a, Frame& b) {
+    using std::swap;
+    swap(a.units, b.units);
+    swap(a.actions, b.actions);
+    swap(a.resources, b.resources);
+    swap(a.bullets, b.bullets);
+    swap(a.reward, b.reward);
+    swap(a.is_terminal, b.is_terminal);
+  }
+
+  Frame& operator=(Frame other) {
+    swap(*this, other);
+    return *this;
   }
 
   void clear() {
@@ -216,6 +320,7 @@ class UnitDiff {
   std::vector<int32_t> order_diffs;
   int32_t order_size;
   double velocityX, velocityY;
+  int64_t flags;
 };
 
 Frame* add(Frame* frame, FrameDiff* diff);
@@ -224,7 +329,7 @@ inline bool orderUnitByiD(Unit a, Unit b) {
   return (a.id < b.id);
 }
 
-bool frameEq(Frame* f1, Frame* f2);
+bool frameEq(Frame* f1, Frame* f2, bool debug = true);
 
 } // namespace detail
 

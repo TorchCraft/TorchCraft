@@ -33,6 +33,7 @@ extern "C" int frameGetUnits(lua_State* L);
 extern "C" int frameGetResources(lua_State* L);
 extern "C" int frameGetNumPlayers(lua_State* L);
 extern "C" int frameGetNumUnits(lua_State* L);
+extern "C" int frameDeepEq(lua_State* L);
 extern "C" int gcFrame(lua_State* L);
 
 // a bunch of utilities to manipulate the stack
@@ -56,4 +57,5 @@ const struct luaL_Reg frame_m[] = {{"__gc", gcFrame},
                                    {"getResources", frameGetResources},
                                    {"getNumPlayers", frameGetNumPlayers},
                                    {"getNumUnits", frameGetNumUnits},
+                                   {"deepEq", frameDeepEq},
                                    {nullptr, nullptr}};

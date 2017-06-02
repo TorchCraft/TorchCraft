@@ -56,15 +56,28 @@ BETTER_ENUM(
     // arguments: (command, args)
     // For documentation about args, see usercommandtypes
     CommandUser = 16,
+    CommandOpenbw = 17,
 
     // BWAPI drawing routines
-    DrawLine = 17, //  x1, y1, x2, y2, color index
-    DrawUnitLine = 18, // uid1, uid2, color index
-    DrawUnitPosLine = 19, // uid, x2, y2, color index
-    DrawCircle = 20, //  x, y, radius, color index
-    DrawUnitCircle = 21, // uid, radius, color index
+    DrawLine = 18, //  x1, y1, x2, y2, color index
+    DrawUnitLine = 19, // uid1, uid2, color index
+    DrawUnitPosLine = 20, // uid, x2, y2, color index
+    DrawCircle = 21, //  x, y, radius, color index
+    DrawUnitCircle = 22, // uid, radius, color index
+    DrawText = 23, // x, y plus text arg
+    DrawTextScreen = 24, // x, y plus text arg
 
-    MAX = 22)
+    MAX)
+
+BETTER_ENUM(
+    OpenBWCommandType,
+    int,
+    // two args
+    KillUnit = 0, // uid
+    // four args
+    SpawnUnit = 1, // playerid, type, x, y
+
+    OPENBW_COMMAND_END = 2)
 
 BETTER_ENUM(
     UserCommandType,
@@ -493,6 +506,8 @@ BETTER_ENUM(
     Resource_Mineral_Field_Type_3 = 178,
     Resource_Vespene_Geyser = 188,
     Spell_Dark_Swarm = 202,
+    Special_Pit_Door = 207,
+    Special_Right_Pit_Door = 208,
     MAX = 233)
 
 BETTER_ENUM(

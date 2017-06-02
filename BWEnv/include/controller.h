@@ -36,14 +36,41 @@ enum Commands {
   COMMAND_UNIT, COMMAND_UNIT_PROTECTED,
   // variable arguments
   COMMAND_USER,
+  COMMAND_OPENBW,
   // BAWPI drawing routins
   DRAW_LINE,          // x1, y1, x2, y2, color
   DRAW_UNIT_LINE,     // uid1, uid2, color
   DRAW_UNIT_POS_LINE, // uid. x2, y2, color
   DRAW_CIRCLE,        // x, y, radius, color
-  DRAW_UNIT_CIRCLE,   // uid, radiu, color
+  DRAW_UNIT_CIRCLE,   // uid, radius, color
+  DRAW_TEXT,          // x, y + text
+  DRAW_TEXT_SCREEN,   // x, y + text
   // last command id
   COMMAND_END
+};
+
+enum OBWCommands {
+  // two args
+  KILL_UNIT,
+  // four args
+  SPAWN_UNIT,
+};
+
+enum CommandStatus : int8_t {
+  SUCCESS = 0,
+  // Positive numbers correspond to
+  // BWAPI error codes from BWAPI::Errors::Enum | BWAPI_ERROR
+  // (since an error code of 0 also signals an error in BWAPI)
+  BWAPI_ERROR_MASK = 0x40,
+  UNKNOWN_ERROR = -1,
+  UNKNOWN_COMMAND = -2,
+  MISSING_ARGUMENTS = -3,
+  TOO_MANY_COMMANDS = -4,
+  INVALID_UNIT = -5,
+  PROTECTED = -6,
+  OPENBW_NOT_IN_USE = -7,
+  INVALID_PLAYER = -8,
+  OPENBW_UNSUCCESSFUL_COMMAND = -9,  // TODO reconsider whether we want this
 };
 
 class Controller
@@ -56,9 +83,11 @@ public:
   void loop();
   void initGame();
   void setupHandshake();
-  void handleCommand(int command, const std::vector<int>& args,
+  int8_t handleCommand(int command, const std::vector<int>& args,
     const std::string& str);
-  void handleUserCommand(int command, const std::vector<int>& args);
+  int8_t handleUserCommand(int command, const std::vector<int>& args);
+  int8_t handleOpenBWCommand(int command, const std::vector<int>& args);
+  void setCommandsStatus(std::vector<int8_t> status);
   BWAPI::Position getPositionFromWalkTiles(int x, int y);
   BWAPI::TilePosition getTilePositionFromWalkTiles(int x, int y);
   int getAttackFrames(int unitID);
@@ -101,7 +130,7 @@ private:
   bool too_long_play_ = false;
   bool exit_process_ = false;
   bool with_image_ = false;
-  std::vector<std::vector<int>> draw_cmds_;
+  std::vector<std::pair<std::vector<int>, std::string>> draw_cmds_;
   torchcraft::fbs::FrameT tcframe_;
 };
 

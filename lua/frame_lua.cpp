@@ -12,6 +12,64 @@
 using namespace std;
 using namespace torchcraft::replayer;
 
+namespace {
+
+std::unordered_map<uint64_t, const char*> flagNames = {
+    {Unit::Flags::Accelerating, "accelerating"},
+    {Unit::Flags::Attacking, "attacking"},
+    {Unit::Flags::AttackFrame, "attack_frame"},
+    {Unit::Flags::BeingConstructed, "being_constructed"},
+    {Unit::Flags::BeingGathered, "being_gathered"},
+    {Unit::Flags::BeingHealed, "being_healed"},
+    {Unit::Flags::Blind, "blind"},
+    {Unit::Flags::Braking, "braking"},
+    {Unit::Flags::Burrowed, "burrowed"},
+    {Unit::Flags::CarryingGas, "carrying_gas"},
+    {Unit::Flags::CarryingMinerals, "carrying_minerals"},
+    {Unit::Flags::Cloaked, "cloaked"},
+    {Unit::Flags::Completed, "completed"},
+    {Unit::Flags::Constructing, "constructing"},
+    {Unit::Flags::DefenseMatrixed, "defense_matrixed"},
+    {Unit::Flags::Detected, "detected"},
+    {Unit::Flags::Ensnared, "ensnared"},
+    {Unit::Flags::Flying, "flying"},
+    {Unit::Flags::Following, "following"},
+    {Unit::Flags::GatheringGas, "gathering_gas"},
+    {Unit::Flags::GatheringMinerals, "gathering_minerals"},
+    {Unit::Flags::Hallucination, "hallucination"},
+    {Unit::Flags::HoldingPosition, "holding_position"},
+    {Unit::Flags::Idle, "idle"},
+    {Unit::Flags::Interruptible, "interruptible"},
+    {Unit::Flags::Invincible, "invincible"},
+    {Unit::Flags::Irradiated, "irradiated"},
+    {Unit::Flags::Lifted, "lifted"},
+    {Unit::Flags::Loaded, "loaded"},
+    {Unit::Flags::LockedDown, "locked_down"},
+    {Unit::Flags::Maelstrommed, "maelstrommed"},
+    {Unit::Flags::Morphing, "morphing"},
+    {Unit::Flags::Moving, "moving"},
+    {Unit::Flags::Parasited, "parasited"},
+    {Unit::Flags::Patrolling, "patrolling"},
+    {Unit::Flags::Plagued, "plagued"},
+    {Unit::Flags::Powered, "powered"},
+    {Unit::Flags::Repairing, "repairing"},
+    {Unit::Flags::Researching, "researching"},
+    {Unit::Flags::Selected, "selected"},
+    {Unit::Flags::Sieged, "sieged"},
+    {Unit::Flags::StartingAttack, "starting_attack"},
+    {Unit::Flags::Stasised, "stasised"},
+    {Unit::Flags::Stimmed, "stimmed"},
+    {Unit::Flags::Stuck, "stuck"},
+    {Unit::Flags::Targetable, "targetable"},
+    {Unit::Flags::Training, "training"},
+    {Unit::Flags::UnderAttack, "under_attack"},
+    {Unit::Flags::UnderDarkSwarm, "under_dark_swarm"},
+    {Unit::Flags::UnderDisruptionWeb, "under_disruption_web"},
+    {Unit::Flags::UnderStorm, "under_storm"},
+    {Unit::Flags::Upgrading, "upgrading"}};
+
+} // namespace
+
 // Utility
 
 Frame* checkFrame(lua_State* L, int id) {
@@ -86,6 +144,17 @@ void setBool(lua_State* L, const char* key, bool v) {
   lua_settable(L, -3);
 }
 
+void setFlags(lua_State* L, const char* key, uint64_t flags) {
+  lua_pushstring(L, key);
+  lua_newtable(L);
+  for (auto& it : flagNames) {
+    lua_pushstring(L, it.second);
+    lua_pushboolean(L, flags & it.first);
+    lua_settable(L, -3);
+  }
+  lua_settable(L, -3);
+}
+
 // put's table[key] on top of the stack. don't forget to pop !
 bool getField(lua_State* L, const char* key) {
   lua_pushstring(L, key);
@@ -106,6 +175,16 @@ bool getBool(lua_State* L, const char* key) {
   lua_pop(L, 1);
   return res;
 };
+
+uint64_t getFlags(lua_State* L, const char* key) {
+  getField(L, key);
+  uint64_t flags = 0;
+  for (auto& it : flagNames) {
+    flags |= getBool(L, it.second) ? it.first : 0;
+  }
+  lua_pop(L, 1);
+  return flags;
+}
 
 void toFrame(lua_State* L, int id, Frame& res) {
   luaL_argcheck(L, lua_istable(L, id), 1, "'table' expected");
@@ -179,9 +258,19 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.maxCD = getInt(L, "maxcd");
       unit.groundCD = getInt(L, "gwcd");
       unit.airCD = getInt(L, "awcd");
-      unit.idle = getBool(L, "idle");
-      unit.detected = getBool(L, "detected");
-      unit.lifted = getBool(L, "lifted");
+      unit.flags = getFlags(L, "flags");
+      if (getBool(L, "idle") != bool(unit.flags & Unit::Flags::Idle)) {
+        luaL_error(
+            L,
+            "inconsistent values for 'idle' in unit.flags for %d",
+            unit.id);
+      }
+      if (getBool(L, "detected") != bool(unit.flags & Unit::Flags::Detected)) {
+        luaL_error(
+            L,
+            "inconsistent values for 'detected' unit.flags for %d",
+            unit.id);
+      }
       unit.visible = getInt(L, "visible");
       unit.type = getInt(L, "type");
       unit.armor = getInt(L, "armor");
@@ -201,7 +290,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.airRange = getInt(L, "awrange");
       unit.resources = getInt(L, "resource");
 
-      // commands
+      // orders
       getField(L, "orders");
       lua_pushnil(L);
       while (lua_next(L, -2) != 0) {
@@ -224,6 +313,22 @@ void toFrame(lua_State* L, int id, Frame& res) {
         lua_pop(L, 1);
       }
       lua_pop(L, 1); // pop orders
+
+      // command
+      getField(L, "command");
+      unit.command.frame = getInt(L, "frame");
+      unit.command.type = getInt(L, "type");
+      unit.command.targetId = getInt(L, "target");
+      unit.command.extra = getInt(L, "extra");
+      getField(L, "targetpos");
+      lua_rawgeti(L, -1, 1);
+      unit.command.targetX = lua_tonumber(L, -1);
+      lua_pop(L, 1);
+      lua_rawgeti(L, -1, 2);
+      unit.command.targetY = lua_tonumber(L, -1);
+      lua_pop(L, 1); // pop targetY
+      lua_pop(L, 1); // pop targetpos
+      lua_pop(L, 1); // pop command
 
       getField(L, "velocity");
       lua_rawgeti(L, -1, 1);
@@ -295,9 +400,10 @@ void pushUnit(lua_State* L, const Unit& unit) {
   setInt(L, "maxcd", unit.maxCD);
   setInt(L, "gwcd", unit.groundCD);
   setInt(L, "awcd", unit.airCD);
-  setBool(L, "idle", unit.idle);
-  setBool(L, "detected", unit.detected);
-  setBool(L, "lifted", unit.lifted);
+  setFlags(L, "flags", unit.flags);
+  // Backwards compatibility
+  setBool(L, "idle", unit.flags & Unit::Flags::Idle);
+  setBool(L, "detected", unit.flags & Unit::Flags::Detected);
   setInt(L, "visible", unit.visible);
   setInt(L, "armor", unit.armor);
   setInt(L, "shieldArmor", unit.shieldArmor);
@@ -333,6 +439,22 @@ void pushUnit(lua_State* L, const Unit& unit) {
 
     lua_rawseti(L, -2, i + 1);
   }
+  lua_settable(L, -3);
+
+  // command
+  lua_pushstring(L, "command");
+  lua_newtable(L);
+  setInt(L, "frame", unit.command.frame);
+  setInt(L, "type", unit.command.type);
+  setInt(L, "target", unit.command.targetId);
+  setInt(L, "extra", unit.command.extra);
+  lua_pushstring(L, "targetpos");
+  lua_newtable(L);
+  lua_pushnumber(L, (lua_Number)unit.command.targetX);
+  lua_rawseti(L, -2, 1);
+  lua_pushnumber(L, (lua_Number)unit.command.targetY);
+  lua_rawseti(L, -2, 2);
+  lua_settable(L, -3);
   lua_settable(L, -3);
 
   // For compatibility {
@@ -499,5 +621,19 @@ extern "C" int frameCombine(lua_State* L) {
 
   // return f
   lua_pushvalue(L, 1);
+  return 1;
+}
+
+extern "C" int frameDeepEq(lua_State* L) {
+  // Optional third argument supresses debug info if it's false
+  Frame* f = checkFrame(L);
+  Frame* f2 = checkFrame(L, 2);
+  bool good;
+  if (lua_isnil(L, 3)) {
+    good = detail::frameEq(f, f2);
+  } else {
+    good = detail::frameEq(f, f2, lua_toboolean(L, 3));
+  }
+  lua_pushboolean(L, good);
   return 1;
 }

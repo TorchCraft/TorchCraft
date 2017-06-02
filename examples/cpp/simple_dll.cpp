@@ -171,6 +171,9 @@ void playGame(std::shared_ptr<tc::Client> cl, int* totalBattles) {
               tc::BW::Command::CommandUnit,
               unit.id,
               tc::BW::UnitCommandType::Train,
+              0,
+              0,
+              0,
               tc::BW::UnitType::Terran_Marine);
         }
       } else if (tc::BW::isWorker(utype)) {

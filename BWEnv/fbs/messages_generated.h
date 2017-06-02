@@ -299,15 +299,16 @@ inline flatbuffers::Offset<HandshakeClient> CreateHandshakeClient(flatbuffers::F
 struct HandshakeServerT : public flatbuffers::NativeTable {
   typedef HandshakeServer TableType;
   int32_t lag_frames;
-  std::vector<uint8_t> map_data;
   std::unique_ptr<Vec2> map_size;
+  std::vector<uint8_t> ground_height_data;
+  std::vector<uint8_t> walkable_data;
   std::string map_name;
   bool is_replay;
   int32_t player_id;
   int32_t neutral_id;
   int32_t battle_frame_count;
-  std::vector<bool> buildable_data;
-  std::unique_ptr<Vec2> buildable_size;
+  std::vector<uint8_t> buildable_data;
+  std::vector<Vec2> start_locations;
   HandshakeServerT()
     : lag_frames(0),
       is_replay(false),
@@ -320,22 +321,25 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef HandshakeServerT NativeTableType;
   enum {
     VT_LAG_FRAMES = 4,
-    VT_MAP_DATA = 6,
-    VT_MAP_SIZE = 8,
-    VT_MAP_NAME = 10,
-    VT_IS_REPLAY = 12,
-    VT_PLAYER_ID = 14,
-    VT_NEUTRAL_ID = 16,
-    VT_BATTLE_FRAME_COUNT = 18,
-    VT_BUILDABLE_DATA = 20,
-    VT_BUILDABLE_SIZE = 22
+    VT_MAP_SIZE = 6,
+    VT_GROUND_HEIGHT_DATA = 8,
+    VT_WALKABLE_DATA = 10,
+    VT_MAP_NAME = 12,
+    VT_IS_REPLAY = 14,
+    VT_PLAYER_ID = 16,
+    VT_NEUTRAL_ID = 18,
+    VT_BATTLE_FRAME_COUNT = 20,
+    VT_BUILDABLE_DATA = 22,
+    VT_START_LOCATIONS = 24
   };
   int32_t lag_frames() const { return GetField<int32_t>(VT_LAG_FRAMES, 0); }
   bool mutate_lag_frames(int32_t _lag_frames) { return SetField(VT_LAG_FRAMES, _lag_frames); }
-  const flatbuffers::Vector<uint8_t> *map_data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_MAP_DATA); }
-  flatbuffers::Vector<uint8_t> *mutable_map_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_MAP_DATA); }
   const Vec2 *map_size() const { return GetStruct<const Vec2 *>(VT_MAP_SIZE); }
   Vec2 *mutable_map_size() { return GetStruct<Vec2 *>(VT_MAP_SIZE); }
+  const flatbuffers::Vector<uint8_t> *ground_height_data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_GROUND_HEIGHT_DATA); }
+  flatbuffers::Vector<uint8_t> *mutable_ground_height_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_GROUND_HEIGHT_DATA); }
+  const flatbuffers::Vector<uint8_t> *walkable_data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_WALKABLE_DATA); }
+  flatbuffers::Vector<uint8_t> *mutable_walkable_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_WALKABLE_DATA); }
   const flatbuffers::String *map_name() const { return GetPointer<const flatbuffers::String *>(VT_MAP_NAME); }
   flatbuffers::String *mutable_map_name() { return GetPointer<flatbuffers::String *>(VT_MAP_NAME); }
   bool is_replay() const { return GetField<uint8_t>(VT_IS_REPLAY, 0) != 0; }
@@ -348,14 +352,16 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_battle_frame_count(int32_t _battle_frame_count) { return SetField(VT_BATTLE_FRAME_COUNT, _battle_frame_count); }
   const flatbuffers::Vector<uint8_t> *buildable_data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_BUILDABLE_DATA); }
   flatbuffers::Vector<uint8_t> *mutable_buildable_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_BUILDABLE_DATA); }
-  const Vec2 *buildable_size() const { return GetStruct<const Vec2 *>(VT_BUILDABLE_SIZE); }
-  Vec2 *mutable_buildable_size() { return GetStruct<Vec2 *>(VT_BUILDABLE_SIZE); }
+  const flatbuffers::Vector<const Vec2 *> *start_locations() const { return GetPointer<const flatbuffers::Vector<const Vec2 *> *>(VT_START_LOCATIONS); }
+  flatbuffers::Vector<const Vec2 *> *mutable_start_locations() { return GetPointer<flatbuffers::Vector<const Vec2 *> *>(VT_START_LOCATIONS); }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_LAG_FRAMES) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_MAP_DATA) &&
-           verifier.Verify(map_data()) &&
            VerifyField<Vec2>(verifier, VT_MAP_SIZE) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_GROUND_HEIGHT_DATA) &&
+           verifier.Verify(ground_height_data()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_WALKABLE_DATA) &&
+           verifier.Verify(walkable_data()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_MAP_NAME) &&
            verifier.Verify(map_name()) &&
            VerifyField<uint8_t>(verifier, VT_IS_REPLAY) &&
@@ -364,7 +370,8 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_BATTLE_FRAME_COUNT) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_BUILDABLE_DATA) &&
            verifier.Verify(buildable_data()) &&
-           VerifyField<Vec2>(verifier, VT_BUILDABLE_SIZE) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_START_LOCATIONS) &&
+           verifier.Verify(start_locations()) &&
            verifier.EndTable();
   }
   HandshakeServerT *UnPack(const flatbuffers::resolver_function_t *resolver = nullptr) const;
@@ -375,43 +382,46 @@ struct HandshakeServerBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_lag_frames(int32_t lag_frames) { fbb_.AddElement<int32_t>(HandshakeServer::VT_LAG_FRAMES, lag_frames, 0); }
-  void add_map_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> map_data) { fbb_.AddOffset(HandshakeServer::VT_MAP_DATA, map_data); }
   void add_map_size(const Vec2 *map_size) { fbb_.AddStruct(HandshakeServer::VT_MAP_SIZE, map_size); }
+  void add_ground_height_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ground_height_data) { fbb_.AddOffset(HandshakeServer::VT_GROUND_HEIGHT_DATA, ground_height_data); }
+  void add_walkable_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> walkable_data) { fbb_.AddOffset(HandshakeServer::VT_WALKABLE_DATA, walkable_data); }
   void add_map_name(flatbuffers::Offset<flatbuffers::String> map_name) { fbb_.AddOffset(HandshakeServer::VT_MAP_NAME, map_name); }
   void add_is_replay(bool is_replay) { fbb_.AddElement<uint8_t>(HandshakeServer::VT_IS_REPLAY, static_cast<uint8_t>(is_replay), 0); }
   void add_player_id(int32_t player_id) { fbb_.AddElement<int32_t>(HandshakeServer::VT_PLAYER_ID, player_id, 0); }
   void add_neutral_id(int32_t neutral_id) { fbb_.AddElement<int32_t>(HandshakeServer::VT_NEUTRAL_ID, neutral_id, 0); }
   void add_battle_frame_count(int32_t battle_frame_count) { fbb_.AddElement<int32_t>(HandshakeServer::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0); }
   void add_buildable_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data) { fbb_.AddOffset(HandshakeServer::VT_BUILDABLE_DATA, buildable_data); }
-  void add_buildable_size(const Vec2 *buildable_size) { fbb_.AddStruct(HandshakeServer::VT_BUILDABLE_SIZE, buildable_size); }
+  void add_start_locations(flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations) { fbb_.AddOffset(HandshakeServer::VT_START_LOCATIONS, start_locations); }
   HandshakeServerBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   HandshakeServerBuilder &operator=(const HandshakeServerBuilder &);
   flatbuffers::Offset<HandshakeServer> Finish() {
-    auto o = flatbuffers::Offset<HandshakeServer>(fbb_.EndTable(start_, 10));
+    auto o = flatbuffers::Offset<HandshakeServer>(fbb_.EndTable(start_, 11));
     return o;
   }
 };
 
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::FlatBufferBuilder &_fbb,
     int32_t lag_frames = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> map_data = 0,
     const Vec2 *map_size = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ground_height_data = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> walkable_data = 0,
     flatbuffers::Offset<flatbuffers::String> map_name = 0,
     bool is_replay = false,
     int32_t player_id = 0,
     int32_t neutral_id = 0,
     int32_t battle_frame_count = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data = 0,
-    const Vec2 *buildable_size = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations = 0) {
   HandshakeServerBuilder builder_(_fbb);
-  builder_.add_buildable_size(buildable_size);
+  builder_.add_start_locations(start_locations);
   builder_.add_buildable_data(buildable_data);
   builder_.add_battle_frame_count(battle_frame_count);
   builder_.add_neutral_id(neutral_id);
   builder_.add_player_id(player_id);
   builder_.add_map_name(map_name);
+  builder_.add_walkable_data(walkable_data);
+  builder_.add_ground_height_data(ground_height_data);
   builder_.add_map_size(map_size);
-  builder_.add_map_data(map_data);
   builder_.add_lag_frames(lag_frames);
   builder_.add_is_replay(is_replay);
   return builder_.Finish();
@@ -419,16 +429,17 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
 
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(flatbuffers::FlatBufferBuilder &_fbb,
     int32_t lag_frames = 0,
-    const std::vector<uint8_t> *map_data = nullptr,
     const Vec2 *map_size = 0,
+    const std::vector<uint8_t> *ground_height_data = nullptr,
+    const std::vector<uint8_t> *walkable_data = nullptr,
     const char *map_name = nullptr,
     bool is_replay = false,
     int32_t player_id = 0,
     int32_t neutral_id = 0,
     int32_t battle_frame_count = 0,
     const std::vector<uint8_t> *buildable_data = nullptr,
-    const Vec2 *buildable_size = 0) {
-  return CreateHandshakeServer(_fbb, lag_frames, map_data ? _fbb.CreateVector<uint8_t>(*map_data) : 0, map_size, map_name ? _fbb.CreateString(map_name) : 0, is_replay, player_id, neutral_id, battle_frame_count, buildable_data ? _fbb.CreateVector<uint8_t>(*buildable_data) : 0, buildable_size);
+    const std::vector<const Vec2 *> *start_locations = nullptr) {
+  return CreateHandshakeServer(_fbb, lag_frames, map_size, ground_height_data ? _fbb.CreateVector<uint8_t>(*ground_height_data) : 0, walkable_data ? _fbb.CreateVector<uint8_t>(*walkable_data) : 0, map_name ? _fbb.CreateString(map_name) : 0, is_replay, player_id, neutral_id, battle_frame_count, buildable_data ? _fbb.CreateVector<uint8_t>(*buildable_data) : 0, start_locations ? _fbb.CreateVector<const Vec2 *>(*start_locations) : 0);
 }
 
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT *_o, const flatbuffers::rehasher_function_t *rehasher = nullptr);
@@ -489,6 +500,7 @@ struct FrameT : public flatbuffers::NativeTable {
   std::vector<int32_t> deaths;
   int32_t frame_from_bwapi;
   int32_t battle_frame_count;
+  std::vector<int8_t> commands_status;
   std::string img_mode;
   std::unique_ptr<Vec2> screen_position;
   std::vector<uint8_t> visibility;
@@ -507,12 +519,13 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_DEATHS = 6,
     VT_FRAME_FROM_BWAPI = 8,
     VT_BATTLE_FRAME_COUNT = 10,
-    VT_IMG_MODE = 12,
-    VT_SCREEN_POSITION = 14,
-    VT_VISIBILITY = 16,
-    VT_VISIBILITY_SIZE = 18,
-    VT_IMG_DATA = 20,
-    VT_IMG_SIZE = 22
+    VT_COMMANDS_STATUS = 12,
+    VT_IMG_MODE = 14,
+    VT_SCREEN_POSITION = 16,
+    VT_VISIBILITY = 18,
+    VT_VISIBILITY_SIZE = 20,
+    VT_IMG_DATA = 22,
+    VT_IMG_SIZE = 24
   };
   const flatbuffers::Vector<uint8_t> *data() const { return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA); }
   flatbuffers::Vector<uint8_t> *mutable_data() { return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_DATA); }
@@ -522,6 +535,8 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_frame_from_bwapi(int32_t _frame_from_bwapi) { return SetField(VT_FRAME_FROM_BWAPI, _frame_from_bwapi); }
   int32_t battle_frame_count() const { return GetField<int32_t>(VT_BATTLE_FRAME_COUNT, 0); }
   bool mutate_battle_frame_count(int32_t _battle_frame_count) { return SetField(VT_BATTLE_FRAME_COUNT, _battle_frame_count); }
+  const flatbuffers::Vector<int8_t> *commands_status() const { return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_COMMANDS_STATUS); }
+  flatbuffers::Vector<int8_t> *mutable_commands_status() { return GetPointer<flatbuffers::Vector<int8_t> *>(VT_COMMANDS_STATUS); }
   const flatbuffers::String *img_mode() const { return GetPointer<const flatbuffers::String *>(VT_IMG_MODE); }
   flatbuffers::String *mutable_img_mode() { return GetPointer<flatbuffers::String *>(VT_IMG_MODE); }
   const Vec2 *screen_position() const { return GetStruct<const Vec2 *>(VT_SCREEN_POSITION); }
@@ -542,6 +557,8 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(deaths()) &&
            VerifyField<int32_t>(verifier, VT_FRAME_FROM_BWAPI) &&
            VerifyField<int32_t>(verifier, VT_BATTLE_FRAME_COUNT) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_COMMANDS_STATUS) &&
+           verifier.Verify(commands_status()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_IMG_MODE) &&
            verifier.Verify(img_mode()) &&
            VerifyField<Vec2>(verifier, VT_SCREEN_POSITION) &&
@@ -564,6 +581,7 @@ struct FrameBuilder {
   void add_deaths(flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths) { fbb_.AddOffset(Frame::VT_DEATHS, deaths); }
   void add_frame_from_bwapi(int32_t frame_from_bwapi) { fbb_.AddElement<int32_t>(Frame::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0); }
   void add_battle_frame_count(int32_t battle_frame_count) { fbb_.AddElement<int32_t>(Frame::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0); }
+  void add_commands_status(flatbuffers::Offset<flatbuffers::Vector<int8_t>> commands_status) { fbb_.AddOffset(Frame::VT_COMMANDS_STATUS, commands_status); }
   void add_img_mode(flatbuffers::Offset<flatbuffers::String> img_mode) { fbb_.AddOffset(Frame::VT_IMG_MODE, img_mode); }
   void add_screen_position(const Vec2 *screen_position) { fbb_.AddStruct(Frame::VT_SCREEN_POSITION, screen_position); }
   void add_visibility(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> visibility) { fbb_.AddOffset(Frame::VT_VISIBILITY, visibility); }
@@ -573,7 +591,7 @@ struct FrameBuilder {
   FrameBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) { start_ = fbb_.StartTable(); }
   FrameBuilder &operator=(const FrameBuilder &);
   flatbuffers::Offset<Frame> Finish() {
-    auto o = flatbuffers::Offset<Frame>(fbb_.EndTable(start_, 10));
+    auto o = flatbuffers::Offset<Frame>(fbb_.EndTable(start_, 11));
     return o;
   }
 };
@@ -583,6 +601,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths = 0,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int8_t>> commands_status = 0,
     flatbuffers::Offset<flatbuffers::String> img_mode = 0,
     const Vec2 *screen_position = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> visibility = 0,
@@ -596,6 +615,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
   builder_.add_visibility(visibility);
   builder_.add_screen_position(screen_position);
   builder_.add_img_mode(img_mode);
+  builder_.add_commands_status(commands_status);
   builder_.add_battle_frame_count(battle_frame_count);
   builder_.add_frame_from_bwapi(frame_from_bwapi);
   builder_.add_deaths(deaths);
@@ -608,13 +628,14 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(flatbuffers::FlatBufferBuild
     const std::vector<int32_t> *deaths = nullptr,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
+    const std::vector<int8_t> *commands_status = nullptr,
     const char *img_mode = nullptr,
     const Vec2 *screen_position = 0,
     const std::vector<uint8_t> *visibility = nullptr,
     const Vec2 *visibility_size = 0,
     const std::vector<uint8_t> *img_data = nullptr,
     const Vec2 *img_size = 0) {
-  return CreateFrame(_fbb, data ? _fbb.CreateVector<uint8_t>(*data) : 0, deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0, frame_from_bwapi, battle_frame_count, img_mode ? _fbb.CreateString(img_mode) : 0, screen_position, visibility ? _fbb.CreateVector<uint8_t>(*visibility) : 0, visibility_size, img_data ? _fbb.CreateVector<uint8_t>(*img_data) : 0, img_size);
+  return CreateFrame(_fbb, data ? _fbb.CreateVector<uint8_t>(*data) : 0, deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0, frame_from_bwapi, battle_frame_count, commands_status ? _fbb.CreateVector<int8_t>(*commands_status) : 0, img_mode ? _fbb.CreateString(img_mode) : 0, screen_position, visibility ? _fbb.CreateVector<uint8_t>(*visibility) : 0, visibility_size, img_data ? _fbb.CreateVector<uint8_t>(*img_data) : 0, img_size);
 }
 
 inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *rehasher = nullptr);
@@ -893,15 +914,16 @@ inline HandshakeServerT *HandshakeServer::UnPack(const flatbuffers::resolver_fun
   (void)resolver;
   auto _o = new HandshakeServerT();
   { auto _e = lag_frames(); _o->lag_frames = _e; };
-  { auto _e = map_data(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->map_data.push_back(_e->Get(_i)); } } };
   { auto _e = map_size(); if (_e) _o->map_size = std::unique_ptr<Vec2>(new Vec2(*_e)); };
+  { auto _e = ground_height_data(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->ground_height_data.push_back(_e->Get(_i)); } } };
+  { auto _e = walkable_data(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->walkable_data.push_back(_e->Get(_i)); } } };
   { auto _e = map_name(); if (_e) _o->map_name = _e->str(); };
   { auto _e = is_replay(); _o->is_replay = _e; };
   { auto _e = player_id(); _o->player_id = _e; };
   { auto _e = neutral_id(); _o->neutral_id = _e; };
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
-  { auto _e = buildable_data(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->buildable_data.push_back(_e->Get(_i)!=0); } } };
-  { auto _e = buildable_size(); if (_e) _o->buildable_size = std::unique_ptr<Vec2>(new Vec2(*_e)); };
+  { auto _e = buildable_data(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->buildable_data.push_back(_e->Get(_i)); } } };
+  { auto _e = start_locations(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->start_locations.push_back(*_e->Get(_i)); } } };
   return _o;
 }
 
@@ -913,15 +935,16 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
   (void)rehasher;
   return CreateHandshakeServer(_fbb,
     _o->lag_frames,
-    _o->map_data.size() ? _fbb.CreateVector(_o->map_data) : 0,
     _o->map_size ? _o->map_size.get() : 0,
+    _o->ground_height_data.size() ? _fbb.CreateVector(_o->ground_height_data) : 0,
+    _o->walkable_data.size() ? _fbb.CreateVector(_o->walkable_data) : 0,
     _o->map_name.size() ? _fbb.CreateString(_o->map_name) : 0,
     _o->is_replay,
     _o->player_id,
     _o->neutral_id,
     _o->battle_frame_count,
     _o->buildable_data.size() ? _fbb.CreateVector(_o->buildable_data) : 0,
-    _o->buildable_size ? _o->buildable_size.get() : 0);
+    _o->start_locations.size() ? _fbb.CreateVectorOfStructs(_o->start_locations) : 0);
 }
 
 inline CommandsT *Commands::UnPack(const flatbuffers::resolver_function_t *resolver) const {
@@ -948,6 +971,7 @@ inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *resolver) c
   { auto _e = deaths(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->deaths.push_back(_e->Get(_i)); } } };
   { auto _e = frame_from_bwapi(); _o->frame_from_bwapi = _e; };
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
+  { auto _e = commands_status(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->commands_status.push_back(_e->Get(_i)); } } };
   { auto _e = img_mode(); if (_e) _o->img_mode = _e->str(); };
   { auto _e = screen_position(); if (_e) _o->screen_position = std::unique_ptr<Vec2>(new Vec2(*_e)); };
   { auto _e = visibility(); if (_e) { for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->visibility.push_back(_e->Get(_i)); } } };
@@ -968,6 +992,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
     _o->deaths.size() ? _fbb.CreateVector(_o->deaths) : 0,
     _o->frame_from_bwapi,
     _o->battle_frame_count,
+    _o->commands_status.size() ? _fbb.CreateVector(_o->commands_status) : 0,
     _o->img_mode.size() ? _fbb.CreateString(_o->img_mode) : 0,
     _o->screen_position ? _o->screen_position.get() : 0,
     _o->visibility.size() ? _fbb.CreateVector(_o->visibility) : 0,

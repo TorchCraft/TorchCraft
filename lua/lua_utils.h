@@ -26,6 +26,8 @@ namespace torchcraft {
 namespace lua {
 
 void sealTable(lua_State* L, int index = -1);
+void deepCloneTable(lua_State* L, int index = -1);
+void deepCopyTable(lua_State* L, int dindex = -2, int index = -1);
 
 inline void pushValue(lua_State* L, bool val) {
   lua_pushboolean(L, val);

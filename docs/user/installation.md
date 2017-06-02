@@ -1,8 +1,18 @@
-Terminology:
-- Server = the part of the code that runs along with StarCraft (that is where we instantiate a ZMQ server).
-- Client = the part of the code that runs in Torch, consumes data (state) from the server and sends commands (actions).
+# Installing TorchCraft
 
-Installation of TorchCraft is based on your platform and whether you are using AIClient or AIModule.
+TorchCraft is split in two different parts:
+
+* **Server**
+  - process that runs along with StarCraft (that is where we instantiate a ZMQ
+    server).
+* **Client**
+  - TorchCraft object in lua / c++ / python, which consumes data (state) from
+    the server and sends commands (actions).
+
+Installation of TorchCraft is based on your platform, and whether you are using
+AIClient or AIModule.
+
+**NOTA BENE: StarCraft 1.18 is currently not supported - see [bwapi/bwapi#710](https://github.com/bwapi/bwapi/issues/710).**
 
 # Windows Server
 

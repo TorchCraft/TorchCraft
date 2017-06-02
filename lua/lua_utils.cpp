@@ -30,5 +30,56 @@ void sealTable(lua_State* L, int index) {
   lua_pop(L, 1);
 }
 
+// Deep-copy a table into a new one
+void deepCloneTable(lua_State* L, int index) {
+  lua_pushvalue(L, index);
+  lua_newtable(L);
+  lua_insert(L, -2);
+  deepCopyTable(L);
+  lua_pop(L, 1);
+}
+
+
+// Deep-copy a table into a given one
+void deepCopyTable(lua_State* L, int dindex, int index) {
+  lua_pushvalue(L, dindex);
+  lua_pushvalue(L, index < 0 ? index-1 : index);
+
+  lua_pushnil(L);
+  while (lua_next(L, -2) != 0) {
+    // Push key for insertion
+    lua_pushvalue(L, -2);
+    lua_insert(L, -2);
+
+    // value at -1: push copy onto stack
+    switch (lua_type(L, -1)) {
+      case LUA_TNIL:
+        lua_pushnil(L);
+        break;
+      case LUA_TBOOLEAN:
+        lua_pushboolean(L, lua_toboolean(L, -1));
+        break;
+      case LUA_TNUMBER:
+        lua_pushnumber(L, lua_tonumber(L, -1));
+        break;
+      case LUA_TSTRING:
+        lua_pushlstring(L, lua_tostring(L, -1), lua_strlen(L, -1));
+        break;
+      case LUA_TTABLE:
+        deepCloneTable(L);
+        break;
+      default:
+        lua_pushvalue(L, -1); // unknown type: shallow copy
+        break;
+    }
+
+    // remove original value
+    lua_remove(L, -2);
+    lua_settable(L, -5);
+  }
+
+  lua_pop(L, 2);
+}
+
 } // namespace lua
 } // namespace torchcraft

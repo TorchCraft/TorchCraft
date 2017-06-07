@@ -3,7 +3,7 @@ from setuptools.command.build_ext import build_ext
 from os.path import expanduser, dirname, join
 from glob import glob
 from itertools import chain
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 import sys
 import setuptools
 
@@ -25,19 +25,14 @@ class get_pybind_include(object):
 
 
 def get_torch_include_lib():
-    # Try includes from pytorch
-    try:
-        import torch
-        rootdir = dirname(torch.__file__)
-        return (join(rootdir, "lib/include"), join(rootdir, "lib"))
-    except:
-        pass
-
     # Try includes from torch
-    path = check_output("which th", shell=True).decode()
-    if "not found" not in path:
-        rootdir = dirname(dirname(path))
-        return (join(rootdir, "include"), join(rootdir, "lib"))
+    try:
+        path = check_output("which th", shell=True).decode()
+        if "not found" not in path:
+            rootdir = dirname(dirname(path))
+            return (join(rootdir, "include"), join(rootdir, "lib"))
+    except CalledProcessError:
+        pass
 
     # Default to using the torch7 default install dir
     return expanduser("~/torch/install/include"), expanduser("~/torch/install/lib")
@@ -45,9 +40,9 @@ def get_torch_include_lib():
 
 torch_incdir, torch_libdir = get_torch_include_lib()
 sources = list(chain(
-    glob('*.cpp'),
-    glob('../replayer/*.cpp'),
-    glob('../client/*.cpp'),
+    glob('py/*.cpp'),
+    glob('replayer/*.cpp'),
+    glob('client/*.cpp'),
 ))
 print(sources)
 
@@ -59,8 +54,9 @@ ext_modules = [
             # Path to pybind11 headers
             get_pybind_include(),
             get_pybind_include(user=True),
-            "../include",
-            "../",
+            "include",
+            "replayer",
+            ".",
             torch_incdir,
         ],
         # TODO Search for ZSTD and define this if it exists
@@ -70,6 +66,7 @@ ext_modules = [
         language='c++'
     ),
 ]
+
 
 class BuildExt(build_ext):
     """A custom build extension for adding compiler-specific options."""
@@ -92,6 +89,7 @@ class BuildExt(build_ext):
         for ext in self.extensions:
             ext.extra_compile_args = opts
         build_ext.build_extensions(self)
+
 
 setup(
     name='torchcraft',

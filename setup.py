@@ -7,7 +7,7 @@ from subprocess import check_output, CalledProcessError
 import sys
 import setuptools
 
-__version__ = '1.3.0beta'
+__version__ = '1.3.1beta'
 
 
 class get_pybind_include(object):

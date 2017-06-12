@@ -574,7 +574,7 @@ void Controller::endGame()
   endg.game_won = this->is_winner;
 
   this->zmq_server->sendEndGame(&endg);
- 
+
   if (is_client)
   {
     // And receive new commands
@@ -834,13 +834,30 @@ void Controller::packBullets(replayer::Frame &f)
   }
 }
 
+
 /**
 * Pack information about resources.
 */
 void Controller::packResources(replayer::Frame &f, BWAPI::PlayerInterface* p)
 {
+  uint64_t upgrades = 0;
+  uint64_t upgrades_level = 0;
+  const auto NUMBER_OF_LVLABLE_UPGRADES = 15;
+  for (auto up : BWAPI::UpgradeTypes::allUpgradeTypes()) {
+    upgrades |= p->getUpgradeLevel(up) > 0 ? up.getID() : 0;
+    if (p->getUpgradeLevel(up) == 2)
+      upgrades_level |= up.getID();
+    else if (p->getUpgradeLevel(up) == 3)
+      upgrades_level |= up.getID() + NUMBER_OF_LVLABLE_UPGRADES;
+  }
+  uint64_t techs = 0;
+  for (auto tt : BWAPI::TechTypes::allTechTypes()) {
+    techs |= p->hasResearched(tt) ? tt.getID() : 0;
+  }
+
   f.resources[p->getID()] = {
-    p->minerals(), p->gas(), p->supplyUsed(), p->supplyTotal()
+    p->minerals(), p->gas(), p->supplyUsed(), p->supplyTotal(),
+    upgrades, upgrades_level, techs
   };
 }
 
@@ -926,6 +943,12 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     }
   }
 
+  int32_t associatedUnit = -1;
+  if (u->getAddon() != nullptr) associatedUnit = u->getAddon()->getID();
+  else if (u->getTransport() != nullptr) associatedUnit = u->getTransport()->getID();
+  else if (u->getHatchery() != nullptr) associatedUnit = u->getHatchery()->getID();
+  else if (u->getNydusExit() != nullptr) associatedUnit = u->getNydusExit()->getID();
+
   uint64_t flags = 0;
   flags |= u->isAccelerating() ? replayer::Unit::Flags::Accelerating : 0;
   flags |= u->isAttacking() ? replayer::Unit::Flags::Attacking : 0;
@@ -1007,6 +1030,15 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getVelocityY(),
     unit_player,
     u->getResources(),
+    u->getBuildType().getID(),
+    u->getTech().getID(),
+    u->getUpgrade().getID(),
+    u->getRemainingBuildTime() + u->getRemainingTrainTime(),
+    u->getRemainingResearchTime() + u->getRemainingUpgradeTime(),
+    u->getSpellCooldown(),
+    associatedUnit,
+    u->getScarabCount() + u->getSpiderMineCount() + u->getInterceptorCount(),
+    u->hasNuke(),
   });
 
   // Add curent orders to order list

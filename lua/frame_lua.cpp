@@ -70,6 +70,143 @@ std::unordered_map<uint64_t, const char*> flagNames = {
 
 } // namespace
 
+namespace {
+
+std::unordered_map<uint64_t, const char*> upgradeName = {
+    {Resources::Upgrades::Terran_Infantry_Armor, "terran_infantry_armor"},
+    {Resources::Upgrades::Terran_Vehicle_Plating, "terran_vehicle_plating"},
+    {Resources::Upgrades::Terran_Ship_Plating, "terran_ship_plating"},
+    {Resources::Upgrades::Zerg_Carapace, "zerg_carapace"},
+    {Resources::Upgrades::Zerg_Flyer_Carapace, "zerg_flyer_carapace"},
+    {Resources::Upgrades::Protoss_Ground_Armor, "protoss_ground_armor"},
+    {Resources::Upgrades::Protoss_Air_Armor, "protoss_air_armor"},
+    {Resources::Upgrades::Terran_Infantry_Weapons, "terran_infantry_weapons"},
+    {Resources::Upgrades::Terran_Vehicle_Weapons, "terran_vehicle_weapons"},
+    {Resources::Upgrades::Terran_Ship_Weapons, "terran_ship_weapons"},
+    {Resources::Upgrades::Zerg_Melee_Attacks, "zerg_melee_attacks"},
+    {Resources::Upgrades::Zerg_Missile_Attacks, "zerg_missile_attacks"},
+    {Resources::Upgrades::Zerg_Flyer_Attacks, "zerg_flyer_attacks"},
+    {Resources::Upgrades::Protoss_Ground_Weapons, "protoss_ground_weapons"},
+    {Resources::Upgrades::Protoss_Air_Weapons, "protoss_air_weapons"},
+    {Resources::Upgrades::Protoss_Plasma_Shields, "protoss_plasma_shields"},
+    {Resources::Upgrades::U_238_Shells, "u_238_shells"},
+    {Resources::Upgrades::Ion_Thrusters, "ion_thrusters"},
+    {Resources::Upgrades::Titan_Reactor, "titan_reactor"},
+    {Resources::Upgrades::Ocular_Implants, "ocular_implants"},
+    {Resources::Upgrades::Moebius_Reactor, "moebius_reactor"},
+    {Resources::Upgrades::Apollo_Reactor, "apollo_reactor"},
+    {Resources::Upgrades::Colossus_Reactor, "colossus_reactor"},
+    {Resources::Upgrades::Ventral_Sacs, "ventral_sacs"},
+    {Resources::Upgrades::Antennae, "antennae"},
+    {Resources::Upgrades::Pneumatized_Carapace, "pneumatized_carapace"},
+    {Resources::Upgrades::Metabolic_Boost, "metabolic_boost"},
+    {Resources::Upgrades::Adrenal_Glands, "adrenal_glands"},
+    {Resources::Upgrades::Muscular_Augments, "muscular_augments"},
+    {Resources::Upgrades::Grooved_Spines, "grooved_spines"},
+    {Resources::Upgrades::Gamete_Meiosis, "gamete_meiosis"},
+    {Resources::Upgrades::Metasynaptic_Node, "metasynaptic_node"},
+    {Resources::Upgrades::Singularity_Charge, "singularity_charge"},
+    {Resources::Upgrades::Leg_Enhancements, "leg_enhancements"},
+    {Resources::Upgrades::Scarab_Damage, "scarab_damage"},
+    {Resources::Upgrades::Reaver_Capacity, "reaver_capacity"},
+    {Resources::Upgrades::Gravitic_Drive, "gravitic_drive"},
+    {Resources::Upgrades::Sensor_Array, "sensor_array"},
+    {Resources::Upgrades::Gravitic_Boosters, "gravitic_boosters"},
+    {Resources::Upgrades::Khaydarin_Amulet, "khaydarin_amulet"},
+    {Resources::Upgrades::Apial_Sensors, "apial_sensors"},
+    {Resources::Upgrades::Gravitic_Thrusters, "gravitic_thrusters"},
+    {Resources::Upgrades::Carrier_Capacity, "carrier_capacity"},
+    {Resources::Upgrades::Khaydarin_Core, "khaydarin_core"},
+    {Resources::Upgrades::Argus_Jewel, "argus_jewel"},
+    {Resources::Upgrades::Argus_Talisman, "argus_talisman"},
+    {Resources::Upgrades::Caduceus_Reactor, "caduceus_reactor"},
+    {Resources::Upgrades::Chitinous_Plating, "chitinous_plating"},
+    {Resources::Upgrades::Anabolic_Synthesis, "anabolic_synthesis"},
+    {Resources::Upgrades::Charon_Boosters, "charon_boosters"},
+    {Resources::Upgrades::Upgrade_60, "upgrade_60"},
+    {Resources::Upgrades::Unknow, "unknow"}};
+
+} // namespace
+
+namespace {
+
+std::unordered_map<uint64_t, const char*> upgradeLevelName = {
+    {Resources::UpgradesLevel::Terran_Infantry_Armor_2, "terran_infantry_armor_2"},
+    {Resources::UpgradesLevel::Terran_Vehicle_Plating_2, "terran_vehicle_plating_2"},
+    {Resources::UpgradesLevel::Terran_Ship_Plating_2, "terran_ship_plating_2"},
+    {Resources::UpgradesLevel::Terran_Infantry_Weapons_2, "terran_infantry_weapons_2"},
+    {Resources::UpgradesLevel::Terran_Vehicle_Weapons_2, "terran_vehicle_weapons_2"},
+    {Resources::UpgradesLevel::Terran_Ship_Weapons_2, "terran_ship_weapons_2"},
+    {Resources::UpgradesLevel::Zerg_Carapace_2, "zerg_carapace_2"},
+    {Resources::UpgradesLevel::Zerg_Flyer_Carapace_2, "zerg_flyer_carapace_2"},
+    {Resources::UpgradesLevel::Protoss_Ground_Armor_2, "protoss_ground_armor_2"},
+    {Resources::UpgradesLevel::Protoss_Air_Armor_2, "protoss_air_armor_2"},
+    {Resources::UpgradesLevel::Zerg_Melee_Attacks_2, "zerg_melee_attacks_2"},
+    {Resources::UpgradesLevel::Zerg_Missile_Attacks_2, "zerg_missile_attacks_2"},
+    {Resources::UpgradesLevel::Zerg_Flyer_Attacks_2, "zerg_flyer_attacks_2"},
+    {Resources::UpgradesLevel::Protoss_Ground_Weapons_2, "protoss_ground_weapons_2"},
+    {Resources::UpgradesLevel::Protoss_Air_Weapons_2, "protoss_air_weapons_2"},
+    {Resources::UpgradesLevel::Protoss_Plasma_Shields_2, "protoss_plasma_shields_2"},
+    {Resources::UpgradesLevel::Terran_Infantry_Armor_3, "terran_infantry_armor_3"},
+    {Resources::UpgradesLevel::Terran_Vehicle_Plating_3, "terran_vehicle_plating_3"},
+    {Resources::UpgradesLevel::Terran_Ship_Plating_3, "terran_ship_plating_3"},
+    {Resources::UpgradesLevel::Terran_Infantry_Weapons_3, "terran_infantry_weapons_3"},
+    {Resources::UpgradesLevel::Terran_Vehicle_Weapons_3, "terran_vehicle_weapons_3"},
+    {Resources::UpgradesLevel::Terran_Ship_Weapons_3, "terran_ship_weapons_3"},
+    {Resources::UpgradesLevel::Zerg_Carapace_3, "zerg_carapace_3"},
+    {Resources::UpgradesLevel::Zerg_Flyer_Carapace_3, "zerg_flyer_carapace_3"},
+    {Resources::UpgradesLevel::Protoss_Ground_Armor_3, "protoss_ground_armor_3"},
+    {Resources::UpgradesLevel::Protoss_Air_Armor_3, "protoss_air_armor_3"},
+    {Resources::UpgradesLevel::Zerg_Melee_Attacks_3, "zerg_melee_attacks_3"},
+    {Resources::UpgradesLevel::Zerg_Missile_Attacks_3, "zerg_missile_attacks_3"},
+    {Resources::UpgradesLevel::Zerg_Flyer_Attacks_3, "zerg_flyer_attacks_3"},
+    {Resources::UpgradesLevel::Protoss_Ground_Weapons_3, "protoss_ground_weapons_3"},
+    {Resources::UpgradesLevel::Protoss_Air_Weapons_3, "protoss_air_weapons_3"},
+    {Resources::UpgradesLevel::Protoss_Plasma_Shields_3, "protoss_plasma_shields_3"}};
+
+} // namespace
+
+namespace {
+std::unordered_map<uint64_t, const char*> techName = {
+    {Resources::Techs::Stim_Packs, "stim_packs"},
+    {Resources::Techs::Lockdown, "lockdown"},
+    {Resources::Techs::EMP_Shockwave, "emp_shockwave"},
+    {Resources::Techs::Spider_Mines, "spider_mines"},
+    {Resources::Techs::Scanner_Sweep, "scanner_sweep"},
+    {Resources::Techs::Tank_Siege_Mode, "tank_siege_mode"},
+    {Resources::Techs::Defensive_Matrix, "defensive_matrix"},
+    {Resources::Techs::Irradiate, "irradiate"},
+    {Resources::Techs::Yamato_Gun, "yamato_gun"},
+    {Resources::Techs::Cloaking_Field, "cloaking_field"},
+    {Resources::Techs::Personnel_Cloaking, "personnel_cloaking"},
+    {Resources::Techs::Burrowing, "burrowing"},
+    {Resources::Techs::Infestation, "infestation"},
+    {Resources::Techs::Spawn_Broodlings, "spawn_broodlings"},
+    {Resources::Techs::Dark_Swarm, "dark_swarm"},
+    {Resources::Techs::Plague, "plague"},
+    {Resources::Techs::Consume, "consume"},
+    {Resources::Techs::Ensnare, "ensnare"},
+    {Resources::Techs::Parasite, "parasite"},
+    {Resources::Techs::Psionic_Storm, "psionic_storm"},
+    {Resources::Techs::Hallucination, "hallucination"},
+    {Resources::Techs::Recall, "recall"},
+    {Resources::Techs::Stasis_Field, "stasis_field"},
+    {Resources::Techs::Archon_Warp, "archon_warp"},
+    {Resources::Techs::Restoration, "restoration"},
+    {Resources::Techs::Disruption_Web, "disruption_web"},
+    {Resources::Techs::Unused_26, "unused_26"},
+    {Resources::Techs::Mind_Control, "mind_control"},
+    {Resources::Techs::Dark_Archon_Meld, "dark_archon_meld"},
+    {Resources::Techs::Feedback, "feedback"},
+    {Resources::Techs::Optical_Flare, "optical_flare"},
+    {Resources::Techs::Maelstrom, "maelstrom"},
+    {Resources::Techs::Lurker_Aspect, "lurker_aspect"},
+    {Resources::Techs::Unused_33, "unused_33"},
+    {Resources::Techs::Healing, "healing"},
+    {Resources::Techs::Nuclear_Strike, "nuclear_strike"},
+    {Resources::Techs::Unknown, "unknown"}};
+} // namespace
+
 // Utility
 
 Frame* checkFrame(lua_State* L, int id) {
@@ -144,10 +281,11 @@ void setBool(lua_State* L, const char* key, bool v) {
   lua_settable(L, -3);
 }
 
-void setFlags(lua_State* L, const char* key, uint64_t flags) {
+void setFlags(lua_State* L, const char* key, uint64_t flags,
+              const std::unordered_map<uint64_t, const char*>& bitNames) {
   lua_pushstring(L, key);
   lua_newtable(L);
-  for (auto& it : flagNames) {
+  for (auto& it : bitNames) {
     lua_pushstring(L, it.second);
     lua_pushboolean(L, flags & it.first);
     lua_settable(L, -3);
@@ -176,10 +314,11 @@ bool getBool(lua_State* L, const char* key) {
   return res;
 };
 
-uint64_t getFlags(lua_State* L, const char* key) {
+uint64_t getFlags(lua_State* L, const char* key,
+                  const std::unordered_map<uint64_t, const char*>& bitNames) {
   getField(L, key);
   uint64_t flags = 0;
-  for (auto& it : flagNames) {
+  for (auto& it : bitNames) {
     flags |= getBool(L, it.second) ? it.first : 0;
   }
   lua_pop(L, 1);
@@ -258,7 +397,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.maxCD = getInt(L, "maxcd");
       unit.groundCD = getInt(L, "gwcd");
       unit.airCD = getInt(L, "awcd");
-      unit.flags = getFlags(L, "flags");
+      unit.flags = getFlags(L, "flags", flagNames);
       if (getBool(L, "idle") != bool(unit.flags & Unit::Flags::Idle)) {
         luaL_error(
             L,
@@ -289,6 +428,16 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.airDmgType = getInt(L, "awdmgtype");
       unit.airRange = getInt(L, "awrange");
       unit.resources = getInt(L, "resource");
+
+      unit.buildType = getInt(L, "buildType");
+      unit.techType = getInt(L, "techType");
+      unit.upgradeType = getInt(L, "upgradeType");
+      unit.remainingBuildTrainTime = getInt(L, "remainingBuildTrainTime");
+      unit.remainingUpgradeResearchTime = getInt(L, "remainingUpgradeResearchTime");
+      unit.spellCD = getInt(L, "spellCD");
+      unit.associatedUnit = getInt(L, "associatedUnit"); // addOn, nydusExit, transport, hatchery
+      unit.associatedCount = getInt(L, "associatedCount"); // spiderMines, scarabs, interceptors
+      unit.hasNuke = getInt(L, "hasNuke");
 
       // orders
       getField(L, "orders");
@@ -348,7 +497,9 @@ void toFrame(lua_State* L, int id, Frame& res) {
   lua_pop(L, 1); // pop the state table
 
   // resources is a table {[playerid] = {ore=O, gas=G,
-  //                                     used_psi=U, total_psi=T}, ...}
+  //                                     used_psi=U, total_psi=TP,
+  //                                     upgrades=UP, upgrades_level=LVLUP
+  //                                     techs=T}, ...}
   bool success = getField(L, "resources");
   if (success) {
     // iterate through player ids
@@ -359,13 +510,16 @@ void toFrame(lua_State* L, int id, Frame& res) {
       Resources r = {getInt(L, "ore"),
                      getInt(L, "gas"),
                      getInt(L, "used_psi"),
-                     getInt(L, "total_psi")};
+                     getInt(L, "total_psi"),
+                     getFlags(L, "upgrades", upgradeName),
+                     getFlags(L, "upgrades_level", upgradeLevelName),
+                     getFlags(L, "techs", techName)};
       res.resources[playerId] = r;
       lua_pop(L, 1);
     }
   } else { // Empty resources if not provided
     for (const auto& idandlst : res.units) {
-      Resources r = {0, 0, 0, 0};
+      Resources r = {0, 0, 0, 0, 0, 0, 0};
       res.resources[idandlst.first] = r;
     }
   }
@@ -378,6 +532,10 @@ void pushResources(lua_State* L, const Resources& resources) {
   setInt(L, "gas", resources.gas);
   setInt(L, "used_psi", resources.used_psi);
   setInt(L, "total_psi", resources.total_psi);
+  setFlags(L, "upgrades", resources.upgrades, upgradeName);
+  setFlags(L, "upgrades_level", resources.upgrades_level,
+     upgradeLevelName);
+  setFlags(L, "techs", resources.techs, techName);
 }
 
 void pushUnit(lua_State* L, const Unit& unit) {
@@ -400,7 +558,7 @@ void pushUnit(lua_State* L, const Unit& unit) {
   setInt(L, "maxcd", unit.maxCD);
   setInt(L, "gwcd", unit.groundCD);
   setInt(L, "awcd", unit.airCD);
-  setFlags(L, "flags", unit.flags);
+  setFlags(L, "flags", unit.flags, flagNames);
   // Backwards compatibility
   setBool(L, "idle", unit.flags & Unit::Flags::Idle);
   setBool(L, "detected", unit.flags & Unit::Flags::Detected);
@@ -536,7 +694,9 @@ void pushFrame(lua_State* L, const Frame& res) {
   }
   lua_settable(L, -3);
   // resources is a table {[playerid] = {ore=O, gas=G,
-  //                                     used_psi=U, total_psi=T}, ...}
+  //                                     used_psi=U, total_psi=TP,
+  //                                     upgrades=UP, upgrades_level=LVLUP
+  //                                     techs=T}, ...}
   lua_pushstring(L, "resources");
   lua_newtable(L);
   for (const auto& player : res.resources) {

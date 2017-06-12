@@ -55,8 +55,8 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
     throw std::runtime_error("Corrupted replay: n_orders > 10000");
   o.orders.resize(n_orders);
   for (int i = 0; i < n_orders; i++) {
-    in >> o.orders[i].first_frame >> o.orders[i].type >> o.orders[i].targetId >>
-        o.orders[i].targetX >> o.orders[i].targetY;
+    auto& oi = o.orders[i];
+    in >> oi.first_frame >> oi.type >> oi.targetId >> oi.targetX >> oi.targetY;
   }
 
   in >> o.command.frame >> o.command.type >> o.command.targetId >>
@@ -72,12 +72,13 @@ std::ostream& replayer::operator<<(
     std::ostream& out,
     const replayer::Resources& r) {
   out << r.ore << " " << r.gas << " ";
-  out << r.used_psi << " " << r.total_psi;
+  out << r.used_psi << " " << r.total_psi << " ";
+  out << r.upgrades << " " << r.upgrades_level << " " << r.techs;
   return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Resources& r) {
-  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi;
+  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >> r.upgrades_level >> r.techs;
   return in;
 }
 
@@ -550,6 +551,9 @@ bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2, bool debug) {
     _TEST(_EQ(->resources[i].gas));
     _TEST(_EQ(->resources[i].used_psi));
     _TEST(_EQ(->resources[i].total_psi));
+    _TEST(_EQ(->resources[i].upgrades));
+    _TEST(_EQ(->resources[i].upgrades_level));
+    _TEST(_EQ(->resources[i].techs));
   }
   _TEST(_EQ(->actions.size()));
   for (auto elem : f1->actions) {

@@ -56,6 +56,7 @@ void init_constants(py::module& torchcraft) {
   setEnumDict<BW::UserCommandType>(constants, "usercommandtypes");
   setEnumDict<BW::Order>(constants, "orders");
   setEnumDict<BW::TechType>(constants, "techtypes");
+  setEnumDict<BW::UpgradeType>(constants, "upgradetypes");
   setEnumDict<BW::UnitType>(constants, "unittypes");
   setEnumDict<BW::BulletType>(constants, "bullettypes");
   setEnumDict<BW::WeaponType>(constants, "weapontypes");

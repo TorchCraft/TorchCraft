@@ -80,6 +80,16 @@ struct Unit {
 
   int32_t resources;
 
+  int32_t buildType;
+  int32_t techType;
+  int32_t upgradeType;
+  int32_t remainingBuildTrainTime;
+  int32_t remainingUpgradeResearchTime;
+  int32_t spellCD;
+  int32_t associatedUnit; // addOn, nydusExit, transport, hatchery
+  int32_t associatedCount; // spiderMines, scarabs, interceptors
+  int32_t hasNuke;
+
   enum Flags : uint64_t {
     // clang-format off
     Accelerating       = 1ll << 0,
@@ -141,11 +151,163 @@ struct Unit {
 std::ostream& operator<<(std::ostream& out, const Unit& o);
 std::istream& operator>>(std::istream& in, Unit& o);
 
+/*
+    Terran_Infantry_Armor = 0,
+    Terran_Vehicle_Plating = 1,
+    Terran_Ship_Plating = 2,
+    Terran_Infantry_Weapons = 7,
+    Terran_Vehicle_Weapons = 8,
+    Terran_Ship_Weapons = 9,
+    Zerg_Carapace = 3,
+    Zerg_Flyer_Carapace = 4,
+    Protoss_Ground_Armor = 5,
+    Protoss_Air_Armor = 6,
+    Zerg_Melee_Attacks = 10,
+    Zerg_Missile_Attacks = 11,
+    Zerg_Flyer_Attacks = 12,
+    Protoss_Ground_Weapons = 13,
+    Protoss_Air_Weapons = 14,
+    Protoss_Plasma_Shields = 15,
+*/
+
 struct Resources {
   int32_t ore;
   int32_t gas;
   int32_t used_psi;
   int32_t total_psi;
+  uint64_t upgrades;
+  uint64_t upgrades_level;
+  uint64_t techs;
+
+  // clang-format off
+  enum Upgrades : uint64_t {
+    Terran_Infantry_Armor   = 1ll << 0,
+    Terran_Vehicle_Plating  = 1ll << 1,
+    Terran_Ship_Plating     = 1ll << 2,
+    Zerg_Carapace           = 1ll << 3,
+    Zerg_Flyer_Carapace     = 1ll << 4,
+    Protoss_Ground_Armor    = 1ll << 5,
+    Protoss_Air_Armor       = 1ll << 6,
+    Terran_Infantry_Weapons = 1ll << 7,
+    Terran_Vehicle_Weapons  = 1ll << 8,
+    Terran_Ship_Weapons     = 1ll << 9,
+    Zerg_Melee_Attacks      = 1ll << 10,
+    Zerg_Missile_Attacks    = 1ll << 11,
+    Zerg_Flyer_Attacks      = 1ll << 12,
+    Protoss_Ground_Weapons  = 1ll << 13,
+    Protoss_Air_Weapons     = 1ll << 14,
+    Protoss_Plasma_Shields  = 1ll << 15,
+    U_238_Shells            = 1ll << 16,
+    Ion_Thrusters           = 1ll << 17,
+    Titan_Reactor           = 1ll << 19,
+    Ocular_Implants         = 1ll << 20,
+    Moebius_Reactor         = 1ll << 21,
+    Apollo_Reactor          = 1ll << 22,
+    Colossus_Reactor        = 1ll << 23,
+    Ventral_Sacs            = 1ll << 24,
+    Antennae                = 1ll << 25,
+    Pneumatized_Carapace    = 1ll << 26,
+    Metabolic_Boost         = 1ll << 27,
+    Adrenal_Glands          = 1ll << 28,
+    Muscular_Augments       = 1ll << 29,
+    Grooved_Spines          = 1ll << 30,
+    Gamete_Meiosis          = 1ll << 31,
+    Metasynaptic_Node       = 1ll << 32,
+    Singularity_Charge      = 1ll << 33,
+    Leg_Enhancements        = 1ll << 34,
+    Scarab_Damage           = 1ll << 35,
+    Reaver_Capacity         = 1ll << 36,
+    Gravitic_Drive          = 1ll << 37,
+    Sensor_Array            = 1ll << 38,
+    Gravitic_Boosters       = 1ll << 39,
+    Khaydarin_Amulet        = 1ll << 40,
+    Apial_Sensors           = 1ll << 41,
+    Gravitic_Thrusters      = 1ll << 42,
+    Carrier_Capacity        = 1ll << 43,
+    Khaydarin_Core          = 1ll << 44,
+    Argus_Jewel             = 1ll << 47,
+    Argus_Talisman          = 1ll << 49,
+    Caduceus_Reactor        = 1ll << 51,
+    Chitinous_Plating       = 1ll << 52,
+    Anabolic_Synthesis      = 1ll << 53,
+    Charon_Boosters         = 1ll << 54,
+    Upgrade_60              = 1ll << 60,
+    Unknow                  = 1ll << 62,
+  };
+  enum UpgradesLevel : uint64_t { // could be uint32_t
+    Terran_Infantry_Armor_2   = 1ll << 0,
+    Terran_Vehicle_Plating_2  = 1ll << 1,
+    Terran_Ship_Plating_2     = 1ll << 2,
+    Terran_Infantry_Weapons_2 = 1ll << 7,
+    Terran_Vehicle_Weapons_2  = 1ll << 8,
+    Terran_Ship_Weapons_2     = 1ll << 9,
+    Zerg_Carapace_2           = 1ll << 3,
+    Zerg_Flyer_Carapace_2     = 1ll << 4,
+    Protoss_Ground_Armor_2    = 1ll << 5,
+    Protoss_Air_Armor_2       = 1ll << 6,
+    Zerg_Melee_Attacks_2      = 1ll << 10,
+    Zerg_Missile_Attacks_2    = 1ll << 11,
+    Zerg_Flyer_Attacks_2      = 1ll << 12,
+    Protoss_Ground_Weapons_2  = 1ll << 13,
+    Protoss_Air_Weapons_2     = 1ll << 14,
+    Protoss_Plasma_Shields_2  = 1ll << 15,
+    Terran_Infantry_Armor_3   = 1ll << 16,
+    Terran_Vehicle_Plating_3  = 1ll << 17,
+    Terran_Ship_Plating_3     = 1ll << 18,
+    Terran_Infantry_Weapons_3 = 1ll << 23,
+    Terran_Vehicle_Weapons_3  = 1ll << 24,
+    Terran_Ship_Weapons_3     = 1ll << 25,
+    Zerg_Carapace_3           = 1ll << 19,
+    Zerg_Flyer_Carapace_3     = 1ll << 20,
+    Protoss_Ground_Armor_3    = 1ll << 21,
+    Protoss_Air_Armor_3       = 1ll << 22,
+    Zerg_Melee_Attacks_3      = 1ll << 26,
+    Zerg_Missile_Attacks_3    = 1ll << 27,
+    Zerg_Flyer_Attacks_3      = 1ll << 28,
+    Protoss_Ground_Weapons_3  = 1ll << 29,
+    Protoss_Air_Weapons_3     = 1ll << 30,
+    Protoss_Plasma_Shields_3  = 1ll << 31,
+  };
+  enum Techs : uint64_t {
+    Stim_Packs         = 1ll << 0,
+    Lockdown           = 1ll << 1,
+    EMP_Shockwave      = 1ll << 2,
+    Spider_Mines       = 1ll << 3,
+    Scanner_Sweep      = 1ll << 4,
+    Tank_Siege_Mode    = 1ll << 5,
+    Defensive_Matrix   = 1ll << 6,
+    Irradiate          = 1ll << 7,
+    Yamato_Gun         = 1ll << 8,
+    Cloaking_Field     = 1ll << 9,
+    Personnel_Cloaking = 1ll << 10,
+    Burrowing          = 1ll << 11,
+    Infestation        = 1ll << 12,
+    Spawn_Broodlings   = 1ll << 13,
+    Dark_Swarm         = 1ll << 14,
+    Plague             = 1ll << 15,
+    Consume            = 1ll << 16,
+    Ensnare            = 1ll << 17,
+    Parasite           = 1ll << 18,
+    Psionic_Storm      = 1ll << 19,
+    Hallucination      = 1ll << 20,
+    Recall             = 1ll << 21,
+    Stasis_Field       = 1ll << 22,
+    Archon_Warp        = 1ll << 23,
+    Restoration        = 1ll << 24,
+    Disruption_Web     = 1ll << 25,
+    Unused_26          = 1ll << 26,
+    Mind_Control       = 1ll << 27,
+    Dark_Archon_Meld   = 1ll << 28,
+    Feedback           = 1ll << 29,
+    Optical_Flare      = 1ll << 30,
+    Maelstrom          = 1ll << 31,
+    Lurker_Aspect      = 1ll << 32,
+    Unused_33          = 1ll << 33,
+    Healing            = 1ll << 34,
+    Nuclear_Strike     = 1ll << 45,
+    Unknown            = 1ll << 46,
+  };
+  // clang-format on
 };
 
 std::ostream& operator<<(std::ostream& out, const Resources& r);
@@ -295,6 +457,9 @@ class Frame : public RefCounted {
         resources[player_id].gas = next_res.gas;
         resources[player_id].used_psi = next_res.used_psi;
         resources[player_id].total_psi = next_res.total_psi;
+        resources[player_id].upgrades = next_res.upgrades;
+        resources[player_id].upgrades_level = next_res.upgrades_level;
+        resources[player_id].techs = next_res.techs;
       }
     }
     // For other stuff, simply keep that of next_frame
@@ -325,7 +490,7 @@ class UnitDiff {
 
 Frame* add(Frame* frame, FrameDiff* diff);
 
-inline bool orderUnitByiD(Unit a, Unit b) {
+inline bool orderUnitByiD(const Unit& a, const Unit& b) {
   return (a.id < b.id);
 }
 

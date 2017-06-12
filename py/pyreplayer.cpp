@@ -145,7 +145,10 @@ void init_replayer(py::module& m) {
       .def_readwrite("ore", &Resources::ore)
       .def_readwrite("gas", &Resources::gas)
       .def_readwrite("used_psi", &Resources::used_psi)
-      .def_readwrite("total_psi", &Resources::total_psi);
+      .def_readwrite("total_psi", &Resources::total_psi)
+      .def_readwrite("upgrades", &Resources::upgrades)
+      .def_readwrite("upgrades_level", &Resources::upgrades_level)
+      .def_readwrite("techs", &Resources::techs);
 
   py::class_<Bullet>(m_sub, "Bullet")
       .def(py::init<>())

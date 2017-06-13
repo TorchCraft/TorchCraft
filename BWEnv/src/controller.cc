@@ -1037,8 +1037,8 @@ void Controller::addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInt
     u->getRemainingResearchTime() + u->getRemainingUpgradeTime(),
     u->getSpellCooldown(),
     associatedUnit,
-    u->getScarabCount() + u->getSpiderMineCount() + u->getInterceptorCount(),
-    u->hasNuke(),
+    u->getScarabCount() + u->getSpiderMineCount() + u->getInterceptorCount()
+      + u->hasNuke(),
   });
 
   // Add curent orders to order list

@@ -1,6 +1,6 @@
 # Torchcraft
 
-This the alpha version of pytorchcraft v1.2.1alpha, and current is parity with
+This the alpha version of pytorchcraft v1.3.0beta, and current is parity with
 the develop branch of torchcraft. There might be bugs, and a few missing
 features.  Please report them when they come up!
 

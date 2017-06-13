@@ -245,40 +245,48 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
 
 namespace detail = replayer::detail;
 // This macro maps the member variables of Unit to some IDs
-#define _DOALL(F)         \
-  F(x, 0)                 \
-  F(y, 1)                 \
-  F(health, 2)            \
-  F(max_health, 3)        \
-  F(shield, 4)            \
-  F(max_shield, 5)        \
-  F(energy, 6)            \
-  F(maxCD, 7)             \
-  F(groundCD, 8)          \
-  F(airCD, 9)             \
-  F(visible, 11)          \
-  F(type, 12)             \
-  F(armor, 13)            \
-  F(shieldArmor, 14)      \
-  F(size, 15)             \
-  F(pixel_x, 16)          \
-  F(pixel_y, 17)          \
-  F(pixel_size_x, 18)     \
-  F(pixel_size_y, 19)     \
-  F(groundATK, 20)        \
-  F(airATK, 21)           \
-  F(groundDmgType, 22)    \
-  F(airDmgType, 23)       \
-  F(groundRange, 24)      \
-  F(airRange, 25)         \
-  F(playerId, 26)         \
-  F(resources, 27)        \
-  F(command.frame, 28)    \
-  F(command.type, 29)     \
-  F(command.targetId, 30) \
-  F(command.targetX, 31)  \
-  F(command.targetY, 32)  \
-  F(command.extra, 33)
+#define _DOALL(F)                     \
+  F(x, 0)                             \
+  F(y, 1)                             \
+  F(health, 2)                        \
+  F(max_health, 3)                    \
+  F(shield, 4)                        \
+  F(max_shield, 5)                    \
+  F(energy, 6)                        \
+  F(maxCD, 7)                         \
+  F(groundCD, 8)                      \
+  F(airCD, 9)                         \
+  F(visible, 11)                      \
+  F(type, 12)                         \
+  F(armor, 13)                        \
+  F(shieldArmor, 14)                  \
+  F(size, 15)                         \
+  F(pixel_x, 16)                      \
+  F(pixel_y, 17)                      \
+  F(pixel_size_x, 18)                 \
+  F(pixel_size_y, 19)                 \
+  F(groundATK, 20)                    \
+  F(airATK, 21)                       \
+  F(groundDmgType, 22)                \
+  F(airDmgType, 23)                   \
+  F(groundRange, 24)                  \
+  F(airRange, 25)                     \
+  F(playerId, 26)                     \
+  F(resources, 27)                    \
+  F(buildType, 28)                    \
+  F(techType, 29)                     \
+  F(upgradeType, 30)                  \
+  F(remainingBuildTrainTime, 31)      \
+  F(remainingUpgradeResearchTime, 32) \
+  F(spellCD, 33)                      \
+  F(associatedUnit, 34)               \
+  F(associatedCount, 35)              \
+  F(command.frame, 36)                \
+  F(command.type, 37)                 \
+  F(command.targetId, 38)             \
+  F(command.targetX, 39)              \
+  F(command.targetY, 40)              \
+  F(command.extra, 41)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \

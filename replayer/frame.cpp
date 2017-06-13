@@ -201,7 +201,36 @@ void readTail(
   }
 }
 
-std::ostream& replayer::operator<<(std::ostream& out, const Frame& o) {
+// The boolean array better be divisible by 8
+std::vector<uint8_t> bool_to_bytes(std::vector<bool> arr) {
+  std::vector<uint8_t> ret;
+  ret.resize(arr.size() / 8);
+  for (size_t i=0; i<arr.size(); i++) {
+    ret[i / 8] |= arr[i] << (i % 8);
+  }
+  return ret;
+}
+std::vector<bool> bytes_to_bool(std::vector<uint8_t> arr) {
+  std::vector<bool> ret;
+  ret.resize(arr.size() * 8);
+  for (size_t i=0; i<arr.size(); i++) {
+    for (size_t k=0; k<8; k++) {
+      ret[i * 8 + k] = (arr[i] >> k) & 1;
+    }
+  }
+  return ret;
+}
+
+std::ostream& replayer::operator<<(
+    std::ostream& out,
+    const replayer::Frame& o) {
+
+  // Read the creep map
+  out << o.creep_map.size() << " ";
+  auto bytes = bool_to_bytes(o.creep_map);
+  out.write((const char*)bytes.data(), bytes.size());
+
+  // Read the Units
   out << o.units.size() << " ";
   for (auto& v : o.units) {
     out << v.first << " " << v.second.size() << " ";
@@ -210,15 +239,25 @@ std::ostream& replayer::operator<<(std::ostream& out, const Frame& o) {
     }
   }
 
+  // Read the rest of frame
   writeTail(out, o.actions, o.resources, o.bullets);
 
   out << " " << o.reward << " " << o.is_terminal;
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, Frame& o) {
-  int nPlayer;
+std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
+  int nPlayer, creep_map_size;
 
+  // Pack the creep map, since you can't serialize vec<bool>
+  in >> creep_map_size;
+  in.ignore(1); // Ignores next space
+  std::vector<uint8_t> buffer;
+  buffer.resize(creep_map_size / 8);
+  in.read((char*)buffer.data(), creep_map_size / 8);
+  o.creep_map = bytes_to_bool(buffer);
+
+  // Pack the units
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: units nPlayer < 0");
@@ -238,6 +277,7 @@ std::istream& replayer::operator>>(std::istream& in, Frame& o) {
     }
   }
 
+  // Pack everything else
   readTail(in, o.actions, o.resources, o.bullets);
 
   in >> o.reward >> o.is_terminal;
@@ -305,6 +345,11 @@ FrameDiff replayer::frame_diff(Frame* lhs, Frame* rhs) {
   df.bullets = lhs->bullets;
   df.actions = lhs->actions;
   df.resources = lhs->resources;
+  for (size_t i = 0; i < lhs->creep_map.size(); i++) {
+    if (lhs->creep_map[i] != rhs->creep_map[i])
+      df.creep_map.insert(std::make_pair(i, lhs->creep_map[i]));
+  }
+
   for (auto it : lhs->units) { // Iterates across number of players
     df.pids.push_back(it.first);
 
@@ -389,6 +434,10 @@ void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
   f->bullets = df->bullets;
   f->actions = df->actions;
   f->resources = df->resources;
+  f->creep_map = frame->creep_map;
+  for (auto pair : df->creep_map)
+    f->creep_map[pair.first] = pair.second;
+
   for (size_t i = 0; i < df->pids.size(); i++) {
     auto pid = df->pids[i];
     f->units[pid] = std::vector<replayer::Unit>();
@@ -464,10 +513,14 @@ std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& o) {
   for (auto& pid : o.pids)
     out << " " << pid;
   for (auto& player_unit : o.units) {
-    out << " " << player_unit.size() << " ";
+    out << " " << player_unit.size();
     for (auto& du : player_unit)
-      out << du << " ";
+      out << " " << du;
   }
+  out << " " << o.creep_map.size();
+  for (auto pair : o.creep_map)
+    out << " " << pair.first << " " << pair.second;
+  out << " ";
   writeTail(out, o.actions, o.resources, o.bullets);
   out << " " << o.reward << " " << o.is_terminal;
   return out;
@@ -492,7 +545,7 @@ std::ostream& replayer::operator<<(
 }
 
 std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
-  int32_t npids;
+  int32_t npids, n_creep_map_diff;
   in >> npids;
   o.pids.resize(npids);
   o.units.resize(npids);
@@ -503,6 +556,12 @@ std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
     o.units[i].resize(nunits);
     for (size_t k = 0; k < nunits; k++)
       in >> o.units[i][k];
+  }
+  in >> n_creep_map_diff;
+  for (size_t i = 0; i < n_creep_map_diff; i++) {
+    int32_t first, second;
+    in >> first >> second;
+    o.creep_map.insert(std::make_pair(first, second));
   }
   readTail(in, o.actions, o.resources, o.bullets);
   in >> o.reward >> o.is_terminal;
@@ -561,6 +620,9 @@ bool detail::frameEq(Frame* f1, Frame* f2, bool debug) {
     _TEST(_EQ(->resources[i].upgrades_level));
     _TEST(_EQ(->resources[i].techs));
   }
+  _TEST(f1->creep_map.size() == f2->creep_map.size());
+  for (size_t i = 0; i < f1->creep_map.size(); i++)
+    _TEST(_EQ(->creep_map[i]));
   _TEST(_EQ(->actions.size()));
   for (auto elem : f1->actions) {
     _TEST(f2->actions.find(elem.first) != f2->actions.end());

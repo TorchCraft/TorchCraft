@@ -731,6 +731,7 @@ void Controller::onFrame() {
       this->packNeutral(*f);
     }
     this->packBullets(*f);
+    f->creep_map = this->packCreep(*f);
 
     // Combine with last_frame
     if (last_frame == nullptr) {
@@ -863,6 +864,20 @@ void Controller::packResources(replayer::Frame& f, BWAPI::PlayerInterface* p) {
                              upgrades,
                              upgrades_level,
                              techs};
+}
+
+/*
+* Packs the creep map
+*/
+std::vector<bool> Controller::packCreep(replayer::Frame &f)
+{
+  std::vector<bool> v;
+  for (int y = 0; y < BWAPI::Broodwar->mapHeight(); ++y) {
+    for (int x = 0; x < BWAPI::Broodwar->mapWidth(); ++x) {
+      v.push_back(BWAPI::Broodwar->hasCreep(x, y));
+    }
+  }
+  return v;
 }
 
 void Controller::packMyUnits(replayer::Frame& f) {

@@ -11,21 +11,22 @@
 #define TORCHCRAFT_CONTROL_H_
 
 #include <fstream>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include <BWAPI.h>
 
-#include "zmq_server.h"
-#include "frame.h"
 #include "config_manager.h"
+#include "frame.h"
 #include "recorder.h"
+#include "zmq_server.h"
 
 #include "messages_generated.h"
 
 class ZMQ_server;
 namespace replayer = torchcraft::replayer;
 
+// clang-format off
 enum Commands {
   // without args
   QUIT, RESTART, MAP_HACK, REQUEST_IMAGE, EXIT_PROCESS, NOOP,
@@ -35,8 +36,7 @@ enum Commands {
   // arguments are those of BWAPI::UnitCommand
   COMMAND_UNIT, COMMAND_UNIT_PROTECTED,
   // variable arguments
-  COMMAND_USER,
-  COMMAND_OPENBW,
+  COMMAND_USER, COMMAND_OPENBW,
   // BAWPI drawing routins
   DRAW_LINE,          // x1, y1, x2, y2, color
   DRAW_UNIT_LINE,     // uid1, uid2, color
@@ -48,6 +48,7 @@ enum Commands {
   // last command id
   COMMAND_END
 };
+// clang-format on
 
 enum OBWCommands {
   // two args
@@ -70,12 +71,11 @@ enum CommandStatus : int8_t {
   PROTECTED = -6,
   OPENBW_NOT_IN_USE = -7,
   INVALID_PLAYER = -8,
-  OPENBW_UNSUCCESSFUL_COMMAND = -9,  // TODO reconsider whether we want this
+  OPENBW_UNSUCCESSFUL_COMMAND = -9, // TODO reconsider whether we want this
 };
 
-class Controller
-{
-public:
+class Controller {
+ public:
   Controller(bool is_client);
   ~Controller();
   bool connect_server();
@@ -83,8 +83,10 @@ public:
   void loop();
   void initGame();
   void setupHandshake();
-  int8_t handleCommand(int command, const std::vector<int>& args,
-    const std::string& str);
+  int8_t handleCommand(
+      int command,
+      const std::vector<int>& args,
+      const std::string& str);
   int8_t handleUserCommand(int command, const std::vector<int>& args);
   int8_t handleOpenBWCommand(int command, const std::vector<int>& args);
   void setCommandsStatus(std::vector<int8_t> status);
@@ -93,7 +95,7 @@ public:
   int getAttackFrames(int unitID);
   void endGame();
   void gameCleanUp();
-  void clearLastFrame();
+  void resetFrameState();
   void executeDrawCommands();
   void onFrame();
   void packBullets(replayer::Frame& f);
@@ -101,7 +103,10 @@ public:
   void packMyUnits(replayer::Frame& f);
   void packTheirUnits(replayer::Frame& f, BWAPI::PlayerInterface* player);
   void packNeutral(replayer::Frame& f);
-  void addUnit(BWAPI::Unit u, replayer::Frame& frame, BWAPI::PlayerInterface* player);
+  void addUnit(
+      BWAPI::Unit u,
+      replayer::Frame& frame,
+      BWAPI::PlayerInterface* player);
   void handleEvents();
   void launchStarCraft();
   void setMap(const std::string& relative_path);
@@ -113,7 +118,9 @@ public:
   std::unique_ptr<Recorder> recorder_;
   bool micro_mode = false;
   bool is_client;
-private:
+
+ private:
+  void Controller::serializeFrameData(torchcraft::fbs::FrameDataT*);
   std::unique_ptr<ConfigManager> config_;
   bool sent_battle_end_frame = false;
   bool game_ended = false;
@@ -124,7 +131,8 @@ private:
   static const int pixelsPerWalkTile = 8;
   bool logCommands = true;
   int combine_frames = 1;
-  replayer::Frame *last_frame = nullptr;
+  replayer::Frame* last_frame = nullptr;
+  replayer::Frame* prev_sent_frame = nullptr; // For frame diffs
   int battle_frame_count = 0;
   int frameskips = 1;
   bool too_long_play_ = false;

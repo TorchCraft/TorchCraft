@@ -46,8 +46,13 @@ table Commands {
   commands:[Command];
 }
 
+table FrameData {
+ data:[ubyte];
+ is_diff:bool;
+}
+
 table Frame {
-  data:[ubyte];                 // serialized frame data
+  data:FrameData;
   deaths:[int];
   frame_from_bwapi:int;
   battle_frame_count:int;
@@ -67,7 +72,7 @@ table PlayerLeft {
 }
 
 table EndGame {
-  frame:[ubyte];
+  data:FrameData;
   game_won:bool;
 }
 

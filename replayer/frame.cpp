@@ -13,6 +13,9 @@
 
 namespace replayer = torchcraft::replayer;
 
+using Frame = replayer::Frame;
+using FrameDiff = replayer::FrameDiff;
+
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
       << o.max_health << " " << o.shield << " " << o.max_shield << " "
@@ -198,9 +201,7 @@ void readTail(
   }
 }
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Frame& o) {
+std::ostream& replayer::operator<<(std::ostream& out, const Frame& o) {
   out << o.units.size() << " ";
   for (auto& v : o.units) {
     out << v.first << " " << v.second.size() << " ";
@@ -215,7 +216,7 @@ std::ostream& replayer::operator<<(
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
+std::istream& replayer::operator>>(std::istream& in, Frame& o) {
   int nPlayer;
 
   in >> nPlayer;
@@ -293,16 +294,12 @@ namespace detail = replayer::detail;
   F(targetX, 3)            \
   F(targetY, 4)
 
-replayer::FrameDiff replayer::frame_diff(
-    replayer::Frame& lhs,
-    replayer::Frame& rhs) {
+FrameDiff replayer::frame_diff(Frame& lhs, Frame& rhs) {
   return replayer::frame_diff(&lhs, &rhs);
 }
 
-replayer::FrameDiff replayer::frame_diff(
-    replayer::Frame* lhs,
-    replayer::Frame* rhs) {
-  replayer::FrameDiff df;
+FrameDiff replayer::frame_diff(Frame* lhs, Frame* rhs) {
+  FrameDiff df;
   df.reward = lhs->reward;
   df.is_terminal = lhs->is_terminal;
   df.bullets = lhs->bullets;
@@ -380,8 +377,13 @@ replayer::FrameDiff replayer::frame_diff(
   return df;
 }
 
-replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
-  auto f = new replayer::Frame();
+Frame* detail::add(Frame* frame, FrameDiff* df) {
+  auto f = new Frame();
+  detail::add(f, frame, df);
+  return f;
+}
+
+void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
   f->reward = df->reward;
   f->is_terminal = df->is_terminal;
   f->bullets = df->bullets;
@@ -439,37 +441,25 @@ replayer::Frame* detail::add(replayer::Frame* frame, replayer::FrameDiff* df) {
       }
     }
   }
-
-  return f;
 }
 
-replayer::Frame* replayer::frame_undiff(
-    replayer::FrameDiff& lhs,
-    replayer::Frame& rhs) {
-  return detail::add(&rhs, &lhs);
-}
-
-replayer::Frame* replayer::frame_undiff(
-    replayer::Frame& lhs,
-    replayer::FrameDiff& rhs) {
-  return detail::add(&lhs, &rhs);
-}
-
-replayer::Frame* replayer::frame_undiff(
-    replayer::FrameDiff* lhs,
-    replayer::Frame* rhs) {
+Frame* replayer::frame_undiff(FrameDiff* lhs, Frame* rhs) {
   return detail::add(rhs, lhs);
 }
 
-replayer::Frame* replayer::frame_undiff(
-    replayer::Frame* lhs,
-    replayer::FrameDiff* rhs) {
+Frame* replayer::frame_undiff(Frame* lhs, FrameDiff* rhs) {
   return detail::add(lhs, rhs);
 }
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::FrameDiff& o) {
+void replayer::frame_undiff(Frame* frame, FrameDiff* lhs, Frame* rhs) {
+  return detail::add(frame, rhs, lhs);
+}
+
+void replayer::frame_undiff(Frame* frame, Frame* lhs, FrameDiff* rhs) {
+  return detail::add(frame, lhs, rhs);
+}
+
+std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& o) {
   out << o.pids.size();
   for (auto& pid : o.pids)
     out << " " << pid;
@@ -552,7 +542,7 @@ std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
 #define _TEST(COND) _TESTMSG(COND, "(" STRINGIFY(COND) ") not satisfied")
 #define _EQV(VAR, CODE) (f1##VAR) CODE == (f2##VAR)CODE
 #define _EQ(CODE) (f1) CODE == (f2)CODE
-bool detail::frameEq(replayer::Frame* f1, replayer::Frame* f2, bool debug) {
+bool detail::frameEq(Frame* f1, Frame* f2, bool debug) {
   _TEST(_EQ(->reward));
   _TEST(_EQ(->is_terminal));
   _TEST(_EQ(->bullets.size()));

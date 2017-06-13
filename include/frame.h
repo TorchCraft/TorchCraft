@@ -342,8 +342,7 @@ class Frame : public RefCounted {
     is_terminal = o->is_terminal;
   }
 
-  Frame(Frame&& o)
-      : RefCounted() {
+  Frame(Frame&& o) : RefCounted() {
     swap(*this, o);
   }
 
@@ -467,6 +466,7 @@ class UnitDiff {
 };
 
 Frame* add(Frame* frame, FrameDiff* diff);
+void add(Frame* res, Frame* frame, FrameDiff* diff);
 
 inline bool orderUnitByiD(const Unit& a, const Unit& b) {
   return (a.id < b.id);
@@ -490,12 +490,12 @@ class FrameDiff {
 
 // These diffing functions will order the IDs of units in each frame, and thus
 // is not const.
-FrameDiff frame_diff(Frame& lhs, Frame& rhs);
-FrameDiff frame_diff(Frame* lhs, Frame* rhs);
-Frame* frame_undiff(FrameDiff& lhs, Frame& rhs);
-Frame* frame_undiff(Frame& lhs, FrameDiff& rhs);
-Frame* frame_undiff(FrameDiff* lhs, Frame* rhs);
-Frame* frame_undiff(Frame* lhs, FrameDiff* rhs);
+FrameDiff frame_diff(Frame&, Frame&);
+FrameDiff frame_diff(Frame*, Frame*);
+Frame* frame_undiff(FrameDiff*, Frame*);
+Frame* frame_undiff(Frame*, FrameDiff*);
+void frame_undiff(Frame*, FrameDiff*, Frame*);
+void frame_undiff(Frame*, Frame*, FrameDiff*);
 
 std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
 std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);

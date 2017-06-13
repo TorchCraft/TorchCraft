@@ -844,15 +844,15 @@ void Controller::packResources(replayer::Frame &f, BWAPI::PlayerInterface* p)
   uint64_t upgrades_level = 0;
   const auto NUMBER_OF_LVLABLE_UPGRADES = 15;
   for (auto up : BWAPI::UpgradeTypes::allUpgradeTypes()) {
-    upgrades |= p->getUpgradeLevel(up) > 0 ? up.getID() : 0;
+    upgrades |= p->getUpgradeLevel(up) > 0 ? 1 << up.getID() : 0;
     if (p->getUpgradeLevel(up) == 2)
-      upgrades_level |= up.getID();
+      upgrades_level |= 1 << up.getID();
     else if (p->getUpgradeLevel(up) == 3)
-      upgrades_level |= up.getID() + NUMBER_OF_LVLABLE_UPGRADES;
+      upgrades_level |= 1 << (up.getID() + NUMBER_OF_LVLABLE_UPGRADES);
   }
   uint64_t techs = 0;
   for (auto tt : BWAPI::TechTypes::allTechTypes()) {
-    techs |= p->hasResearched(tt) ? tt.getID() : 0;
+    techs |= p->hasResearched(tt) ? 1 << tt.getID() : 0;
   }
 
   f.resources[p->getID()] = {

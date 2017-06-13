@@ -87,8 +87,7 @@ struct Unit {
   int32_t remainingUpgradeResearchTime;
   int32_t spellCD;
   int32_t associatedUnit; // addOn, nydusExit, transport, hatchery
-  int32_t associatedCount; // spiderMines, scarabs, interceptors
-  int32_t hasNuke;
+  int32_t associatedCount; // spiderMines, scarabs, interceptors, nuke
 
   enum Flags : uint64_t {
     // clang-format off

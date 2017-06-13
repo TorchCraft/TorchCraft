@@ -36,6 +36,11 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.velocityX << " " << o.velocityY;
   out << " " << o.playerId;
   out << " " << o.resources;
+  out << " " << o.buildType << " " << o.techType << " " << o.upgradeType;
+  out << " " << o.remainingBuildTrainTime;
+  out << " " << o.remainingUpgradeResearchTime;
+  out << " " << o.spellCD;
+  out << " " << o.associatedUnit << " " << o.associatedCount;
   return out;
 }
 
@@ -65,6 +70,11 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> o.velocityX >> o.velocityY;
   in >> o.playerId;
   in >> o.resources;
+
+  in >> o.buildType >> o.techType >> o.upgradeType;
+  in >> o.remainingBuildTrainTime >> o.remainingUpgradeResearchTime;
+  in >> o.spellCD >> o.associatedUnit >> o.associatedCount;
+
   return in;
 }
 

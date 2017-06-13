@@ -436,8 +436,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.remainingUpgradeResearchTime = getInt(L, "remainingUpgradeResearchTime");
       unit.spellCD = getInt(L, "spellCD");
       unit.associatedUnit = getInt(L, "associatedUnit"); // addOn, nydusExit, transport, hatchery
-      unit.associatedCount = getInt(L, "associatedCount"); // spiderMines, scarabs, interceptors
-      unit.hasNuke = getInt(L, "hasNuke");
+      unit.associatedCount = getInt(L, "associatedCount"); // spiderMines, scarabs, interceptors, nuke
 
       // orders
       getField(L, "orders");

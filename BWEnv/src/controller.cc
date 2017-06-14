@@ -731,7 +731,7 @@ void Controller::onFrame() {
       this->packNeutral(*f);
     }
     this->packBullets(*f);
-    f->creep_map = this->packCreep(*f);
+    this->packCreep(*f);
 
     // Combine with last_frame
     if (last_frame == nullptr) {
@@ -869,15 +869,16 @@ void Controller::packResources(replayer::Frame& f, BWAPI::PlayerInterface* p) {
 /*
 * Packs the creep map
 */
-std::vector<bool> Controller::packCreep(replayer::Frame &f)
+void Controller::packCreep(replayer::Frame& f)
 {
-  std::vector<bool> v;
-  for (int y = 0; y < BWAPI::Broodwar->mapHeight(); ++y) {
-    for (int x = 0; x < BWAPI::Broodwar->mapWidth(); ++x) {
-      v.push_back(BWAPI::Broodwar->hasCreep(x, y));
+  auto height = BWAPI::Broodwar->mapHeight();
+  auto width = BWAPI::Broodwar->mapWidth();
+  f.creep_map.resize(height * width / 8);
+  for (int y = 0, i = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x, ++i) {
+      f.creep_map[i / 8] |= BWAPI::Broodwar->hasCreep(x, y) << (i % 8);
     }
   }
-  return v;
 }
 
 void Controller::packMyUnits(replayer::Frame& f) {

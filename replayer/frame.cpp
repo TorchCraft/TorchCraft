@@ -225,12 +225,11 @@ std::ostream& replayer::operator<<(
     std::ostream& out,
     const replayer::Frame& o) {
 
-  // Read the creep map
+  // Writes the creep map
   out << o.creep_map.size() << " ";
-  auto bytes = bool_to_bytes(o.creep_map);
-  out.write((const char*)bytes.data(), bytes.size());
+  out.write((const char*)o.creep_map.data(), o.creep_map.size());
 
-  // Read the Units
+  // Writes the Units
   out << o.units.size() << " ";
   for (auto& v : o.units) {
     out << v.first << " " << v.second.size() << " ";
@@ -239,7 +238,7 @@ std::ostream& replayer::operator<<(
     }
   }
 
-  // Read the rest of frame
+  // Writes the rest of frame
   writeTail(out, o.actions, o.resources, o.bullets);
 
   out << " " << o.reward << " " << o.is_terminal;
@@ -249,15 +248,13 @@ std::ostream& replayer::operator<<(
 std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   int nPlayer, creep_map_size;
 
-  // Pack the creep map, since you can't serialize vec<bool>
+  // Read the creep map
   in >> creep_map_size;
   in.ignore(1); // Ignores next space
-  std::vector<uint8_t> buffer;
-  buffer.resize(creep_map_size / 8);
-  in.read((char*)buffer.data(), creep_map_size / 8);
-  o.creep_map = bytes_to_bool(buffer);
+  o.creep_map.resize(creep_map_size);
+  in.read((char*)o.creep_map.data(), creep_map_size);
 
-  // Pack the units
+  // Read the units
   in >> nPlayer;
   if (nPlayer < 0)
     throw std::runtime_error("Corrupted replay: units nPlayer < 0");
@@ -277,7 +274,7 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
     }
   }
 
-  // Pack everything else
+  // Read everything else
   readTail(in, o.actions, o.resources, o.bullets);
 
   in >> o.reward >> o.is_terminal;

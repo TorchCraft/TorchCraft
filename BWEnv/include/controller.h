@@ -99,7 +99,7 @@ class Controller {
   void executeDrawCommands();
   void onFrame();
   void packBullets(replayer::Frame& f);
-  std::vector<bool> packCreep(replayer::Frame& f);
+  void packCreep(replayer::Frame& f);
   void packResources(replayer::Frame& f, BWAPI::PlayerInterface* player);
   void packMyUnits(replayer::Frame& f);
   void packTheirUnits(replayer::Frame& f, BWAPI::PlayerInterface* player);

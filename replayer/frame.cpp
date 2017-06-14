@@ -229,6 +229,8 @@ std::ostream& replayer::operator<<(
   out << o.creep_map.size() << " ";
   out.write((const char*)o.creep_map.data(), o.creep_map.size());
 
+  out << o.height << " " << o.width << " ";
+
   // Writes the Units
   out << o.units.size() << " ";
   for (auto& v : o.units) {
@@ -253,6 +255,8 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   in.ignore(1); // Ignores next space
   o.creep_map.resize(creep_map_size);
   in.read((char*)o.creep_map.data(), creep_map_size);
+
+  in >> o.height >> o.width;
 
   // Read the units
   in >> nPlayer;
@@ -431,6 +435,8 @@ void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
   f->bullets = df->bullets;
   f->actions = df->actions;
   f->resources = df->resources;
+  f->height = frame->height;
+  f->width = frame->width;
   f->creep_map = frame->creep_map;
   for (auto pair : df->creep_map)
     f->creep_map[pair.first] = pair.second;
@@ -601,6 +607,8 @@ std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
 bool detail::frameEq(Frame* f1, Frame* f2, bool debug) {
   _TEST(_EQ(->reward));
   _TEST(_EQ(->is_terminal));
+  _TEST(_EQ(->height));
+  _TEST(_EQ(->width));
   _TEST(_EQ(->bullets.size()));
   for (size_t i = 0; i < f1->bullets.size(); i++) {
     _TEST(_EQ(->bullets[i].type));

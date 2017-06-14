@@ -650,6 +650,8 @@ void pushFrame(lua_State* L, const Frame& res) {
   lua_newtable(L);
   setInt(L, "reward", res.reward);
   setBool(L, "is_terminal", res.is_terminal);
+  setInt(L, "height", res.height);
+  setInt(L, "width", res.width);
 
   // actions is a table {[playerid] = {{cmd, arg1, ...}, ...}, ...}
   lua_pushstring(L, "actions");
@@ -744,6 +746,14 @@ extern "C" int frameGetNumUnits(lua_State* L) {
     n = f->units[luaL_checkint(L, 2)].size();
   }
   lua_pushnumber(L, (lua_Number)n);
+  return 1;
+}
+
+extern "C" int frameGetCreepAt(lua_State* L) {
+  Frame* f = checkFrame(L);
+  uint32_t y = luaL_checkint(L, 2);
+  uint32_t x = luaL_checkint(L, 3);
+  lua_pushboolean(L, f->getCreepAt(y - 1, x - 1));
   return 1;
 }
 

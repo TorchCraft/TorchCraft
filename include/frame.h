@@ -80,9 +80,7 @@ struct Unit {
 
   int32_t resources;
 
-  int32_t buildType;
-  int32_t techType;
-  int32_t upgradeType;
+  int32_t buildTechUpgradeType;
   int32_t remainingBuildTrainTime;
   int32_t remainingUpgradeResearchTime;
   int32_t spellCD;

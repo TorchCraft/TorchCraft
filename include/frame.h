@@ -148,25 +148,6 @@ struct Unit {
 std::ostream& operator<<(std::ostream& out, const Unit& o);
 std::istream& operator>>(std::istream& in, Unit& o);
 
-/*
-    Terran_Infantry_Armor = 0,
-    Terran_Vehicle_Plating = 1,
-    Terran_Ship_Plating = 2,
-    Terran_Infantry_Weapons = 7,
-    Terran_Vehicle_Weapons = 8,
-    Terran_Ship_Weapons = 9,
-    Zerg_Carapace = 3,
-    Zerg_Flyer_Carapace = 4,
-    Protoss_Ground_Armor = 5,
-    Protoss_Air_Armor = 6,
-    Zerg_Melee_Attacks = 10,
-    Zerg_Missile_Attacks = 11,
-    Zerg_Flyer_Attacks = 12,
-    Protoss_Ground_Weapons = 13,
-    Protoss_Air_Weapons = 14,
-    Protoss_Plasma_Shields = 15,
-*/
-
 struct Resources {
   int32_t ore;
   int32_t gas;

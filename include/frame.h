@@ -494,8 +494,8 @@ FrameDiff frame_diff(Frame&, Frame&);
 FrameDiff frame_diff(Frame*, Frame*);
 Frame* frame_undiff(FrameDiff*, Frame*);
 Frame* frame_undiff(Frame*, FrameDiff*);
-void frame_undiff(Frame*, FrameDiff*, Frame*);
-void frame_undiff(Frame*, Frame*, FrameDiff*);
+void frame_undiff(Frame* result, FrameDiff*, Frame*);
+void frame_undiff(Frame* result, Frame*, FrameDiff*);
 
 std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
 std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);

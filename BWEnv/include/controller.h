@@ -120,7 +120,7 @@ class Controller {
   bool is_client;
 
  private:
-  void Controller::serializeFrameData(torchcraft::fbs::FrameDataT*);
+  void serializeFrameData(torchcraft::fbs::FrameDataT*);
   std::unique_ptr<ConfigManager> config_;
   bool sent_battle_end_frame = false;
   bool game_ended = false;

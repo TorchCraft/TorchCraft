@@ -206,20 +206,20 @@ std::vector<std::string> State::update(
   return upd;
 }
 
-void update_frame(State* state, const torchcraft::fbs::FrameData* fd) {
+void State::update_frame(const torchcraft::fbs::FrameData* fd) {
   if (fd->is_diff()) {
     std::istringstream ss(std::string(fd->data()->begin(), fd->data()->end()));
     replayer::FrameDiff diff;
     ss >> diff;
-    replayer::frame_undiff(state->frame, state->frame, &diff);
+    replayer::frame_undiff(this->frame, this->frame, &diff);
 
     std::ostringstream out; // Redo the frame string since it's a diff
-    out << *state->frame;
-    state->frame_string.assign(out.str());
+    out << *this->frame;
+    this->frame_string.assign(out.str());
   } else {
-    state->frame_string.assign(fd->data()->begin(), fd->data()->end());
-    std::istringstream ss(state->frame_string);
-    ss >> *state->frame;
+    this->frame_string.assign(fd->data()->begin(), fd->data()->end());
+    std::istringstream ss(this->frame_string);
+    ss >> *this->frame;
   }
 }
 
@@ -227,7 +227,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
   std::vector<std::string> upd;
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DATA)) {
-    update_frame(this, frame->data());
+    this->update_frame(frame->data());
     upd.emplace_back("frame_string");
     upd.emplace_back("frame");
   }
@@ -290,7 +290,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
 
   if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
-    update_frame(this, end->data());
+    this->update_frame(end->data());
     upd.emplace_back("frame_string");
     upd.emplace_back("frame");
   }

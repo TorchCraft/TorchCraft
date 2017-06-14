@@ -208,14 +208,11 @@ std::vector<std::string> State::update(
 
 void State::update_frame(const torchcraft::fbs::FrameData* fd) {
   if (fd->is_diff()) {
+    this->frame_string = "";
     std::istringstream ss(std::string(fd->data()->begin(), fd->data()->end()));
     replayer::FrameDiff diff;
     ss >> diff;
     replayer::frame_undiff(this->frame, this->frame, &diff);
-
-    std::ostringstream out; // Redo the frame string since it's a diff
-    out << *this->frame;
-    this->frame_string.assign(out.str());
   } else {
     this->frame_string.assign(fd->data()->begin(), fd->data()->end());
     std::istringstream ss(this->frame_string);

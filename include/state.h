@@ -137,6 +137,21 @@ class State : public RefCounted {
       std::vector<std::string>& upd,
       const std::set<BW::UnitType>& considered);
 
+  int getUpgradeLevel(BW::UpgradeType ut) {
+    if (!(frame->resources[player_id].upgrades & (1ll << ut))) return 0;
+    const auto NB_LVLABLE_UPGRADES = 16;
+    if (ut >= 2*NB_LVLABLE_UPGRADES) return 1;
+    uint64_t lvls = frame->resources[player_id].upgrades_level;
+    if (lvls & (1ll << ut)) return 2;
+    if (lvls & (1ll << (ut + NB_LVLABLE_UPGRADES))) return 3;
+    return 1;
+  }
+
+  bool hasResearched(BW::TechType tt) {
+    if (frame->resources[player_id].techs & (1ll << tt)) return true;
+    return false;
+  }
+
  private:
   bool setRawImage(const torchcraft::fbs::Frame* frame);
   void postUpdate(std::vector<std::string>& upd);

@@ -36,7 +36,7 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
   out << o.velocityX << " " << o.velocityY;
   out << " " << o.playerId;
   out << " " << o.resources;
-  out << " " << o.buildType << " " << o.techType << " " << o.upgradeType;
+  out << " " << o.buildTechUpgradeType;
   out << " " << o.remainingBuildTrainTime;
   out << " " << o.remainingUpgradeResearchTime;
   out << " " << o.spellCD;
@@ -71,7 +71,7 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
   in >> o.playerId;
   in >> o.resources;
 
-  in >> o.buildType >> o.techType >> o.upgradeType;
+  in >> o.buildTechUpgradeType;
   in >> o.remainingBuildTrainTime >> o.remainingUpgradeResearchTime;
   in >> o.spellCD >> o.associatedUnit >> o.associatedCount;
 
@@ -273,20 +273,18 @@ namespace detail = replayer::detail;
   F(airRange, 25)                     \
   F(playerId, 26)                     \
   F(resources, 27)                    \
-  F(buildType, 28)                    \
-  F(techType, 29)                     \
-  F(upgradeType, 30)                  \
-  F(remainingBuildTrainTime, 31)      \
-  F(remainingUpgradeResearchTime, 32) \
-  F(spellCD, 33)                      \
-  F(associatedUnit, 34)               \
-  F(associatedCount, 35)              \
-  F(command.frame, 36)                \
-  F(command.type, 37)                 \
-  F(command.targetId, 38)             \
-  F(command.targetX, 39)              \
-  F(command.targetY, 40)              \
-  F(command.extra, 41)
+  F(buildTechUpgradeType, 28)                    \
+  F(remainingBuildTrainTime, 29)      \
+  F(remainingUpgradeResearchTime, 30) \
+  F(spellCD, 31)                      \
+  F(associatedUnit, 32)               \
+  F(associatedCount, 33)              \
+  F(command.frame, 34)                \
+  F(command.type, 35)                 \
+  F(command.targetId, 36)             \
+  F(command.targetX, 37)              \
+  F(command.targetY, 38)              \
+  F(command.extra, 39)
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \

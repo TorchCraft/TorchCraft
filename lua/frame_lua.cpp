@@ -429,9 +429,7 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.airRange = getInt(L, "awrange");
       unit.resources = getInt(L, "resource");
 
-      unit.buildType = getInt(L, "buildType");
-      unit.techType = getInt(L, "techType");
-      unit.upgradeType = getInt(L, "upgradeType");
+      unit.buildTechUpgradeType = getInt(L, "buildTechUpgradeType");
       unit.remainingBuildTrainTime = getInt(L, "remainingBuildTrainTime");
       unit.remainingUpgradeResearchTime = getInt(L, "remainingUpgradeResearchTime");
       unit.spellCD = getInt(L, "spellCD");

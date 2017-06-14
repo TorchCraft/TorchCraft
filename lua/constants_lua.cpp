@@ -312,6 +312,8 @@ void registerConstants(lua_State* L, int index) {
   lua_setfield(L, -2, "orders");
   pushTable<BW::TechType>(L);
   lua_setfield(L, -2, "techtypes");
+  pushTable<BW::UpgradeType>(L);
+  lua_setfield(L, -2, "upgradetypes");
   pushTable<BW::UnitType>(L);
   lua_setfield(L, -2, "unittypes");
   pushTable<BW::BulletType>(L);

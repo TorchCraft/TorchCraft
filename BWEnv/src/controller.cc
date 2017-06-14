@@ -714,7 +714,7 @@ void Controller::onFrame() {
 
   // Save frame state
   if (!battle_ended || !this->sent_battle_end_frame) {
-    replayer::Frame *f = new replayer::Frame();
+    replayer::Frame* f = new replayer::Frame();
     f->height = BWAPI::Broodwar->mapHeight() * 4;
     f->width = BWAPI::Broodwar->mapWidth() * 4;
 
@@ -868,11 +868,10 @@ void Controller::packResources(replayer::Frame& f, BWAPI::PlayerInterface* p) {
                              techs};
 }
 
-/*
-* Packs the creep map
-*/
-void Controller::packCreep(replayer::Frame& f)
-{
+/**
+ * Packs the creep map
+ */
+void Controller::packCreep(replayer::Frame& f) {
   auto height = f.height / 4;
   auto width = f.width / 4;
   f.creep_map.resize(height * width / 8); // Only store build tiles

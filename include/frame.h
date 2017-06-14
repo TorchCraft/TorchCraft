@@ -314,7 +314,7 @@ class Frame : public RefCounted {
   std::unordered_map<int32_t, std::vector<Action>> actions;
   std::unordered_map<int32_t, Resources> resources;
   std::vector<Bullet> bullets;
-  std::vector<uint8_t> creep_map;  // Do not access directly
+  std::vector<uint8_t> creep_map; // Do not access directly
   uint32_t width, height;
   int reward;
   int is_terminal;

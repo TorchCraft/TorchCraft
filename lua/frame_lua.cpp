@@ -400,15 +400,11 @@ void toFrame(lua_State* L, int id, Frame& res) {
       unit.flags = getFlags(L, "flags", flagNames);
       if (getBool(L, "idle") != bool(unit.flags & Unit::Flags::Idle)) {
         luaL_error(
-            L,
-            "inconsistent values for 'idle' in unit.flags for %d",
-            unit.id);
+            L, "inconsistent values for 'idle' in unit.flags for %d", unit.id);
       }
       if (getBool(L, "detected") != bool(unit.flags & Unit::Flags::Detected)) {
         luaL_error(
-            L,
-            "inconsistent values for 'detected' unit.flags for %d",
-            unit.id);
+            L, "inconsistent values for 'detected' unit.flags for %d", unit.id);
       }
       unit.visible = getInt(L, "visible");
       unit.type = getInt(L, "type");

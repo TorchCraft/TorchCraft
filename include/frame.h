@@ -314,6 +314,8 @@ class Frame : public RefCounted {
   std::unordered_map<int32_t, std::vector<Action>> actions;
   std::unordered_map<int32_t, Resources> resources;
   std::vector<Bullet> bullets;
+  std::vector<uint8_t> creep_map; // Do not access directly
+  uint32_t width, height;
   int reward;
   int is_terminal;
 
@@ -327,7 +329,10 @@ class Frame : public RefCounted {
         units(o.units),
         actions(o.actions),
         resources(o.resources),
-        bullets(o.bullets) {
+        bullets(o.bullets),
+        creep_map(o.creep_map),
+        width(o.width),
+        height(o.height) {
     reward = o.reward;
     is_terminal = o.is_terminal;
   }
@@ -337,7 +342,10 @@ class Frame : public RefCounted {
         units(o->units),
         actions(o->actions),
         resources(o->resources),
-        bullets(o->bullets) {
+        bullets(o->bullets),
+        creep_map(o->creep_map),
+        width(o->width),
+        height(o->height) {
     reward = o->reward;
     is_terminal = o->is_terminal;
   }
@@ -352,6 +360,9 @@ class Frame : public RefCounted {
     swap(a.actions, b.actions);
     swap(a.resources, b.resources);
     swap(a.bullets, b.bullets);
+    swap(a.creep_map, b.creep_map);
+    swap(a.width, b.width);
+    swap(a.height, b.height);
     swap(a.reward, b.reward);
     swap(a.is_terminal, b.is_terminal);
   }
@@ -366,6 +377,9 @@ class Frame : public RefCounted {
     actions.clear();
     resources.clear();
     bullets.clear();
+    creep_map.clear();
+    width = 0;
+    height = 0;
     reward = 0;
     is_terminal = 0;
   }
@@ -442,8 +456,16 @@ class Frame : public RefCounted {
     // For other stuff, simply keep that of next_frame
     actions = next_frame.actions;
     bullets = next_frame.bullets;
+    creep_map = next_frame.creep_map;
+    width = next_frame.width;
+    height = next_frame.height;
     reward = next_frame.reward;
     is_terminal = next_frame.is_terminal;
+  }
+
+  bool getCreepAt(uint32_t y, uint32_t x) {
+    auto ind = (y / 4) * (this->width / 4) + (x / 4); // Convert to buildtiles
+    return (this->creep_map[ind / 8] >> (ind % 8)) & 1;
   }
 }; // class Frame
 std::ostream& operator<<(std::ostream& out, const Frame& o);
@@ -484,6 +506,8 @@ class FrameDiff {
   std::unordered_map<int32_t, std::vector<Action>> actions;
   std::unordered_map<int32_t, Resources> resources;
   std::vector<Bullet> bullets;
+  std::unordered_map<uint32_t, uint32_t> creep_map;
+  // Width and height never changes, so we don't diff them
   int reward;
   int is_terminal;
 };

@@ -46,10 +46,12 @@ game:setMap(map)
 print('Dumping '..map.map_name)
 
 local is_ok, err = false, nil
-while not tc.state.game_ended do
+local n = 0
+while not tc.state.game_ended and n < 5000 do
   is_ok, err = pcall(function () return tc:receive() end)
   if not is_ok then break end
   game:push(tc.state.frame)
+  n = n + 1
 end
 
 print("Game ended....")
@@ -68,6 +70,8 @@ tc:close()
 
 
 local savedRep = replayer.loadReplayer(savePath)
+
+-- Checks the static map data
 walkmap, heightmap, buildmap, startloc = savedRep:getMap()
 
 function checkMap(ret, correct, desc, outname)
@@ -88,6 +92,7 @@ checkMap(walkmap, map.walkable_data, "Walkability", "/tmp/walkmap.pgm")
 checkMap(heightmap, map.ground_height_data, "Ground Height", "/tmp/heightmap.pgm")
 checkMap(buildmap, map.buildable_data, "Buildability", "/tmp/buildmap.pgm")
 
+-- Start locations may be scrambled...
 if #startloc ~= #map.start_locations then
   print("Not the same number of start locations, replayer is bugged")
 end
@@ -106,6 +111,8 @@ for _, p in ipairs(startloc) do
     return
   end
 end
+
+-- Checks that each frame is reproduced faithfully
 local first = game:getFrame(1)
 for i=1, game:getNumFrames() do
   local f1 = game:getFrame(i)
@@ -123,4 +130,25 @@ for i=1, game:getNumFrames() do
     end
   end
 end
+
+-- Write out some creep maps
+function write_creep_map(framenum, outname)
+  local f = savedRep:getFrame(framenum)
+  local ft = f:toTable()
+  local mf = io.open(outname, 'w')
+  local max = 1
+    mf:write("P2 " .. walkmap:size(2) .. " " .. walkmap:size(1) .. " " .. max .. "\n")
+    for y = 1, ft.height do
+      for x = 1, ft.width do
+        mf:write((f:getCreepAt(y, x) and 1 or 0) .. " ")
+      end
+      mf:write('\n')
+    end
+end
+write_creep_map(1, "/tmp/creep_map0.pgm")
+write_creep_map(999, "/tmp/creep_map1.pgm")
+write_creep_map(1999, "/tmp/creep_map2.pgm")
+write_creep_map(2999, "/tmp/creep_map3.pgm")
+write_creep_map(3999, "/tmp/creep_map4.pgm")
+write_creep_map(4999, "/tmp/creep_map5.pgm")
 print("Saving succeeded!")

@@ -29,22 +29,34 @@ namespace replayer = torchcraft::replayer;
 // clang-format off
 enum Commands {
   // without args
-  QUIT, RESTART, MAP_HACK, REQUEST_IMAGE, EXIT_PROCESS, NOOP,
+  QUIT,
+  RESTART,
+  MAP_HACK,
+  REQUEST_IMAGE,
+  EXIT_PROCESS,
+  NOOP,
   // one arg
-  SET_SPEED, SET_LOG, SET_GUI, SET_FRAMESKIP, SET_CMD_OPTIM,
-  SET_COMBINE_FRAMES, SET_MAP, SET_MULTI,
+  SET_SPEED,
+  SET_LOG,
+  SET_GUI,
+  SET_FRAMESKIP,
+  SET_CMD_OPTIM,
+  SET_COMBINE_FRAMES,
+  SET_MAP,
+  SET_MULTI,
   // arguments are those of BWAPI::UnitCommand
-  COMMAND_UNIT, COMMAND_UNIT_PROTECTED,
+  COMMAND_UNIT,
+  COMMAND_UNIT_PROTECTED,
   // variable arguments
   COMMAND_USER, COMMAND_OPENBW,
   // BAWPI drawing routins
-  DRAW_LINE,          // x1, y1, x2, y2, color
-  DRAW_UNIT_LINE,     // uid1, uid2, color
+  DRAW_LINE, // x1, y1, x2, y2, color
+  DRAW_UNIT_LINE, // uid1, uid2, color
   DRAW_UNIT_POS_LINE, // uid. x2, y2, color
-  DRAW_CIRCLE,        // x, y, radius, color
-  DRAW_UNIT_CIRCLE,   // uid, radius, color
-  DRAW_TEXT,          // x, y + text
-  DRAW_TEXT_SCREEN,   // x, y + text
+  DRAW_CIRCLE, // x, y, radius, color
+  DRAW_UNIT_CIRCLE, // uid, radius, color
+  DRAW_TEXT, // x, y + text
+  DRAW_TEXT_SCREEN, // x, y + text
   // last command id
   COMMAND_END
 };
@@ -99,6 +111,7 @@ class Controller {
   void executeDrawCommands();
   void onFrame();
   void packBullets(replayer::Frame& f);
+  void packCreep(replayer::Frame& f);
   void packResources(replayer::Frame& f, BWAPI::PlayerInterface* player);
   void packMyUnits(replayer::Frame& f);
   void packTheirUnits(replayer::Frame& f, BWAPI::PlayerInterface* player);

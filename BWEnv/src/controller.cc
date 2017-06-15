@@ -715,6 +715,8 @@ void Controller::onFrame() {
   // Save frame state
   if (!battle_ended || !this->sent_battle_end_frame) {
     replayer::Frame* f = new replayer::Frame();
+    f->height = BWAPI::Broodwar->mapHeight() * 4;
+    f->width = BWAPI::Broodwar->mapWidth() * 4;
 
     if (BWAPI::Broodwar->isReplay()) {
       for (auto player : BWAPI::Broodwar->getPlayers()) {
@@ -731,6 +733,7 @@ void Controller::onFrame() {
       this->packNeutral(*f);
     }
     this->packBullets(*f);
+    this->packCreep(*f);
 
     // Combine with last_frame
     if (last_frame == nullptr) {
@@ -863,6 +866,20 @@ void Controller::packResources(replayer::Frame& f, BWAPI::PlayerInterface* p) {
                              upgrades,
                              upgrades_level,
                              techs};
+}
+
+/**
+ * Packs the creep map
+ */
+void Controller::packCreep(replayer::Frame& f) {
+  auto height = f.height / 4;
+  auto width = f.width / 4;
+  f.creep_map.resize(height * width / 8); // Only store build tiles
+  for (int y = 0, i = 0; y < height; ++y) {
+    for (int x = 0; x < width; ++x, ++i) {
+      f.creep_map[i / 8] |= BWAPI::Broodwar->hasCreep(x, y) << (i % 8);
+    }
+  }
 }
 
 void Controller::packMyUnits(replayer::Frame& f) {

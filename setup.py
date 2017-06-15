@@ -5,9 +5,46 @@ from glob import glob
 from itertools import chain
 from subprocess import check_output, CalledProcessError
 import sys
-import setuptools
+import distutils.unixccompiler
 
 __version__ = '1.3.1beta'
+
+###############################################################################
+# Monkey-patch setuptools to compile in parallel (copied from pytorch)
+###############################################################################
+original_link = distutils.unixccompiler.UnixCCompiler.link
+
+
+def parallelCCompile(self, sources, output_dir=None, macros=None,
+                     include_dirs=None, debug=0, extra_preargs=None,
+                     extra_postargs=None, depends=None):
+    # those lines are copied from distutils.ccompiler.CCompiler directly
+    macros, objects, extra_postargs, pp_opts, build = self._setup_compile(
+        output_dir, macros, include_dirs, sources, depends, extra_postargs)
+    cc_args = self._get_cc_args(pp_opts, debug, extra_preargs)
+
+    # compile using a thread pool
+    import multiprocessing.pool
+
+    def _single_compile(obj):
+        src, ext = build[obj]
+        self._compile(obj, src, ext, cc_args, extra_postargs, pp_opts)
+    num_jobs = multiprocessing.cpu_count()
+    multiprocessing.pool.ThreadPool(num_jobs).map(_single_compile, objects)
+
+    return objects
+
+
+def patched_link(self, *args, **kwargs):
+    _cxx = self.compiler_cxx
+    self.compiler_cxx = None
+    result = original_link(self, *args, **kwargs)
+    self.compiler_cxx = _cxx
+    return result
+
+
+distutils.ccompiler.CCompiler.compile = parallelCCompile
+distutils.unixccompiler.UnixCCompiler.link = patched_link
 
 
 class get_pybind_include(object):

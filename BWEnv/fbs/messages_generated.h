@@ -23,6 +23,9 @@ struct HandshakeServerT;
 struct Commands;
 struct CommandsT;
 
+struct FrameData;
+struct FrameDataT;
+
 struct Frame;
 struct FrameT;
 
@@ -722,9 +725,91 @@ inline flatbuffers::Offset<Commands> CreateCommandsDirect(
 
 flatbuffers::Offset<Commands> CreateCommands(flatbuffers::FlatBufferBuilder &_fbb, const CommandsT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
+struct FrameDataT : public flatbuffers::NativeTable {
+  typedef FrameData TableType;
+  std::vector<uint8_t> data;
+  bool is_diff;
+  FrameDataT()
+      : is_diff(false) {
+  }
+};
+
+struct FrameData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef FrameDataT NativeTableType;
+  enum {
+    VT_DATA = 4,
+    VT_IS_DIFF = 6
+  };
+  const flatbuffers::Vector<uint8_t> *data() const {
+    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
+  }
+  flatbuffers::Vector<uint8_t> *mutable_data() {
+    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_DATA);
+  }
+  bool is_diff() const {
+    return GetField<uint8_t>(VT_IS_DIFF, 0) != 0;
+  }
+  bool mutate_is_diff(bool _is_diff) {
+    return SetField(VT_IS_DIFF, static_cast<uint8_t>(_is_diff));
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_DATA) &&
+           verifier.Verify(data()) &&
+           VerifyField<uint8_t>(verifier, VT_IS_DIFF) &&
+           verifier.EndTable();
+  }
+  FrameDataT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(FrameDataT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<FrameData> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct FrameDataBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
+    fbb_.AddOffset(FrameData::VT_DATA, data);
+  }
+  void add_is_diff(bool is_diff) {
+    fbb_.AddElement<uint8_t>(FrameData::VT_IS_DIFF, static_cast<uint8_t>(is_diff), 0);
+  }
+  FrameDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  FrameDataBuilder &operator=(const FrameDataBuilder &);
+  flatbuffers::Offset<FrameData> Finish() {
+    const auto end = fbb_.EndTable(start_, 2);
+    auto o = flatbuffers::Offset<FrameData>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<FrameData> CreateFrameData(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0,
+    bool is_diff = false) {
+  FrameDataBuilder builder_(_fbb);
+  builder_.add_data(data);
+  builder_.add_is_diff(is_diff);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<FrameData> CreateFrameDataDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<uint8_t> *data = nullptr,
+    bool is_diff = false) {
+  return torchcraft::fbs::CreateFrameData(
+      _fbb,
+      data ? _fbb.CreateVector<uint8_t>(*data) : 0,
+      is_diff);
+}
+
+flatbuffers::Offset<FrameData> CreateFrameData(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
 struct FrameT : public flatbuffers::NativeTable {
   typedef Frame TableType;
-  std::vector<uint8_t> data;
+  std::unique_ptr<FrameDataT> data;
   std::vector<int32_t> deaths;
   int32_t frame_from_bwapi;
   int32_t battle_frame_count;
@@ -756,11 +841,11 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_IMG_DATA = 22,
     VT_IMG_SIZE = 24
   };
-  const flatbuffers::Vector<uint8_t> *data() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
+  const FrameData *data() const {
+    return GetPointer<const FrameData *>(VT_DATA);
   }
-  flatbuffers::Vector<uint8_t> *mutable_data() {
-    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_DATA);
+  FrameData *mutable_data() {
+    return GetPointer<FrameData *>(VT_DATA);
   }
   const flatbuffers::Vector<int32_t> *deaths() const {
     return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_DEATHS);
@@ -825,7 +910,7 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_DATA) &&
-           verifier.Verify(data()) &&
+           verifier.VerifyTable(data()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_DEATHS) &&
            verifier.Verify(deaths()) &&
            VerifyField<int32_t>(verifier, VT_FRAME_FROM_BWAPI) &&
@@ -851,7 +936,7 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct FrameBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
+  void add_data(flatbuffers::Offset<FrameData> data) {
     fbb_.AddOffset(Frame::VT_DATA, data);
   }
   void add_deaths(flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths) {
@@ -898,7 +983,7 @@ struct FrameBuilder {
 
 inline flatbuffers::Offset<Frame> CreateFrame(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0,
+    flatbuffers::Offset<FrameData> data = 0,
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths = 0,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
@@ -926,7 +1011,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
 
 inline flatbuffers::Offset<Frame> CreateFrameDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<uint8_t> *data = nullptr,
+    flatbuffers::Offset<FrameData> data = 0,
     const std::vector<int32_t> *deaths = nullptr,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
@@ -939,7 +1024,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
     const Vec2 *img_size = 0) {
   return torchcraft::fbs::CreateFrame(
       _fbb,
-      data ? _fbb.CreateVector<uint8_t>(*data) : 0,
+      data,
       deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0,
       frame_from_bwapi,
       battle_frame_count,
@@ -1021,7 +1106,7 @@ flatbuffers::Offset<PlayerLeft> CreatePlayerLeft(flatbuffers::FlatBufferBuilder 
 
 struct EndGameT : public flatbuffers::NativeTable {
   typedef EndGame TableType;
-  std::vector<uint8_t> frame;
+  std::unique_ptr<FrameDataT> data;
   bool game_won;
   EndGameT()
       : game_won(false) {
@@ -1031,14 +1116,14 @@ struct EndGameT : public flatbuffers::NativeTable {
 struct EndGame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef EndGameT NativeTableType;
   enum {
-    VT_FRAME = 4,
+    VT_DATA = 4,
     VT_GAME_WON = 6
   };
-  const flatbuffers::Vector<uint8_t> *frame() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_FRAME);
+  const FrameData *data() const {
+    return GetPointer<const FrameData *>(VT_DATA);
   }
-  flatbuffers::Vector<uint8_t> *mutable_frame() {
-    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_FRAME);
+  FrameData *mutable_data() {
+    return GetPointer<FrameData *>(VT_DATA);
   }
   bool game_won() const {
     return GetField<uint8_t>(VT_GAME_WON, 0) != 0;
@@ -1048,8 +1133,8 @@ struct EndGame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_FRAME) &&
-           verifier.Verify(frame()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_DATA) &&
+           verifier.VerifyTable(data()) &&
            VerifyField<uint8_t>(verifier, VT_GAME_WON) &&
            verifier.EndTable();
   }
@@ -1061,8 +1146,8 @@ struct EndGame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct EndGameBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_frame(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> frame) {
-    fbb_.AddOffset(EndGame::VT_FRAME, frame);
+  void add_data(flatbuffers::Offset<FrameData> data) {
+    fbb_.AddOffset(EndGame::VT_DATA, data);
   }
   void add_game_won(bool game_won) {
     fbb_.AddElement<uint8_t>(EndGame::VT_GAME_WON, static_cast<uint8_t>(game_won), 0);
@@ -1081,22 +1166,12 @@ struct EndGameBuilder {
 
 inline flatbuffers::Offset<EndGame> CreateEndGame(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> frame = 0,
+    flatbuffers::Offset<FrameData> data = 0,
     bool game_won = false) {
   EndGameBuilder builder_(_fbb);
-  builder_.add_frame(frame);
+  builder_.add_data(data);
   builder_.add_game_won(game_won);
   return builder_.Finish();
-}
-
-inline flatbuffers::Offset<EndGame> CreateEndGameDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<uint8_t> *frame = nullptr,
-    bool game_won = false) {
-  return torchcraft::fbs::CreateEndGame(
-      _fbb,
-      frame ? _fbb.CreateVector<uint8_t>(*frame) : 0,
-      game_won);
 }
 
 flatbuffers::Offset<EndGame> CreateEndGame(flatbuffers::FlatBufferBuilder &_fbb, const EndGameT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -1411,6 +1486,34 @@ inline flatbuffers::Offset<Commands> CreateCommands(flatbuffers::FlatBufferBuild
       _commands);
 }
 
+inline FrameDataT *FrameData::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new FrameDataT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void FrameData::UnPackTo(FrameDataT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = data(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->data.push_back(_e->Get(_i)); } };
+  { auto _e = is_diff(); _o->is_diff = _e; };
+}
+
+inline flatbuffers::Offset<FrameData> FrameData::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateFrameData(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<FrameData> CreateFrameData(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  auto _data = _o->data.size() ? _fbb.CreateVector(_o->data) : 0;
+  auto _is_diff = _o->is_diff;
+  return torchcraft::fbs::CreateFrameData(
+      _fbb,
+      _data,
+      _is_diff);
+}
+
 inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new FrameT();
   UnPackTo(_o, _resolver);
@@ -1420,7 +1523,7 @@ inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *_resolver) 
 inline void Frame::UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
-  { auto _e = data(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->data.push_back(_e->Get(_i)); } };
+  { auto _e = data(); if (_e) _o->data = std::unique_ptr<FrameDataT>(_e->UnPack(_resolver)); };
   { auto _e = deaths(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->deaths.push_back(_e->Get(_i)); } };
   { auto _e = frame_from_bwapi(); _o->frame_from_bwapi = _e; };
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
@@ -1440,7 +1543,7 @@ inline flatbuffers::Offset<Frame> Frame::Pack(flatbuffers::FlatBufferBuilder &_f
 inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
-  auto _data = _o->data.size() ? _fbb.CreateVector(_o->data) : 0;
+  auto _data = _o->data ? CreateFrameData(_fbb, _o->data.get(), _rehasher) : 0;
   auto _deaths = _o->deaths.size() ? _fbb.CreateVector(_o->deaths) : 0;
   auto _frame_from_bwapi = _o->frame_from_bwapi;
   auto _battle_frame_count = _o->battle_frame_count;
@@ -1500,7 +1603,7 @@ inline EndGameT *EndGame::UnPack(const flatbuffers::resolver_function_t *_resolv
 inline void EndGame::UnPackTo(EndGameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
-  { auto _e = frame(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->frame.push_back(_e->Get(_i)); } };
+  { auto _e = data(); if (_e) _o->data = std::unique_ptr<FrameDataT>(_e->UnPack(_resolver)); };
   { auto _e = game_won(); _o->game_won = _e; };
 }
 
@@ -1511,11 +1614,11 @@ inline flatbuffers::Offset<EndGame> EndGame::Pack(flatbuffers::FlatBufferBuilder
 inline flatbuffers::Offset<EndGame> CreateEndGame(flatbuffers::FlatBufferBuilder &_fbb, const EndGameT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
-  auto _frame = _o->frame.size() ? _fbb.CreateVector(_o->frame) : 0;
+  auto _data = _o->data ? CreateFrameData(_fbb, _o->data.get(), _rehasher) : 0;
   auto _game_won = _o->game_won;
   return torchcraft::fbs::CreateEndGame(
       _fbb,
-      _frame,
+      _data,
       _game_won);
 }
 

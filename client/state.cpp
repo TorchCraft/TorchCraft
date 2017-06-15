@@ -10,6 +10,7 @@
 #include "state.h"
 
 #include "BWEnv/fbs/messages_generated.h"
+#include "replayer.h"
 
 namespace torchcraft {
 
@@ -22,45 +23,42 @@ State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
 }
 
 State::State(const State& other)
-  : RefCounted(),
-    lag_frames(other.lag_frames),
-    map_size{other.map_size[0], other.map_size[1]},
-    ground_height_data(other.ground_height_data),
-    walkable_data(other.walkable_data),
-    buildable_data(other.buildable_data),
-    map_name(other.map_name),
-    start_locations(other.start_locations),
-    player_id(other.player_id),
-    neutral_id(other.neutral_id),
-    replay(other.replay),
-    frame(new Frame(other.frame)),
-    // frame_string(other.frame_string)  // save some cycles
-    deaths(other.deaths),
-    frame_from_bwapi(other.frame_from_bwapi),
-    battle_frame_count(other.battle_frame_count),
-    game_ended(other.game_ended),
-    game_won(other.game_won),
-    battle_just_ended(other.battle_just_ended),
-    battle_won(other.battle_won),
-    waiting_for_restart(other.waiting_for_restart),
-    last_battle_ended(other.last_battle_ended),
-    img_mode(other.img_mode),
-    screen_position{other.screen_position[0], other.screen_position[1]},
-    visibility(other.visibility),
-    visibility_size{other.visibility_size[0], other.visibility_size[1]},
-    image(other.image),
-    image_size{other.image_size[0], other.image_size[1]},
-    aliveUnits(other.aliveUnits),
-    aliveUnitsConsidered(other.aliveUnitsConsidered),
-    units(other.units),
-    numUpdates(other.numUpdates),
-    microBattles_(other.microBattles_),
-    onlyConsiderTypes_(other.onlyConsiderTypes_) {
-}
+    : RefCounted(),
+      lag_frames(other.lag_frames),
+      map_size{other.map_size[0], other.map_size[1]},
+      ground_height_data(other.ground_height_data),
+      walkable_data(other.walkable_data),
+      buildable_data(other.buildable_data),
+      map_name(other.map_name),
+      start_locations(other.start_locations),
+      player_id(other.player_id),
+      neutral_id(other.neutral_id),
+      replay(other.replay),
+      frame(new Frame(other.frame)),
+      // frame_string(other.frame_string)  // save some cycles
+      deaths(other.deaths),
+      frame_from_bwapi(other.frame_from_bwapi),
+      battle_frame_count(other.battle_frame_count),
+      game_ended(other.game_ended),
+      game_won(other.game_won),
+      battle_just_ended(other.battle_just_ended),
+      battle_won(other.battle_won),
+      waiting_for_restart(other.waiting_for_restart),
+      last_battle_ended(other.last_battle_ended),
+      img_mode(other.img_mode),
+      screen_position{other.screen_position[0], other.screen_position[1]},
+      visibility(other.visibility),
+      visibility_size{other.visibility_size[0], other.visibility_size[1]},
+      image(other.image),
+      image_size{other.image_size[0], other.image_size[1]},
+      aliveUnits(other.aliveUnits),
+      aliveUnitsConsidered(other.aliveUnitsConsidered),
+      units(other.units),
+      numUpdates(other.numUpdates),
+      microBattles_(other.microBattles_),
+      onlyConsiderTypes_(other.onlyConsiderTypes_) {}
 
-State::State(State&& other)
-  : RefCounted(),
-    frame(nullptr) {
+State::State(State&& other) : RefCounted(), frame(nullptr) {
   swap(*this, other);
 }
 
@@ -160,11 +158,12 @@ std::vector<std::string> State::update(
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_GROUND_HEIGHT_DATA)) {
     ground_height_data.assign(
-        handshake->ground_height_data()->begin(), handshake->ground_height_data()->end());
+        handshake->ground_height_data()->begin(),
+        handshake->ground_height_data()->end());
     upd.emplace_back("ground_height_data");
   }
   if (flatbuffers::IsFieldPresent(
-        handshake, torchcraft::fbs::HandshakeServer::VT_WALKABLE_DATA)) {
+          handshake, torchcraft::fbs::HandshakeServer::VT_WALKABLE_DATA)) {
     walkable_data.assign(
         handshake->walkable_data()->begin(), handshake->walkable_data()->end());
     upd.emplace_back("walkable_data");
@@ -172,11 +171,12 @@ std::vector<std::string> State::update(
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
     buildable_data.assign(
-        handshake->buildable_data()->begin(), handshake->buildable_data()->end());
+        handshake->buildable_data()->begin(),
+        handshake->buildable_data()->end());
     upd.emplace_back("buildable_data");
   }
   if (flatbuffers::IsFieldPresent(
-        handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
+          handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
     map_size[0] = handshake->map_size()->x();
     map_size[1] = handshake->map_size()->y();
   }
@@ -206,13 +206,25 @@ std::vector<std::string> State::update(
   return upd;
 }
 
+void State::update_frame(const torchcraft::fbs::FrameData* fd) {
+  if (fd->is_diff()) {
+    this->frame_string = "";
+    std::istringstream ss(std::string(fd->data()->begin(), fd->data()->end()));
+    replayer::FrameDiff diff;
+    ss >> diff;
+    replayer::frame_undiff(this->frame, this->frame, &diff);
+  } else {
+    this->frame_string.assign(fd->data()->begin(), fd->data()->end());
+    std::istringstream ss(this->frame_string);
+    ss >> *this->frame;
+  }
+}
+
 std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
   std::vector<std::string> upd;
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DATA)) {
-    frame_string.assign(frame->data()->begin(), frame->data()->end());
-    std::istringstream ss(frame_string);
-    ss >> *this->frame;
+    this->update_frame(frame->data());
     upd.emplace_back("frame_string");
     upd.emplace_back("frame");
   }
@@ -274,10 +286,8 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
 std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
 
-  if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_FRAME)) {
-    frame_string.assign(end->frame()->begin(), end->frame()->end());
-    std::istringstream ss(frame_string);
-    ss >> *frame;
+  if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
+    this->update_frame(end->data());
     upd.emplace_back("frame_string");
     upd.emplace_back("frame");
   }

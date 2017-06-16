@@ -72,7 +72,7 @@ while total_battles < 40:
             if battles_game >= 10:
                 actions = [
                     [tcc.set_map, maps[nrestarts % len(maps)], 0],
-                    [tcc.restart],
+                    [tcc.quit],
                 ]
                 print(maps[nrestarts % len(maps)])
         elif state.waiting_for_restart:

@@ -206,7 +206,8 @@ std::vector<std::string> State::update(
   return upd;
 }
 
-void State::update_frame(const torchcraft::fbs::FrameData* fd) {
+bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
+  if (fd->data() == nullptr) return false;
   if (fd->is_diff()) {
     this->frame_string = "";
     std::istringstream ss(std::string(fd->data()->begin(), fd->data()->end()));
@@ -218,15 +219,17 @@ void State::update_frame(const torchcraft::fbs::FrameData* fd) {
     std::istringstream ss(this->frame_string);
     ss >> *this->frame;
   }
+  return true;
 }
 
 std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
   std::vector<std::string> upd;
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DATA)) {
-    this->update_frame(frame->data());
-    upd.emplace_back("frame_string");
-    upd.emplace_back("frame");
+    if (this->update_frame(frame->data())) {
+      upd.emplace_back("frame_string");
+      upd.emplace_back("frame");
+    }
   }
 
   deaths.clear();
@@ -287,9 +290,10 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
 
   if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
-    this->update_frame(end->data());
-    upd.emplace_back("frame_string");
-    upd.emplace_back("frame");
+    if (this->update_frame(end->data())) {
+      upd.emplace_back("frame_string");
+      upd.emplace_back("frame");
+    }
   }
 
   game_ended = true;

@@ -157,7 +157,7 @@ class State : public RefCounted {
   bool setRawImage(const torchcraft::fbs::Frame* frame);
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
-  void update_frame(const torchcraft::fbs::FrameData* fd);
+  bool update_frame(const torchcraft::fbs::FrameData* fd);
 
   bool microBattles_;
   std::set<BW::UnitType> onlyConsiderTypes_;

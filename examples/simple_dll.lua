@@ -121,7 +121,7 @@ while total_battles < 40 do
             if battles_game >= 10 then
                 actions = {
                     tc.command(tc.set_map, maps[(nrestarts % #maps) + 1]),
-                    tc.command(tc.restart),
+                    tc.command(tc.quit),
                 }
             end
         elseif tc.state.waiting_for_restart then

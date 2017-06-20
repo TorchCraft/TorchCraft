@@ -8,7 +8,6 @@
 
 -- attacks the closest units, th simple_dll.lua [-t $hostname] [-p $port]
 local DEBUG = 0 -- can take values 0, 1, 2 (from no output to most verbose)
-local MICRO_MODE = true -- set to false for normal maps!
 require 'torch'
 torch.setdefaulttensortype('torch.FloatTensor')
 require 'sys'
@@ -18,6 +17,7 @@ Baselines for Starcraft
     -t,--hostname       (default "")    Give hostname / ip pointing to VM
     -h,--heuristic      (default "wc")  Check comments for list of heuristics
     -p,--port           (default 11111) Port for torchcraft. Do 0 to grab vm from cloud
+    -m,--micro                          Whether we're doing a micro map, defaults to false
 ]]
 
 local skip_frames = 7
@@ -57,7 +57,7 @@ local total_battles = 0
 local maps = {'Maps/BroodWar/micro/dragoons_zealots.scm',
               'Maps/BroodWar/micro/m5v5_c_far.scm'}
 
-tc.micro_battles = MICRO_MODE
+tc.micro_battles = args.micro
 local nrestarts = -1
 
 while total_battles < 40 do

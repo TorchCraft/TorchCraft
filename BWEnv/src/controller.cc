@@ -131,7 +131,7 @@ void Controller::loop() {
       if (exit_process_)
         break;
 
-      if (game_ended || too_long_play_) {
+      if (game_ended) {
         endGame();
         break;
       }
@@ -683,10 +683,6 @@ void Controller::onFrame() {
   } catch (std::exception& e) {
     Utils::bwlog(output_log, "Error drawing client annotations: %s", e.what());
   }
-
-  // Called once every game frame
-  // if more than ~2 hours worth of SC for the game, reboot the game
-  too_long_play_ = Utils::checkTimeInGame();
 
   // check if the Proxy Bot is connected
   if (!this->zmq_server->server_sock_connected) {

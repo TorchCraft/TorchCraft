@@ -12,7 +12,6 @@
 #include <set>
 #include <vector>
 
-#include "BWEnv/fbs/messages_generated.h"
 #include "constants.h"
 #include "frame.h"
 #include "refcount.h"
@@ -23,6 +22,7 @@ namespace fbs {
 struct HandshakeServer;
 struct Frame;
 struct EndGame;
+struct FrameData;
 }
 }
 
@@ -141,7 +141,7 @@ class State : public RefCounted {
   int getUpgradeLevel(BW::UpgradeType ut) {
     if (!(frame->resources[player_id].upgrades & (1ll << ut))) return 0;
     const auto NB_LVLABLE_UPGRADES = 16;
-    if (ut >= 2*NB_LVLABLE_UPGRADES) return 1;
+    if (ut >= NB_LVLABLE_UPGRADES) return 1;
     uint64_t lvls = frame->resources[player_id].upgrades_level;
     if (lvls & (1ll << ut)) return 2;
     if (lvls & (1ll << (ut + NB_LVLABLE_UPGRADES))) return 3;

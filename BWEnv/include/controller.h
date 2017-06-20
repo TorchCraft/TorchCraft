@@ -148,7 +148,6 @@ class Controller {
   replayer::Frame* prev_sent_frame = nullptr; // For frame diffs
   int battle_frame_count = 0;
   int frameskips = 1;
-  bool too_long_play_ = false;
   bool exit_process_ = false;
   bool with_image_ = false;
   std::vector<std::pair<std::vector<int>, std::string>> draw_cmds_;

@@ -57,11 +57,17 @@ void ZMQ_server::connect()
     port++) {
       stringstream url;
       url << "tcp://*:" << port;
-      this->server_sock = zsock_new_rep(url.str().c_str());
-      if (this->server_sock != nullptr) {
+      this->server_sock = zsock_new(ZMQ_REP);
+#ifndef _WIN32
+      zsock_set_ipv6(this->server_sock, 1);
+#endif
+      auto ret = zsock_bind(this->server_sock, "%s", url.str().c_str());
+      if (ret >= 0) {
         this->port = port;
         break;
       }
+      zsock_destroy(&this->server_sock);
+      this->server_sock = nullptr;
     }
   }
   else {
@@ -90,6 +96,7 @@ void ZMQ_server::connect()
   }
 
   this->server_sock_connected = true;
+  std::cout << "TorchCraft server listening on port " << port << std::endl;
 
   zchunk_t *chunk;
   if (zsock_recv(this->server_sock, "c", &chunk) != 0) {

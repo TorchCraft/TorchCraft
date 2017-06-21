@@ -968,12 +968,15 @@ void Controller::addUnit(
     }
   }
   int32_t buildTechUpgradeType = u->getBuildType().getID();
-  if (buildTechUpgradeType == BWAPI::UnitTypes::None.getID())
+  if (buildTechUpgradeType == BWAPI::UnitTypes::None.getID()) {
     buildTechUpgradeType = u->getTech().getID();
-  else if (buildTechUpgradeType == BWAPI::TechTypes::None.getID())
-    buildTechUpgradeType = u->getUpgrade().getID();
-  else if (buildTechUpgradeType == BWAPI::UpgradeTypes::None.getID())
-    buildTechUpgradeType = -1;
+    if (buildTechUpgradeType == BWAPI::TechTypes::None.getID()) {
+      buildTechUpgradeType = u->getUpgrade().getID();
+      if (buildTechUpgradeType == BWAPI::UpgradeTypes::None.getID()) {
+        buildTechUpgradeType = -1;
+      }
+    }
+  }
 
   int32_t associatedUnit = -1;
   if (u->getAddon() != nullptr)

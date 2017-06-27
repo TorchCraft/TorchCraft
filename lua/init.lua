@@ -222,7 +222,7 @@ function torchcraft:_n_attacks(utype, air)
         return 4
     elseif air and utype == self.unittypes.Terran_Goliath then
         return 2
-    elseif air and utype == self.unittypes.Terran_Scout then
+    elseif air and utype == self.unittypes.Protoss_Scout then
         return 2
     else
         return 1

@@ -231,24 +231,24 @@ end
 
 function torchcraft:get_weapon(source, dest)
     local wd = 0
-    local weapontype = -1
+    local dmgtype = -1
     local range = 0
     local air = false
     if self.staticdata.isFlyer[dest.type] then
         wd = source.awattack -- n attacks and dmg multiplier accounted for
-        weapontype = source.awtype
+        dmgtype = source.awdmgtype
         range = source.awrange
         air = true
     else
         wd = source.gwattack -- n attacks and dmg multiplier accounted for
-        weapontype = source.gwtype
+        dmgtype = source.gwdmgtype
         range = source.gwrange
     end
-    return wd, weapontype, range, air
+    return wd, dmgtype, range, air
 end
 
 function torchcraft:compute_dmg(source, dest)
-    local wd, weapontype, _, air = self:get_weapon(source, dest)
+    local wd, dmgtype, _, air = self:get_weapon(source, dest)
     if wd <= 0 then
         return 0, 0, 0
     end
@@ -262,7 +262,7 @@ function torchcraft:compute_dmg(source, dest)
         shielddmg = dest.shield
         wd = wd - dest.shield
     end
-    local hpdmg = self:dmg_multiplier(weapontype, dest.size)*wd
+    local hpdmg = self:dmg_multiplier(dmgtype, dest.size)*wd
         - self:_n_attacks(source, air) * dest.armor
     return hpdmg + shielddmg, hpdmg, shielddmg
 end

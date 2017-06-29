@@ -904,13 +904,10 @@ void Controller::packTheirUnits(
 
 void Controller::packNeutral(replayer::Frame& f) {
   for (auto& u : BWAPI::Broodwar->getNeutralUnits()) {
-    if (u->getType().isMineralField() ||
-        u->getType() == BWAPI::UnitTypes::Resource_Vespene_Geyser) {
-      addUnit(
-          u,
-          f,
-          BWAPI::Broodwar->neutral()); // TODO: only when the state changes
-    }
+    addUnit(
+        u,
+        f,
+        BWAPI::Broodwar->neutral()); // TODO: only when the state changes
   }
 }
 

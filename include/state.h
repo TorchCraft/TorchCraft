@@ -46,10 +46,10 @@ class State : public RefCounted {
 
   // setup
   int lag_frames; // number of frames from order to execution
-  int map_size[2];  // build tile resolution
-  std::vector<uint8_t> ground_height_data; // 2D. build tile resolution
-  std::vector<uint8_t> walkable_data; // 2D, walk tile resolution (build x 4)
-  std::vector<uint8_t> buildable_data; // 2D, build tile resolution
+  int map_size[2];  // map size in walk tiles
+  std::vector<uint8_t> ground_height_data; // 2D, walk tile resolution
+  std::vector<uint8_t> walkable_data; // 2D, walk tile resolution
+  std::vector<uint8_t> buildable_data; // 2D, walk tile resolution
   std::string map_name; // Name on the current map
   std::vector<Position> start_locations;
   int player_id;

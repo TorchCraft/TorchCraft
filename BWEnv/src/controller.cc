@@ -965,9 +965,6 @@ void Controller::addUnit(
     buildTechUpgradeType = u->getTech().getID();
     if (buildTechUpgradeType == BWAPI::TechTypes::None.getID()) {
       buildTechUpgradeType = u->getUpgrade().getID();
-      if (buildTechUpgradeType == BWAPI::UpgradeTypes::None.getID()) {
-        buildTechUpgradeType = -1;
-      }
     }
   }
 

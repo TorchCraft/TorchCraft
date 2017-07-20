@@ -749,7 +749,7 @@ extern "C" int frameGetCreepAt(lua_State* L) {
   Frame* f = checkFrame(L);
   uint32_t y = luaL_checkint(L, 2);
   uint32_t x = luaL_checkint(L, 3);
-  lua_pushboolean(L, f->getCreepAt(y - 1, x - 1));
+  lua_pushboolean(L, f->getCreepAt(x - 1, y - 1));
   return 1;
 }
 

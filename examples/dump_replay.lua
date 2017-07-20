@@ -140,7 +140,7 @@ function write_creep_map(framenum, outname)
     mf:write("P2 " .. walkmap:size(2) .. " " .. walkmap:size(1) .. " " .. max .. "\n")
     for y = 1, ft.height do
       for x = 1, ft.width do
-        mf:write((f:getCreepAt(y, x) and 1 or 0) .. " ")
+        mf:write((f:getCreepAt(x, y) and 1 or 0) .. " ")
       end
       mf:write('\n')
     end

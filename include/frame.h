@@ -463,7 +463,7 @@ class Frame : public RefCounted {
     is_terminal = next_frame.is_terminal;
   }
 
-  bool getCreepAt(uint32_t y, uint32_t x) {
+  bool getCreepAt(uint32_t x, uint32_t y) {
     auto ind = (y / 4) * (this->width / 4) + (x / 4); // Convert to buildtiles
     return (this->creep_map[ind / 8] >> (ind % 8)) & 1;
   }

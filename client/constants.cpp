@@ -211,7 +211,8 @@ std::vector<Order> commandToOrders(UnitCommandType id) {
       return {Order::PlaceBuilding,
               Order::BuildNydusExit,
               Order::CreateProtossBuilding,
-              Order::ConstructingBuilding};
+              Order::ConstructingBuilding,
+              Order::IncompleteBuilding};
     case UnitCommandType::Right_Click_Unit:
       return {Order::MoveToMinerals,
               Order::MoveToGas,
@@ -260,7 +261,9 @@ std::vector<Order> commandToOrders(UnitCommandType id) {
     case UnitCommandType::Hold_Position:
       return {Order::HoldPosition};
     case UnitCommandType::Morph:
-      return {Order::ZergUnitMorph, Order::ZergBuildingMorph};
+      return {Order::ZergUnitMorph,
+              Order::ZergBuildingMorph,
+              Order::ZergBirth};
     case UnitCommandType::Cancel_Construction:
       return {Order::ResetCollision, Order::Die};
     case UnitCommandType::Gather:

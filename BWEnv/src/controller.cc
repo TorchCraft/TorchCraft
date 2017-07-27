@@ -895,6 +895,8 @@ void Controller::packMyUnits(replayer::Frame& f) {
 void Controller::packTheirUnits(
     replayer::Frame& f,
     BWAPI::PlayerInterface* player) {
+  if (player == nullptr)
+    return;
   for (auto& u : player->getUnits()) {
     if (u->getHitPoints() > 0) {
       addUnit(u, f, player); // TODO: only when the state changes

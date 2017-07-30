@@ -210,8 +210,9 @@ void ZMQ_server::receiveMessage()
           reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
       break;
     case torchcraft::fbs::Any::Commands: {
-    auto status = handleCommands(reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
-      controller->setCommandsStatus(status);
+      auto status = handleCommands(
+          reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
+      controller->setCommandsStatus(std::move(status));
       break;
   }
     default:

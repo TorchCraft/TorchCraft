@@ -49,7 +49,7 @@ enum Commands {
   COMMAND_UNIT_PROTECTED,
   // variable arguments
   COMMAND_USER, COMMAND_OPENBW,
-  // BAWPI drawing routins
+  // BWAPI drawing routines
   DRAW_LINE, // x1, y1, x2, y2, color
   DRAW_UNIT_LINE, // uid1, uid2, color
   DRAW_UNIT_POS_LINE, // uid. x2, y2, color

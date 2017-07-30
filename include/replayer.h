@@ -80,7 +80,7 @@ class Replayer : public RefCounted {
         auto i = u.first;
         if (numUnits.count(i) == 0) {
           numUnits[i] = s;
-        } else if (s > numUnits[i]) {
+        } else if (s > static_cast<size_t>(numUnits[i])) {
           numUnits[i] = s;
         }
       }

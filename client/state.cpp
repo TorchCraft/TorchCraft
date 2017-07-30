@@ -31,6 +31,7 @@ State::State(const State& other)
       buildable_data(other.buildable_data),
       map_name(other.map_name),
       start_locations(other.start_locations),
+      player_races(other.player_races),
       player_id(other.player_id),
       neutral_id(other.neutral_id),
       replay(other.replay),
@@ -83,6 +84,7 @@ void swap(State& a, State& b) {
   swap(a.buildable_data, b.buildable_data);
   swap(a.map_name, b.map_name);
   swap(a.start_locations, b.start_locations);
+  swap(a.player_races, b.player_races);
   swap(a.player_id, b.player_id);
   swap(a.neutral_id, b.neutral_id);
   swap(a.replay, b.replay);
@@ -124,6 +126,7 @@ void State::reset() {
   buildable_data.clear();
   map_name.clear();
   start_locations.clear();
+  player_races.clear();
   frame_string.clear();
   frame->clear();
   deaths.clear();
@@ -193,6 +196,14 @@ std::vector<std::string> State::update(
     }
     upd.emplace_back("start_locations");
   }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_PLAYER_RACES)) {
+    player_races.clear();
+    for (auto pr : *handshake->player_races()) {
+      player_races.emplace_back(pr);
+    }
+    upd.emplace_back("player_races");
+  }
   player_id = handshake->player_id();
   upd.emplace_back("player_id");
   neutral_id = handshake->neutral_id();
@@ -259,8 +270,8 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
           frame, torchcraft::fbs::Frame::VT_VISIBILITY) &&
       flatbuffers::IsFieldPresent(
           frame, torchcraft::fbs::Frame::VT_VISIBILITY_SIZE)) {
-    if (frame->visibility()->size() ==
-        frame->visibility_size()->x() * frame->visibility_size()->y()) {
+    if (frame->visibility()->size() == static_cast<size_t>(
+        frame->visibility_size()->x() * frame->visibility_size()->y())) {
       visibility_size[0] = frame->visibility_size()->x();
       visibility_size[1] = frame->visibility_size()->y();
       visibility.assign(
@@ -306,8 +317,8 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
 }
 
 bool State::setRawImage(const torchcraft::fbs::Frame* frame) {
-  if (frame->img_data()->size() !=
-      frame->img_size()->x() * frame->img_size()->y() * 4) {
+  if (frame->img_data()->size() != static_cast<size_t>(
+      frame->img_size()->x() * frame->img_size()->y() * 4)) {
     image_size[0] = 0;
     image_size[1] = 0;
     image.clear();

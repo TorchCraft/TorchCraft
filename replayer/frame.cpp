@@ -202,7 +202,7 @@ void readTail(
 }
 
 // The boolean array better be divisible by 8
-std::vector<uint8_t> bool_to_bytes(std::vector<bool> arr) {
+std::vector<uint8_t> bool_to_bytes(const std::vector<bool>& arr) {
   std::vector<uint8_t> ret;
   ret.resize(arr.size() / 8);
   for (size_t i = 0; i < arr.size(); i++) {
@@ -210,7 +210,7 @@ std::vector<uint8_t> bool_to_bytes(std::vector<bool> arr) {
   }
   return ret;
 }
-std::vector<bool> bytes_to_bool(std::vector<uint8_t> arr) {
+std::vector<bool> bytes_to_bool(const std::vector<uint8_t>& arr) {
   std::vector<bool> ret;
   ret.resize(arr.size() * 8);
   for (size_t i = 0; i < arr.size(); i++) {
@@ -555,16 +555,16 @@ std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
   in >> npids;
   o.pids.resize(npids);
   o.units.resize(npids);
-  for (size_t i = 0; i < npids; i++)
+  for (size_t i = 0; i < static_cast<size_t>(npids); i++)
     in >> o.pids[i];
-  for (size_t i = 0, nunits = 0; i < npids; i++) {
+  for (size_t i = 0, nunits = 0; i < static_cast<size_t>(npids); i++) {
     in >> nunits;
     o.units[i].resize(nunits);
     for (size_t k = 0; k < nunits; k++)
       in >> o.units[i][k];
   }
   in >> n_creep_map_diff;
-  for (size_t i = 0; i < n_creep_map_diff; i++) {
+  for (size_t i = 0; i < static_cast<size_t>(n_creep_map_diff); i++) {
     int32_t first, second;
     in >> first >> second;
     o.creep_map.insert(std::make_pair(first, second));

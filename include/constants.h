@@ -757,6 +757,21 @@ BETTER_ENUM(
     None = 5)
 
 BETTER_ENUM(
+    Race,
+    int,
+    // corresponds to BWAPI::Races::Enum
+    Zerg = 0,
+    Terran = 1,
+    Protoss = 2,
+    Other = 3,
+    Unused = 4,
+    Select = 5,
+    Random = 6,
+    None = 7,
+    Unknown = 8,
+    MAX)
+
+BETTER_ENUM(
     Color,
     int,
     Black = 0,

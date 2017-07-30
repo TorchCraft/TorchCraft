@@ -97,6 +97,7 @@ std::unique_ptr<tc::Client> makeClient() {
   if (client->state()->replay) {
     throw std::runtime_error("Expected non-replay map");
   }
+  std::cout << "I'm player #" << client->state()->player_id << " and I'm " << tc::BW::Race::_from_integral(client->state()->player_races[client->state()->player_id])._to_string() << '\n';
 
   return client;
 }
@@ -119,16 +120,18 @@ void playGame(std::shared_ptr<tc::Client> cl, int* totalBattles) {
   auto last = std::chrono::system_clock::now();
   while (!cl->state()->game_ended) {
     // Display progress
-    printf("Loop = %5d | ", nloop);
-    printf(
-        "FPS = %5lld | ",
-        CLOCKS_PER_SEC / (std::chrono::system_clock::now() - last).count());
-    printf("WR = %1.3f | ", battlesWon / (battlesGame + 1e-6));
-    printf("#Wins = %4d | ", battlesWon);
-    printf("#Bttls = %4d | ", battlesGame);
-    printf("Tot Bttls = %4d |    ", *totalBattles);
-    printf("\r");
-    std::cout << std::flush;
+    if (!(cl->state()->frame_from_bwapi % 120)) {
+      printf("Loop = %5d | ", nloop);
+      printf(
+          "FPS = %5lld | ",
+          CLOCKS_PER_SEC / (std::chrono::system_clock::now() - last).count());
+      printf("WR = %1.3f | ", battlesWon / (battlesGame + 1e-6));
+      printf("#Wins = %4d | ", battlesWon);
+      printf("#Bttls = %4d | ", battlesGame);
+      printf("Tot Bttls = %4d |    ", *totalBattles);
+      printf("\r");
+      std::cout << std::flush;
+    }
     last = std::chrono::system_clock::now();
 
     std::vector<std::string> updates;

@@ -153,7 +153,7 @@ void Replayer::setMap(
       THTensor_fastSet2d(map.data, y, x, packed);
     }
   }
-  for (int i = 0; i < start_loc_x.size(); i++) {
+  for (size_t i = 0; i < static_cast<size_t>(start_loc_x.size()); i++) {
     auto x = start_loc_x[i];
     auto y = start_loc_y[i];
     auto v = THTensor_fastGet2d(map.data, y, x) | (1 << START_LOC_SHIFT);

@@ -62,6 +62,7 @@ void init_constants(py::module& torchcraft) {
   setEnumDict<BW::WeaponType>(constants, "weapontypes");
   setEnumDict<BW::UnitSize>(constants, "unitsizes");
   setEnumDict<BW::DamageType>(constants, "dmgtypes");
+  setEnumDict<BW::Race>(constants, "races");
   setEnumDict<BW::Color>(constants, "colors");
 
   py::dict produces, producedby;

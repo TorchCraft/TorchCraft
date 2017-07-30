@@ -77,6 +77,7 @@ while total_battles < 40 do
     if DEBUG > 1 then
         print('Received init: ', update)
     end
+    print("I'm ", tc.races[tc.state.player_races[tc.state.player_id]])
     assert(tc.state.replay == false)
 
     -- first message to BWAPI's side is setting up variables

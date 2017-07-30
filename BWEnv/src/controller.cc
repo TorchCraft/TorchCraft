@@ -217,6 +217,17 @@ void Controller::setupHandshake() {
     BWAPI::WalkPosition walkPos(loc);
     handshake.start_locations.emplace_back(walkPos.x, walkPos.y);
   }
+  size_t max_nplayers = BWAPI::Broodwar->getPlayers().size();
+  handshake.player_races.resize(max_nplayers, 8);  // 8 = BWAPI::Races::Unknown
+  for (const auto& p : BWAPI::Broodwar->getPlayers())
+  {
+    if (p->getID() < 0) continue;  // some non-playing players are ID=-1
+    if (p->getID() >= max_nplayers) {  // should not happen
+      std::cout << "ERROR: one player has player ID > max n players" << std::endl;
+      std::cout << p->getID() << std::endl;
+    }
+    handshake.player_races[p->getID()] = p->getRace().getID();
+  }
 
   this->zmq_server->sendHandshake(&handshake);
 

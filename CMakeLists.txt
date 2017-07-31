@@ -29,8 +29,8 @@ IF(APPLE)
        LINK_FLAGS "-undefined dynamic_lookup")
 ENDIF()
 SET_TARGET_PROPERTIES(torchcraft PROPERTIES
-    VERSION   1.3.0
-    SOVERSION 1.3.0)
+    VERSION   1.3.2
+    SOVERSION 1.3.2)
 TARGET_LINK_LIBRARIES(torchcraft TH luaT zmq)
 IF(ZSTD_FOUND)
     # Use the static library since we're using "advanced/experimental" features

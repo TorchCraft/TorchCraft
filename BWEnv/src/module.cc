@@ -24,6 +24,7 @@ void Module::onStart() {
 }
 
 void Module::onEnd(bool isWinner) {
+  this->c_->setIsWinner(isWinner);
   this->c_->endGame();
 }
 

@@ -125,6 +125,7 @@ class Controller {
   void setMap(const std::string& relative_path);
   void setWindowSize(std::pair<int, int> size);
   void setWindowPos(const std::pair<int, int> size);
+  void setIsWinner(bool isWinner);
   std::ofstream output_log;
   std::unique_ptr<ZMQ_server> zmq_server;
   std::vector<int> deaths;

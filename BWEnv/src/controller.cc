@@ -1193,3 +1193,8 @@ void Controller::setWindowPos(const std::pair<int, int> pos) {
   Utils::overwriteConfig(sc_path_, "left", std::to_string(pos.first));
   Utils::overwriteConfig(sc_path_, "top", std::to_string(pos.second));
 }
+
+void Controller::setIsWinner(bool isWinner) {
+  this->is_winner = isWinner;
+}
+

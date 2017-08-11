@@ -8,6 +8,8 @@
  */
 
 #include <stdexcept>
+
+#define WIN32_LEAN_AND_MEAN
 #include <BWAPI.h>
 
 #include "user_actions.h"

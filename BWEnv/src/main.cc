@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#define WIN32_LEAN_AND_MEAN
 #include <iostream>
 
 #include "controller.h"

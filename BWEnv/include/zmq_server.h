@@ -10,6 +10,8 @@
 #ifndef TORCHCRAFT_ZMQ_H_
 #define TORCHCRAFT_ZMQ_H_
 
+#define _WINSOCKAPI_
+#define WIN32_LEAN_AND_MEAN
 #include <czmq.h>
 #include "controller.h"
 #include "messages_generated.h"

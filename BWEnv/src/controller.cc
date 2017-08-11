@@ -8,8 +8,8 @@
  */
 
 #include <thread>
-#define WIN32_LEAN_AND_MEAN
 
+#define WIN32_LEAN_AND_MEAN
 #include <BWAPI/Client.h>
 
 #include "controller.h"

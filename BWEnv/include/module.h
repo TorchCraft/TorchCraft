@@ -10,6 +10,7 @@
 #ifndef TORCHCRAFT_MODULE_H_
 #define TORCHCRAFT_MODULE_H_
 
+#define WIN32_LEAN_AND_MEAN
 #include <BWAPI.h>
 #include "controller.h"
 

@@ -7,6 +7,9 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#define _WINSOCKAPI_
+
+#define WIN32_LEAN_AND_MEAN
 #include <BWAPI.h>
 
 #include "module.h"

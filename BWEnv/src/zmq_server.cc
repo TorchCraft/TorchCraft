@@ -7,11 +7,14 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#define WIN32_LEAN_AND_MEAN
 #include <BWAPI.h>
 #include <BWAPI/Client.h>
+
 #ifdef _WIN32
 #include <winsock2.h>
 #endif
+
 #include "zmq_server.h"
 #include "controller.h"
 #include <utils.h>

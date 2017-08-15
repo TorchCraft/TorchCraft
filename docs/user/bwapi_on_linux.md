@@ -32,8 +32,8 @@ Warning: Chaoslauncher was only tested to work on wine1.6. For most non-ubuntu d
     winetricks -q vcrun2013
     
     # Download latest release of BWAPI at https://github.com/bwapi/bwapi/releases
-    wget https://github.com/bwapi/bwapi/releases/download/v4.1.2/BWAPI_412_Setup.exe
-    wine BWAPI_412_Setup.exe
+    wget https://github.com/bwapi/bwapi/releases/download/v4.2.0/BWAPI_420_Setup.exe
+    wine BWAPI_420_Setup.exe
     # INSTALL THIS TO C:\StarCraft\BWAPI
     
     # Install TorchCraft

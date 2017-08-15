@@ -82,7 +82,7 @@ RUN git clone https://github.com/TorchCraft/TorchCraft
 RUN cd ./TorchCraft; luarocks make *.rockspec
 
 RUN curl -L http://ftp.blizzard.com/pub/broodwar/patches/PC/BW-1161.exe -o /home/torchcraft/BW-1161.exe
-RUN curl -L https://github.com/bwapi/bwapi/releases/download/v4.1.2/BWAPI_412_Setup.exe -o /home/torchcraft/BWAPI_412_Setup.exe
+RUN curl -L https://github.com/bwapi/bwapi/releases/download/v4.2.0/BWAPI_420_Setup.exe -o /home/torchcraft/BWAPI_420_Setup.exe
 
 RUN chown -R torchcraft:torchcraft /root
 RUN chmod -R 777 /root

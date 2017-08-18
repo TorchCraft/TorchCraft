@@ -97,7 +97,13 @@ std::unique_ptr<tc::Client> makeClient() {
   if (client->state()->replay) {
     throw std::runtime_error("Expected non-replay map");
   }
-  std::cout << "I'm player #" << client->state()->player_id << " and I'm " << tc::BW::Race::_from_integral(client->state()->player_races[client->state()->player_id])._to_string() << '\n';
+  std::cout << "I'm player #" << client->state()->player_id << " named "
+            << client->state()->player_names[client->state()->player_id]
+            << " and I'm "
+            << tc::BW::Race::_from_integral(
+                   client->state()->player_races[client->state()->player_id])
+                   ._to_string()
+            << '\n';
 
   return client;
 }

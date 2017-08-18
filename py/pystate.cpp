@@ -25,6 +25,7 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("map_name", &State::map_name)
       .def_readwrite("start_locations", &State::start_locations)
       .def_readwrite("player_races", &State::player_races)
+      .def_readwrite("player_names", &State::player_names)
       .def_readwrite("player_id", &State::player_id)
       .def_readwrite("neutral_id", &State::neutral_id)
       .def_readwrite("replay", &State::replay)

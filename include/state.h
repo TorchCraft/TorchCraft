@@ -10,6 +10,7 @@
 #pragma once
 
 #include <set>
+#include <string>
 #include <vector>
 
 #include "constants.h"
@@ -53,6 +54,7 @@ class State : public RefCounted {
   std::string map_name; // Name on the current map
   std::vector<Position> start_locations;
   std::vector<int32_t> player_races;
+  std::vector<std::string> player_names;
   int player_id;
   int neutral_id;
   bool replay;

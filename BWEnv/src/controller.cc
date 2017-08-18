@@ -219,6 +219,7 @@ void Controller::setupHandshake() {
   }
   size_t max_nplayers = BWAPI::Broodwar->getPlayers().size();
   handshake.player_races.resize(max_nplayers, 8);  // 8 = BWAPI::Races::Unknown
+  handshake.player_names.resize(max_nplayers, "NONAME");
   for (const auto& p : BWAPI::Broodwar->getPlayers())
   {
     if (p->getID() < 0) continue;  // some non-playing players are ID=-1
@@ -227,6 +228,7 @@ void Controller::setupHandshake() {
       std::cout << p->getID() << std::endl;
     }
     handshake.player_races[p->getID()] = p->getRace().getID();
+    handshake.player_names[p->getID()] = p->getName().c_str();
   }
 
   this->zmq_server->sendHandshake(&handshake);

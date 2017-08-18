@@ -51,7 +51,8 @@ while total_battles < 40:
     cl.connect(args.hostname, args.port)
     state = cl.init(micro_battles=True)
     for plid, race in enumerate(state.player_races):
-        print("player {} is {}".format(plid, tc.Constants.races._dict[race]))
+        print("player {} named {} is {}".format(plid, state.player_names[plid],
+            tc.Constants.races._dict[race]))
 
     # Initial setup
     cl.send([

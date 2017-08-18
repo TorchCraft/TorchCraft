@@ -32,6 +32,7 @@ State::State(const State& other)
       map_name(other.map_name),
       start_locations(other.start_locations),
       player_races(other.player_races),
+      player_names(other.player_names),
       player_id(other.player_id),
       neutral_id(other.neutral_id),
       replay(other.replay),
@@ -85,6 +86,7 @@ void swap(State& a, State& b) {
   swap(a.map_name, b.map_name);
   swap(a.start_locations, b.start_locations);
   swap(a.player_races, b.player_races);
+  swap(a.player_names, b.player_names);
   swap(a.player_id, b.player_id);
   swap(a.neutral_id, b.neutral_id);
   swap(a.replay, b.replay);
@@ -127,6 +129,7 @@ void State::reset() {
   map_name.clear();
   start_locations.clear();
   player_races.clear();
+  player_names.clear();
   frame_string.clear();
   frame->clear();
   deaths.clear();
@@ -203,6 +206,14 @@ std::vector<std::string> State::update(
       player_races.emplace_back(pr);
     }
     upd.emplace_back("player_races");
+  }
+  if (flatbuffers::IsFieldPresent(
+          handshake, torchcraft::fbs::HandshakeServer::VT_PLAYER_NAMES)) {
+    player_names.clear();
+    for (auto pr : *handshake->player_names()) {
+      player_names.emplace_back(pr->c_str());
+    }
+    upd.emplace_back("player_names");
   }
   player_id = handshake->player_id();
   upd.emplace_back("player_id");

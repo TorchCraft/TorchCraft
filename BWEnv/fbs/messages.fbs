@@ -41,6 +41,7 @@ table HandshakeServer {
   buildable_data:[ubyte];       // walk tile resolution of buildability
   start_locations:[Vec2];
   player_races:[int];           // playerid -> race enum
+  player_names:[string];
 }
 
 table Commands {

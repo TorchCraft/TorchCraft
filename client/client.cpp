@@ -273,25 +273,25 @@ bool Client::receive(std::vector<std::string>& updates) {
               msg->msg()));
       break;
     // TODO These message types were not explicitly handled in the Lua version
-    case torchcraft::fbs::Any::PlayerLeft:
+    case torchcraft::fbs::Any::PlayerLeft: {
+      auto left =
+          reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(msg->msg())
+              ->player_left();
       std::cerr << "[Warning] Unhandled message from server: "
                 << torchcraft::fbs::EnumNameAny(msg->msg_type())
-                << "(player_left=\""
-                << reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(
-                       msg->msg())
-                       ->player_left()
-                       ->str()
-                << "\")" << std::endl;
+                << "(player_left=\"" << (left ? left->str() : "(null)") << "\")"
+                << std::endl;
       break;
-    case torchcraft::fbs::Any::Error:
+    }
+    case torchcraft::fbs::Any::Error: {
+      auto text = reinterpret_cast<const torchcraft::fbs::Error*>(msg->msg())
+                      ->message();
       std::cerr << "[Warning] Unhandled message from server: "
                 << torchcraft::fbs::EnumNameAny(msg->msg_type())
-                << "(message=\""
-                << reinterpret_cast<const torchcraft::fbs::Error*>(msg->msg())
-                       ->message()
-                       ->str()
-                << "\"" << std::endl;
+                << "(message=\"" << (text ? text->str() : "(null)") << "\""
+                << std::endl;
       break;
+    }
     default:
       error_ = std::string("Error parsing reply: cannot handle message: ") +
           torchcraft::fbs::EnumNameAny(msg->msg_type());

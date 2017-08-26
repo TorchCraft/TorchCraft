@@ -10,7 +10,6 @@
 #include "state.h"
 
 #include "BWEnv/fbs/messages_generated.h"
-#include "replayer.h"
 
 namespace torchcraft {
 

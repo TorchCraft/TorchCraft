@@ -898,10 +898,8 @@ void Controller::packMyUnits(replayer::Frame& f) {
     if (!u->exists())
       continue;
 
-    if (u->getHitPoints() > 0) {
-      addUnit(
-          u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
-    }
+    addUnit(
+        u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
   }
 }
 
@@ -911,9 +909,7 @@ void Controller::packTheirUnits(
   if (player == nullptr)
     return;
   for (auto& u : player->getUnits()) {
-    if (u->getHitPoints() > 0) {
-      addUnit(u, f, player); // TODO: only when the state changes
-    }
+    addUnit(u, f, player); // TODO: only when the state changes
   }
 }
 

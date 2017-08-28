@@ -267,7 +267,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DEATHS)) {
     auto& fd = *frame->deaths();
     deaths.resize(fd.size());
-    for (size_t i = 0; fd.size(); i++) {
+    for (size_t i = 0; i < fd.size(); i++) {
       deaths[i] = fd[i];
     }
     if (!deaths.empty()) {

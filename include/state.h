@@ -24,6 +24,8 @@ struct HandshakeServer;
 struct Frame;
 struct EndGame;
 struct FrameData;
+struct PlayerLeft;
+struct Error;
 }
 }
 
@@ -137,6 +139,8 @@ class State : public RefCounted {
       const torchcraft::fbs::HandshakeServer* handshake);
   std::vector<std::string> update(const torchcraft::fbs::Frame* frame);
   std::vector<std::string> update(const torchcraft::fbs::EndGame* end);
+  std::vector<std::string> update(const torchcraft::fbs::PlayerLeft* left);
+  std::vector<std::string> update(const torchcraft::fbs::Error* error);
   void trackAliveUnits(
       std::vector<std::string>& upd,
       const std::set<BW::UnitType>& considered);
@@ -158,6 +162,7 @@ class State : public RefCounted {
 
  private:
   bool setRawImage(const torchcraft::fbs::Frame* frame);
+  void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
   bool update_frame(const torchcraft::fbs::FrameData* fd);

@@ -228,7 +228,8 @@ std::vector<std::string> State::update(
 }
 
 bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
-  if (fd->data() == nullptr) return false;
+  if (fd->data() == nullptr)
+    return false;
   if (fd->is_diff()) {
     this->frame_string = "";
     std::istringstream ss(std::string(fd->data()->begin(), fd->data()->end()));
@@ -245,6 +246,7 @@ bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
 
 std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
   std::vector<std::string> upd;
+  preUpdate();
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DATA)) {
     if (this->update_frame(frame->data())) {
@@ -253,10 +255,11 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
     }
   }
 
-  deaths.clear();
-  upd.emplace_back("deaths");
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DEATHS)) {
     deaths.assign(frame->deaths()->begin(), frame->deaths()->end());
+    if (!deaths.empty()) {
+      upd.emplace_back("deaths");
+    }
   }
 
   frame_from_bwapi = frame->frame_from_bwapi();
@@ -280,8 +283,9 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
           frame, torchcraft::fbs::Frame::VT_VISIBILITY) &&
       flatbuffers::IsFieldPresent(
           frame, torchcraft::fbs::Frame::VT_VISIBILITY_SIZE)) {
-    if (frame->visibility()->size() == static_cast<size_t>(
-        frame->visibility_size()->x() * frame->visibility_size()->y())) {
+    if (frame->visibility()->size() ==
+        static_cast<size_t>(
+            frame->visibility_size()->x() * frame->visibility_size()->y())) {
       visibility_size[0] = frame->visibility_size()->x();
       visibility_size[1] = frame->visibility_size()->y();
       visibility.assign(
@@ -309,6 +313,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
 
 std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
+  preUpdate();
 
   if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
     if (this->update_frame(end->data())) {
@@ -326,9 +331,21 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   return upd;
 }
 
+std::vector<std::string> State::update(
+    const torchcraft::fbs::PlayerLeft* left) {
+  preUpdate();
+  return std::vector<std::string>();
+}
+
+std::vector<std::string> State::update(const torchcraft::fbs::Error* error) {
+  preUpdate();
+  return std::vector<std::string>();
+}
+
 bool State::setRawImage(const torchcraft::fbs::Frame* frame) {
-  if (frame->img_data()->size() != static_cast<size_t>(
-      frame->img_size()->x() * frame->img_size()->y() * 4)) {
+  if (frame->img_data()->size() !=
+      static_cast<size_t>(
+          frame->img_size()->x() * frame->img_size()->y() * 4)) {
     image_size[0] = 0;
     image_size[1] = 0;
     image.clear();
@@ -352,6 +369,10 @@ bool State::setRawImage(const torchcraft::fbs::Frame* frame) {
   }
 
   return true;
+}
+
+void State::preUpdate() {
+  deaths.clear();
 }
 
 void State::postUpdate(std::vector<std::string>& upd) {

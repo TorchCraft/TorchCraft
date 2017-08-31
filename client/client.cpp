@@ -281,6 +281,8 @@ bool Client::receive(std::vector<std::string>& updates) {
                 << torchcraft::fbs::EnumNameAny(msg->msg_type())
                 << "(player_left=\"" << (left ? left->str() : "(null)") << "\")"
                 << std::endl;
+      updates = state_->update(
+          reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(msg->msg()));
       break;
     }
     case torchcraft::fbs::Any::Error: {
@@ -290,6 +292,8 @@ bool Client::receive(std::vector<std::string>& updates) {
                 << torchcraft::fbs::EnumNameAny(msg->msg_type())
                 << "(message=\"" << (text ? text->str() : "(null)") << "\""
                 << std::endl;
+      updates = state_->update(
+          reinterpret_cast<const torchcraft::fbs::Error*>(msg->msg()));
       break;
     }
     default:

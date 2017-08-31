@@ -21,7 +21,7 @@ class Controller;
 class ZMQ_server
 {
   static const int protocol_version = 22;
-  static const int max_commands = 400; // maximum number of commands per frame
+  static const int max_commands = 2500; // maximum number of commands per frame
   static const int starting_port = 11111;
   static const int max_instances = 1000;
 

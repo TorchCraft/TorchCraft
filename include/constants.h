@@ -417,7 +417,6 @@ BETTER_ENUM(
     Unknow = 62,
     MAX = 63)
 
-// Be sure to update the expanded version below when changing this
 BETTER_ENUM(
     TechType,
     int,

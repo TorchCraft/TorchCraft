@@ -162,22 +162,29 @@ std::vector<std::string> State::update(
   upd.emplace_back("lag_frames");
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_GROUND_HEIGHT_DATA)) {
-    ground_height_data.assign(
-        handshake->ground_height_data()->begin(),
-        handshake->ground_height_data()->end());
+    auto& ghd = *handshake->ground_height_data();
+    ground_height_data.resize(ghd.size());
+    for (size_t i = 0; i < ghd.size(); i++) {
+      ground_height_data[i] = ghd[i];
+    }
     upd.emplace_back("ground_height_data");
   }
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_WALKABLE_DATA)) {
-    walkable_data.assign(
-        handshake->walkable_data()->begin(), handshake->walkable_data()->end());
+    auto& wd = *handshake->walkable_data();
+    walkable_data.resize(wd.size());
+    for (size_t i = 0; i < wd.size(); i++) {
+      walkable_data[i] = wd[i];
+    }
     upd.emplace_back("walkable_data");
   }
   if (flatbuffers::IsFieldPresent(
           handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
-    buildable_data.assign(
-        handshake->buildable_data()->begin(),
-        handshake->buildable_data()->end());
+    auto& bd = *handshake->buildable_data();
+    buildable_data.resize(bd.size());
+    for (size_t i = 0; i < bd.size(); i++) {
+      buildable_data[i] = bd[i];
+    }
     upd.emplace_back("buildable_data");
   }
   if (flatbuffers::IsFieldPresent(
@@ -232,12 +239,14 @@ bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
     return false;
   if (fd->is_diff()) {
     this->frame_string = "";
-    std::istringstream ss(std::string(fd->data()->begin(), fd->data()->end()));
+    std::istringstream ss(std::string(
+        reinterpret_cast<const char*>(fd->data()->data()), fd->data()->size()));
     replayer::FrameDiff diff;
     ss >> diff;
     replayer::frame_undiff(this->frame, this->frame, &diff);
   } else {
-    this->frame_string.assign(fd->data()->begin(), fd->data()->end());
+    this->frame_string = std::string(
+        reinterpret_cast<const char*>(fd->data()->data()), fd->data()->size());
     std::istringstream ss(this->frame_string);
     ss >> *this->frame;
   }
@@ -256,7 +265,11 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
   }
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DEATHS)) {
-    deaths.assign(frame->deaths()->begin(), frame->deaths()->end());
+    auto& fd = *frame->deaths();
+    deaths.resize(fd.size());
+    for (size_t i = 0; i < fd.size(); i++) {
+      deaths[i] = fd[i];
+    }
     if (!deaths.empty()) {
       upd.emplace_back("deaths");
     }
@@ -288,8 +301,11 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
             frame->visibility_size()->x() * frame->visibility_size()->y())) {
       visibility_size[0] = frame->visibility_size()->x();
       visibility_size[1] = frame->visibility_size()->y();
-      visibility.assign(
-          frame->visibility()->begin(), frame->visibility()->end());
+      auto& vb = *frame->visibility();
+      visibility.resize(vb.size());
+      for (size_t i = 0; i < vb.size(); i++) {
+        visibility[i] = vb[i];
+      }
       upd.emplace_back("visibility");
     } else {
       visibility_size[0] = 0;

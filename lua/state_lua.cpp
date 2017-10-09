@@ -47,8 +47,7 @@ const std::set<std::string> stateMembers = {
     "buildable_data",
     "map_name",
     "start_locations",
-    "player_races",
-    "player_names",
+    "player_info",
     "player_id",
     "neutral_id",
     "replay",
@@ -137,19 +136,20 @@ int pushMember(
       lua_setfield(L, -2, "y");
       lua_rawseti(L, -2, n++);
     }
-  } else if (m == "player_races") {
-    lua_createtable(L, 0, s->player_races.size());
-    int n = 0;  // n=0 because player_ids start at 0
-    for (auto pr : s->player_races) {
-      lua_pushinteger(L, pr);
-      lua_rawseti(L, -2, n++);
-    }
-  } else if (m == "player_names") {
-    lua_createtable(L, 0, s->player_names.size());
-    int n = 0;  // n=0 because player_ids start at 0
-    for (auto pr : s->player_names) {
-      lua_pushstring(L, pr.c_str());
-      lua_rawseti(L, -2, n++);
+  } else if (m == "player_info") {
+    lua_createtable(L, s->player_info.size(), 0);
+    for (auto& it : s->player_info) {
+      auto& pinfo = it.second;
+      lua_createtable(L, 4, 0);
+      lua_pushinteger(L, pinfo.id);
+      lua_setfield(L, -2, "id");
+      lua_pushinteger(L, pinfo.race._to_integral());
+      lua_setfield(L, -2, "race");
+      lua_pushstring(L, pinfo.name.c_str());
+      lua_setfield(L, -2, "name");
+      lua_pushboolean(L, pinfo.is_enemy);
+      lua_setfield(L, -2, "is_enemy");
+      lua_rawseti(L, -2, pinfo.id);
     }
   } else if (m == "player_id") {
     lua_pushinteger(L, s->player_id);

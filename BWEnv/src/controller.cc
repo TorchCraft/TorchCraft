@@ -217,18 +217,13 @@ void Controller::setupHandshake() {
     BWAPI::WalkPosition walkPos(loc);
     handshake.start_locations.emplace_back(walkPos.x, walkPos.y);
   }
-  size_t max_nplayers = BWAPI::Broodwar->getPlayers().size();
-  handshake.player_races.resize(max_nplayers, 8);  // 8 = BWAPI::Races::Unknown
-  handshake.player_names.resize(max_nplayers, "NONAME");
-  for (const auto& p : BWAPI::Broodwar->getPlayers())
-  {
-    if (p->getID() < 0) continue;  // some non-playing players are ID=-1
-    if (p->getID() >= max_nplayers) {  // should not happen
-      std::cout << "ERROR: one player has player ID > max n players" << std::endl;
-      std::cout << p->getID() << std::endl;
-    }
-    handshake.player_races[p->getID()] = p->getRace().getID();
-    handshake.player_names[p->getID()] = p->getName().c_str();
+  for (const auto& p : BWAPI::Broodwar->getPlayers()) {
+    handshake.players.emplace_back(
+        std::make_unique<torchcraft::fbs::PlayerT>());
+    handshake.players.back()->id = p->getID();
+    handshake.players.back()->race = p->getRace().getID();
+    handshake.players.back()->name = p->getName().c_str();
+    handshake.players.back()->is_enemy = p->isEnemy(BWAPI::Broodwar->self());
   }
 
   this->zmq_server->sendHandshake(&handshake);

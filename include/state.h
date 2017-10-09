@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -26,8 +27,8 @@ struct EndGame;
 struct FrameData;
 struct PlayerLeft;
 struct Error;
-}
-}
+} // namespace fbs
+} // namespace torchcraft
 
 namespace torchcraft {
 
@@ -47,16 +48,22 @@ class State : public RefCounted {
     Position(int x, int y) : x(x), y(y) {}
   };
 
+  struct PlayerInfo {
+    int id;
+    BW::Race race = BW::Race::Unknown;
+    std::string name;
+    bool is_enemy;
+  };
+
   // setup
   int lag_frames; // number of frames from order to execution
-  int map_size[2];  // map size in walk tiles
+  int map_size[2]; // map size in walk tiles
   std::vector<uint8_t> ground_height_data; // 2D, walk tile resolution
   std::vector<uint8_t> walkable_data; // 2D, walk tile resolution
   std::vector<uint8_t> buildable_data; // 2D, walk tile resolution
   std::string map_name; // Name on the current map
   std::vector<Position> start_locations;
-  std::vector<int32_t> player_races;
-  std::vector<std::string> player_names;
+  std::map<int, PlayerInfo> player_info;
   int player_id;
   int neutral_id;
   bool replay;
@@ -146,17 +153,27 @@ class State : public RefCounted {
       const std::set<BW::UnitType>& considered);
 
   int getUpgradeLevel(BW::UpgradeType ut) {
-    if (!(frame->resources[player_id].upgrades & (1ll << ut))) return 0;
-    const auto NB_LVLABLE_UPGRADES = 16;
-    if (ut >= NB_LVLABLE_UPGRADES) return 1;
+    if (!(frame->resources[player_id].upgrades & (1ll << ut))) {
+      return 0;
+    }
+    auto constexpr NB_LVLABLE_UPGRADES = 16;
+    if (ut >= NB_LVLABLE_UPGRADES) {
+      return 1;
+    }
     uint64_t lvls = frame->resources[player_id].upgrades_level;
-    if (lvls & (1ll << ut)) return 2;
-    if (lvls & (1ll << (ut + NB_LVLABLE_UPGRADES))) return 3;
+    if (lvls & (1ll << ut)) {
+      return 2;
+    }
+    if (lvls & (1ll << (ut + NB_LVLABLE_UPGRADES))) {
+      return 3;
+    }
     return 1;
   }
 
   bool hasResearched(BW::TechType tt) {
-    if (frame->resources[player_id].techs & (1ll << tt)) return true;
+    if (frame->resources[player_id].techs & (1ll << tt)) {
+      return true;
+    }
     return false;
   }
 

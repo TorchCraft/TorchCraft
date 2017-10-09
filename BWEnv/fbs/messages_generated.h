@@ -14,6 +14,9 @@ struct Vec2;
 struct Command;
 struct CommandT;
 
+struct Player;
+struct PlayerT;
+
 struct HandshakeClient;
 struct HandshakeClientT;
 
@@ -294,6 +297,122 @@ inline flatbuffers::Offset<Command> CreateCommandDirect(
 
 flatbuffers::Offset<Command> CreateCommand(flatbuffers::FlatBufferBuilder &_fbb, const CommandT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
+struct PlayerT : public flatbuffers::NativeTable {
+  typedef Player TableType;
+  int32_t id;
+  int32_t race;
+  std::string name;
+  bool is_enemy;
+  PlayerT()
+      : id(0),
+        race(0),
+        is_enemy(false) {
+  }
+};
+
+struct Player FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef PlayerT NativeTableType;
+  enum {
+    VT_ID = 4,
+    VT_RACE = 6,
+    VT_NAME = 8,
+    VT_IS_ENEMY = 10
+  };
+  int32_t id() const {
+    return GetField<int32_t>(VT_ID, 0);
+  }
+  bool mutate_id(int32_t _id) {
+    return SetField(VT_ID, _id);
+  }
+  int32_t race() const {
+    return GetField<int32_t>(VT_RACE, 0);
+  }
+  bool mutate_race(int32_t _race) {
+    return SetField(VT_RACE, _race);
+  }
+  const flatbuffers::String *name() const {
+    return GetPointer<const flatbuffers::String *>(VT_NAME);
+  }
+  flatbuffers::String *mutable_name() {
+    return GetPointer<flatbuffers::String *>(VT_NAME);
+  }
+  bool is_enemy() const {
+    return GetField<uint8_t>(VT_IS_ENEMY, 0) != 0;
+  }
+  bool mutate_is_enemy(bool _is_enemy) {
+    return SetField(VT_IS_ENEMY, static_cast<uint8_t>(_is_enemy));
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyField<int32_t>(verifier, VT_RACE) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_NAME) &&
+           verifier.Verify(name()) &&
+           VerifyField<uint8_t>(verifier, VT_IS_ENEMY) &&
+           verifier.EndTable();
+  }
+  PlayerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(PlayerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Player> Pack(flatbuffers::FlatBufferBuilder &_fbb, const PlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct PlayerBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_id(int32_t id) {
+    fbb_.AddElement<int32_t>(Player::VT_ID, id, 0);
+  }
+  void add_race(int32_t race) {
+    fbb_.AddElement<int32_t>(Player::VT_RACE, race, 0);
+  }
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
+    fbb_.AddOffset(Player::VT_NAME, name);
+  }
+  void add_is_enemy(bool is_enemy) {
+    fbb_.AddElement<uint8_t>(Player::VT_IS_ENEMY, static_cast<uint8_t>(is_enemy), 0);
+  }
+  PlayerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  PlayerBuilder &operator=(const PlayerBuilder &);
+  flatbuffers::Offset<Player> Finish() {
+    const auto end = fbb_.EndTable(start_, 4);
+    auto o = flatbuffers::Offset<Player>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Player> CreatePlayer(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t id = 0,
+    int32_t race = 0,
+    flatbuffers::Offset<flatbuffers::String> name = 0,
+    bool is_enemy = false) {
+  PlayerBuilder builder_(_fbb);
+  builder_.add_name(name);
+  builder_.add_race(race);
+  builder_.add_id(id);
+  builder_.add_is_enemy(is_enemy);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Player> CreatePlayerDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t id = 0,
+    int32_t race = 0,
+    const char *name = nullptr,
+    bool is_enemy = false) {
+  return torchcraft::fbs::CreatePlayer(
+      _fbb,
+      id,
+      race,
+      name ? _fbb.CreateString(name) : 0,
+      is_enemy);
+}
+
+flatbuffers::Offset<Player> CreatePlayer(flatbuffers::FlatBufferBuilder &_fbb, const PlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
 struct HandshakeClientT : public flatbuffers::NativeTable {
   typedef HandshakeClient TableType;
   int32_t protocol;
@@ -438,8 +557,7 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
   int32_t battle_frame_count;
   std::vector<uint8_t> buildable_data;
   std::vector<Vec2> start_locations;
-  std::vector<int32_t> player_races;
-  std::vector<std::string> player_names;
+  std::vector<std::unique_ptr<PlayerT>> players;
   HandshakeServerT()
       : lag_frames(0),
         is_replay(false),
@@ -463,8 +581,7 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_BATTLE_FRAME_COUNT = 20,
     VT_BUILDABLE_DATA = 22,
     VT_START_LOCATIONS = 24,
-    VT_PLAYER_RACES = 26,
-    VT_PLAYER_NAMES = 28
+    VT_PLAYERS = 26
   };
   int32_t lag_frames() const {
     return GetField<int32_t>(VT_LAG_FRAMES, 0);
@@ -532,17 +649,11 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<const Vec2 *> *mutable_start_locations() {
     return GetPointer<flatbuffers::Vector<const Vec2 *> *>(VT_START_LOCATIONS);
   }
-  const flatbuffers::Vector<int32_t> *player_races() const {
-    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_PLAYER_RACES);
+  const flatbuffers::Vector<flatbuffers::Offset<Player>> *players() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Player>> *>(VT_PLAYERS);
   }
-  flatbuffers::Vector<int32_t> *mutable_player_races() {
-    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_PLAYER_RACES);
-  }
-  const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *player_names() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_PLAYER_NAMES);
-  }
-  flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *mutable_player_names() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>> *>(VT_PLAYER_NAMES);
+  flatbuffers::Vector<flatbuffers::Offset<Player>> *mutable_players() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Player>> *>(VT_PLAYERS);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -562,11 +673,9 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(buildable_data()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_START_LOCATIONS) &&
            verifier.Verify(start_locations()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_PLAYER_RACES) &&
-           verifier.Verify(player_races()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_PLAYER_NAMES) &&
-           verifier.Verify(player_names()) &&
-           verifier.VerifyVectorOfStrings(player_names()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_PLAYERS) &&
+           verifier.Verify(players()) &&
+           verifier.VerifyVectorOfTables(players()) &&
            verifier.EndTable();
   }
   HandshakeServerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -610,11 +719,8 @@ struct HandshakeServerBuilder {
   void add_start_locations(flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations) {
     fbb_.AddOffset(HandshakeServer::VT_START_LOCATIONS, start_locations);
   }
-  void add_player_races(flatbuffers::Offset<flatbuffers::Vector<int32_t>> player_races) {
-    fbb_.AddOffset(HandshakeServer::VT_PLAYER_RACES, player_races);
-  }
-  void add_player_names(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> player_names) {
-    fbb_.AddOffset(HandshakeServer::VT_PLAYER_NAMES, player_names);
+  void add_players(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players) {
+    fbb_.AddOffset(HandshakeServer::VT_PLAYERS, players);
   }
   HandshakeServerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -622,7 +728,7 @@ struct HandshakeServerBuilder {
   }
   HandshakeServerBuilder &operator=(const HandshakeServerBuilder &);
   flatbuffers::Offset<HandshakeServer> Finish() {
-    const auto end = fbb_.EndTable(start_, 13);
+    const auto end = fbb_.EndTable(start_, 12);
     auto o = flatbuffers::Offset<HandshakeServer>(end);
     return o;
   }
@@ -641,11 +747,9 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
     int32_t battle_frame_count = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data = 0,
     flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations = 0,
-    flatbuffers::Offset<flatbuffers::Vector<int32_t>> player_races = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<flatbuffers::String>>> player_names = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players = 0) {
   HandshakeServerBuilder builder_(_fbb);
-  builder_.add_player_names(player_names);
-  builder_.add_player_races(player_races);
+  builder_.add_players(players);
   builder_.add_start_locations(start_locations);
   builder_.add_buildable_data(buildable_data);
   builder_.add_battle_frame_count(battle_frame_count);
@@ -673,8 +777,7 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
     int32_t battle_frame_count = 0,
     const std::vector<uint8_t> *buildable_data = nullptr,
     const std::vector<const Vec2 *> *start_locations = nullptr,
-    const std::vector<int32_t> *player_races = nullptr,
-    const std::vector<flatbuffers::Offset<flatbuffers::String>> *player_names = nullptr) {
+    const std::vector<flatbuffers::Offset<Player>> *players = nullptr) {
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
       lag_frames,
@@ -688,8 +791,7 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
       battle_frame_count,
       buildable_data ? _fbb.CreateVector<uint8_t>(*buildable_data) : 0,
       start_locations ? _fbb.CreateVector<const Vec2 *>(*start_locations) : 0,
-      player_races ? _fbb.CreateVector<int32_t>(*player_races) : 0,
-      player_names ? _fbb.CreateVector<flatbuffers::Offset<flatbuffers::String>>(*player_names) : 0);
+      players ? _fbb.CreateVector<flatbuffers::Offset<Player>>(*players) : 0);
 }
 
 flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -1404,6 +1506,40 @@ inline flatbuffers::Offset<Command> CreateCommand(flatbuffers::FlatBufferBuilder
       _str);
 }
 
+inline PlayerT *Player::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new PlayerT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Player::UnPackTo(PlayerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = id(); _o->id = _e; };
+  { auto _e = race(); _o->race = _e; };
+  { auto _e = name(); if (_e) _o->name = _e->str(); };
+  { auto _e = is_enemy(); _o->is_enemy = _e; };
+}
+
+inline flatbuffers::Offset<Player> Player::Pack(flatbuffers::FlatBufferBuilder &_fbb, const PlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreatePlayer(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Player> CreatePlayer(flatbuffers::FlatBufferBuilder &_fbb, const PlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  auto _id = _o->id;
+  auto _race = _o->race;
+  auto _name = _o->name.size() ? _fbb.CreateString(_o->name) : 0;
+  auto _is_enemy = _o->is_enemy;
+  return torchcraft::fbs::CreatePlayer(
+      _fbb,
+      _id,
+      _race,
+      _name,
+      _is_enemy);
+}
+
 inline HandshakeClientT *HandshakeClient::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new HandshakeClientT();
   UnPackTo(_o, _resolver);
@@ -1461,8 +1597,7 @@ inline void HandshakeServer::UnPackTo(HandshakeServerT *_o, const flatbuffers::r
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
   { auto _e = buildable_data(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->buildable_data.push_back(_e->Get(_i)); } };
   { auto _e = start_locations(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->start_locations.push_back(*_e->Get(_i)); } };
-  { auto _e = player_races(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->player_races.push_back(_e->Get(_i)); } };
-  { auto _e = player_names(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->player_names.push_back(_e->Get(_i)->str()); } };
+  { auto _e = players(); if (_e) for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->players.push_back(std::unique_ptr<PlayerT>(_e->Get(_i)->UnPack(_resolver))); } };
 }
 
 inline flatbuffers::Offset<HandshakeServer> HandshakeServer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -1483,8 +1618,7 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
   auto _battle_frame_count = _o->battle_frame_count;
   auto _buildable_data = _o->buildable_data.size() ? _fbb.CreateVector(_o->buildable_data) : 0;
   auto _start_locations = _o->start_locations.size() ? _fbb.CreateVectorOfStructs(_o->start_locations) : 0;
-  auto _player_races = _o->player_races.size() ? _fbb.CreateVector(_o->player_races) : 0;
-  auto _player_names = _o->player_names.size() ? _fbb.CreateVectorOfStrings(_o->player_names) : 0;
+  auto _players = _o->players.size() ? _fbb.CreateVector<flatbuffers::Offset<Player>>(_o->players.size(), [&](size_t i) { return CreatePlayer(_fbb, _o->players[i].get(), _rehasher); }) : 0;
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
       _lag_frames,
@@ -1498,8 +1632,7 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
       _battle_frame_count,
       _buildable_data,
       _start_locations,
-      _player_races,
-      _player_names);
+      _players);
 }
 
 inline CommandsT *Commands::UnPack(const flatbuffers::resolver_function_t *_resolver) const {

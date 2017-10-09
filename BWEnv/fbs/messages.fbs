@@ -20,6 +20,13 @@ table Command {
   str:string;
 }
 
+table Player {
+  id:int;
+  race:int;              // See torchcraft::BW::Race enum
+  name:string;
+  is_enemy:bool;
+}
+
 table HandshakeClient {
   protocol:int;           // protocol for binary frame format
   map:string;
@@ -40,8 +47,7 @@ table HandshakeServer {
   battle_frame_count:int;       // if micro_mode == true
   buildable_data:[ubyte];       // walk tile resolution of buildability
   start_locations:[Vec2];
-  player_races:[int];           // playerid -> race enum
-  player_names:[string];
+  players:[Player];
 }
 
 table Commands {

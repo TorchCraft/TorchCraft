@@ -11,6 +11,17 @@ void init_state(py::module& torchcraft) {
       .def(py::init<int, int>())
       .def_readwrite("x", &State::Position::x)
       .def_readwrite("y", &State::Position::y);
+  py::class_<State::PlayerInfo>(state, "PlayerInfo")
+      .def(py::init<>())
+      .def_readwrite("id", &State::PlayerInfo::id)
+      .def_property(
+          "race",
+          [](State::PlayerInfo* self) { return self->race._to_integral(); },
+          [](State::PlayerInfo* self, int val) {
+            self->race = BW::Race::_from_integral(val);
+          })
+      .def_readwrite("name", &State::PlayerInfo::name)
+      .def_readwrite("is_enemy", &State::PlayerInfo::is_enemy);
 
   state.def_readwrite("lag_frames", &State::lag_frames)
       .def_property_readonly(
@@ -24,8 +35,7 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("buildable_data", &State::buildable_data)
       .def_readwrite("map_name", &State::map_name)
       .def_readwrite("start_locations", &State::start_locations)
-      .def_readwrite("player_races", &State::player_races)
-      .def_readwrite("player_names", &State::player_names)
+      .def_readwrite("player_info", &State::player_info)
       .def_readwrite("player_id", &State::player_id)
       .def_readwrite("neutral_id", &State::neutral_id)
       .def_readwrite("replay", &State::replay)

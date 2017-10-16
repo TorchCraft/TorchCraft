@@ -210,7 +210,7 @@ std::vector<std::string> State::update(
       info.id = player->id();
       auto bwrace = BW::Race::_from_integral_nothrow(player->race());
       info.race = bwrace ? *bwrace : +BW::Race::Unknown;
-      info.name = player->name()->c_str();
+      info.name = player->name() ? player->name()->str() : "";
       info.is_enemy = player->is_enemy();
       player_info[info.id] = info;
     }

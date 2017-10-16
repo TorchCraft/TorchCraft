@@ -222,7 +222,7 @@ void Controller::setupHandshake() {
         std::make_unique<torchcraft::fbs::PlayerT>());
     handshake.players.back()->id = p->getID();
     handshake.players.back()->race = p->getRace().getID();
-    handshake.players.back()->name = p->getName().c_str();
+    handshake.players.back()->name = p->getName();
     handshake.players.back()->is_enemy = p->isEnemy(BWAPI::Broodwar->self());
   }
 

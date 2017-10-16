@@ -12,7 +12,7 @@
 
 #define _WINSOCKAPI_
 #define WIN32_LEAN_AND_MEAN
-#include <czmq.h>
+#include "zmq.hpp"
 #include "controller.h"
 #include "messages_generated.h"
 
@@ -26,7 +26,8 @@ class ZMQ_server
   static const int max_instances = 1000;
 
   Controller *controller;
-  zsock_t* server_sock = nullptr;
+  std::unique_ptr<zmq::context_t> ctx;
+  std::unique_ptr<zmq::socket_t> sock;
   int port = 0;
 public:
   bool server_sock_connected;

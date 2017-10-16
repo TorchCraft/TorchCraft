@@ -201,19 +201,43 @@ void ZMQ_server::sendError(const torchcraft::fbs::ErrorT* error) {
   sendFBObject(*this->sock.get(), error);
 }
 
-void ZMQ_server::receiveMessage()
+/**
+ * Receive a message from the client.
+ * If timeoutMs is >= 0, only try to receive a message for that many
+ * milliseconds before giving up and returning false.
+ * Returns true if a message has been received (and handled).
+ * Throws on network errors other than reaching the specified timeout.
+ */
+bool ZMQ_server::receiveMessage(int timeoutMs)
 {
   /* if not yet connected, do nothing */
-  if (!this->server_sock_connected) return;
+  if (!this->server_sock_connected) {
+    return false;
+  }
 
   zmq::message_t zmsg;
-  try {
-    bool res = this->sock->recv(&zmsg);
-    if (!res) {
-      throw runtime_error("ZMQ_server::receiveMessage(): receive failed.");
+  if (timeoutMs < 0) {
+    try {
+      bool res = this->sock->recv(&zmsg);
+      if (!res) {
+        throw runtime_error("ZMQ_server::receiveMessage(): receive failed.");
+      }
+    } catch (const zmq::error_t& e) {
+      throw runtime_error(string("ZMQ_server::receiveMessage(): receive failed: ") + e.what());
     }
-  } catch (const zmq::error_t& e) {
-    throw runtime_error(string("ZMQ_server::receiveMessage(): receive failed: ") + e.what());
+  } else {
+    try {
+      auto start = chrono::steady_clock::now();
+      auto limit = start + chrono::milliseconds(timeoutMs);
+      while (!this->sock->recv(&zmsg, ZMQ_NOBLOCK)) {
+        if (chrono::steady_clock::now() >= limit) {
+          return false;
+        }
+        this_thread::sleep_for(chrono::milliseconds(1));
+      }
+    } catch (const zmq::error_t& e) {
+      throw runtime_error(string("ZMQ_server::receiveMessage(): receive failed: ") + e.what());
+    }
   }
 
   uint8_t *data = zmsg.data<uint8_t>();
@@ -244,6 +268,8 @@ void ZMQ_server::receiveMessage()
           string("ZMQ_server::receiveMessage(): cannot handle message: ") +
           torchcraft::fbs::EnumNameAny(msg->msg_type()));
   }
+
+  return true;
 }
 
 void ZMQ_server::handleReconnect(const torchcraft::fbs::HandshakeClient* handshake) {

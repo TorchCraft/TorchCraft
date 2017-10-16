@@ -42,7 +42,7 @@ public:
   void sendPlayerLeft(const torchcraft::fbs::PlayerLeftT *pl);
   void sendEndGame(const torchcraft::fbs::EndGameT *endgame);
   void sendError(const torchcraft::fbs::ErrorT *error);
-  void receiveMessage();
+  bool receiveMessage(int timeoutMs = -1);
   void handleReconnect(const torchcraft::fbs::HandshakeClient* handshake);
   std::vector<int8_t> handleCommands(const torchcraft::fbs::Commands* commands);
   int getPort();

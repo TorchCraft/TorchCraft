@@ -1,15 +1,4 @@
-The following software is included in this product: libzmq. The source code is available at https://github.com/zeromq/libzmq. This software contains the following license and notice below:
-
-Copyright (c) 2007-2014 iMatix Corporation
-Copyright (c) 2009-2011 250bpm s.r.o.
-Copyright (c) 2010-2011 Miru Limited
-Copyright (c) 2011 VMware, Inc.
-Copyright (c) 2012 Spotify AB
-Copyright (c) 2013 Ericsson AB
-Copyright (c) 2014 AppDynamics Inc.
-Copyright (c) 2015-2016 Brocade Communications Systems Inc.		         
-				 
-				 GNU LESSER GENERAL PUBLIC LICENSE
+		         GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>

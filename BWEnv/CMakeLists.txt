@@ -55,7 +55,7 @@ if (NOT USE_MINI_OPENBWAPI)
   )
   
   target_link_libraries(BWEnv
-    czmq
+    zmq
     ${BWAPI_LIBRARIES}
   )
 endif()
@@ -66,6 +66,6 @@ add_executable(BWEnvClient
 )
 
 target_link_libraries(BWEnvClient
-  czmq
+  zmq
   ${BWAPI_LIBRARIES}
 )

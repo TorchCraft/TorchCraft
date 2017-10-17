@@ -4,7 +4,7 @@
 With OpenBW, TorchCraft *and* StarCraft can run natively on Linux (or any other system), without the need for Virtual Machines or Wine.
 
 ### Dependencies
-czmq, openbw/bwapi (https://github.com/openbw/bwapi)
+libzmq, openbw/bwapi (https://github.com/openbw/bwapi)
 
 These instructions assume BWAPI is installed. If you installed to a non-default directory, then the path can be specified by passing `-DBWAPI_DIR=/new/path/` to cmake.
 

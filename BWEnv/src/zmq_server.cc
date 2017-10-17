@@ -25,16 +25,25 @@ using namespace std;
 
 namespace {
 
-template<typename T>
-void sendFBObject(zsock_t* sock, const T* obj) {
+template <typename T>
+void sendFBObject(zmq::socket_t& sock, const T* obj) {
   flatbuffers::FlatBufferBuilder fbb;
   auto payload = T::TableType::Pack(fbb, obj);
   auto root = torchcraft::fbs::CreateMessage(
-      fbb, torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value, payload.Union());
+      fbb,
+      torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value,
+      payload.Union());
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 
-  if (zsock_send(sock, "b", fbb.GetBufferPointer(), fbb.GetSize()) != 0) {
-    throw runtime_error("ZMQ_server::send(): zmq_send failed.");
+  try {
+    size_t res = sock.send(fbb.GetBufferPointer(), fbb.GetSize());
+    if (res != fbb.GetSize()) {
+      throw runtime_error(
+          "ZMQ_server::send*(): zmq_send failed: no/partial send");
+    }
+  } catch (const zmq::error_t& e) {
+    throw runtime_error(
+        string("ZMQ_server::send*(): zmq_send failed: ") + e.what());
   }
 }
 
@@ -51,7 +60,8 @@ void ZMQ_server::connect()
 {
   if (this->server_sock_connected) return;
 
-  zsys_shutdown(); /* reinitialize zsys*/
+  // reinit ZMQ context
+  ctx = std::make_unique<zmq::context_t>();
 
   if (this->port == 0) {
     for (int port = ZMQ_server::starting_port;
@@ -60,17 +70,18 @@ void ZMQ_server::connect()
     port++) {
       stringstream url;
       url << "tcp://*:" << port;
-      this->server_sock = zsock_new(ZMQ_REP);
+      this->sock = std::make_unique<zmq::socket_t>(*ctx.get(), zmq::socket_type::rep);
 #ifndef _WIN32
-      zsock_set_ipv6(this->server_sock, 1);
+      this->sock->setsockopt(ZMQ_IPV6, 1);
 #endif
-      auto ret = zsock_bind(this->server_sock, "%s", url.str().c_str());
-      if (ret >= 0) {
+      try {
+        this->sock->bind(url.str());
         this->port = port;
         break;
+      } catch (...) {
+        // Try next port
       }
-      zsock_destroy(&this->server_sock);
-      this->server_sock = nullptr;
+      this->sock = nullptr;
     }
   }
   else {
@@ -81,46 +92,58 @@ void ZMQ_server::connect()
     while (success == -1) {
       stringstream url;
       url << "tcp://*:" << this->port;
-      zsock_destroy(&this->server_sock);
-      this->server_sock = zsock_new(ZMQ_REP);
+      this->sock = nullptr;
+      this->sock = std::make_unique<zmq::socket_t>(*ctx.get(), zmq::socket_type::rep);
 #ifdef _WIN32
-      if (setsockopt(zsock_fd(this->server_sock), SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) != 0) {
+      if (setsockopt(this->sock->getsockopt<int>(ZMQ_FD), SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) != 0) {
         std::cout << "SO_REUSEADDR setsockopt failed with " << WSAGetLastError() << std::endl;
       }
 #else
-      zsock_set_ipv6(this->server_sock, 1);
+      this->sock->setsockopt(ZMQ_IPV6, 1);
 #endif
-      success = zsock_bind(this->server_sock, "%s", url.str().c_str());
+      try {
+        this->sock->bind(url.str());
+      } catch (const zmq::error_t& e) {
+        throw runtime_error(string("ZMQ_server::connect(): bind failed: ") + e.what());
+      }
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
   }
-  if (this->server_sock == nullptr) {
+  if (this->sock == nullptr) {
     throw runtime_error("No more free ports for ZMQ server socket.");
   }
 
   this->server_sock_connected = true;
   std::cout << "TorchCraft server listening on port " << port << std::endl;
 
-  zchunk_t *chunk;
-  if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
-    throw runtime_error("ZMQ_server::connect(): zmq_recv failed.");
+  zmq::message_t zmsg;
+  try {
+    bool res = this->sock->recv(&zmsg);
+    if (!res) {
+      throw runtime_error("ZMQ_server::connect(): receive failed.");
+    }
+  } catch (const zmq::error_t& e) {
+    throw runtime_error(string("ZMQ_server::connect(): receive failed: ") + e.what());
   }
 
-  if (zchunk_size(chunk) == 0) {
+  if (zmsg.size() == 0) {
     // Retry
     torchcraft::fbs::ErrorT err;
     sendError(&err);
-    zchunk_destroy(&chunk);
-    if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
-      throw runtime_error("ZMQ_server::connect(): zsock_recv failed.");
+    try {
+      bool res = this->sock->recv(&zmsg);
+      if (!res) {
+        throw runtime_error("ZMQ_server::connect(): receive failed.");
+      }
+    } catch (const zmq::error_t& e) {
+      throw runtime_error(string("ZMQ_server::connect(): receive failed: ") + e.what());
     }
   }
 
-  uint8_t* data = zchunk_data(chunk);
-  size_t size = zchunk_size(chunk);
+  uint8_t* data = zmsg.data<uint8_t>();
+  size_t size = zmsg.size();
   flatbuffers::Verifier verifier(data, size);
   if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
-    zchunk_destroy(&chunk);
     throw runtime_error("ZMQ_server::connect(): invalid message.");
   }
 
@@ -128,19 +151,15 @@ void ZMQ_server::connect()
   if (msg->msg_type() == torchcraft::fbs::Any::HandshakeClient) {
     if (!torchcraft::fbs::VerifyAny(
             verifier, msg->msg(), torchcraft::fbs::Any::HandshakeClient)) {
-      zchunk_destroy(&chunk);
       throw runtime_error("ZMQ_server::connect(): invalid message.");
     }
     handleReconnect(
         reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
   } else {
-    zchunk_destroy(&chunk);
     throw logic_error(
         string("ZMQ_server::connect(): cannot handle message: ") +
         torchcraft::fbs::EnumNameAny(msg->msg_type()));
   }
-
-  zchunk_destroy(&chunk);
 }
 
 ZMQ_server::~ZMQ_server()
@@ -153,34 +172,32 @@ void ZMQ_server::close()
   if (!this->server_sock_connected) return;
 
   // Called when the game ends
-  zsock_destroy(&this->server_sock);
-  this->server_sock = nullptr;
-  zsys_shutdown();
+  this->sock = nullptr;
+  this->ctx = nullptr;
 
-  Utils::bwlog(controller->output_log, "socket: %d", server_sock);
   Utils::bwlog(controller->output_log, "after zsock destroy");
 
   this->server_sock_connected = false;
 }
 
 void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake) {
-  sendFBObject(this->server_sock, handshake);
+  sendFBObject(*this->sock.get(), handshake);
 }
 
 void ZMQ_server::sendFrame(const torchcraft::fbs::FrameT* frame) {
-  sendFBObject(this->server_sock, frame);
+  sendFBObject(*this->sock.get(), frame);
 }
 
 void ZMQ_server::sendPlayerLeft(const torchcraft::fbs::PlayerLeftT* pl) {
-  sendFBObject(this->server_sock, pl);
+  sendFBObject(*this->sock.get(), pl);
 }
 
 void ZMQ_server::sendEndGame(const torchcraft::fbs::EndGameT* endgame) {
-  sendFBObject(this->server_sock, endgame);
+  sendFBObject(*this->sock.get(), endgame);
 }
 
 void ZMQ_server::sendError(const torchcraft::fbs::ErrorT* error) {
-  sendFBObject(this->server_sock, error);
+  sendFBObject(*this->sock.get(), error);
 }
 
 void ZMQ_server::receiveMessage()
@@ -188,22 +205,25 @@ void ZMQ_server::receiveMessage()
   /* if not yet connected, do nothing */
   if (!this->server_sock_connected) return;
 
-  zchunk_t *chunk;
-  if (zsock_recv(this->server_sock, "c", &chunk) != 0) {
-    throw runtime_error("ZMQ_server::receiveMessage(): zmq_recv failed.");
+  zmq::message_t zmsg;
+  try {
+    bool res = this->sock->recv(&zmsg);
+    if (!res) {
+      throw runtime_error("ZMQ_server::receiveMessage(): receive failed.");
+    }
+  } catch (const zmq::error_t& e) {
+    throw runtime_error(string("ZMQ_server::receiveMessage(): receive failed: ") + e.what());
   }
 
-  uint8_t *data = zchunk_data(chunk);
-  size_t size = zchunk_size(chunk);
+  uint8_t *data = zmsg.data<uint8_t>();
+  size_t size = zmsg.size();
   flatbuffers::Verifier verifier(data, size);
   if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
-    zchunk_destroy(&chunk);
     throw runtime_error("ZMQ_server::receiveMessage(): invalid message.");
   }
 
   auto msg = torchcraft::fbs::GetMessage(data);
   if (!torchcraft::fbs::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
-    zchunk_destroy(&chunk);
     throw runtime_error("ZMQ_server::receiveMessage(): invalid message.");
   }
 
@@ -217,15 +237,12 @@ void ZMQ_server::receiveMessage()
           reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
       controller->setCommandsStatus(std::move(status));
       break;
-  }
+    }
     default:
-      zchunk_destroy(&chunk);
       throw runtime_error(
           string("ZMQ_server::receiveMessage(): cannot handle message: ") +
           torchcraft::fbs::EnumNameAny(msg->msg_type()));
   }
-
-  zchunk_destroy(&chunk);
 }
 
 void ZMQ_server::handleReconnect(const torchcraft::fbs::HandshakeClient* handshake) {

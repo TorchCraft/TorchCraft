@@ -93,7 +93,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;$(SolutionDir)/../fbs/;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../fbs/;$(SolutionDir)/../fbs/;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -108,7 +108,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/czmq.lib;$(BWAPI_DIR)/lib/BWAPId.lib;$(BWAPI_DIR)/lib/BWAPIClientd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/libzmq.lib;$(BWAPI_DIR)/lib/BWAPId.lib;$(BWAPI_DIR)/lib/BWAPIClientd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>C:\Users\edran\Source\Repos\TorchCraft\BWEnv\lib</AdditionalLibraryDirectories>
     </Link>
     <BuildLog>
@@ -119,7 +119,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -136,7 +136,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/czmq.lib;$(BWAPI_DIR)/lib/BWAPI.lib;$(BWAPI_DIR)/lib/BWAPIClient.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/libzmq.lib;$(BWAPI_DIR)/lib/BWAPI.lib;$(BWAPI_DIR)/lib/BWAPIClient.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>
@@ -148,7 +148,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(BWAPI_DIR)/include;$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(BWAPI_DIR)/include;$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../fbs/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USRDLL;BWENV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -165,7 +165,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/czmq.lib;$(BWAPI_DIR)/lib/BWAPI.lib;$(BWAPI_DIR)/lib/BWAPIClient.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/libzmq.lib;$(BWAPI_DIR)/lib/BWAPI.lib;$(BWAPI_DIR)/lib/BWAPIClient.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
@@ -178,7 +178,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../include/czmq/include;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../fbs/;;$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_DEBUG;_WINDOWS;_USRDLL;BWENV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <FunctionLevelLinking>
@@ -199,7 +199,7 @@
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/czmq.lib;$(BWAPI_DIR)/lib/BWAPId.lib;$(BWAPI_DIR)/lib/BWAPIClientd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/libzmq.lib;$(BWAPI_DIR)/lib/BWAPId.lib;$(BWAPI_DIR)/lib/BWAPIClientd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
     </Link>

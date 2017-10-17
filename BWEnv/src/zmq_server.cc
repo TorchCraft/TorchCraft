@@ -103,6 +103,7 @@ void ZMQ_server::connect()
 #endif
       try {
         this->sock->bind(url.str());
+        break;
       } catch (const zmq::error_t& e) {
         throw runtime_error(string("ZMQ_server::connect(): bind failed: ") + e.what());
       }

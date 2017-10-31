@@ -20,9 +20,9 @@ namespace replayer {
 // Serialization
 
 std::ostream& operator<<(std::ostream& out, const Replayer& o) {
-  auto height = THByteTensor_size(o.map.data, 0);
-  auto width = THByteTensor_size(o.map.data, 1);
-  auto data = THByteTensor_data(o.map.data);
+  auto height = o.map.height;
+  auto width = o.map.width;
+  auto data = o.map.data.data();
 
   if (o.keyframe != 0)
     out << 0 << " " << o.keyframe << " ";
@@ -66,7 +66,7 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   diffed = (diffed == 0); // Every kf is a Frame, others are frame diffs
   if (height <= 0 || width <= 0 || height > 10000 || width > 10000 )
     throw std::runtime_error("Corrupted replay: invalid map size");
-  uint8_t* data = (uint8_t*)THAlloc(sizeof(uint8_t) * height * width);
+  uint8_t* data = (uint8_t*)malloc(sizeof(uint8_t) * height * width);
   in.ignore(1); // Ignores next space
   in.read((char*)data, height * width); // Read some raw bytes
   o.setRawMap(height, width, data);
@@ -103,25 +103,21 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
 }
 
 void Replayer::setMap(
-    THByteTensor* walkability,
-    THByteTensor* ground_height,
-    THByteTensor* buildability,
+    int32_t h,
+    int32_t w,
+    std::vector<uint8_t>& walkability,
+    std::vector<uint8_t>& ground_height,
+    std::vector<uint8_t>& buildability,
     std::vector<int>& start_loc_x,
     std::vector<int>& start_loc_y) {
-  walkability = THByteTensor_newContiguous(walkability);
-  ground_height = THByteTensor_newContiguous(ground_height);
-  buildability = THByteTensor_newContiguous(buildability);
   Replayer::setMap(
-      THByteTensor_size(walkability, 0),
-      THByteTensor_size(walkability, 1),
-      THByteTensor_data(walkability),
-      THByteTensor_data(ground_height),
-      THByteTensor_data(buildability),
+      h,
+      w,
+      walkability.data(),
+      ground_height.data(),
+      buildability.data(),
       start_loc_x,
       start_loc_y);
-  THByteTensor_free(walkability);
-  THByteTensor_free(ground_height);
-  THByteTensor_free(buildability);
 }
 
 #define WALKABILITY_SHIFT 0
@@ -138,10 +134,7 @@ void Replayer::setMap(
     uint8_t* buildability,
     std::vector<int>& start_loc_x,
     std::vector<int>& start_loc_y) {
-  if (map.data != nullptr) {
-    THByteTensor_free(map.data);
-  }
-  map.data = THByteTensor_newWithSize2d(h, w);
+  map.data.resize(h * w);
   for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {
       uint8_t v_w = walkability[y * w + x] & 1;
@@ -150,14 +143,14 @@ void Replayer::setMap(
       uint8_t v_g = ground_height[y * w + x] & 0b111;
       uint8_t packed = (v_w << WALKABILITY_SHIFT) |
           (v_b << BUILDABILITY_SHIFT) | (v_g << HEIGHT_SHIFT);
-      THTensor_fastSet2d(map.data, y, x, packed);
+      map.data[y * w + x] = packed;
     }
   }
   for (size_t i = 0; i < static_cast<size_t>(start_loc_x.size()); i++) {
     auto x = start_loc_x[i];
     auto y = start_loc_y[i];
-    auto v = THTensor_fastGet2d(map.data, y, x) | (1 << START_LOC_SHIFT);
-    THTensor_fastSet2d(map.data, y, x, v);
+    auto v = map.data[y * w + x] | (1 << START_LOC_SHIFT);
+    map.data[y * w + x] = v;
   }
 }
 
@@ -179,25 +172,25 @@ void Replayer::setMapFromState(torchcraft::State* state) {
       start_loc_y);
 }
 
-void Replayer::getMap(
-    THByteTensor* walkability,
-    THByteTensor* ground_height,
-    THByteTensor* buildability,
+std::pair<int32_t, int32_t> Replayer::getMap(
+    std::vector<uint8_t>& walkability,
+    std::vector<uint8_t>& ground_height,
+    std::vector<uint8_t>& buildability,
     std::vector<int>& start_loc_x,
     std::vector<int>& start_loc_y) {
-  auto h = THByteTensor_size(map.data, 0);
-  auto w = THByteTensor_size(map.data, 1);
-  THByteTensor_resizeAs(walkability, map.data);
-  THByteTensor_resizeAs(ground_height, map.data);
-  THByteTensor_resizeAs(buildability, map.data);
+  auto h = mapHeight();
+  auto w = mapWidth();
+  walkability.resize(h * w);
+  ground_height.resize(h * w);
+  buildability.resize(h * w);
   start_loc_x.clear();
   start_loc_y.clear();
   for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {
-      uint8_t v = THTensor_fastGet2d(map.data, y, x);
-      THTensor_fastSet2d(walkability, y, x, (v >> WALKABILITY_SHIFT) & 1);
-      THTensor_fastSet2d(buildability, y, x, (v >> BUILDABILITY_SHIFT) & 1);
-      THTensor_fastSet2d(ground_height, y, x, (v >> HEIGHT_SHIFT) & 0b111);
+      uint8_t v = map.data[y * w + x];
+      walkability[y * w + x] = (v >> WALKABILITY_SHIFT) & 1;
+      buildability[y * w + x] = (v >> BUILDABILITY_SHIFT) & 1;
+      ground_height[y * w + x] = (v >> HEIGHT_SHIFT) & 0b111;
       bool is_start = ((v >> START_LOC_SHIFT) & 1) == 1;
       if (is_start) {
         start_loc_x.push_back(x);
@@ -205,6 +198,7 @@ void Replayer::getMap(
       }
     }
   }
+  return std::make_pair(h, w);
 }
 
 void Replayer::load(const std::string& path) {

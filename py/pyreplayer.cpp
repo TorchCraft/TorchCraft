@@ -245,12 +245,13 @@ void init_replayer(py::module& m) {
             self->getMap(w_vec, g_vec, b_vec, sx, sy);
 
             auto walkability = py::array_t<uint8_t, py::array::c_style>({h, w});
-            auto ground_height = py::array_t<uint8_t, py::array::c_style>({h, w});
-            auto buildability = py::array_t<uint8_t, py::array::c_style>({h, w});
+            auto ground_height =
+                py::array_t<uint8_t, py::array::c_style>({h, w});
+            auto buildability =
+                py::array_t<uint8_t, py::array::c_style>({h, w});
             auto w_data = walkability.mutable_unchecked<2>();
             auto g_data = ground_height.mutable_unchecked<2>();
             auto b_data = buildability.mutable_unchecked<2>();
-
 
             std::vector<std::pair<int, int>> start_loc;
             for (size_t y = 0; y < h; y++) {

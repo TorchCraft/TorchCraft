@@ -64,7 +64,7 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
     o.keyframe = 0;
   }
   diffed = (diffed == 0); // Every kf is a Frame, others are frame diffs
-  if (height <= 0 || width <= 0 || height > 10000 || width > 10000 )
+  if (height <= 0 || width <= 0 || height > 10000 || width > 10000)
     throw std::runtime_error("Corrupted replay: invalid map size");
   uint8_t* data = (uint8_t*)malloc(sizeof(uint8_t) * height * width);
   in.ignore(1); // Ignores next space

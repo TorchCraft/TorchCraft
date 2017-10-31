@@ -52,6 +52,7 @@ void Module::onPlayerLeft(BWAPI::Player player) {
 
   torchcraft::fbs::PlayerLeftT pl;
   pl.player_left = player->getName();
+  this->c_->clearPendingReceive();
   this->c_->zmq_server->sendPlayerLeft(&pl);
   this->c_->zmq_server->receiveMessage();
 }

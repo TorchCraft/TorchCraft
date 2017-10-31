@@ -55,26 +55,28 @@ BETTER_ENUM(
     // you are guaranteed the map will be what you want.
     SetMap = 12,
     SetMulti = 13,
+    SetBlocking = 14,
+    SetMaxFrameTimeMs = 15,
 
     // arguments: (unit ID, command, target id, target x, target y, extra)
     // (x, y) are walktiles instead of pixels
     // otherwise this corresponds exactly to BWAPI::UnitCommand
-    CommandUnit = 14,
-    CommandUnitProtected = 15,
+    CommandUnit = 16,
+    CommandUnitProtected = 17,
 
     // arguments: (command, args)
     // For documentation about args, see usercommandtypes
-    CommandUser = 16,
-    CommandOpenbw = 17,
+    CommandUser = 18,
+    CommandOpenbw = 19,
 
     // BWAPI drawing routines
-    DrawLine = 18, //  x1, y1, x2, y2, color index
-    DrawUnitLine = 19, // uid1, uid2, color index
-    DrawUnitPosLine = 20, // uid, x2, y2, color index
-    DrawCircle = 21, //  x, y, radius, color index
-    DrawUnitCircle = 22, // uid, radius, color index
-    DrawText = 23, // x, y plus text arg
-    DrawTextScreen = 24, // x, y plus text arg
+    DrawLine = 20, //  x1, y1, x2, y2, color index
+    DrawUnitLine = 21, // uid1, uid2, color index
+    DrawUnitPosLine = 22, // uid, x2, y2, color index
+    DrawCircle = 23, //  x, y, radius, color index
+    DrawUnitCircle = 24, // uid, radius, color index
+    DrawText = 25, // x, y plus text arg
+    DrawTextScreen = 26, // x, y plus text arg
 
     MAX)
 

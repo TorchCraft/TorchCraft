@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#include <chrono>
 #include <thread>
 
 #define WIN32_LEAN_AND_MEAN
@@ -297,7 +298,7 @@ int8_t Controller::handleCommand(
       case Commands::NOOP:
         return CommandStatus::SUCCESS;
     }
-  } else if (command <= Commands::SET_MULTI) {
+  } else if (command <= Commands::SET_MAX_FRAME_TIME_MS) {
     if (!check_args(1))
       return status;
     switch (command) {
@@ -325,16 +326,23 @@ int8_t Controller::handleCommand(
         return CommandStatus::SUCCESS;
       case Commands::SET_COMBINE_FRAMES:
         Utils::bwlog(output_log, "Set combine frames to: %d", args[0]);
-        this->combine_frames = args[0];
+        this->min_combine_frames = args[0];
         return CommandStatus::SUCCESS;
       case Commands::SET_MAP:
         setMap(str);
         return CommandStatus::SUCCESS;
-      case Commands::SET_MULTI:
+      case Commands::SET_MULTI: {
         Utils::bwlog(output_log, "Set multiplayer: %d", args[0]);
         std::string string = args[0] ? "LAN" : "SINGLE_PLAYER";
         Utils::overwriteConfig(sc_path_, "auto_menu", string);
         Utils::overwriteConfig(sc_path_, "lan_mode", "Local PC");
+        return CommandStatus::SUCCESS;
+      }
+      case Commands::SET_BLOCKING:
+        blocking_ = args[0] ? true : false;
+        return CommandStatus::SUCCESS;
+      case Commands::SET_MAX_FRAME_TIME_MS:
+        max_frame_time_ms_ = args[0];
         return CommandStatus::SUCCESS;
     }
   } else if (command <= Commands::COMMAND_UNIT_PROTECTED) {
@@ -605,6 +613,7 @@ void Controller::endGame() {
     this->serializeFrameData(endg.data.get());
   endg.game_won = this->is_winner;
 
+  clearPendingReceive();
   this->zmq_server->sendEndGame(&endg);
 
   if (is_client) {
@@ -682,6 +691,8 @@ void Controller::executeDrawCommands() {
 }
 
 void Controller::onFrame() {
+  auto startOnFrame = std::chrono::steady_clock::now();
+
   // Display the game frame rate as text in the upper left area of the screen
   BWAPI::Broodwar->drawTextScreen(200, 0, "FPS: %d", BWAPI::Broodwar->getFPS());
   BWAPI::Broodwar->drawTextScreen(
@@ -701,8 +712,10 @@ void Controller::onFrame() {
   if (BWAPI::Broodwar->isPaused())
     return;
 
-  // Determine whether the frame must be sent now
-  bool must_send = (this->battle_frame_count % combine_frames == 0);
+  // Should we ideally send this frame or do we have to under all
+  // circumstances?
+  bool should_send = (combined_frames + 1 >= min_combine_frames);
+  bool must_send = false;
 
   // If we are in battle mode and the battle has ended, we need to:
   // 1. Send as soon as possible a frame where the Lua side can identify
@@ -717,7 +730,7 @@ void Controller::onFrame() {
   }
 
   // Save frame state
-  if (!battle_ended || !this->sent_battle_end_frame) {
+  if (!battle_ended || !this->sent_battle_end_frame || last_frame == nullptr) {
     replayer::Frame* f = new replayer::Frame();
     f->height = BWAPI::Broodwar->mapHeight() * 4;
     f->width = BWAPI::Broodwar->mapWidth() * 4;
@@ -746,10 +759,22 @@ void Controller::onFrame() {
       last_frame->combine(*f);
       f->decref();
     }
+    combined_frames++;
   }
 
+  // We can send the data if the last receive call did complete
+  bool send_frame = (should_send && last_receive_ok) || must_send;
+  if (send_frame) {
+    // Ensure there's no pending receive call before attempting to send
+    clearPendingReceive();
+  }
+
+  // If the last receive didn't complete, we need to receive new commands in any
+  // case.
+  bool receive_commands = !last_receive_ok;
+
   // Send frame out to Lua side
-  if (must_send) {
+  if (send_frame) {
     // only done once before sending
 
     if (with_image_) {
@@ -810,14 +835,28 @@ void Controller::onFrame() {
     }
 
     this->zmq_server->sendFrame(&this->tcframe_);
-
-    // And receive new commands
-    draw_cmds_.clear();
-    tcframe_.commands_status.clear();
-    this->zmq_server->receiveMessage();
+    combined_frames = 0;
 
     if (battle_ended) {
       this->sent_battle_end_frame = true;
+    }
+
+    // Ready for new commands!
+    receive_commands = true;
+  }
+
+  if (receive_commands) {
+    draw_cmds_.clear();
+    tcframe_.commands_status.clear();
+    if (blocking_) {
+      last_receive_ok = this->zmq_server->receiveMessage();
+    } else {
+      auto timeSpent = std::chrono::steady_clock::now() - startOnFrame;
+      auto timeLeft = std::chrono::milliseconds(max_frame_time_ms_) - timeSpent;
+      last_receive_ok = this->zmq_server->receiveMessage(std::max(
+          0,
+          int(std::chrono::duration_cast<std::chrono::milliseconds>(timeLeft)
+                  .count())));
     }
   }
 
@@ -893,8 +932,7 @@ void Controller::packMyUnits(replayer::Frame& f) {
     if (!u->exists())
       continue;
 
-    addUnit(
-        u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
+    addUnit(u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
   }
 }
 
@@ -1202,3 +1240,10 @@ void Controller::setIsWinner(bool isWinner) {
   this->is_winner = isWinner;
 }
 
+void Controller::clearPendingReceive() {
+  if (!last_receive_ok) {
+    // The previous receive did not complete successfully. Perform a blocking
+    // receive so that we're clear wrt the REQ/REP pattern.
+    last_receive_ok = zmq_server->receiveMessage();
+  }
+}

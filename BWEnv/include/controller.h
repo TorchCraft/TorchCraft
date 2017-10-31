@@ -45,6 +45,8 @@ enum Commands {
   SET_COMBINE_FRAMES,
   SET_MAP,
   SET_MULTI,
+  SET_BLOCKING,
+  SET_MAX_FRAME_TIME_MS,
   // arguments are those of BWAPI::UnitCommand
   COMMAND_UNIT,
   COMMAND_UNIT_PROTECTED,
@@ -127,6 +129,8 @@ class Controller {
   void setWindowSize(std::pair<int, int> size);
   void setWindowPos(const std::pair<int, int> size);
   void setIsWinner(bool isWinner);
+  void clearPendingReceive();
+
   std::ofstream output_log;
   std::unique_ptr<ZMQ_server> zmq_server;
   std::vector<int> deaths;
@@ -145,13 +149,17 @@ class Controller {
   static const int pixelsPerTile = 32;
   static const int pixelsPerWalkTile = 8;
   bool logCommands = true;
-  int combine_frames = 1;
+  int min_combine_frames = 1;
+  int combined_frames = 0;
+  bool last_receive_ok = true;
   replayer::Frame* last_frame = nullptr;
   replayer::Frame* prev_sent_frame = nullptr; // For frame diffs
   int battle_frame_count = 0;
   int frameskips = 1;
   bool exit_process_ = false;
   bool with_image_ = false;
+  bool blocking_ = true;
+  int max_frame_time_ms_ = 50;
   std::vector<std::pair<std::vector<int>, std::string>> draw_cmds_;
   torchcraft::fbs::FrameT tcframe_;
 };

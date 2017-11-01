@@ -91,7 +91,8 @@ std::ostream& replayer::operator<<(
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Resources& r) {
-  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >> r.upgrades_level >> r.techs;
+  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >>
+      r.upgrades_level >> r.techs;
   return in;
 }
 
@@ -315,7 +316,7 @@ namespace detail = replayer::detail;
   F(airRange, 25)                     \
   F(playerId, 26)                     \
   F(resources, 27)                    \
-  F(buildTechUpgradeType, 28)                    \
+  F(buildTechUpgradeType, 28)         \
   F(remainingBuildTrainTime, 29)      \
   F(remainingUpgradeResearchTime, 30) \
   F(spellCD, 31)                      \
@@ -441,16 +442,15 @@ void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
   for (auto pair : df->creep_map)
     f->creep_map[pair.first] = pair.second;
 
-  auto frame_units = std::move(frame->units);
   f->units.clear();
 
   for (size_t i = 0; i < df->pids.size(); i++) {
     auto pid = df->pids[i];
     f->units[pid] = std::vector<replayer::Unit>();
 
-    auto f_units = frame_units.find(pid) == frame_units.end()
+    auto f_units = frame->units.find(pid) == frame->units.end()
         ? std::vector<replayer::Unit>()
-        : frame_units.at(pid);
+        : frame->units.at(pid);
     std::sort(f_units.begin(), f_units.end(), detail::orderUnitByiD);
 
     // Should be in order

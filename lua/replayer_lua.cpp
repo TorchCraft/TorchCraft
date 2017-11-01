@@ -180,7 +180,19 @@ extern "C" int replayerSetMap(lua_State* L) {
     start_loc_y.push_back(luaL_checkint(L, -1));
     lua_pop(L, 3);
   }
-  r->setMap(walkmap, heightmap, buildmap, start_loc_x, start_loc_y);
+  auto h = THByteTensor_size(walkmap, 0);
+  auto w = THByteTensor_size(walkmap, 0);
+  walkmap = THByteTensor_newContiguous(walkmap);
+  heightmap = THByteTensor_newContiguous(heightmap);
+  buildmap = THByteTensor_newContiguous(buildmap);
+  r->setMap(
+      h,
+      w,
+      THByteTensor_data(walkmap),
+      THByteTensor_data(heightmap),
+      THByteTensor_data(buildmap),
+      start_loc_x,
+      start_loc_y);
   return 0;
 }
 
@@ -190,7 +202,14 @@ extern "C" int replayerGetMap(lua_State* L) {
   THByteTensor* heightmap = THByteTensor_new();
   THByteTensor* buildmap = THByteTensor_new();
   std::vector<int> start_loc_x, start_loc_y;
-  r->getMap(walkmap, heightmap, buildmap, start_loc_x, start_loc_y);
+  std::vector<uint8_t> w_vec, h_vec, b_vec;
+  auto dim = r->getMap(w_vec, h_vec, b_vec, start_loc_x, start_loc_y);
+  THByteTensor_resize2d(walkmap, dim.first, dim.second);
+  THByteTensor_resize2d(heightmap, dim.first, dim.second);
+  THByteTensor_resize2d(buildmap, dim.first, dim.second);
+  std::memcpy(THByteTensor_data(walkmap), w_vec.data(), w_vec.size());
+  std::memcpy(THByteTensor_data(heightmap), h_vec.data(), h_vec.size());
+  std::memcpy(THByteTensor_data(buildmap), b_vec.data(), b_vec.size());
   luaT_pushudata(L, walkmap, "torch.ByteTensor");
   luaT_pushudata(L, heightmap, "torch.ByteTensor");
   luaT_pushudata(L, buildmap, "torch.ByteTensor");

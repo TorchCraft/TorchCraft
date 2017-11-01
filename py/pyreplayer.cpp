@@ -173,7 +173,27 @@ void init_replayer(py::module& m) {
       .def_readwrite("width", &Frame::width)
       .def_readwrite("reward", &Frame::reward)
       .def_readwrite("is_terminal", &Frame::is_terminal)
+      .def(
+          "deepEq",
+          [](Frame* self, Frame* other, bool debug) {
+            return torchcraft::replayer::detail::frameEq(self, other, debug);
+          },
+          py::arg("other"),
+          py::arg("debug") = false)
       .def("get_creep_at", &Frame::getCreepAt)
+      .def(
+          "creep_map",
+          [](Frame* self) {
+            auto map = py::array_t<uint8_t, py::array::c_style>(
+                {self->height, self->width});
+            auto map_data = map.mutable_unchecked<2>();
+            for (auto y = 0U; y < self->height; y++) {
+              for (auto x = 0U; x < self->width; x++) {
+                map_data(y, x) = self->getCreepAt(x, y);
+              }
+            }
+            return map;
+          })
       .def("combine", &Frame::combine)
       .def("filter", &Frame::filter);
 
@@ -234,14 +254,21 @@ void init_replayer(py::module& m) {
 // height is 0-5, hence 3 bits
 #define START_LOC_SHIFT 5
 
-            // TODO Figure out how to return a THTensor... Copying the code
-            // avoids an extra copy operation
             const auto map = self->getRawMap();
-            auto h = (uint64_t)THByteTensor_size(map, 0);
-            auto w = (uint64_t)THByteTensor_size(map, 1);
-            auto walkability = py::array_t<uint8_t>({h, w});
-            auto ground_height = py::array_t<uint8_t>({h, w});
-            auto buildability = py::array_t<uint8_t>({h, w});
+            auto h = self->mapHeight();
+            auto w = self->mapWidth();
+            auto w_vec = std::vector<uint8_t>();
+            auto g_vec = std::vector<uint8_t>();
+            auto b_vec = std::vector<uint8_t>();
+            auto sx = std::vector<int>();
+            auto sy = std::vector<int>();
+            self->getMap(w_vec, g_vec, b_vec, sx, sy);
+
+            auto walkability = py::array_t<uint8_t, py::array::c_style>({h, w});
+            auto ground_height =
+                py::array_t<uint8_t, py::array::c_style>({h, w});
+            auto buildability =
+                py::array_t<uint8_t, py::array::c_style>({h, w});
             auto w_data = walkability.mutable_unchecked<2>();
             auto g_data = ground_height.mutable_unchecked<2>();
             auto b_data = buildability.mutable_unchecked<2>();
@@ -249,14 +276,13 @@ void init_replayer(py::module& m) {
             std::vector<std::pair<int, int>> start_loc;
             for (size_t y = 0; y < h; y++) {
               for (size_t x = 0; x < w; x++) {
-                uint8_t v = THTensor_fastGet2d(map, y, x);
-                w_data(y, x) = (v >> WALKABILITY_SHIFT) & 1;
-                b_data(y, x) = (v >> BUILDABILITY_SHIFT) & 1;
-                g_data(y, x) = (v >> HEIGHT_SHIFT) & 0b111;
-                bool is_start = ((v >> START_LOC_SHIFT) & 1) == 1;
-                if (is_start)
-                  start_loc.emplace_back(x, y);
+                w_data(y, x) = w_vec[y * w + x];
+                b_data(y, x) = b_vec[y * w + x];
+                g_data(y, x) = g_vec[y * w + x];
               }
+            }
+            for (auto i = 0U; i < sx.size(); i++) {
+              start_loc.emplace_back(sx[i], sy[i]);
             }
 
             py::dict ret;

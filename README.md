@@ -94,3 +94,6 @@ Please cite the arXiv paper if you use TorchCraft in your work:
 ## Contributing
 
 See [Contributing](CONTRIBUTING.md)
+
+Also check out the [code structure](/docs/contributor/code_structure.md)
+and [PR process](/docs/contributor/pr_process.md)

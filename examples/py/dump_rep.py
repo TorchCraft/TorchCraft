@@ -6,6 +6,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -49,7 +50,7 @@ savePath = path.join(args.out, state.map_name + ".tcr")
 
 print("Saving to " + savePath)
 rep.setKeyFrame(-1)
-rep.save(savePath, False)
+rep.save(savePath, True)
 print('Done dumping replay')
 cl.send([[tcc.quit]])
 
@@ -75,6 +76,16 @@ if slset != trueslset:
     print(slset)
     print("While it should have: ")
     print(trueslset)
+
+for i in range(len(rep)):
+  f1 = rep.getFrame(i)
+  f2 = savedRep.getFrame(i)
+  good = f1.deepEq(f2)
+  if not good:
+    print("Saving failed! Frame {} doesn't match replay".format(i))
+    sys.exit(1)
+
+    
 
 def write_creep_map(framenum, outname):
     f = savedRep.getFrame(framenum)

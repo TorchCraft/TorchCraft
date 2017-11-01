@@ -173,6 +173,11 @@ void init_replayer(py::module& m) {
       .def_readwrite("width", &Frame::width)
       .def_readwrite("reward", &Frame::reward)
       .def_readwrite("is_terminal", &Frame::is_terminal)
+      .def("deepEq", [](Frame* self, Frame* other, bool debug) {
+          return torchcraft::replayer::detail::frameEq(self, other, debug);
+          },
+          py::arg("other"),
+          py::arg("debug") = false)
       .def("get_creep_at", &Frame::getCreepAt)
       .def("creep_map", [](Frame* self) {
           auto map = py::array_t<uint8_t, py::array::c_style>({self->height, self->width});

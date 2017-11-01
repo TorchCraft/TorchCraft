@@ -91,7 +91,8 @@ std::ostream& replayer::operator<<(
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Resources& r) {
-  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >> r.upgrades_level >> r.techs;
+  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >>
+      r.upgrades_level >> r.techs;
   return in;
 }
 
@@ -315,7 +316,7 @@ namespace detail = replayer::detail;
   F(airRange, 25)                     \
   F(playerId, 26)                     \
   F(resources, 27)                    \
-  F(buildTechUpgradeType, 28)                    \
+  F(buildTechUpgradeType, 28)         \
   F(remainingBuildTrainTime, 29)      \
   F(remainingUpgradeResearchTime, 30) \
   F(spellCD, 31)                      \

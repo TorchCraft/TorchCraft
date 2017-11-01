@@ -1,4 +1,4 @@
-# BWAPI on Linux
+# TOrchCraft WINE Server
 
 ## Instructions
 ### 1. Installing Wine

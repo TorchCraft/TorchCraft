@@ -22,7 +22,7 @@
 #include "recorder.h"
 #include "zmq_server.h"
 
-#include "messages_generated.h"
+#include "bwenv_messages_generated.h"
 
 class ZMQ_server;
 namespace replayer = torchcraft::replayer;

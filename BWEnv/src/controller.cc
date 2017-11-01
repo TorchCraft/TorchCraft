@@ -17,7 +17,7 @@
 #include "user_actions.h"
 #include "utils.h"
 
-#include "messages_generated.h"
+#include "bwenv_messages_generated.h"
 
 Controller::Controller(bool is_client) {
   this->is_client = is_client;

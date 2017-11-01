@@ -9,7 +9,7 @@
 
 #include "state.h"
 
-#include "BWEnv/fbs/messages_generated.h"
+#include "fbs/bwenv_messages_generated.h"
 
 namespace torchcraft {
 

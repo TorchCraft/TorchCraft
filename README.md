@@ -24,9 +24,9 @@ C++ Requirements:
   - zstd-devel 1.1.4
   - zeromq 4+
 
-Remember to init submodules: `git submodule update --init --recursive`
-Python setup: `pip install .`
-Lua setup (depends on [torch7](http://torch.ch/docs/getting-started.html)): `luarocks make *.rockspec`
+Remember to init submodules: `git submodule update --init --recursive`<br/>
+Python setup: `pip install .`<br/>
+Lua setup (depends on [torch7](http://torch.ch/docs/getting-started.html)): `luarocks make *.rockspec`<br/>
 
 We provide an example C++ CMake project in `examples/cpp/`
 

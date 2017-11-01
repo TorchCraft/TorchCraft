@@ -21,7 +21,7 @@ This will build a shared object BWEnv.so, which can be loaded by BWAPI. It will 
 
 For detailed instructions on using BWAPILauncher, see https://github.com/openbw/bwapi.
 
-*NOTE* You must have 
+*NOTE* You must have `Patch_rt.mpq`, `StarDat.mpq`, and `BrooDat.mpq` in the directory where you launch BWAPILauncher. This can be simply copied from your closest StarCraft installation, even from windows is okay.
 
 TL;DR is run BWAPILauncher from the StarCraft folder, settings are the same as usual (bwapi-data/bwapi.ini and bwapi-data/torchcraft.ini. These can be copied from TorchCraft/config/).
 

@@ -1,4 +1,4 @@
-# TOrchCraft WINE Server
+# TorchCraft WINE Server
 
 ## Instructions
 ### 1. Installing Wine

@@ -89,27 +89,27 @@ class Replayer : public RefCounted {
     return numUnits.at(key);
   }
 
-  void setMapFromState(torchcraft::State* state);
+  void setMapFromState(torchcraft::State const* state);
 
   void setMap(
       int32_t h,
       int32_t w,
-      std::vector<uint8_t>& walkability,
-      std::vector<uint8_t>& ground_height,
-      std::vector<uint8_t>& buildability,
-      std::vector<int>& start_loc_x,
-      std::vector<int>& start_loc_y);
+      std::vector<uint8_t> const& walkability,
+      std::vector<uint8_t> const& ground_height,
+      std::vector<uint8_t> const& buildability,
+      std::vector<int> const& start_loc_x,
+      std::vector<int> const& start_loc_y);
 
   void setMap(
       int32_t h,
       int32_t w,
-      uint8_t* walkability,
-      uint8_t* ground_height,
-      uint8_t* buildability,
-      std::vector<int>& start_loc_x,
-      std::vector<int>& start_loc_y);
+      uint8_t const* const walkability,
+      uint8_t const* const ground_height,
+      uint8_t const* const buildability,
+      std::vector<int> const& start_loc_x,
+      std::vector<int> const& start_loc_y);
 
-  void setRawMap(uint32_t h, uint32_t w, uint8_t* d) {
+  void setRawMap(uint32_t h, uint32_t w, uint8_t const* d) {
     // free existing map if needed
     map.data.resize(h * w);
     map.data.assign(d, d + h * w);
@@ -126,7 +126,7 @@ class Replayer : public RefCounted {
       std::vector<uint8_t>& ground_height,
       std::vector<uint8_t>& buildability,
       std::vector<int>& start_loc_x,
-      std::vector<int>& start_loc_y);
+      std::vector<int>& start_loc_y) const;
 
   friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
   friend std::istream& operator>>(std::istream& in, Replayer& o);

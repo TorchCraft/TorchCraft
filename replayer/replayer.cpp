@@ -105,11 +105,11 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
 void Replayer::setMap(
     int32_t h,
     int32_t w,
-    std::vector<uint8_t>& walkability,
-    std::vector<uint8_t>& ground_height,
-    std::vector<uint8_t>& buildability,
-    std::vector<int>& start_loc_x,
-    std::vector<int>& start_loc_y) {
+    std::vector<uint8_t> const& walkability,
+    std::vector<uint8_t> const& ground_height,
+    std::vector<uint8_t> const& buildability,
+    std::vector<int> const& start_loc_x,
+    std::vector<int> const& start_loc_y) {
   Replayer::setMap(
       h,
       w,
@@ -129,11 +129,11 @@ void Replayer::setMap(
 void Replayer::setMap(
     int32_t h,
     int32_t w,
-    uint8_t* walkability,
-    uint8_t* ground_height,
-    uint8_t* buildability,
-    std::vector<int>& start_loc_x,
-    std::vector<int>& start_loc_y) {
+    uint8_t const* const walkability,
+    uint8_t const* const ground_height,
+    uint8_t const* const buildability,
+    std::vector<int> const& start_loc_x,
+    std::vector<int> const& start_loc_y) {
   map.height = h;
   map.width = w;
   map.data.resize(h * w);
@@ -156,7 +156,7 @@ void Replayer::setMap(
   }
 }
 
-void Replayer::setMapFromState(torchcraft::State* state) {
+void Replayer::setMapFromState(torchcraft::State const* state) {
   auto w = state->map_size[0];
   auto h = state->map_size[1];
   std::vector<int> start_loc_x, start_loc_y;
@@ -179,7 +179,7 @@ std::pair<int32_t, int32_t> Replayer::getMap(
     std::vector<uint8_t>& ground_height,
     std::vector<uint8_t>& buildability,
     std::vector<int>& start_loc_x,
-    std::vector<int>& start_loc_y) {
+    std::vector<int>& start_loc_y) const {
   auto h = mapHeight();
   auto w = mapWidth();
   walkability.resize(h * w);

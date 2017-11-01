@@ -14,7 +14,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include "zmq.hpp"
 #include "controller.h"
-#include "bwenv_messages_generated.h"
+#include "../fbs/bwenv_messages_generated.h"
 
 class Controller;
 

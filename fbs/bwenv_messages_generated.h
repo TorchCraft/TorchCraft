@@ -4,7 +4,7 @@
 #ifndef FLATBUFFERS_GENERATED_BWENVMESSAGES_TORCHCRAFT_FBS_H_
 #define FLATBUFFERS_GENERATED_BWENVMESSAGES_TORCHCRAFT_FBS_H_
 
-#include "flatbuffers.h"
+#include "flatbuffers/flatbuffers.h"
 
 namespace torchcraft {
 namespace fbs {

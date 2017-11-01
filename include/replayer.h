@@ -113,6 +113,8 @@ class Replayer : public RefCounted {
     // free existing map if needed
     map.data.resize(h * w);
     map.data.assign(d, d + h * w);
+    map.height = h;
+    map.width = w;
   }
 
   const std::vector<uint8_t>& getRawMap() {

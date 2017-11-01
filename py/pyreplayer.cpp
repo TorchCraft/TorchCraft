@@ -174,6 +174,16 @@ void init_replayer(py::module& m) {
       .def_readwrite("reward", &Frame::reward)
       .def_readwrite("is_terminal", &Frame::is_terminal)
       .def("get_creep_at", &Frame::getCreepAt)
+      .def("creep_map", [](Frame* self) {
+          auto map = py::array_t<uint8_t, py::array::c_style>({self->height, self->width});
+          auto map_data = map.mutable_unchecked<2>();
+          for (auto y = 0U; y < self->height; y++) {
+            for (auto x = 0U; x < self->width; x++) {
+              map_data(y, x) = self->getCreepAt(x, y);
+            }
+          }
+          return map;
+          })
       .def("combine", &Frame::combine)
       .def("filter", &Frame::filter);
 

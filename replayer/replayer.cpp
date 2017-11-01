@@ -134,6 +134,8 @@ void Replayer::setMap(
     uint8_t* buildability,
     std::vector<int>& start_loc_x,
     std::vector<int>& start_loc_y) {
+  map.height = h;
+  map.width = w;
   map.data.resize(h * w);
   for (int y = 0; y < h; y++) {
     for (int x = 0; x < w; x++) {

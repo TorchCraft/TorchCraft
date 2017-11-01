@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.6)
+
+# This CMake file is used _only_ really to install torchcraft in lua
 IF(LUAROCKS_PREFIX)
     MESSAGE(STATUS "Installing TorchCraft through Luarocks")
     STRING(REGEX REPLACE "(.*)lib/luarocks/rocks.*" "\\1" CMAKE_INSTALL_PREFIX  "${LUAROCKS_PREFIX}")

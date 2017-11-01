@@ -31,7 +31,7 @@ ENDIF()
 SET_TARGET_PROPERTIES(torchcraft PROPERTIES
     VERSION   1.3.3
     SOVERSION 1.3.3)
-TARGET_LINK_LIBRARIES(torchcraft TH luaT zmq)
+TARGET_LINK_LIBRARIES(torchcraft luaT zmq)
 IF(ZSTD_FOUND)
     # Use the static library since we're using "advanced/experimental" features
     TARGET_LINK_LIBRARIES(torchcraft ${ZSTD_LIBDIR}/libzstd.a)

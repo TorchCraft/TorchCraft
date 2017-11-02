@@ -32,12 +32,15 @@ AIClient or AIModule.
 - Download the game at https://battle.net/account/management/.
 - Run `setup.exe` and install the game in some folder.
   - `$STARCRAFT` will be from now on the installation directory.
-- Download the 1.16.1 patch at https://battle.net/support/en/article/classic-game-patches.
-  - Make sure you download the **Brood War** patch.
+- Download the 1.16.1 patch at http://ftp.blizzard.com/pub/broodwar/patches/PC/BW-1161.exe
+  - Make sure you download the **Brood War** patch 1.16.1.
 - Install the patch.
 
   > The patch should be discovered automatically, but if it's not, make sure to point it to the right folder.
 
+- **NOTE** It may be difficult to obtain 1.16.1 after the 1.18 release. 
+  Check [here](https://us.battle.net/forums/en/starcraft/topic/20754525604) 
+  for possible solutions. We will not support 1.18 until BWAPI does.
 - Enter the game and create a character.
   - Single Player → Expansion, AND
   - Multiplayer → Expansion → Local PC
@@ -49,15 +52,12 @@ AIClient or AIModule.
 - Download latest release at https://github.com/bwapi/bwapi/releases.
 - Install this in `$STARCRAFT\BWAPI`.
 
-
 ### TorchCraft, common prerequisites:
 
 - Copy `$STARCRAFT/TorchCraft/config/bwapi.ini` in `$STARCRAFT/bwapi-data/bwapi.ini`.
 - Copy `$STARCRAFT/TorchCraft/config/torchcraft.ini` in `$STARCRAFT/bwapi-data/torchcraft.ini`.
 - Copy `$STARCRAFT/TorchCraft/BWEnv/bin/*.dll` into `$STARCRAFT/`.
 - Copy `$STARCRAFT/TorchCraft/maps/*` into `$STARCRAFT/Maps/BroodWar`.
-
-Now you only need one of the following two methods, either AIModule (DLL) or AIClient (EXE).
 
 ### TorchCraft AIModule (DLL) for users:
 
@@ -66,10 +66,10 @@ Now you only need one of the following two methods, either AIModule (DLL) or AIC
 - Run `$STARCRAFT/BWAPI/ChaosLauncher/Chaoslauncher - MultiInstance.exe` **as administrator**.
 - Check the “RELEASE” box from BWAPI.
 - Click Start.
-- Goto [Installing the Torch client (Linux)](#installing-the-torch-client-linux)
 
+### TorchCraft AIClient (EXE) for users (EXPERIMENTAL)
 
-### TorchCraft AIClient (EXE) for users:
+If you need support, please start an issue. The last time this was tested was 1.3.0.
 
 - Extract `BWEnv.exe` from the latest archive in the [release](https://github.com/TorchCraft/TorchCraft/releases/) 
   page  and put it in `$STARCRAFT`.
@@ -77,7 +77,7 @@ Now you only need one of the following two methods, either AIModule (DLL) or AIC
 - Goto [Installing the Torch client (Linux)](#installing-the-torch-client-linux)
 
 
-### TorchCraft for developers:
+### Developing the TorchCraft Server:
 
 - Install Visual Studio 2013. The Community/Express version of Visual Studio is fine.
   - Follow the [same requirements as BWAPI](https://github.com/bwapi/bwapi/wiki/Compile-BWAPI).
@@ -93,10 +93,6 @@ Now you only need one of the following two methods, either AIModule (DLL) or AIC
 - Open `$STARCRAFT/TorchCraft/BWEnv/VisualStudio/BWEnv.sln` and start hacking.
 - Compile in `Release` mode for the AIClient (you will get a `BWEnv.exe` ) and in `DLL-Release` mode for the AIModule (you will get a `BWEnv.dll` ).
 
-
-## Linux Server
-
-Please see [BWAPI on Linux](/docs/user/bwapi_on_linux.md).
 
 ## Installing the Torch client (Linux)
 

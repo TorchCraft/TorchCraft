@@ -7,7 +7,7 @@ from subprocess import check_output, CalledProcessError
 import sys
 import distutils.unixccompiler
 
-__version__ = '1.3.3beta'
+__version__ = '1.3.3'
 
 ###############################################################################
 # Monkey-patch setuptools to compile in parallel (copied from pytorch)

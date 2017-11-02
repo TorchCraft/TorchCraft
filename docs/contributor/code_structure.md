@@ -20,6 +20,19 @@ have to be injected within StarCraft using for instance ChaosLauncher.
 
 ## TorchCraft
 
+### C++ library
+
+* `client/` contains code for client-server communication, client-side game
+ state management and some useful constants from BWAPI.
+* `replayer/` contains the code that serialises and deserialises the game data
+ both within the client and the server, both for communicating between
+ StarCraft and Torch and for the experience replay (gamestore). Note that some
+ of this functionality is currently implemented in `lua/`.
+* `include/` contains headers that make the above functionality available to
+ other C++ clients.
+* Lua wrappers used in the Lua library for both `client/` and `replayer/` code
+ are available in `lua/`.
+
 ### Lua library
 
 * `init.lua` contains the majority of the code that provides the lua interface.
@@ -36,18 +49,11 @@ have to be injected within StarCraft using for instance ChaosLauncher.
   (and works similarly to `simple_dll` unless stated otherwise in the
   script).
 
-### C++ library
+### Python Library
 
-* `client/` contains code for client-server communication, client-side game
- state management and some useful constants from BWAPI.
-* `replayer/` contains the code that serialises and deserialises the game data
- both within the client and the server, both for communicating between
- StarCraft and Torch and for the experience replay (gamestore). Note that some
- of this functionality is currently implemented in `lua/`.
-* `include/` contains headers that make the above functionality available to
- other C++ clients.
-* Lua wrappers used in the Lua library for both `client/` and `replayer/` code
- are available in `lua/`.
+* The Python bindings are 1-to-1 bindings of the C++ library.
+* All of the code is in `py/*.cpp`. They should be quite readable since most
+  of the code is just a list of functions available in Python.
 
 
 ## Non-code

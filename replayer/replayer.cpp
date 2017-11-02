@@ -9,6 +9,7 @@
 
 #include "replayer.h"
 #include <bitset>
+#include "../fbs/frame_generated.h"
 
 #ifdef WITH_ZSTD
 #include "zstdstream.h"
@@ -30,6 +31,8 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   out.write((const char*)data, height * width); // Write map data as raw bytes
 
   auto kf = o.keyframe == 0 ? 1 : o.keyframe;
+
+  o.writeFrames(out);
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
     if (i % kf == 0)
@@ -72,6 +75,8 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   o.setRawMap(height, width, data);
   size_t nFrames;
   in >> nFrames;
+
+  o.readFrames(in);
   o.frames.resize(nFrames);
   for (size_t i = 0; i < nFrames; i++) {
     if (o.keyframe == 0) {
@@ -100,6 +105,18 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   }
 
   return in;
+}
+
+void Replayer::writeFrames(std::ostream& out) const {
+  flatbuffers::FlatBufferBuilder builder;
+  auto frames = fbs::CreateFrames(builder);
+
+
+
+}
+
+void Replayer::readFrames(std::istream& out) {
+
 }
 
 void Replayer::setMap(

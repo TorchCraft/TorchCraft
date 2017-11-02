@@ -1,0 +1,120 @@
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+namespace torchcraft.fbs;
+
+table Map {
+  height:int;
+  width:int;
+  data:[ubyte];
+}
+
+table Action { // Corresponds to a TorchCraft message
+  action:[int];
+  uid:int;
+  aid:int;
+}
+
+table Resources {
+  ore:int;
+  gas:int;
+  used_psi:int;
+  total_psi:int;
+  upgrades:long;
+  upgrades_level:long;
+  techs:long;
+  //Upgrades enum?
+  //UpgradesLevel enum?
+  //Techs enum?
+}
+
+table Order {
+  first_frame:int; //First frame number where order appeared
+  type:int; //Maps to BWAPI::Orders::Enum
+  targetId:int;
+  targetX:int;
+  targetY:int;
+  // Current implementation has equivalence operator that compares vars other than first_frame
+}
+
+table UnitCommand {
+  farme:int;
+  type:int; //Maps to BWAPI::UnitCommandTypes::Enum
+  targetId:int;
+  targetX:int;
+  targetY:int;
+  extra:int;
+}
+
+table Bullet {
+  type:int;
+  x:int;
+  y:int;
+}
+
+table Unit {
+  id:int;
+  x:int;
+  y:int;
+  health:int;
+  max_health:int;
+  shield:int;
+  max_shield:int;
+  energy:int;
+  maxCD:int;
+  groundCD:int;
+  airCD:int;
+  //uint64_t flags;
+  visible:bool;
+  type:int;
+  armor:int;
+  shieldArmor:int;
+  size:int;
+  pixel_x:int;
+  pixel_y:int;
+  pixel_size_x:int;
+  pixel_size_y:int;
+  groundATK:int;
+  airATK:int;
+  groundDmgType:int;
+  airDmgType:int;
+  groundRange:int;
+  airRange:int;
+  orders:[Order];
+  command:UnitCommand;
+  velocityX:double;
+  velocityY:double;
+  playerId:int;
+  resources:int;
+  buildTechUpgradeType:int;
+  remainingBuildTrainTime:int;
+  remainingUgpradeResearchTime:int;
+  spellCD:int;
+  associatedUnit:int; //addOn, nydusExit, transport, hatchery
+  associatedCount:int; //spiderMines, scarabs, interceptors, nuke
+  // Flags enum?
+}
+
+table Frame {
+  //units, keyed by player ID
+  //actions, queued by player ID
+  //resources, queued by player ID
+  bullets:[Bullet];
+  creep_map:[ubyte];
+  width:uint;
+  height:uint;
+  reward:int;
+  is_terminal:bool;
+}
+
+table Frames {
+  frames:[Frame];
+}
+
+root_type Frames;

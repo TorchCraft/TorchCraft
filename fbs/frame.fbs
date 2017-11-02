@@ -29,9 +29,9 @@ table Resources {
   upgrades:long;
   upgrades_level:long;
   techs:long;
-  //Upgrades enum?
-  //UpgradesLevel enum?
-  //Techs enum?
+  upgrades:long;
+  upgrades_level:long;
+  techs:long;
 }
 
 table Order {
@@ -98,13 +98,28 @@ table Unit {
   spellCD:int;
   associatedUnit:int; //addOn, nydusExit, transport, hatchery
   associatedCount:int; //spiderMines, scarabs, interceptors, nuke
-  // Flags enum?
+  flags:long;
+}
+
+table UnitByPlayerId {
+  playerId:int;
+  unit:Unit;
+}
+
+table ActionByPlayerId {
+  playerId:int;
+  action:Action;
+}
+
+table ResourcesByPlayerId {
+  playerId:int;
+  action:Action;
 }
 
 table Frame {
-  //units, keyed by player ID
-  //actions, queued by player ID
-  //resources, queued by player ID
+  units:[UnitByPlayerId];
+  actions:[ActionByPlayerId];
+  resources:[ResourcesByPlayerId];
   bullets:[Bullet];
   creep_map:[ubyte];
   width:uint;

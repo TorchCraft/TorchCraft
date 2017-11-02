@@ -113,8 +113,8 @@ table Frame {
   is_terminal:bool;
 }
 
-table Frames {
+table FrameContainer {
   frames:[Frame];
 }
 
-root_type Frames;
+root_type FrameContainer;

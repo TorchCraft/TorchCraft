@@ -108,11 +108,19 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
 }
 
 void Replayer::writeFrames(std::ostream& out) const {
-  flatbuffers::FlatBufferBuilder builder;
-  auto frames = fbs::CreateFrames(builder);
+  flatbuffers::FlatBufferBuilder fbsBuilder;
 
+  auto buildFbsFrame = [&fbsBuilder](Frame frame) {
+    fbs::FrameBuilder fbsFrameBuilder(fbsBuilder);
+    //TODO: Populate the frame
+    return fbsFrameBuilder.Finish();
+  };
 
+  std::vector<flatbuffers::Offset<fbs::Frame>> fbsFrames;
+  std::transform(frames.begin(), frames.end(), fbsFrames.begin(), buildFbsFrame);
 
+  auto fbsFrameContainer = fbs::CreateFrameContainer(fbsBuilder, fbsBuilder.CreateVector(fbsFrames));
+  //out << fbsFrameContainer;
 }
 
 void Replayer::readFrames(std::istream& out) {

@@ -33,8 +33,8 @@ struct UnitT;
 struct Frame;
 struct FrameT;
 
-struct Frames;
-struct FramesT;
+struct FrameContainer;
+struct FrameContainerT;
 
 struct MapT : public flatbuffers::NativeTable {
   typedef Map TableType;
@@ -1563,15 +1563,15 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
 
 flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct FramesT : public flatbuffers::NativeTable {
-  typedef Frames TableType;
+struct FrameContainerT : public flatbuffers::NativeTable {
+  typedef FrameContainer TableType;
   std::vector<std::unique_ptr<FrameT>> frames;
-  FramesT() {
+  FrameContainerT() {
   }
 };
 
-struct Frames FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef FramesT NativeTableType;
+struct FrameContainer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef FrameContainerT NativeTableType;
   enum {
     VT_FRAMES = 4
   };
@@ -1588,46 +1588,46 @@ struct Frames FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(frames()) &&
            verifier.EndTable();
   }
-  FramesT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(FramesT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Frames> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FramesT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+  FrameContainerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(FrameContainerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<FrameContainer> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameContainerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
-struct FramesBuilder {
+struct FrameContainerBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_frames(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Frame>>> frames) {
-    fbb_.AddOffset(Frames::VT_FRAMES, frames);
+    fbb_.AddOffset(FrameContainer::VT_FRAMES, frames);
   }
-  explicit FramesBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit FrameContainerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  FramesBuilder &operator=(const FramesBuilder &);
-  flatbuffers::Offset<Frames> Finish() {
+  FrameContainerBuilder &operator=(const FrameContainerBuilder &);
+  flatbuffers::Offset<FrameContainer> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Frames>(end);
+    auto o = flatbuffers::Offset<FrameContainer>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<Frames> CreateFrames(
+inline flatbuffers::Offset<FrameContainer> CreateFrameContainer(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Frame>>> frames = 0) {
-  FramesBuilder builder_(_fbb);
+  FrameContainerBuilder builder_(_fbb);
   builder_.add_frames(frames);
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<Frames> CreateFramesDirect(
+inline flatbuffers::Offset<FrameContainer> CreateFrameContainerDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const std::vector<flatbuffers::Offset<Frame>> *frames = nullptr) {
-  return torchcraft::fbs::CreateFrames(
+  return torchcraft::fbs::CreateFrameContainer(
       _fbb,
       frames ? _fbb.CreateVector<flatbuffers::Offset<Frame>>(*frames) : 0);
 }
 
-flatbuffers::Offset<Frames> CreateFrames(flatbuffers::FlatBufferBuilder &_fbb, const FramesT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+flatbuffers::Offset<FrameContainer> CreateFrameContainer(flatbuffers::FlatBufferBuilder &_fbb, const FrameContainerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 inline MapT *Map::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new MapT();
@@ -2026,55 +2026,55 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
       _is_terminal);
 }
 
-inline FramesT *Frames::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new FramesT();
+inline FrameContainerT *FrameContainer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new FrameContainerT();
   UnPackTo(_o, _resolver);
   return _o;
 }
 
-inline void Frames::UnPackTo(FramesT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+inline void FrameContainer::UnPackTo(FrameContainerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
   { auto _e = frames(); if (_e) { _o->frames.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->frames[_i] = std::unique_ptr<FrameT>(_e->Get(_i)->UnPack(_resolver)); } } };
 }
 
-inline flatbuffers::Offset<Frames> Frames::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FramesT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateFrames(_fbb, _o, _rehasher);
+inline flatbuffers::Offset<FrameContainer> FrameContainer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameContainerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateFrameContainer(_fbb, _o, _rehasher);
 }
 
-inline flatbuffers::Offset<Frames> CreateFrames(flatbuffers::FlatBufferBuilder &_fbb, const FramesT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+inline flatbuffers::Offset<FrameContainer> CreateFrameContainer(flatbuffers::FlatBufferBuilder &_fbb, const FrameContainerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FramesT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameContainerT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _frames = _o->frames.size() ? _fbb.CreateVector<flatbuffers::Offset<Frame>> (_o->frames.size(), [](size_t i, _VectorArgs *__va) { return CreateFrame(*__va->__fbb, __va->__o->frames[i].get(), __va->__rehasher); }, &_va ) : 0;
-  return torchcraft::fbs::CreateFrames(
+  return torchcraft::fbs::CreateFrameContainer(
       _fbb,
       _frames);
 }
 
-inline const torchcraft::fbs::Frames *GetFrames(const void *buf) {
-  return flatbuffers::GetRoot<torchcraft::fbs::Frames>(buf);
+inline const torchcraft::fbs::FrameContainer *GetFrameContainer(const void *buf) {
+  return flatbuffers::GetRoot<torchcraft::fbs::FrameContainer>(buf);
 }
 
-inline Frames *GetMutableFrames(void *buf) {
-  return flatbuffers::GetMutableRoot<Frames>(buf);
+inline FrameContainer *GetMutableFrameContainer(void *buf) {
+  return flatbuffers::GetMutableRoot<FrameContainer>(buf);
 }
 
-inline bool VerifyFramesBuffer(
+inline bool VerifyFrameContainerBuffer(
     flatbuffers::Verifier &verifier) {
-  return verifier.VerifyBuffer<torchcraft::fbs::Frames>(nullptr);
+  return verifier.VerifyBuffer<torchcraft::fbs::FrameContainer>(nullptr);
 }
 
-inline void FinishFramesBuffer(
+inline void FinishFrameContainerBuffer(
     flatbuffers::FlatBufferBuilder &fbb,
-    flatbuffers::Offset<torchcraft::fbs::Frames> root) {
+    flatbuffers::Offset<torchcraft::fbs::FrameContainer> root) {
   fbb.Finish(root);
 }
 
-inline std::unique_ptr<FramesT> UnPackFrames(
+inline std::unique_ptr<FrameContainerT> UnPackFrameContainer(
     const void *buf,
     const flatbuffers::resolver_function_t *res = nullptr) {
-  return std::unique_ptr<FramesT>(GetFrames(buf)->UnPack(res));
+  return std::unique_ptr<FrameContainerT>(GetFrameContainer(buf)->UnPack(res));
 }
 
 }  // namespace fbs

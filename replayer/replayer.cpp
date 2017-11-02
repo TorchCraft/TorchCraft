@@ -115,25 +115,24 @@ void Replayer::writeFrames(std::ostream& out) const {
     auto buildFbsUnit = [&fbsBuilder](Unit unit) {
       auto buildFbsOrder = [&fbsBuilder](Order order) {
         fbs::OrderBuilder fbsOrderBuilder(fbsBuilder);
-        fbsOrderBuilder.add_frame(order.frame);
+        fbsOrderBuilder.add_first_frame(order.first_frame);
         fbsOrderBuilder.add_type(order.type);
         fbsOrderBuilder.add_targetId(order.targetId);
         fbsOrderBuilder.add_targetX(order.targetX);
         fbsOrderBuilder.add_targetY(order.targetY);
-        fbsOrderBuilder.add_extra(order.extra);
         return fbsOrderBuilder.Finish();
       };
 
-      std::vector<flatbuffers:Offset<fbs::Order>> fbsOrders;
+      std::vector<flatbuffers::Offset<fbs::Order>> fbsOrders;
       std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
 
       fbs::UnitCommandBuilder fbsUnitCommandBuilder(fbsBuilder);
-      fbsUnitCommandBuilder.add_frame(command.frame);
-      fbsUnitCommandBuilder.add_type(command.type);
-      fbsUnitCommandBuilder.add_targetId(command.targetId);
-      fbsUnitCommandBuilder.add_targetX(command.targetX);
-      fbsUnitCommandBuilder.add_targetY(command.targetY);
-      fbsUnitCommandBuilder.add_extra(command.extra);
+      fbsUnitCommandBuilder.add_frame(unit.command.frame);
+      fbsUnitCommandBuilder.add_type(unit.command.type);
+      fbsUnitCommandBuilder.add_targetId(unit.command.targetId);
+      fbsUnitCommandBuilder.add_targetX(unit.command.targetX);
+      fbsUnitCommandBuilder.add_targetY(unit.command.targetY);
+      fbsUnitCommandBuilder.add_extra(unit.command.extra);
       auto command = fbsUnitCommandBuilder.Finish();
 
       fbs::UnitBuilder fbsUnitBuilder(fbsBuilder);
@@ -180,9 +179,14 @@ void Replayer::writeFrames(std::ostream& out) const {
 
     auto buildFbsAction = [&fbsBuilder](std::pair<int, Action> actionPair) {
       fbs::ActionBuilder fbsActionBuilder(fbsBuilder);
-      fbsActionBuilder.add_action(actionPair->2.action);
-      fbsActionBuilder.add_uid(actionPair->2.uid);
-      fbsActionBuilder.add_aid(actionPair->2.aid);
+      fbsActionBuilder.add_action(actionPair.second.action);
+      fbsActionBuilder.add_uid(actionPair.second.uid);
+      fbsActionBuilder.add_aid(actionPai.second.aid);
+      auto action = fbsActionBuilder.Finish();
+
+      fbs::ActionByPlayerIdBuilder fbsActionByPlayerIdBuild(fbsBuilder);
+      fbsActionByPlayerIdBuild.add_playerId(actionPair.first);
+      fbsActionByPlayerIdBuild.add_action(action);
       return fbsActionBuilder.Finish();
     };
 

@@ -29,9 +29,6 @@ table Resources {
   upgrades:long;
   upgrades_level:long;
   techs:long;
-  upgrades:long;
-  upgrades_level:long;
-  techs:long;
 }
 
 table Order {
@@ -44,7 +41,7 @@ table Order {
 }
 
 table UnitCommand {
-  farme:int;
+  frame:int;
   type:int; //Maps to BWAPI::UnitCommandTypes::Enum
   targetId:int;
   targetX:int;
@@ -70,7 +67,7 @@ table Unit {
   maxCD:int;
   groundCD:int;
   airCD:int;
-  //uint64_t flags;
+  flags:long;
   visible:bool;
   type:int;
   armor:int;
@@ -94,7 +91,7 @@ table Unit {
   resources:int;
   buildTechUpgradeType:int;
   remainingBuildTrainTime:int;
-  remainingUgpradeResearchTime:int;
+  remainingUpgradeResearchTime:int;
   spellCD:int;
   associatedUnit:int; //addOn, nydusExit, transport, hatchery
   associatedCount:int; //spiderMines, scarabs, interceptors, nuke

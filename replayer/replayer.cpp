@@ -111,8 +111,28 @@ void Replayer::writeFrames(std::ostream& out) const {
   flatbuffers::FlatBufferBuilder fbsBuilder;
 
   auto buildFbsFrame = [&fbsBuilder](Frame frame) {
+    auto buildFbsBullet = [&fbsBuilder](Bullet bullet) {
+      fbs::BulletBuilder fbsBulletBuilder(fbsBuilder);
+      fbsBulletBuilder.add_type(bullet.type);
+      fbsBulletBuilder.add_x(bullet.x);
+      fbsBulletBuilder.add_y(bullet.y);
+      return fbsBulletBuilder.Finish();
+    };
+
+    std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
+    std::transform(frame.bullets.begin(), frame.bullets.end(), fbsBullets.begin(), buildFbsBullet);
+
+
     fbs::FrameBuilder fbsFrameBuilder(fbsBuilder);
-    //TODO: Populate the frame
+    fbsFrameBuilder.add_width(frame.width);
+    fbsFrameBuilder.add_height(frame.height);
+    fbsFrameBuilder.add_reward(frame.reward);
+    fbsFrameBuilder.add_is_terminal(frame.is_terminal);
+    //TODO: Populate resources
+    //TODO: Populate actions
+    //TODO: Populate units
+    fbsFrameBuilder.add_bullets(fbsBuilder.CreateVector(fbsBullets));
+    fbsFrameBuilder.add_creep_map(fbsBuilder.CreateVector(frame.creep_map));
     return fbsFrameBuilder.Finish();
   };
 

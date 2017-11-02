@@ -15,17 +15,17 @@ Please follow the [installation instructions](docs/user/starcraft_in_windows.md)
 
 You will need to have a license of StarCraft: Brood War. 
 
-TorchCraft is proxy into BWAPI, that enables data from StarCraft to be sent 
-over a ZMQ connection so that it can be parsed anywhere. The TorchCraft client 
-should be installed from C++, Python, or Lua. We provide off the shelf solutions
-for Python and Lua:
+TorchCraft is a BWAPI module that sends StarCraft data out over a ZMQ
+connection. This lets you parse StarCraft data and interact with BWAPI from
+anywhere. The TorchCraft client should be installed from C++, Python, or Lua.
+We provide off the shelf solutions for Python and Lua:
 
-C++ Requirements:
+Requirements:
   - zstd-devel 1.1.4
   - zeromq 4+
 
 Remember to init submodules: `git submodule update --init --recursive`<br/>
-Python setup: `pip install .`<br/>
+Python setup: `pip install pybind11 && pip install .`<br/>
 Lua setup (depends on [torch7](http://torch.ch/docs/getting-started.html)): `luarocks make *.rockspec`<br/>
 
 We provide an example C++ CMake project in `examples/cpp/`

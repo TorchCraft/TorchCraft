@@ -38,6 +38,9 @@ AIClient or AIModule.
 
   > The patch should be discovered automatically, but if it's not, make sure to point it to the right folder.
 
+- **NOTE** It may be difficult to obtain 1.16.1 after the 1.18 release. 
+  Check [here](https://us.battle.net/forums/en/starcraft/topic/20754525604) 
+  for possible solutions. We will not support 1.18 until BWAPI does.
 - Enter the game and create a character.
   - Single Player → Expansion, AND
   - Multiplayer → Expansion → Local PC
@@ -64,7 +67,7 @@ AIClient or AIModule.
 - Check the “RELEASE” box from BWAPI.
 - Click Start.
 
-### TorchCraft AIClient (EXE) for users (DEPRECATED)
+### TorchCraft AIClient (EXE) for users (EXPERIMENTAL)
 
 If you need support, please start an issue. The last time this was tested was 1.3.0.
 

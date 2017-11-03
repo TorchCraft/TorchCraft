@@ -260,11 +260,10 @@ void Replayer::writeFrames(std::ostream& out) const {
   std::transform(frames.begin(), frames.end(), fbsFrames.begin(), buildFbsFrame);
 
   auto fbsFrameContainer = fbs::CreateFrameContainer(fbsBuilder, fbsBuilder.CreateVector(fbsFrames));
-  //out << fbsFrameContainer;
+  // TODO: Write to stream
 }
 
 void Replayer::readFrames(std::istream& out) {
-
 }
 
 void Replayer::setMap(

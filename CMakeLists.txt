@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.6)
+
+# This CMake file is used _only_ really to install torchcraft in lua
 IF(LUAROCKS_PREFIX)
     MESSAGE(STATUS "Installing TorchCraft through Luarocks")
     STRING(REGEX REPLACE "(.*)lib/luarocks/rocks.*" "\\1" CMAKE_INSTALL_PREFIX  "${LUAROCKS_PREFIX}")
@@ -31,7 +33,7 @@ ENDIF()
 SET_TARGET_PROPERTIES(torchcraft PROPERTIES
     VERSION   1.3.3
     SOVERSION 1.3.3)
-TARGET_LINK_LIBRARIES(torchcraft TH luaT zmq)
+TARGET_LINK_LIBRARIES(torchcraft luaT zmq)
 IF(ZSTD_FOUND)
     # Use the static library since we're using "advanced/experimental" features
     TARGET_LINK_LIBRARIES(torchcraft ${ZSTD_LIBDIR}/libzstd.a)

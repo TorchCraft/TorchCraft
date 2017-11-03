@@ -7,7 +7,7 @@ from subprocess import check_output, CalledProcessError
 import sys
 import distutils.unixccompiler
 
-__version__ = '1.3.3beta'
+__version__ = '1.3.3'
 
 ###############################################################################
 # Monkey-patch setuptools to compile in parallel (copied from pytorch)
@@ -99,7 +99,7 @@ ext_modules = [
         # TODO Search for ZSTD and define this if it exists
         define_macros=[('WITH_ZSTD', None)],
         library_dirs=[torch_libdir],
-        libraries=['TH', 'zstd', 'zmq'],
+        libraries=['zstd', 'zmq'],
         language='c++'
     ),
 ]

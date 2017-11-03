@@ -9,10 +9,6 @@
 
 #pragma once
 
-extern "C" {
-#include <TH/TH.h>
-}
-
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -26,14 +22,8 @@ namespace torchcraft {
 namespace replayer {
 
 struct Map {
-  THByteTensor* data;
-  Map() {
-    data = nullptr;
-  }
-  ~Map() {
-    if (data != nullptr)
-      THByteTensor_free(data);
-  }
+  uint32_t height, width;
+  std::vector<uint8_t> data;
 };
 
 class Replayer : public RefCounted {
@@ -72,6 +62,12 @@ class Replayer : public RefCounted {
   size_t size() const {
     return frames.size();
   }
+  int32_t mapHeight() const {
+    return map.height;
+  }
+  int32_t mapWidth() const {
+    return map.width;
+  }
 
   void setNumUnits() {
     for (const auto f : frames) {
@@ -93,45 +89,44 @@ class Replayer : public RefCounted {
     return numUnits.at(key);
   }
 
-  void setMapFromState(torchcraft::State* state);
-
-  void setMap(
-      THByteTensor* walkability,
-      THByteTensor* ground_height,
-      THByteTensor* buildability,
-      std::vector<int>& start_loc_x,
-      std::vector<int>& start_loc_y);
+  void setMapFromState(torchcraft::State const* state);
 
   void setMap(
       int32_t h,
       int32_t w,
-      uint8_t* walkability,
-      uint8_t* ground_height,
-      uint8_t* buildability,
-      std::vector<int>& start_loc_x,
-      std::vector<int>& start_loc_y);
+      std::vector<uint8_t> const& walkability,
+      std::vector<uint8_t> const& ground_height,
+      std::vector<uint8_t> const& buildability,
+      std::vector<int> const& start_loc_x,
+      std::vector<int> const& start_loc_y);
 
-  void setRawMap(uint32_t h, uint32_t w, uint8_t* d) {
+  void setMap(
+      int32_t h,
+      int32_t w,
+      uint8_t const* const walkability,
+      uint8_t const* const ground_height,
+      uint8_t const* const buildability,
+      std::vector<int> const& start_loc_x,
+      std::vector<int> const& start_loc_y);
+
+  void setRawMap(uint32_t h, uint32_t w, uint8_t const* d) {
     // free existing map if needed
-    if (map.data != nullptr) {
-      THByteTensor_free(map.data);
-    }
-    auto storage = THByteStorage_newWithData(d, h * w); // refcount 1
-    map.data = THByteTensor_newWithStorage2d(storage, 0, h, w, w, 1);
-    // storage has been retained by map.data, so decrease refcount back to 1
-    THByteStorage_free(storage);
+    map.data.resize(h * w);
+    map.data.assign(d, d + h * w);
+    map.height = h;
+    map.width = w;
   }
 
-  THByteTensor* getRawMap() {
+  const std::vector<uint8_t>& getRawMap() {
     return map.data;
   }
 
-  void getMap(
-      THByteTensor* walkability,
-      THByteTensor* ground_height,
-      THByteTensor* buildability,
+  std::pair<int32_t, int32_t> getMap(
+      std::vector<uint8_t>& walkability,
+      std::vector<uint8_t>& ground_height,
+      std::vector<uint8_t>& buildability,
       std::vector<int>& start_loc_x,
-      std::vector<int>& start_loc_y);
+      std::vector<int>& start_loc_y) const;
 
   friend std::ostream& operator<<(std::ostream& out, const Replayer& o);
   friend std::istream& operator>>(std::istream& in, Replayer& o);

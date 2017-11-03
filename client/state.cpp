@@ -9,7 +9,7 @@
 
 #include "state.h"
 
-#include "fbs/bwenv_messages_generated.h"
+#include "fbs/torchcraft_generated.h"
 
 namespace torchcraft {
 
@@ -35,7 +35,6 @@ State::State(const State& other)
       neutral_id(other.neutral_id),
       replay(other.replay),
       frame(new Frame(other.frame)),
-      // frame_string(other.frame_string)  // save some cycles
       deaths(other.deaths),
       frame_from_bwapi(other.frame_from_bwapi),
       battle_frame_count(other.battle_frame_count),
@@ -88,7 +87,6 @@ void swap(State& a, State& b) {
   swap(a.neutral_id, b.neutral_id);
   swap(a.replay, b.replay);
   swap(a.frame, b.frame);
-  swap(a.frame_string, b.frame_string);
   swap(a.deaths, b.deaths);
   swap(a.frame_from_bwapi, b.frame_from_bwapi);
   swap(a.battle_frame_count, b.battle_frame_count);
@@ -126,7 +124,6 @@ void State::reset() {
   map_name.clear();
   start_locations.clear();
   player_info.clear();
-  frame_string.clear();
   frame->clear();
   deaths.clear();
   frame_from_bwapi = 0;
@@ -229,38 +226,34 @@ std::vector<std::string> State::update(
   return upd;
 }
 
-bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
-  if (fd->data() == nullptr)
-    return false;
-  if (fd->is_diff()) {
-    this->frame_string = "";
-    std::istringstream ss(std::string(
-        reinterpret_cast<const char*>(fd->data()->data()), fd->data()->size()));
-    replayer::FrameDiff diff;
-    ss >> diff;
-    replayer::frame_undiff(this->frame, this->frame, &diff);
-  } else {
-    this->frame_string = std::string(
-        reinterpret_cast<const char*>(fd->data()->data()), fd->data()->size());
-    std::istringstream ss(this->frame_string);
-    ss >> *this->frame;
+bool State::update_frame(const void* frameOrFrameDiff) {
+
+  auto asFrame = static_cast<const fbs::Frame*>(frameOrFrameDiff);
+  if (asFrame) {
+    //TODO: Unpack
+    //this->frame = asFrame;
+    return true;
   }
-  return true;
+  auto asFrameDiff = static_cast<const fbs::FrameDiff*>(frameOrFrameDiff);
+  if (asFrameDiff) {
+    //TODO: Unpack
+    //replayer::frame_undiff(this->frame, this->frame, asFrameDiff);
+    return true;
+  }
+
+  return false;
 }
 
-std::vector<std::string> State::update(const torchcraft::fbs::FrameState* frame) {
+std::vector<std::string> State::update(const torchcraft::fbs::FrameState* frameState) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::FrameState::VT_DATA)) {
-    if (this->update_frame(frame->data())) {
-      upd.emplace_back("frame_string");
-      upd.emplace_back("frame");
-    }
+  if (this->update_frame(frameState->frameOrFrameDiff())) {
+    upd.emplace_back("frame");
   }
 
-  if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::FrameState::VT_DEATHS)) {
-    auto& fd = *frame->deaths();
+  if (flatbuffers::IsFieldPresent(frameState, torchcraft::fbs::FrameState::VT_DEATHS)) {
+    auto& fd = *frameState->deaths();
     deaths.resize(fd.size());
     for (size_t i = 0; i < fd.size(); i++) {
       deaths[i] = fd[i];
@@ -270,33 +263,33 @@ std::vector<std::string> State::update(const torchcraft::fbs::FrameState* frame)
     }
   }
 
-  frame_from_bwapi = frame->frame_from_bwapi();
+  frame_from_bwapi = frameState->frame_from_bwapi();
   upd.emplace_back("frame_from_bwapi");
-  battle_frame_count = frame->battle_frame_count();
+  battle_frame_count = frameState->battle_frame_count();
   upd.emplace_back("battle_frame_count");
 
-  if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::FrameState::VT_IMG_MODE)) {
-    img_mode = frame->img_mode()->str();
+  if (flatbuffers::IsFieldPresent(frameState, torchcraft::fbs::FrameState::VT_IMG_MODE)) {
+    img_mode = frameState->img_mode()->str();
     upd.emplace_back("img_mode");
   }
 
   if (flatbuffers::IsFieldPresent(
-          frame, torchcraft::fbs::FrameState::VT_SCREEN_POSITION)) {
-    screen_position[0] = frame->screen_position()->x();
-    screen_position[1] = frame->screen_position()->y();
+          frameState, torchcraft::fbs::FrameState::VT_SCREEN_POSITION)) {
+    screen_position[0] = frameState->screen_position()->x();
+    screen_position[1] = frameState->screen_position()->y();
     upd.emplace_back("screen_position");
   }
 
   if (flatbuffers::IsFieldPresent(
-          frame, torchcraft::fbs::FrameState::VT_VISIBILITY) &&
+          frameState, torchcraft::fbs::FrameState::VT_VISIBILITY) &&
       flatbuffers::IsFieldPresent(
-          frame, torchcraft::fbs::FrameState::VT_VISIBILITY_SIZE)) {
-    if (frame->visibility()->size() ==
+          frameState, torchcraft::fbs::FrameState::VT_VISIBILITY_SIZE)) {
+    if (frameState->visibility()->size() ==
         static_cast<size_t>(
-            frame->visibility_size()->x() * frame->visibility_size()->y())) {
-      visibility_size[0] = frame->visibility_size()->x();
-      visibility_size[1] = frame->visibility_size()->y();
-      auto& vb = *frame->visibility();
+            frameState->visibility_size()->x() * frameState->visibility_size()->y())) {
+      visibility_size[0] = frameState->visibility_size()->x();
+      visibility_size[1] = frameState->visibility_size()->y();
+      auto& vb = *frameState->visibility();
       visibility.resize(vb.size());
       for (size_t i = 0; i < vb.size(); i++) {
         visibility[i] = vb[i];
@@ -311,9 +304,9 @@ std::vector<std::string> State::update(const torchcraft::fbs::FrameState* frame)
     }
   }
 
-  if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::FrameState::VT_IMG_DATA) &&
-      flatbuffers::IsFieldPresent(frame, torchcraft::fbs::FrameState::VT_IMG_SIZE)) {
-    if (setRawImage(frame)) {
+  if (flatbuffers::IsFieldPresent(frameState, torchcraft::fbs::FrameState::VT_IMG_DATA) &&
+      flatbuffers::IsFieldPresent(frameState, torchcraft::fbs::FrameState::VT_IMG_SIZE)) {
+    if (setRawImage(frameState)) {
       upd.emplace_back("image");
     }
   }
@@ -326,11 +319,9 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
-    if (this->update_frame(end->data())) {
-      upd.emplace_back("frame_string");
-      upd.emplace_back("frame");
-    }
+  // TODO There used to be a test here of whether a frame(diff) was present. Is it ever not?
+  if (this->update_frame(end->frameOrFrameDiff())) {
+    upd.emplace_back("frame");
   }
 
   game_ended = true;

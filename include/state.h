@@ -24,7 +24,7 @@ namespace fbs {
 struct HandshakeServer;
 struct FrameState;
 struct EndGame;
-struct FrameData;
+struct FrameOrFrameDiffUnion;
 struct PlayerLeft;
 struct Error;
 } // namespace fbs
@@ -70,7 +70,6 @@ class State : public RefCounted {
 
   // game state
   Frame* frame; // this will allow for easy reset (XXX)
-  std::string frame_string;
   std::vector<int> deaths;
   int frame_from_bwapi;
   int battle_frame_count; // if micro mode
@@ -182,7 +181,7 @@ class State : public RefCounted {
   void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
-  bool update_frame(const torchcraft::fbs::FrameData* fd);
+  bool update_frame(const void* frameOrFrameDiff);
 
   bool microBattles_;
   std::set<BW::UnitType> onlyConsiderTypes_;

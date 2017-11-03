@@ -16,7 +16,7 @@
 #include "connection.h"
 #include "state.h"
 
-#include "fbs/bwenv_messages_generated.h"
+#include "fbs/torchcraft_generated.h"
 
 namespace {
 

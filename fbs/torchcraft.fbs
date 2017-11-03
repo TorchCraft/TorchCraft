@@ -9,6 +9,112 @@
 
 namespace torchcraft.fbs;
 
+struct Vec2 {
+  x:int;
+  y:int;
+}
+
+table Command {
+  code:int;
+  args:[int];
+  str:string;
+}
+
+table Player {
+  id:int;
+  race:int;              // See torchcraft::BW::Race enum
+  name:string;
+  is_enemy:bool;
+}
+
+table HandshakeClient {
+  protocol:int;           // protocol for binary frame format
+  map:string;
+  window_size:Vec2;
+  window_pos:Vec2;
+  micro_mode:bool;
+}
+
+table HandshakeServer {
+  lag_frames:int;
+  map_size:Vec2;                // walk tile x and y
+  ground_height_data:[ubyte];   // walk tile resolution of ground heights
+  walkable_data:[ubyte];        // walk tile resolution of walkability
+  map_name:string;
+  is_replay:bool;
+  player_id:int;                // if is_replay == false
+  neutral_id:int;               // if is_replay == false
+  battle_frame_count:int;       // if micro_mode == true
+  buildable_data:[ubyte];       // walk tile resolution of buildability
+  start_locations:[Vec2];
+  players:[Player];
+}
+
+table Commands {
+  commands:[Command];
+}
+
+enum FrameRepresentation : bool {
+  AsFrame,
+  AsFrameDiff
+}
+
+union FrameOrFrameDiff {
+  Frame,
+  FrameDiff
+}
+
+table FrameState {
+  frameOrFrameDiff:FrameOrFrameDiff;
+  deaths:[int];
+  frame_from_bwapi:int;
+  battle_frame_count:int;
+  commands_status:[byte];       // Status for previous commands (zero == success)
+
+  // if with_image
+  img_mode:string;
+  screen_position:Vec2;
+  visibility:[ubyte];
+  visibility_size:Vec2;
+  img_data:[ubyte];
+  img_size:Vec2;
+}
+
+table PlayerLeft {
+  player_left:string;
+}
+
+table EndGame {
+  frameOrFrameDiff:FrameOrFrameDiff;
+  game_won:bool;
+}
+
+table Error {
+  message:string;
+}
+
+union MessageType {
+  // from client
+  HandshakeClient,
+  Commands,
+
+  // from server
+  HandshakeServer,
+  FrameState,
+  PlayerLeft,
+  EndGame,
+  Error,
+}
+
+table Message {
+  msg:MessageType;
+  uid:string; // sender ID
+}
+
+root_type Message;
+
+
+
 table Map {
   height:int;
   width:int;
@@ -167,5 +273,3 @@ table Replayer {
   map:Map;
   keyFrame:int;
 }
-
-root_type Replayer;

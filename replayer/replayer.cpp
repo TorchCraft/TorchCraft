@@ -9,7 +9,7 @@
 
 #include "replayer.h"
 #include <bitset>
-#include "../fbs/frame_generated.h"
+#include "../fbs/torchcraft_generated.h"
 
 #ifdef WITH_ZSTD
 #include "zstdstream.h"

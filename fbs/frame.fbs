@@ -95,17 +95,16 @@ table Unit {
   spellCD:int;
   associatedUnit:int; //addOn, nydusExit, transport, hatchery
   associatedCount:int; //spiderMines, scarabs, interceptors, nuke
-  flags:long;
 }
 
-table UnitByPlayerId {
+table UnitsByPlayerId {
   playerId:int;
-  unit:Unit;
+  units:[Unit];
 }
 
-table ActionByPlayerId {
+table ActionsByPlayerId {
   playerId:int;
-  action:Action;
+  actions:[Action];
 }
 
 table ResourcesByPlayerId {
@@ -114,8 +113,8 @@ table ResourcesByPlayerId {
 }
 
 table Frame {
-  units:[UnitByPlayerId];
-  actions:[ActionByPlayerId];
+  units:[UnitsByPlayerId];
+  actions:[ActionsByPlayerId];
   resources:[ResourcesByPlayerId];
   bullets:[Bullet];
   creep_map:[ubyte];

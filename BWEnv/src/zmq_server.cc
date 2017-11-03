@@ -31,7 +31,7 @@ void sendFBObject(zmq::socket_t& sock, const T* obj) {
   auto payload = T::TableType::Pack(fbb, obj);
   auto root = torchcraft::fbs::CreateMessage(
       fbb,
-      torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value,
+      torchcraft::fbs::MessageTypeTraits<typename T::TableType>::enum_value,
       payload.Union());
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 
@@ -149,9 +149,9 @@ void ZMQ_server::connect()
   }
 
   auto msg = torchcraft::fbs::GetMessage(data);
-  if (msg->msg_type() == torchcraft::fbs::Any::HandshakeClient) {
+  if (msg->msg_type() == torchcraft::fbs::MessageType::HandshakeClient) {
     if (!torchcraft::fbs::VerifyAny(
-            verifier, msg->msg(), torchcraft::fbs::Any::HandshakeClient)) {
+            verifier, msg->msg(), torchcraft::fbs::MessageType::HandshakeClient)) {
       throw runtime_error("ZMQ_server::connect(): invalid message.");
     }
     handleReconnect(
@@ -253,11 +253,11 @@ bool ZMQ_server::receiveMessage(int timeoutMs)
   }
 
   switch (msg->msg_type()) {
-    case torchcraft::fbs::Any::HandshakeClient: // reconnection
+    case torchcraft::fbs::MessageType::HandshakeClient: // reconnection
       handleReconnect(
           reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
       break;
-    case torchcraft::fbs::Any::Commands: {
+    case torchcraft::fbs::MessageType::Commands: {
       auto status = handleCommands(
           reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
       controller->setCommandsStatus(std::move(status));

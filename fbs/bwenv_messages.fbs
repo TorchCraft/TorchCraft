@@ -55,17 +55,31 @@ table Commands {
 }
 
 table FrameData {
- data:[ubyte];
- is_diff:bool;
+ data:[ubyte];  // TODO: Entry point for frames
+ is_diff:bool;  // Instead do a Union of Frame/FrameDiff
 }
 
-table Frame {
-  data:FrameData;
+table FrameDiffData {
+//TODO
+}
+
+enum FrameRepresentation : bool {
+  AsFrame,
+  AsFrameDiff
+}
+
+union FrameOrFrameDiff {
+  FrameData,
+  FrameDiffData
+}
+
+table FrameState {
+  data:FrameData; //TODO: FrameOrFrameDiff
   deaths:[int];
   frame_from_bwapi:int;
   battle_frame_count:int;
   commands_status:[byte];       // Status for previous commands (zero == success)
-  
+
   // if with_image
   img_mode:string;
   screen_position:Vec2;
@@ -88,21 +102,21 @@ table Error {
   message:string;
 }
 
-union Any {
+union MessageType {
   // from client
   HandshakeClient,
   Commands,
 
   // from server
   HandshakeServer,
-  Frame,
+  FrameState,
   PlayerLeft,
   EndGame,
   Error,
 }
 
 table Message {
-  msg:Any;
+  msg:MessageType;
   uid:string; // sender ID
 }
 

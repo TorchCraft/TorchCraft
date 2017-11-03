@@ -55,7 +55,7 @@ void buildHandshakeMessage(
   auto payload = torchcraft::fbs::HandshakeClient::Pack(fbb, &hsc);
   auto root = torchcraft::fbs::CreateMessageDirect(
       fbb,
-      torchcraft::fbs::Any::HandshakeClient,
+      torchcraft::fbs::MessageType::HandshakeClient,
       payload.Union(),
       uid ? uid->c_str() : nullptr);
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
@@ -74,7 +74,7 @@ void buildCommandMessage(
   auto payload = torchcraft::fbs::CreateCommandsDirect(fbb, &offsets);
   auto root = torchcraft::fbs::CreateMessageDirect(
       fbb,
-      torchcraft::fbs::Any::Commands,
+      torchcraft::fbs::MessageType::Commands,
       payload.Union(),
       uid ? uid->c_str() : nullptr);
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
@@ -170,14 +170,14 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
     return false;
   }
   auto msg = torchcraft::fbs::GetMessage(reply.data());
-  if (msg->msg_type() != torchcraft::fbs::Any::HandshakeServer) {
+  if (msg->msg_type() != torchcraft::fbs::MessageType::HandshakeServer) {
     error_ = std::string(
                  "Error parsing init reply: expected HandshakeServer, got ") +
-        torchcraft::fbs::EnumNameAny(msg->msg_type());
+        torchcraft::fbs::EnumNameMessageType(msg->msg_type());
     return false;
   }
-  if (!torchcraft::fbs::VerifyAny(
-          verifier, msg->msg(), torchcraft::fbs::Any::HandshakeServer)) {
+  if (!torchcraft::fbs::VerifyMessageType(
+          verifier, msg->msg(), torchcraft::fbs::MessageType::HandshakeServer)) {
     error_ = "Error parsing init reply";
     return false;
   }
@@ -245,17 +245,17 @@ bool Client::receive(std::vector<std::string>& updates) {
     return false;
   }
   auto msg = torchcraft::fbs::GetMessage(reply.data());
-  if (!torchcraft::fbs::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
+  if (!torchcraft::fbs::VerifyMessageType(verifier, msg->msg(), msg->msg_type())) {
     error_ = "Error parsing reply";
     return false;
   }
 
   switch (msg->msg_type()) {
-    case torchcraft::fbs::Any::Frame: {
+    case torchcraft::fbs::MessageType::FrameState: {
       auto frameMsg =
-          reinterpret_cast<const torchcraft::fbs::Frame*>(msg->msg());
+          reinterpret_cast<const torchcraft::fbs::FrameState*>(msg->msg());
       if (flatbuffers::IsFieldPresent(
-              frameMsg, torchcraft::fbs::Frame::VT_COMMANDS_STATUS)) {
+              frameMsg, torchcraft::fbs::FrameState::VT_COMMANDS_STATUS)) {
         auto& cs = *frameMsg->commands_status();
         lastCommandsStatus_.resize(cs.size());
         for (size_t i = 0; i < cs.size(); i++) {
@@ -265,33 +265,33 @@ bool Client::receive(std::vector<std::string>& updates) {
       updates = state_->update(frameMsg);
       break;
     }
-    case torchcraft::fbs::Any::EndGame:
+    case torchcraft::fbs::MessageType::EndGame:
       updates = state_->update(
           reinterpret_cast<const torchcraft::fbs::EndGame*>(msg->msg()));
       break;
-    case torchcraft::fbs::Any::HandshakeServer:
+    case torchcraft::fbs::MessageType::HandshakeServer:
       updates = state_->update(
           reinterpret_cast<const torchcraft::fbs::HandshakeServer*>(
               msg->msg()));
       break;
     // TODO These message types were not explicitly handled in the Lua version
-    case torchcraft::fbs::Any::PlayerLeft: {
+    case torchcraft::fbs::MessageType::PlayerLeft: {
       auto left =
           reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(msg->msg())
               ->player_left();
       std::cerr << "[Warning] Unhandled message from server: "
-                << torchcraft::fbs::EnumNameAny(msg->msg_type())
+                << torchcraft::fbs::EnumNameMessageType(msg->msg_type())
                 << "(player_left=\"" << (left ? left->str() : "(null)") << "\")"
                 << std::endl;
       updates = state_->update(
           reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(msg->msg()));
       break;
     }
-    case torchcraft::fbs::Any::Error: {
+    case torchcraft::fbs::MessageType::Error: {
       auto text = reinterpret_cast<const torchcraft::fbs::Error*>(msg->msg())
                       ->message();
       std::cerr << "[Warning] Unhandled message from server: "
-                << torchcraft::fbs::EnumNameAny(msg->msg_type())
+                << torchcraft::fbs::EnumNameMessageType(msg->msg_type())
                 << "(message=\"" << (text ? text->str() : "(null)") << "\""
                 << std::endl;
       updates = state_->update(
@@ -300,7 +300,7 @@ bool Client::receive(std::vector<std::string>& updates) {
     }
     default:
       error_ = std::string("Error parsing reply: cannot handle message: ") +
-          torchcraft::fbs::EnumNameAny(msg->msg_type());
+          torchcraft::fbs::EnumNameMessageType(msg->msg_type());
       return false;
   }
   return true;

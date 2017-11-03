@@ -1607,7 +1607,7 @@ flatbuffers::Offset<ActionsByPlayerId> CreateActionsByPlayerId(flatbuffers::Flat
 struct ResourcesByPlayerIdT : public flatbuffers::NativeTable {
   typedef ResourcesByPlayerId TableType;
   int32_t playerId;
-  std::unique_ptr<ActionT> action;
+  std::unique_ptr<ResourcesT> resources;
   ResourcesByPlayerIdT()
       : playerId(0) {
   }
@@ -1617,7 +1617,7 @@ struct ResourcesByPlayerId FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table 
   typedef ResourcesByPlayerIdT NativeTableType;
   enum {
     VT_PLAYERID = 4,
-    VT_ACTION = 6
+    VT_RESOURCES = 6
   };
   int32_t playerId() const {
     return GetField<int32_t>(VT_PLAYERID, 0);
@@ -1625,17 +1625,17 @@ struct ResourcesByPlayerId FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table 
   bool mutate_playerId(int32_t _playerId) {
     return SetField<int32_t>(VT_PLAYERID, _playerId, 0);
   }
-  const Action *action() const {
-    return GetPointer<const Action *>(VT_ACTION);
+  const Resources *resources() const {
+    return GetPointer<const Resources *>(VT_RESOURCES);
   }
-  Action *mutable_action() {
-    return GetPointer<Action *>(VT_ACTION);
+  Resources *mutable_resources() {
+    return GetPointer<Resources *>(VT_RESOURCES);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_PLAYERID) &&
-           VerifyOffset(verifier, VT_ACTION) &&
-           verifier.VerifyTable(action()) &&
+           VerifyOffset(verifier, VT_RESOURCES) &&
+           verifier.VerifyTable(resources()) &&
            verifier.EndTable();
   }
   ResourcesByPlayerIdT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -1649,8 +1649,8 @@ struct ResourcesByPlayerIdBuilder {
   void add_playerId(int32_t playerId) {
     fbb_.AddElement<int32_t>(ResourcesByPlayerId::VT_PLAYERID, playerId, 0);
   }
-  void add_action(flatbuffers::Offset<Action> action) {
-    fbb_.AddOffset(ResourcesByPlayerId::VT_ACTION, action);
+  void add_resources(flatbuffers::Offset<Resources> resources) {
+    fbb_.AddOffset(ResourcesByPlayerId::VT_RESOURCES, resources);
   }
   explicit ResourcesByPlayerIdBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -1667,9 +1667,9 @@ struct ResourcesByPlayerIdBuilder {
 inline flatbuffers::Offset<ResourcesByPlayerId> CreateResourcesByPlayerId(
     flatbuffers::FlatBufferBuilder &_fbb,
     int32_t playerId = 0,
-    flatbuffers::Offset<Action> action = 0) {
+    flatbuffers::Offset<Resources> resources = 0) {
   ResourcesByPlayerIdBuilder builder_(_fbb);
-  builder_.add_action(action);
+  builder_.add_resources(resources);
   builder_.add_playerId(playerId);
   return builder_.Finish();
 }
@@ -2374,7 +2374,7 @@ inline void ResourcesByPlayerId::UnPackTo(ResourcesByPlayerIdT *_o, const flatbu
   (void)_o;
   (void)_resolver;
   { auto _e = playerId(); _o->playerId = _e; };
-  { auto _e = action(); if (_e) _o->action = std::unique_ptr<ActionT>(_e->UnPack(_resolver)); };
+  { auto _e = resources(); if (_e) _o->resources = std::unique_ptr<ResourcesT>(_e->UnPack(_resolver)); };
 }
 
 inline flatbuffers::Offset<ResourcesByPlayerId> ResourcesByPlayerId::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesByPlayerIdT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -2386,11 +2386,11 @@ inline flatbuffers::Offset<ResourcesByPlayerId> CreateResourcesByPlayerId(flatbu
   (void)_o;
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ResourcesByPlayerIdT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _playerId = _o->playerId;
-  auto _action = _o->action ? CreateAction(_fbb, _o->action.get(), _rehasher) : 0;
+  auto _resources = _o->resources ? CreateResources(_fbb, _o->resources.get(), _rehasher) : 0;
   return torchcraft::fbs::CreateResourcesByPlayerId(
       _fbb,
       _playerId,
-      _action);
+      _resources);
 }
 
 inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *_resolver) const {

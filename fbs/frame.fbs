@@ -109,7 +109,7 @@ table ActionsByPlayerId {
 
 table ResourcesByPlayerId {
   playerId:int;
-  action:Action;
+  resources:Resources;
 }
 
 table Frame {

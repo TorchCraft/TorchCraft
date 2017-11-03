@@ -236,7 +236,7 @@ void Replayer::writeFrames(std::ostream& out) const {
     std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
     std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
     std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
-    std::vector<flatbuffers::Offset<fbs:ResourcesByPlayerId>> fbsRsourcesByPlayerId;
+    std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
     std::transform(frame.bullets.begin(), frame.bullets.end(), fbsBullets.begin(), buildFbsBullet);
     std::transform(frame.actions.begin(), frame.actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId);
     std::transform(frame.resources.begin(), frame.resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId);
@@ -251,7 +251,7 @@ void Replayer::writeFrames(std::ostream& out) const {
     fbsFrameBuilder.add_bullets(fbsBuilder.CreateVector(fbsBullets));
     fbsFrameBuilder.add_actions(fbsBuilder.CreateVector(fbsActionsByPlayerId));
     fbsFrameBuilder.add_units(fbsBuilder.CreateVector(fbsUnitsByPlayerId));
-    fbsFrameBuilder.add_resources(fbsBuilder.CreateVector(fbsResourcesByPlayerId))
+    fbsFrameBuilder.add_resources(fbsBuilder.CreateVector(fbsResourcesByPlayerId));
 
     return fbsFrameBuilder.Finish();
   };

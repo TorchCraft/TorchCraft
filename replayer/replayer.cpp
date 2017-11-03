@@ -21,6 +21,7 @@ namespace replayer {
 // Serialization
 
 std::ostream& operator<<(std::ostream& out, const Replayer& o) {
+  /*
   auto height = o.map.height;
   auto width = o.map.width;
   auto data = o.map.data.data();
@@ -32,12 +33,14 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
 
   auto kf = o.keyframe == 0 ? 1 : o.keyframe;
 
-  o.writeFrames(out);
+  //Serialize the frame state, either as a Frame or a FrameDiff
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
     if (i % kf == 0)
+      // It's a keyframe. Serialize a Frame.
       out << *o.frames[i] << " ";
     else
+      // It's not a keyframe. Serialize a FrameDiff.
       out << frame_diff(o.frames[i], o.frames[i - 1]) << " ";
   }
 
@@ -45,6 +48,7 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   for (const auto& nu : o.numUnits) {
     out << nu.first << " " << nu.second << " ";
   }
+  */
 
   return out;
 }
@@ -55,6 +59,7 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   // if we tried to delete it.
   // Cause: invalid data file? I/O error? or a bug in the code?
 
+/*
   int32_t diffed;
   int32_t height, width;
   in >> diffed;
@@ -76,7 +81,6 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   size_t nFrames;
   in >> nFrames;
 
-  o.readFrames(in);
   o.frames.resize(nFrames);
   for (size_t i = 0; i < nFrames; i++) {
     if (o.keyframe == 0) {
@@ -104,10 +108,11 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
     o.numUnits[key] = val;
   }
 
+*/
   return in;
 }
 
-void Replayer::writeFrames(std::ostream& out) const {
+void Replayer::write(std::ostream& out) const {
 
   flatbuffers::FlatBufferBuilder fbsBuilder;
 
@@ -263,7 +268,25 @@ void Replayer::writeFrames(std::ostream& out) const {
   // TODO: Write to stream
 }
 
-void Replayer::readFrames(std::istream& out) {
+void Replayer::read(std::istream& out) {
+
+  validate();
+}
+
+void Replayer::validate() {
+  auto throwCorruptedReplayException = [&](const char* problem) {
+    std::string message("Corrupted replay: ");
+    message.append(problem);
+    std::runtime_error(message.c_str());
+  };
+
+  //TODO: Orders in a frame > 10000
+  //TODO: Players with actions in a frame > 9
+  //TODO: Actions in a frame > 10000
+  //TODO: Players with resources in a frame > 9
+  //TODO: Bullets in a frame > 500
+  //TODO: Players with units > 9
+  //TODO: Untis in a frame > 10000
 }
 
 void Replayer::setMap(

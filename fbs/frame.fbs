@@ -128,4 +128,44 @@ table FrameContainer {
   frames:[Frame];
 }
 
-root_type FrameContainer;
+table UnitDiff {
+  id:int;
+  var_ids:[int];
+  var_diffs:[int];
+  order_ids:[int];
+  order_diffs:[int];
+  order_size:int;
+  velocityX:double;
+  velocityY:double;
+  flags:long;
+}
+
+struct Creep {
+  x:int;
+  y:int;
+}
+
+table FrameDiff {
+  pids:[int];
+  //units:[[UnitDiff]];
+  actions:[ActionsByPlayerId];
+  resources:[ResourcesByPlayerId];
+  bullets:[Bullet];
+  creep_map:[Creep];
+  reward:int;
+  is_terminal:int;
+}
+
+table UnitCount {
+  a:int;
+  b:int;
+}
+
+table Replayer {
+  frames:[Frame];
+  numUnits:[UnitCount];
+  map:Map;
+  keyFrame:int;
+}
+
+root_type Replayer;

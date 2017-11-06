@@ -27,7 +27,7 @@ namespace torchcraft {
 
     public:
       FlatbufferStream() {}
-      FlatbufferStream(const T& finishedFlatbuffer): flatbuffer(finishedFlatbuffer) {}
+      FlatbufferStream(T& unfinishedFlatbuffer): flatbuffer(unfinishedFlatbuffer) {} // Modifies it by invoking .Finish()
       std::shared_ptr<T> getFlatbuffer() { std::shared_ptr<T>(flatBuffer); }
 
     private:
@@ -40,10 +40,30 @@ namespace torchcraft {
   //    t       The flatbuffer
   //  }
   //
-  //  Flatbuffers are ignorant of how mcuh
+  // We need to record the Flatbuffer's size because it can't otherwise
+  // figure out how much of the stream to consume.
+
+  /*
+  template<typename T>
+  void writePOD(std::ostream& out, T const& val) const {
+    out.write(reinterpret_cast<char const*>(&val), sizeof(T));
+  }
+  template<typename T>
+  void readPOD(T& val, std::istream& in) const {
+    in.read(reinterpret_cast<char*>(&val), sizeof(T));
+  }
+  */
 
   template <typename T>
   std::ostream& operator<<(std::ostream& out, const FlatbufferStream<T>& o) {
+    auto flatbuffer = o->getFlatBuffer();
+
+    flatbuffer->Finish();
+    auto flatbufferSize = flatbuffer.GetSize();
+
+    out << flatbufferSize;
+    out.write(reinterpret_cast<char const*>(flatbuffer->GetBufferPointer()), flatbufferSize);
+
     return out;
   }
 

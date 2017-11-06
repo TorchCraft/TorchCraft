@@ -442,15 +442,16 @@ void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
   for (auto pair : df->creep_map)
     f->creep_map[pair.first] = pair.second;
 
+  auto frame_units = std::move(frame->units);
   f->units.clear();
 
   for (size_t i = 0; i < df->pids.size(); i++) {
     auto pid = df->pids[i];
     f->units[pid] = std::vector<replayer::Unit>();
 
-    auto f_units = frame->units.find(pid) == frame->units.end()
+    auto f_units = frame_units.find(pid) == frame_units.end()
         ? std::vector<replayer::Unit>()
-        : frame->units.at(pid);
+        : frame_units.at(pid);
     std::sort(f_units.begin(), f_units.end(), detail::orderUnitByiD);
 
     // Should be in order

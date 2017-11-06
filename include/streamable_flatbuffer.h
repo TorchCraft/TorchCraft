@@ -14,8 +14,19 @@
 
 namespace torchcraft {
 
+  // Lets us read/write Flatbuffer types to/from a stream.
+  //
+  // We need this because Flatbuffers don't have a fixed size;
+  // they just read from their input pointer until complete,
+  // an don't record the number of bytes consumed in the process.
+  //
+  // So you can't just read in a Flatbuffer from a stream, because you need
+  // to read a chunk the stream in advance; and the amount of stream you need
+  // to read is dynamic; so StreamableFlatbufferWrapper reads/writes metadata
+  // (the size of the stored Flatbuffer) to enable streaming.
+
   template <typename T>
-  class FlatbufferStream {
+  class AbstractFlatbufferWrapper {
 
     static_assert(
       std::is_default_constructible<T>::value,
@@ -25,50 +36,52 @@ namespace torchcraft {
       std::is_base_of<flatbuffers::Struct, T>::value,
       "Should be a default-constructible FlatBuffer (but isn't a Flatbuffer)");
 
-    public:
-      FlatbufferStream() {}
-      FlatbufferStream(T& unfinishedFlatbuffer): flatbuffer(unfinishedFlatbuffer) {} // Modifies it by invoking .Finish()
-      std::shared_ptr<T> getFlatbuffer() { std::shared_ptr<T>(flatBuffer); }
-
-    private:
-      std::shared_ptr<T> flatbuffer;
+    protected:
+      AbstractFlatbufferWrapper() {}
   };
 
-  // A FlatbufferStream serializes to :
+  template <typename T>
+  class OutStreamableFlatbuffer : protected AbstractFlatbufferWrapper<T> {
+
+    public:
+      T& flatbuffer;
+      OutStreamableFlatbuffer(T& unfinishedFlatbuffer)
+        : flatbuffer(unfinishedFlatbuffer) {
+        unfinishedFlatbuffer.Finish();
+      }
+
+      void write(std::ostream& out) {
+        flatbuffer->Finish();
+        auto flatbufferPointer = flatbuffer->GetBufferPointer();
+        auto flatbufferSize = flatbuffer.GetSize();
+
+        out << flatbufferSize;
+        out.write(reinterpret_cast<char const*>(flatbufferPointer), flatbufferSize);
+      }
+  };
+
+  template <typename T>
+  class InStreamableFlatbuffer : protected AbstractFlatbufferWrapper<T> {
+
+    public:
+      std::shared_ptr<T> flatbuffer;
+      InStreamableFlatbuffer() {}
+  };
+
+  // A StreamableFlatbufferWrapper serializes to :
   //  {
   //    size_t  The flatbuffer's size,
   //    t       The flatbuffer
   //  }
-  //
-  // We need to record the Flatbuffer's size because it can't otherwise
-  // figure out how much of the stream to consume.
-
-  /*
-  template<typename T>
-  void writePOD(std::ostream& out, T const& val) const {
-    out.write(reinterpret_cast<char const*>(&val), sizeof(T));
-  }
-  template<typename T>
-  void readPOD(T& val, std::istream& in) const {
-    in.read(reinterpret_cast<char*>(&val), sizeof(T));
-  }
-  */
 
   template <typename T>
-  std::ostream& operator<<(std::ostream& out, const FlatbufferStream<T>& o) {
-    auto flatbuffer = o->getFlatBuffer();
-
-    flatbuffer->Finish();
-    auto flatbufferSize = flatbuffer.GetSize();
-
-    out << flatbufferSize;
-    out.write(reinterpret_cast<char const*>(flatbuffer->GetBufferPointer()), flatbufferSize);
-
+  std::ostream& operator<<(std::ostream& out, const OutStreamableFlatbuffer<T>& o) {
+    out.write(out, o);
     return out;
   }
 
   template <typename T>
-  std::istream& operator>>(std::istream& in, FlatbufferStream<T>& o) {
+  std::istream& operator>>(std::istream& in, InStreamableFlatbuffer<T>& o) {
 
     size_t bufferSize;
     in >> bufferSize;

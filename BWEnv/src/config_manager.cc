@@ -40,12 +40,20 @@ void ConfigManager::loadDefault()
 void ConfigManager::loadGeneralSection()
 {
   port = readInt_("general", "port", 0);
+#ifdef _WIN32
   log_path = readString_("general", "log_path", "C:/tc_data/torchcraft_log_cpp_port_");
+#else
+  log_path = readString_("general", "log_path", "/tmp/tc_data/torchcraft_log_cpp_port_");
+#endif
   display_log = readBool_("general", "display_log", "false");
   img_mode = readString_("general", "img_mode", "raw");
   window_mode = readString_("general", "window_mode", "windows");
   window_mode_custom = readString_("general", "window_mode_custom", "");
+#ifdef _WIN32
   img_save_path = readString_("general", "img_save_path", "C:/tc_data/output_");
+#else
+  img_save_path = readString_("general", "img_save_path", "/tmp/tc_data/output_");
+#endif
 }
 
 void ConfigManager::loadStarCraftSection()

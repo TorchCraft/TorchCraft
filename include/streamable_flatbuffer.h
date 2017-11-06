@@ -24,10 +24,15 @@ namespace torchcraft {
   // to read a chunk the stream in advance; and the amount of stream you need
   // to read is dynamic; so StreamableFlatbufferWrapper reads/writes metadata
   // (the size of the stored Flatbuffer) to enable streaming.
+  //
+  // A StreamableFlatbufferWrapper serializes to :
+  //  {
+  //    size_t  The flatbuffer's size,
+  //    t       The flatbuffer
+  //  }
 
   template <typename T>
   class AbstractFlatbufferWrapper {
-
     static_assert(
       std::is_default_constructible<T>::value,
       "Should be a default-constructible FlatBuffer (but isn't default-constructible)");
@@ -35,14 +40,12 @@ namespace torchcraft {
       std::is_base_of<flatbuffers::Table, T>::value ||
       std::is_base_of<flatbuffers::Struct, T>::value,
       "Should be a default-constructible FlatBuffer (but isn't a Flatbuffer)");
-
     protected:
       AbstractFlatbufferWrapper() {}
   };
 
   template <typename T>
   class OutStreamableFlatbuffer : protected AbstractFlatbufferWrapper<T> {
-
     public:
       T& flatbuffer;
       OutStreamableFlatbuffer(T& unfinishedFlatbuffer)
@@ -62,42 +65,38 @@ namespace torchcraft {
 
   template <typename T>
   class InStreamableFlatbuffer : protected AbstractFlatbufferWrapper<T> {
-
     public:
       std::shared_ptr<T> flatbuffer;
       InStreamableFlatbuffer() {}
+
+      void read(std::istream& in) {
+        size_t bufferSize;
+        in >> bufferSize;
+
+        flatbuffer = std::make_shared<T>(new T);
+        flatbuffer->data.resize(bufferSize);
+        in.read(flatbuffer->data.data(), bufferSize);
+
+        // TODO: Use verifier?
+        // flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(content->data.data()), content->data.size());
+        // if (!fbs::VerifyReducedUnitTypesBuffer(verifier)) {
+        //  throw std::runtime_error("corrupted data");
+        //}
+
+        // TODO: How to get the actual object? Or is that not necessary
+        // red->d = ffbs::GetReducedUnitTypes(red->data.data());
+      }
   };
 
-  // A StreamableFlatbufferWrapper serializes to :
-  //  {
-  //    size_t  The flatbuffer's size,
-  //    t       The flatbuffer
-  //  }
-
   template <typename T>
-  std::ostream& operator<<(std::ostream& out, const OutStreamableFlatbuffer<T>& o) {
-    out.write(out, o);
+  std::ostream& operator<<(std::ostream& out, const OutStreamableFlatbuffer<T>& streamableFlatbuffer) {
+    streamableFlatbuffer.write(out);
     return out;
   }
 
   template <typename T>
-  std::istream& operator>>(std::istream& in, InStreamableFlatbuffer<T>& o) {
-
-    size_t bufferSize;
-    in >> bufferSize;
-
-    o.getFlatbuffer()->data.resize(bufferSize);
-    in.read(o.getFlatbuffer()->data.data(), bufferSize);
-
-    // TODO: Use verifier?
-    // flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(content->data.data()), content->data.size());
-    // if (!fbs::VerifyReducedUnitTypesBuffer(verifier)) {
-    //  throw std::runtime_error("corrupted data");
-    //}
-
-    // TODO: How to get the actual object? Or is that not necessary
-    // red->d = ffbs::GetReducedUnitTypes(red->data.data());
-
+  std::istream& operator>>(std::istream& in, InStreamableFlatbuffer<T>& streamableFlatbuffer) {
+    streamableFlatbuffer.read(in);
     return in;
   }
 }

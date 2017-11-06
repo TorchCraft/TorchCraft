@@ -10,7 +10,7 @@
 #include <algorithm>
 
 #include "frame.h"
-#include "flatbufferStream.h"
+#include "streamable_flatbuffer.h"
 
 namespace replayer = torchcraft::replayer;
 

@@ -15,9 +15,10 @@
 
 namespace torchcraft {
 
-  // Lets us read/write Flatbuffer types to/from a stream.
+  // In/OutStreamableFlatBuffer
+  // Wrapper classes to Let us read/write Flatbuffer types to/from a stream.
   //
-  // We need this because Flatbuffers don't have a fixed size;
+  // We need these because Flatbuffers don't have a fixed size;
   // they just read from their input pointer until complete,
   // an don't record the number of bytes consumed in the process.
   //

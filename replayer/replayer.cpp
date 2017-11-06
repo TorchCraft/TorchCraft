@@ -21,7 +21,6 @@ namespace replayer {
 // Serialization
 
 std::ostream& operator<<(std::ostream& out, const Replayer& o) {
-  /*
   auto height = o.map.height;
   auto width = o.map.width;
   auto data = o.map.data.data();
@@ -48,7 +47,6 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   for (const auto& nu : o.numUnits) {
     out << nu.first << " " << nu.second << " ";
   }
-  */
 
   return out;
 }
@@ -59,7 +57,6 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   // if we tried to delete it.
   // Cause: invalid data file? I/O error? or a bug in the code?
 
-/*
   int32_t diffed;
   int32_t height, width;
   in >> diffed;
@@ -108,164 +105,23 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
     o.numUnits[key] = val;
   }
 
-*/
   return in;
 }
 
 void Replayer::write(std::ostream& out) const {
 
+/*
   flatbuffers::FlatBufferBuilder fbsBuilder;
 
-  auto buildFbsFrame = [&fbsBuilder](const Frame& frame) {
-    auto buildFbsUnitsByPlayerId = [&fbsBuilder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
-      auto buildFbsUnit = [&fbsBuilder](const Unit& unit) {
-        auto buildFbsOrder = [&fbsBuilder](const Order& order) {
-          fbs::OrderBuilder fbsOrderBuilder(fbsBuilder);
-          fbsOrderBuilder.add_first_frame(order.first_frame);
-          fbsOrderBuilder.add_type(order.type);
-          fbsOrderBuilder.add_targetId(order.targetId);
-          fbsOrderBuilder.add_targetX(order.targetX);
-          fbsOrderBuilder.add_targetY(order.targetY);
-          return fbsOrderBuilder.Finish();
-        };
-
-        std::vector<flatbuffers::Offset<fbs::Order>> fbsOrders;
-        std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
-
-        auto command = unit.command;
-        fbs::UnitCommandBuilder fbsUnitCommandBuilder(fbsBuilder);
-        fbsUnitCommandBuilder.add_frame(command.frame);
-        fbsUnitCommandBuilder.add_type(command.type);
-        fbsUnitCommandBuilder.add_targetId(command.targetId);
-        fbsUnitCommandBuilder.add_targetX(command.targetX);
-        fbsUnitCommandBuilder.add_targetY(command.targetY);
-        fbsUnitCommandBuilder.add_extra(command.extra);
-        auto fbsCommand = fbsUnitCommandBuilder.Finish();
-
-        fbs::UnitBuilder fbsUnitBuilder(fbsBuilder);
-        fbsUnitBuilder.add_id(unit.id);
-        fbsUnitBuilder.add_x(unit.x);
-        fbsUnitBuilder.add_y(unit.y);
-        fbsUnitBuilder.add_health(unit.health);
-        fbsUnitBuilder.add_max_health(unit.max_health);
-        fbsUnitBuilder.add_shield(unit.shield);
-        fbsUnitBuilder.add_max_shield(unit.max_shield);
-        fbsUnitBuilder.add_energy(unit.energy);
-        fbsUnitBuilder.add_maxCD(unit.maxCD);
-        fbsUnitBuilder.add_groundCD(unit.groundCD);
-        fbsUnitBuilder.add_airCD(unit.airCD);
-        fbsUnitBuilder.add_flags(unit.flags);
-        fbsUnitBuilder.add_visible(unit.visible);
-        fbsUnitBuilder.add_armor(unit.armor);
-        fbsUnitBuilder.add_shieldArmor(unit.shieldArmor);
-        fbsUnitBuilder.add_size(unit.size);
-        fbsUnitBuilder.add_pixel_x(unit.pixel_x);
-        fbsUnitBuilder.add_pixel_y(unit.pixel_y);
-        fbsUnitBuilder.add_pixel_size_x(unit.pixel_size_x);
-        fbsUnitBuilder.add_pixel_size_y(unit.pixel_size_y);
-        fbsUnitBuilder.add_groundATK(unit.groundATK);
-        fbsUnitBuilder.add_airATK(unit.airATK);
-        fbsUnitBuilder.add_groundDmgType(unit.groundDmgType);
-        fbsUnitBuilder.add_airDmgType(unit.airDmgType);
-        fbsUnitBuilder.add_groundRange(unit.groundRange);
-        fbsUnitBuilder.add_airRange(unit.airRange);
-        fbsUnitBuilder.add_velocityX(unit.velocityX);
-        fbsUnitBuilder.add_velocityY(unit.velocityY);
-        fbsUnitBuilder.add_playerId(unit.playerId);
-        fbsUnitBuilder.add_resources(unit.resources);
-        fbsUnitBuilder.add_buildTechUpgradeType(unit.buildTechUpgradeType);
-        fbsUnitBuilder.add_remainingBuildTrainTime(unit.remainingBuildTrainTime);
-        fbsUnitBuilder.add_remainingUpgradeResearchTime(unit.remainingUpgradeResearchTime);
-        fbsUnitBuilder.add_spellCD(unit.spellCD);
-        fbsUnitBuilder.add_associatedUnit(unit.associatedUnit);
-        fbsUnitBuilder.add_associatedCount(unit.associatedCount);
-        fbsUnitBuilder.add_command(fbsCommand);
-        fbsUnitBuilder.add_orders(fbsBuilder.CreateVector(fbsOrders));
-        return fbsUnitBuilder.Finish();
-      };
-
-      std::vector<flatbuffers::Offset<fbs::Unit>> fbsUnits;
-      std::transform(unitPair.second.begin(), unitPair.second.end(), fbsUnits.begin(), buildFbsUnit);
-
-      fbs::UnitsByPlayerIdBuilder fbsUnitsByPlayerIdBuilder(fbsBuilder);
-      fbsUnitsByPlayerIdBuilder.add_playerId(unitPair.first);
-      fbsUnitsByPlayerIdBuilder.add_units(fbsBuilder.CreateVector(fbsUnits));
-      return fbsUnitsByPlayerIdBuilder.Finish();
-    };
-
-    auto buildFbsActionsByPlayerId = [&fbsBuilder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
-      auto buildFbsAction = [&fbsBuilder](const Action& action) {
-        fbs::ActionBuilder fbsActionBuilder(fbsBuilder);
-        fbsActionBuilder.add_action(fbsBuilder.CreateVector(action.action));
-        fbsActionBuilder.add_uid(action.uid);
-        fbsActionBuilder.add_aid(action.aid);
-        return fbsActionBuilder.Finish();
-      };
-
-      std::vector<flatbuffers::Offset<fbs::Action>> fbsActions;
-      std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), buildFbsAction);
-
-      fbs::ActionsByPlayerIdBuilder fbsActionsByPlayerIdBuilder(fbsBuilder);
-      fbsActionsByPlayerIdBuilder.add_playerId(actionPair.first);
-      fbsActionsByPlayerIdBuilder.add_actions(fbsBuilder.CreateVector(fbsActions));
-      return fbsActionsByPlayerIdBuilder.Finish();
-    };
-
-    auto buildFbsResourcesByPlayerId = [&fbsBuilder](const std::pair<int32_t, Resources>& resourcesPair) {
-      auto resources = resourcesPair.second;
-
-      fbs::ResourcesBuilder fbsResourcesBuilder(fbsBuilder);
-      fbsResourcesBuilder.add_ore(resources.ore);
-      fbsResourcesBuilder.add_gas(resources.gas);
-      fbsResourcesBuilder.add_used_psi(resources.used_psi);
-      fbsResourcesBuilder.add_total_psi(resources.total_psi);
-      fbsResourcesBuilder.add_upgrades(resources.upgrades);
-      fbsResourcesBuilder.add_upgrades_level(resources.upgrades_level);
-      fbsResourcesBuilder.add_techs(resources.techs);
-      auto fbsResources = fbsResourcesBuilder.Finish();
-
-      fbs::ResourcesByPlayerIdBuilder fbsResourcesByPlayerIdBuilder(fbsBuilder);
-      fbsResourcesByPlayerIdBuilder.add_playerId(resourcesPair.first);
-      fbsResourcesByPlayerIdBuilder.add_resources(fbsResources);
-      return fbsResourcesByPlayerIdBuilder.Finish();
-    };
-
-    auto buildFbsBullet = [&fbsBuilder](const Bullet& bullet) {
-      fbs::BulletBuilder fbsBulletBuilder(fbsBuilder);
-      fbsBulletBuilder.add_type(bullet.type);
-      fbsBulletBuilder.add_x(bullet.x);
-      fbsBulletBuilder.add_y(bullet.y);
-      return fbsBulletBuilder.Finish();
-    };
-
-    std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
-    std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
-    std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
-    std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
-    std::transform(frame.bullets.begin(), frame.bullets.end(), fbsBullets.begin(), buildFbsBullet);
-    std::transform(frame.actions.begin(), frame.actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId);
-    std::transform(frame.resources.begin(), frame.resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId);
-    std::transform(frame.units.begin(), frame.units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
-
-    fbs::FrameBuilder fbsFrameBuilder(fbsBuilder);
-    fbsFrameBuilder.add_width(frame.width);
-    fbsFrameBuilder.add_height(frame.height);
-    fbsFrameBuilder.add_reward(frame.reward);
-    fbsFrameBuilder.add_is_terminal(frame.is_terminal);
-    fbsFrameBuilder.add_creep_map(fbsBuilder.CreateVector(frame.creep_map));
-    fbsFrameBuilder.add_bullets(fbsBuilder.CreateVector(fbsBullets));
-    fbsFrameBuilder.add_actions(fbsBuilder.CreateVector(fbsActionsByPlayerId));
-    fbsFrameBuilder.add_units(fbsBuilder.CreateVector(fbsUnitsByPlayerId));
-    fbsFrameBuilder.add_resources(fbsBuilder.CreateVector(fbsResourcesByPlayerId));
-
-    return fbsFrameBuilder.Finish();
-  };
-
   std::vector<flatbuffers::Offset<fbs::Frame>> fbsFrames;
-  std::transform(frames.begin(), frames.end(), fbsFrames.begin(), buildFbsFrame);
+  std::transform(
+    frames.begin(),
+    frames.end(),
+    fbsFrames.begin(),
+    [&fbsBuilder](const Frame& frame) { frame.addToFlatBufferBuilder(fbsBuilder); });
 
   auto fbsFrameContainer = fbs::CreateFrameContainer(fbsBuilder, fbsBuilder.CreateVector(fbsFrames));
-  // TODO: Write to stream
+  */
 }
 
 void Replayer::read(std::istream& out) {

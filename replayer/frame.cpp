@@ -18,33 +18,6 @@ using Frame = replayer::Frame;
 using FrameDiff = replayer::FrameDiff;
 
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
-  out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
-      << o.max_health << " " << o.shield << " " << o.max_shield << " "
-      << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
-      << " " << o.flags << " " << o.visible << " " << o.type << " " << o.armor
-      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
-      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
-      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
-      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
-
-  out << o.orders.size() << " ";
-  for (auto& c : o.orders) {
-    out << c.first_frame << " " << c.type << " " << c.targetId << " "
-        << c.targetX << " " << c.targetY << " ";
-  }
-
-  out << o.command.frame << " " << o.command.type << " " << o.command.targetId
-      << " " << o.command.targetX << " " << o.command.targetY << " "
-      << o.command.extra << " ";
-
-  out << o.velocityX << " " << o.velocityY;
-  out << " " << o.playerId;
-  out << " " << o.resources;
-  out << " " << o.buildTechUpgradeType;
-  out << " " << o.remainingBuildTrainTime;
-  out << " " << o.remainingUpgradeResearchTime;
-  out << " " << o.spellCD;
-  out << " " << o.associatedUnit << " " << o.associatedCount;
   return out;
 }
 

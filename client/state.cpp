@@ -212,6 +212,7 @@ std::vector<std::string> State::update(
       info.race = bwrace ? *bwrace : +BW::Race::Unknown;
       info.name = player->name() ? player->name()->str() : "";
       info.is_enemy = player->is_enemy();
+      info.has_left = false;
       player_info[info.id] = info;
     }
     upd.emplace_back("players");
@@ -345,6 +346,14 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
 std::vector<std::string> State::update(
     const torchcraft::fbs::PlayerLeft* left) {
   preUpdate();
+  if (left->player_left()) {
+    for (auto& it : player_info) {
+      if (it.second.name == left->player_left()->str()) {
+        it.second.has_left = true;
+        break;
+      }
+    }
+  }
   return std::vector<std::string>();
 }
 

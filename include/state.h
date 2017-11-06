@@ -53,6 +53,7 @@ class State : public RefCounted {
     BW::Race race = BW::Race::Unknown;
     std::string name;
     bool is_enemy;
+    bool has_left;
   };
 
   // setup

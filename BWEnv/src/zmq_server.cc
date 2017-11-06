@@ -26,8 +26,12 @@ using namespace std;
 namespace {
 
 template <typename T>
-void sendFBObject(zmq::socket_t& sock, const T* obj) {
+void sendFBObject(zmq::socket_t* sock, const T* obj) {
   flatbuffers::FlatBufferBuilder fbb;
+  if (sock == nullptr) {
+    throw runtime_error("Attempt to use nullptr socket");
+  }
+
   auto payload = T::TableType::Pack(fbb, obj);
   auto root = torchcraft::fbs::CreateMessage(
       fbb,
@@ -36,7 +40,7 @@ void sendFBObject(zmq::socket_t& sock, const T* obj) {
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
 
   try {
-    size_t res = sock.send(fbb.GetBufferPointer(), fbb.GetSize());
+    size_t res = sock->send(fbb.GetBufferPointer(), fbb.GetSize());
     if (res != fbb.GetSize()) {
       throw runtime_error(
           "ZMQ_server::send*(): zmq_send failed: no/partial send");
@@ -182,23 +186,23 @@ void ZMQ_server::close()
 }
 
 void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake) {
-  sendFBObject(*this->sock.get(), handshake);
+  sendFBObject(this->sock.get(), handshake);
 }
 
 void ZMQ_server::sendFrame(const torchcraft::fbs::FrameT* frame) {
-  sendFBObject(*this->sock.get(), frame);
+  sendFBObject(this->sock.get(), frame);
 }
 
 void ZMQ_server::sendPlayerLeft(const torchcraft::fbs::PlayerLeftT* pl) {
-  sendFBObject(*this->sock.get(), pl);
+  sendFBObject(this->sock.get(), pl);
 }
 
 void ZMQ_server::sendEndGame(const torchcraft::fbs::EndGameT* endgame) {
-  sendFBObject(*this->sock.get(), endgame);
+  sendFBObject(this->sock.get(), endgame);
 }
 
 void ZMQ_server::sendError(const torchcraft::fbs::ErrorT* error) {
-  sendFBObject(*this->sock.get(), error);
+  sendFBObject(this->sock.get(), error);
 }
 
 /**

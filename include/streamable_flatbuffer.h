@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <type_traits>
+
 #include "../fbs/flatbuffers/flatbuffers.h"
 
 namespace torchcraft {
@@ -31,72 +32,76 @@ namespace torchcraft {
   //    t       The flatbuffer
   //  }
 
-  template <typename T>
-  class AbstractFlatbufferWrapper {
-    static_assert(
-      std::is_default_constructible<T>::value,
-      "Should be a default-constructible FlatBuffer (but isn't default-constructible)");
-    static_assert(
-      std::is_base_of<flatbuffers::Table, T>::value ||
-      std::is_base_of<flatbuffers::Struct, T>::value,
-      "Should be a default-constructible FlatBuffer (but isn't a Flatbuffer)");
-    protected:
-      AbstractFlatbufferWrapper() {}
-  };
+  class OutStreamableFlatBuffer {
 
-  template <typename T>
-  class OutStreamableFlatbuffer : protected AbstractFlatbufferWrapper<T> {
     public:
-      T& flatbuffer;
-      OutStreamableFlatbuffer(T& unfinishedFlatbuffer)
-        : flatbuffer(unfinishedFlatbuffer) {
-        unfinishedFlatbuffer.Finish();
-      }
+      flatbuffers::FlatBufferBuilder& flatBufferBuilder;
+      OutStreamableFlatBuffer(
+        flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder)
+        : flatBufferBuilder(finishedFlatBufferBuilder) {
+          // TODO: Verify that it's actually finished.
+          // The actual .finished property is protected.
+          // How can we tell?
+        }
 
-      void write(std::ostream& out) {
-        flatbuffer->Finish();
-        auto flatbufferPointer = flatbuffer->GetBufferPointer();
-        auto flatbufferSize = flatbuffer.GetSize();
-
+      void write(std::ostream& out) const {
+        auto flatbufferPointer = flatBufferBuilder.GetBufferPointer();
+        auto flatbufferSize = flatBufferBuilder.GetSize();
         out << flatbufferSize;
-        out.write(reinterpret_cast<char const*>(flatbufferPointer), flatbufferSize);
+        out.write(
+          reinterpret_cast<char const*>(flatbufferPointer),
+          flatbufferSize);
       }
   };
 
   template <typename T>
-  class InStreamableFlatbuffer : protected AbstractFlatbufferWrapper<T> {
+  class InStreamableFlatBuffer{
+
+    static_assert(
+      std::is_base_of<flatbuffers::Table, T>::value,
+      "Should be a FlatBuffer table.");
+
+    public:
+      typedef std::function<bool (const flatbuffers::Verifier&)> tInvokeVerifier;
+      typedef std::function<T* (uint8_t*)> tInvokeReader;
+
+    private:
+      tInvokeVerifier invokeVerifier;
+      tInvokeReader invokeReader;
+
     public:
       std::shared_ptr<T> flatbuffer;
-      InStreamableFlatbuffer() {}
+      InStreamableFlatBuffer(
+        tInvokeVerifier toVerify,
+        tInvokeReader toRead):
+        invokeVerifier(toVerify),
+        invokeReader(toRead) {}
 
       void read(std::istream& in) {
         size_t bufferSize;
         in >> bufferSize;
 
-        flatbuffer = std::make_shared<T>(new T);
-        flatbuffer->data.resize(bufferSize);
-        in.read(flatbuffer->data.data(), bufferSize);
+        uint8_t buffer[bufferSize];
+        in.read(buffer, bufferSize);
 
-        // TODO: Use verifier?
-        // flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(content->data.data()), content->data.size());
-        // if (!fbs::VerifyReducedUnitTypesBuffer(verifier)) {
-        //  throw std::runtime_error("corrupted data");
-        //}
+        flatbuffers::Verifier verifier(buffer, bufferSize);
+        if ( ! invokeVerifier(verifier)) {
+          throw std::runtime_error("Streaming FlatBuffer table failed verification");
+        }
 
-        // TODO: How to get the actual object? Or is that not necessary
-        // red->d = ffbs::GetReducedUnitTypes(red->data.data());
+        flatbuffer = std::make_shared<T>(invokeReader(buffer));
       }
   };
 
   template <typename T>
-  std::ostream& operator<<(std::ostream& out, const OutStreamableFlatbuffer<T>& streamableFlatbuffer) {
-    streamableFlatbuffer.write(out);
-    return out;
+  std::ostream& operator<<(std::ostream& oStream, const OutStreamableFlatBuffer& streamableFlatBuffer) {
+    streamableFlatBuffer.write(oStream);
+    return oStream;
   }
 
   template <typename T>
-  std::istream& operator>>(std::istream& in, InStreamableFlatbuffer<T>& streamableFlatbuffer) {
-    streamableFlatbuffer.read(in);
-    return in;
+  std::istream& operator>>(std::istream& iStream, InStreamableFlatBuffer<T>& streamableFlatBuffer) {
+    streamableFlatBuffer.read(iStream);
+    return iStream;
   }
 }

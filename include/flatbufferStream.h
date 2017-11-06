@@ -27,38 +27,44 @@ namespace torchcraft {
 
     public:
       FlatbufferStream() {}
-      FlatbufferStream(const T& f): flatbuffer(f) {}
-
+      FlatbufferStream(const T& finishedFlatbuffer): flatbuffer(finishedFlatbuffer) {}
       std::shared_ptr<T> getFlatbuffer() { std::shared_ptr<T>(flatBuffer); }
 
     private:
       std::shared_ptr<T> flatbuffer;
   };
 
-  namespace flatbufferstream {
+  // A FlatbufferStream serializes to :
+  //  {
+  //    size_t  The flatbuffer's size,
+  //    t       The flatbuffer
+  //  }
+  //
+  //  Flatbuffers are ignorant of how mcuh
 
-    template <typename T>
-    std::ostream& operator<<(std::ostream& out, const FlatbufferStream<T>& o) {
-      return out;
-    }
+  template <typename T>
+  std::ostream& operator<<(std::ostream& out, const FlatbufferStream<T>& o) {
+    return out;
+  }
 
-    template <typename T>
-    std::istream& operator>>(std::istream& in, FlatbufferStream<T>& o) {
+  template <typename T>
+  std::istream& operator>>(std::istream& in, FlatbufferStream<T>& o) {
 
-      /*
-      size_t size;
-      ReducedUnitTypes* red = new ReducedUnitTypes();
-      red->data.resize(size);
-      in.read(red->data.data(), size);
-      flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(red->data.data()), red->data.size());
-      if (!ffbs::VerifyReducedUnitTypesBuffer(verifier)) {
-        throw std::runtime_error("corrupted data");
-      }
-      red->d = ffbs::GetReducedUnitTypes(red->data.data());
+    size_t bufferSize;
+    in >> bufferSize;
 
-      */
+    o.getFlatbuffer()->data.resize(bufferSize);
+    in.read(o.getFlatbuffer()->data.data(), bufferSize);
 
-      return in;
-    }
+    // TODO: Use verifier?
+    // flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(content->data.data()), content->data.size());
+    // if (!fbs::VerifyReducedUnitTypesBuffer(verifier)) {
+    //  throw std::runtime_error("corrupted data");
+    //}
+
+    // TODO: How to get the actual object? Or is that not necessary
+    // red->d = ffbs::GetReducedUnitTypes(red->data.data());
+
+    return in;
   }
 }

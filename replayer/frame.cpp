@@ -202,26 +202,6 @@ void readTail(
   }
 }
 
-// The boolean array better be divisible by 8
-std::vector<uint8_t> bool_to_bytes(const std::vector<bool>& arr) {
-  std::vector<uint8_t> ret;
-  ret.resize(arr.size() / 8);
-  for (size_t i = 0; i < arr.size(); i++) {
-    ret[i / 8] |= arr[i] << (i % 8);
-  }
-  return ret;
-}
-std::vector<bool> bytes_to_bool(const std::vector<uint8_t>& arr) {
-  std::vector<bool> ret;
-  ret.resize(arr.size() * 8);
-  for (size_t i = 0; i < arr.size(); i++) {
-    for (size_t k = 0; k < 8; k++) {
-      ret[i * 8 + k] = (arr[i] >> k) & 1;
-    }
-  }
-  return ret;
-}
-
 std::ostream& replayer::operator<<(
   std::ostream& out,
   const replayer::Frame& frame) {

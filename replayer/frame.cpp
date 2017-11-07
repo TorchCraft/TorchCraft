@@ -24,20 +24,28 @@ std::ostream& replayer::operator<<(std::ostream& out, const replayer::Frame& fra
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
+std::istream& replayer::operator>>(std::istream& in, replayer::Frame& frame) {
   InStreamableFlatBuffer<const fbs::Frame> streamable;
   streamable.read(in);
   auto fbsFrame = streamable.flatBufferTable;
-  frame.readFromFlatBufferTable(fbsFrame);
+  frame.readFromFlatBufferTable(*fbsFrame);
   return in;
 }
 
 
-std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& o) {
+std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& frameDiff) {
+  flatbuffers::FlatBufferBuilder builder;
+  //frameDiff.addToFlatBufferBuilder(builder);
+  OutStreamableFlatBuffer streamable(builder);
+  streamable.write(out);
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
+std::istream& replayer::operator>>(std::istream& in, FrameDiff& frameDiff) {
+  InStreamableFlatBuffer<const fbs::Frame> streamable;
+  streamable.read(in);
+  auto fbsFrame = streamable.flatBufferTable;
+  //frameDiff.readFromFlatBufferTable(fbsFrame);
   return in;
 }
 
@@ -53,7 +61,6 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
         fbsOrderBuilder.add_targetY(order.targetY);
         return fbsOrderBuilder.Finish();
       };
-
       std::vector<flatbuffers::Offset<fbs::Order>> fbsOrders;
       std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
 
@@ -108,16 +115,13 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
       fbsUnitBuilder.add_orders(builder.CreateVector(fbsOrders));
       return fbsUnitBuilder.Finish();
     };
-
     std::vector<flatbuffers::Offset<fbs::Unit>> fbsUnits;
     std::transform(unitPair.second.begin(), unitPair.second.end(), fbsUnits.begin(), buildFbsUnit);
-
     fbs::UnitsByPlayerIdBuilder fbsUnitsByPlayerIdBuilder(builder);
     fbsUnitsByPlayerIdBuilder.add_playerId(unitPair.first);
     fbsUnitsByPlayerIdBuilder.add_units(builder.CreateVector(fbsUnits));
     return fbsUnitsByPlayerIdBuilder.Finish();
   };
-
   auto buildFbsActionsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
     auto buildFbsAction = [&builder](const Action& action) {
       fbs::ActionBuilder fbsActionBuilder(builder);
@@ -126,16 +130,13 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
       fbsActionBuilder.add_aid(action.aid);
       return fbsActionBuilder.Finish();
     };
-
     std::vector<flatbuffers::Offset<fbs::Action>> fbsActions;
     std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), buildFbsAction);
-
     fbs::ActionsByPlayerIdBuilder fbsActionsByPlayerIdBuilder(builder);
     fbsActionsByPlayerIdBuilder.add_playerId(actionPair.first);
     fbsActionsByPlayerIdBuilder.add_actions(builder.CreateVector(fbsActions));
     return fbsActionsByPlayerIdBuilder.Finish();
   };
-
   auto buildFbsResourcesByPlayerId = [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
     auto resources = resourcesPair.second;
     fbs::ResourcesBuilder fbsResourcesBuilder(builder);
@@ -147,13 +148,11 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
     fbsResourcesBuilder.add_upgrades_level(resources.upgrades_level);
     fbsResourcesBuilder.add_techs(resources.techs);
     auto fbsResources = fbsResourcesBuilder.Finish();
-
     fbs::ResourcesByPlayerIdBuilder fbsResourcesByPlayerIdBuilder(builder);
     fbsResourcesByPlayerIdBuilder.add_playerId(resourcesPair.first);
     fbsResourcesByPlayerIdBuilder.add_resources(fbsResources);
     return fbsResourcesByPlayerIdBuilder.Finish();
   };
-
   auto buildFbsBullet = [&builder](const Bullet& bullet) {
     fbs::BulletBuilder fbsBulletBuilder(builder);
     fbsBulletBuilder.add_type(bullet.type);
@@ -161,7 +160,6 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
     fbsBulletBuilder.add_y(bullet.y);
     return fbsBulletBuilder.Finish();
   };
-
   std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
   std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
@@ -170,7 +168,6 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
   std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId);
   std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId);
   std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
-
   fbs::FrameBuilder fbsFrameBuilder(builder);
   fbsFrameBuilder.add_width(width);
   fbsFrameBuilder.add_height(height);
@@ -184,12 +181,7 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
   fbsFrameBuilder.Finish();
 };
 
-void Frame::readFromFlatBufferTable(const fbs::Frame table) {
-  width = table.width();
-  height = table.height();
-  reward = table.reward();
-  is_terminal = table.is_terminal();
-
+void Frame::readFromFlatBufferTable(const fbs::Frame& table) {
 }
 
 namespace detail = replayer::detail;

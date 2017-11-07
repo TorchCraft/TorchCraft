@@ -52,7 +52,7 @@ namespace torchcraft {
       void write(std::ostream& out) const {
         auto flatbufferPointer = flatBufferBuilder.GetBufferPointer();
         size_t flatbufferSize = flatBufferBuilder.GetSize();
-        out.write(&flatbufferSize, sizeof(size_t));
+        out.write(reinterpret_cast<std::ostream::char_type*>(&flatbufferSize), sizeof(size_t));
         out.write(
           reinterpret_cast<char const*>(flatbufferPointer),
           flatbufferSize);
@@ -71,7 +71,7 @@ namespace torchcraft {
 
       void read(std::istream& in) {
         size_t bufferSize;
-        in.read(&bufferSize, sizeof(size_t));
+        in.read(reinterpret_cast<std::istream::char_type*>(&bufferSize), sizeof(size_t));
 
         std::istream::char_type buffer[bufferSize];
         in.read(buffer, bufferSize);

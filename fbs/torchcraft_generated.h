@@ -80,8 +80,6 @@ struct FrameContainerT;
 struct UnitDiff;
 struct UnitDiffT;
 
-struct Creep;
-
 struct FrameDiff;
 struct FrameDiffT;
 
@@ -90,35 +88,6 @@ struct UnitCountT;
 
 struct Replayer;
 struct ReplayerT;
-
-enum class FrameRepresentation : uint8_t {
-  AsFrame = 0,
-  AsFrameDiff = 1,
-  MIN = AsFrame,
-  MAX = AsFrameDiff
-};
-
-inline FrameRepresentation (&EnumValuesFrameRepresentation())[2] {
-  static FrameRepresentation values[] = {
-    FrameRepresentation::AsFrame,
-    FrameRepresentation::AsFrameDiff
-  };
-  return values;
-}
-
-inline const char **EnumNamesFrameRepresentation() {
-  static const char *names[] = {
-    "AsFrame",
-    "AsFrameDiff",
-    nullptr
-  };
-  return names;
-}
-
-inline const char *EnumNameFrameRepresentation(FrameRepresentation e) {
-  const size_t index = static_cast<int>(e);
-  return EnumNamesFrameRepresentation()[index];
-}
 
 enum class FrameOrFrameDiff : uint8_t {
   NONE = 0,
@@ -216,7 +185,7 @@ struct FrameOrFrameDiffUnion {
 bool VerifyFrameOrFrameDiff(flatbuffers::Verifier &verifier, const void *obj, FrameOrFrameDiff type);
 bool VerifyFrameOrFrameDiffVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
 
-enum class MessageType : uint8_t {
+enum class AnyMessage : uint8_t {
   NONE = 0,
   HandshakeClient = 1,
   Commands = 2,
@@ -229,21 +198,21 @@ enum class MessageType : uint8_t {
   MAX = Error
 };
 
-inline MessageType (&EnumValuesMessageType())[8] {
-  static MessageType values[] = {
-    MessageType::NONE,
-    MessageType::HandshakeClient,
-    MessageType::Commands,
-    MessageType::HandshakeServer,
-    MessageType::FrameState,
-    MessageType::PlayerLeft,
-    MessageType::EndGame,
-    MessageType::Error
+inline AnyMessage (&EnumValuesAnyMessage())[8] {
+  static AnyMessage values[] = {
+    AnyMessage::NONE,
+    AnyMessage::HandshakeClient,
+    AnyMessage::Commands,
+    AnyMessage::HandshakeServer,
+    AnyMessage::FrameState,
+    AnyMessage::PlayerLeft,
+    AnyMessage::EndGame,
+    AnyMessage::Error
   };
   return values;
 }
 
-inline const char **EnumNamesMessageType() {
+inline const char **EnumNamesAnyMessage() {
   static const char *names[] = {
     "NONE",
     "HandshakeClient",
@@ -258,57 +227,57 @@ inline const char **EnumNamesMessageType() {
   return names;
 }
 
-inline const char *EnumNameMessageType(MessageType e) {
+inline const char *EnumNameAnyMessage(AnyMessage e) {
   const size_t index = static_cast<int>(e);
-  return EnumNamesMessageType()[index];
+  return EnumNamesAnyMessage()[index];
 }
 
-template<typename T> struct MessageTypeTraits {
-  static const MessageType enum_value = MessageType::NONE;
+template<typename T> struct AnyMessageTraits {
+  static const AnyMessage enum_value = AnyMessage::NONE;
 };
 
-template<> struct MessageTypeTraits<HandshakeClient> {
-  static const MessageType enum_value = MessageType::HandshakeClient;
+template<> struct AnyMessageTraits<HandshakeClient> {
+  static const AnyMessage enum_value = AnyMessage::HandshakeClient;
 };
 
-template<> struct MessageTypeTraits<Commands> {
-  static const MessageType enum_value = MessageType::Commands;
+template<> struct AnyMessageTraits<Commands> {
+  static const AnyMessage enum_value = AnyMessage::Commands;
 };
 
-template<> struct MessageTypeTraits<HandshakeServer> {
-  static const MessageType enum_value = MessageType::HandshakeServer;
+template<> struct AnyMessageTraits<HandshakeServer> {
+  static const AnyMessage enum_value = AnyMessage::HandshakeServer;
 };
 
-template<> struct MessageTypeTraits<FrameState> {
-  static const MessageType enum_value = MessageType::FrameState;
+template<> struct AnyMessageTraits<FrameState> {
+  static const AnyMessage enum_value = AnyMessage::FrameState;
 };
 
-template<> struct MessageTypeTraits<PlayerLeft> {
-  static const MessageType enum_value = MessageType::PlayerLeft;
+template<> struct AnyMessageTraits<PlayerLeft> {
+  static const AnyMessage enum_value = AnyMessage::PlayerLeft;
 };
 
-template<> struct MessageTypeTraits<EndGame> {
-  static const MessageType enum_value = MessageType::EndGame;
+template<> struct AnyMessageTraits<EndGame> {
+  static const AnyMessage enum_value = AnyMessage::EndGame;
 };
 
-template<> struct MessageTypeTraits<Error> {
-  static const MessageType enum_value = MessageType::Error;
+template<> struct AnyMessageTraits<Error> {
+  static const AnyMessage enum_value = AnyMessage::Error;
 };
 
-struct MessageTypeUnion {
-  MessageType type;
+struct AnyMessageUnion {
+  AnyMessage type;
   void *value;
 
-  MessageTypeUnion() : type(MessageType::NONE), value(nullptr) {}
-  MessageTypeUnion(MessageTypeUnion&& u) FLATBUFFERS_NOEXCEPT :
-    type(MessageType::NONE), value(nullptr)
+  AnyMessageUnion() : type(AnyMessage::NONE), value(nullptr) {}
+  AnyMessageUnion(AnyMessageUnion&& u) FLATBUFFERS_NOEXCEPT :
+    type(AnyMessage::NONE), value(nullptr)
     { std::swap(type, u.type); std::swap(value, u.value); }
-  MessageTypeUnion(const MessageTypeUnion &) FLATBUFFERS_NOEXCEPT;
-  MessageTypeUnion &operator=(const MessageTypeUnion &u) FLATBUFFERS_NOEXCEPT
-    { MessageTypeUnion t(u); std::swap(type, t.type); std::swap(value, t.value); return *this; }
-  MessageTypeUnion &operator=(MessageTypeUnion &&u) FLATBUFFERS_NOEXCEPT
+  AnyMessageUnion(const AnyMessageUnion &) FLATBUFFERS_NOEXCEPT;
+  AnyMessageUnion &operator=(const AnyMessageUnion &u) FLATBUFFERS_NOEXCEPT
+    { AnyMessageUnion t(u); std::swap(type, t.type); std::swap(value, t.value); return *this; }
+  AnyMessageUnion &operator=(AnyMessageUnion &&u) FLATBUFFERS_NOEXCEPT
     { std::swap(type, u.type); std::swap(value, u.value); return *this; }
-  ~MessageTypeUnion() { Reset(); }
+  ~AnyMessageUnion() { Reset(); }
 
   void Reset();
 
@@ -316,76 +285,76 @@ struct MessageTypeUnion {
   template <typename T>
   void Set(T&& val) {
     Reset();
-    type = MessageTypeTraits<typename T::TableType>::enum_value;
-    if (type != MessageType::NONE) {
+    type = AnyMessageTraits<typename T::TableType>::enum_value;
+    if (type != AnyMessage::NONE) {
       value = new T(std::forward<T>(val));
     }
   }
 #endif  // FLATBUFFERS_CPP98_STL
 
-  static void *UnPack(const void *obj, MessageType type, const flatbuffers::resolver_function_t *resolver);
+  static void *UnPack(const void *obj, AnyMessage type, const flatbuffers::resolver_function_t *resolver);
   flatbuffers::Offset<void> Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher = nullptr) const;
 
   HandshakeClientT *AsHandshakeClient() {
-    return type == MessageType::HandshakeClient ?
+    return type == AnyMessage::HandshakeClient ?
       reinterpret_cast<HandshakeClientT *>(value) : nullptr;
   }
   const HandshakeClientT *AsHandshakeClient() const {
-    return type == MessageType::HandshakeClient ?
+    return type == AnyMessage::HandshakeClient ?
       reinterpret_cast<const HandshakeClientT *>(value) : nullptr;
   }
   CommandsT *AsCommands() {
-    return type == MessageType::Commands ?
+    return type == AnyMessage::Commands ?
       reinterpret_cast<CommandsT *>(value) : nullptr;
   }
   const CommandsT *AsCommands() const {
-    return type == MessageType::Commands ?
+    return type == AnyMessage::Commands ?
       reinterpret_cast<const CommandsT *>(value) : nullptr;
   }
   HandshakeServerT *AsHandshakeServer() {
-    return type == MessageType::HandshakeServer ?
+    return type == AnyMessage::HandshakeServer ?
       reinterpret_cast<HandshakeServerT *>(value) : nullptr;
   }
   const HandshakeServerT *AsHandshakeServer() const {
-    return type == MessageType::HandshakeServer ?
+    return type == AnyMessage::HandshakeServer ?
       reinterpret_cast<const HandshakeServerT *>(value) : nullptr;
   }
   FrameStateT *AsFrameState() {
-    return type == MessageType::FrameState ?
+    return type == AnyMessage::FrameState ?
       reinterpret_cast<FrameStateT *>(value) : nullptr;
   }
   const FrameStateT *AsFrameState() const {
-    return type == MessageType::FrameState ?
+    return type == AnyMessage::FrameState ?
       reinterpret_cast<const FrameStateT *>(value) : nullptr;
   }
   PlayerLeftT *AsPlayerLeft() {
-    return type == MessageType::PlayerLeft ?
+    return type == AnyMessage::PlayerLeft ?
       reinterpret_cast<PlayerLeftT *>(value) : nullptr;
   }
   const PlayerLeftT *AsPlayerLeft() const {
-    return type == MessageType::PlayerLeft ?
+    return type == AnyMessage::PlayerLeft ?
       reinterpret_cast<const PlayerLeftT *>(value) : nullptr;
   }
   EndGameT *AsEndGame() {
-    return type == MessageType::EndGame ?
+    return type == AnyMessage::EndGame ?
       reinterpret_cast<EndGameT *>(value) : nullptr;
   }
   const EndGameT *AsEndGame() const {
-    return type == MessageType::EndGame ?
+    return type == AnyMessage::EndGame ?
       reinterpret_cast<const EndGameT *>(value) : nullptr;
   }
   ErrorT *AsError() {
-    return type == MessageType::Error ?
+    return type == AnyMessage::Error ?
       reinterpret_cast<ErrorT *>(value) : nullptr;
   }
   const ErrorT *AsError() const {
-    return type == MessageType::Error ?
+    return type == AnyMessage::Error ?
       reinterpret_cast<const ErrorT *>(value) : nullptr;
   }
 };
 
-bool VerifyMessageType(flatbuffers::Verifier &verifier, const void *obj, MessageType type);
-bool VerifyMessageTypeVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
+bool VerifyAnyMessage(flatbuffers::Verifier &verifier, const void *obj, AnyMessage type);
+bool VerifyAnyMessageVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
 
 MANUALLY_ALIGNED_STRUCT(4) Vec2 FLATBUFFERS_FINAL_CLASS {
  private:
@@ -417,37 +386,6 @@ MANUALLY_ALIGNED_STRUCT(4) Vec2 FLATBUFFERS_FINAL_CLASS {
   }
 };
 STRUCT_END(Vec2, 8);
-
-MANUALLY_ALIGNED_STRUCT(4) Creep FLATBUFFERS_FINAL_CLASS {
- private:
-  int32_t x_;
-  int32_t y_;
-
- public:
-  Creep() {
-    memset(this, 0, sizeof(Creep));
-  }
-  Creep(const Creep &_o) {
-    memcpy(this, &_o, sizeof(Creep));
-  }
-  Creep(int32_t _x, int32_t _y)
-      : x_(flatbuffers::EndianScalar(_x)),
-        y_(flatbuffers::EndianScalar(_y)) {
-  }
-  int32_t x() const {
-    return flatbuffers::EndianScalar(x_);
-  }
-  void mutate_x(int32_t _x) {
-    flatbuffers::WriteScalar(&x_, _x);
-  }
-  int32_t y() const {
-    return flatbuffers::EndianScalar(y_);
-  }
-  void mutate_y(int32_t _y) {
-    flatbuffers::WriteScalar(&y_, _y);
-  }
-};
-STRUCT_END(Creep, 8);
 
 struct CommandT : public flatbuffers::NativeTable {
   typedef Command TableType;
@@ -1607,7 +1545,7 @@ flatbuffers::Offset<Error> CreateError(flatbuffers::FlatBufferBuilder &_fbb, con
 
 struct MessageT : public flatbuffers::NativeTable {
   typedef Message TableType;
-  MessageTypeUnion msg;
+  AnyMessageUnion msg;
   std::string uid;
   MessageT() {
   }
@@ -1620,10 +1558,10 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_MSG = 6,
     VT_UID = 8
   };
-  MessageType msg_type() const {
-    return static_cast<MessageType>(GetField<uint8_t>(VT_MSG_TYPE, 0));
+  AnyMessage msg_type() const {
+    return static_cast<AnyMessage>(GetField<uint8_t>(VT_MSG_TYPE, 0));
   }
-  bool mutate_msg_type(MessageType _msg_type) {
+  bool mutate_msg_type(AnyMessage _msg_type) {
     return SetField<uint8_t>(VT_MSG_TYPE, static_cast<uint8_t>(_msg_type), 0);
   }
   const void *msg() const {
@@ -1631,25 +1569,25 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   template<typename T> const T *msg_as() const;
   const HandshakeClient *msg_as_HandshakeClient() const {
-    return msg_type() == MessageType::HandshakeClient ? static_cast<const HandshakeClient *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::HandshakeClient ? static_cast<const HandshakeClient *>(msg()) : nullptr;
   }
   const Commands *msg_as_Commands() const {
-    return msg_type() == MessageType::Commands ? static_cast<const Commands *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::Commands ? static_cast<const Commands *>(msg()) : nullptr;
   }
   const HandshakeServer *msg_as_HandshakeServer() const {
-    return msg_type() == MessageType::HandshakeServer ? static_cast<const HandshakeServer *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::HandshakeServer ? static_cast<const HandshakeServer *>(msg()) : nullptr;
   }
   const FrameState *msg_as_FrameState() const {
-    return msg_type() == MessageType::FrameState ? static_cast<const FrameState *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::FrameState ? static_cast<const FrameState *>(msg()) : nullptr;
   }
   const PlayerLeft *msg_as_PlayerLeft() const {
-    return msg_type() == MessageType::PlayerLeft ? static_cast<const PlayerLeft *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::PlayerLeft ? static_cast<const PlayerLeft *>(msg()) : nullptr;
   }
   const EndGame *msg_as_EndGame() const {
-    return msg_type() == MessageType::EndGame ? static_cast<const EndGame *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::EndGame ? static_cast<const EndGame *>(msg()) : nullptr;
   }
   const Error *msg_as_Error() const {
-    return msg_type() == MessageType::Error ? static_cast<const Error *>(msg()) : nullptr;
+    return msg_type() == AnyMessage::Error ? static_cast<const Error *>(msg()) : nullptr;
   }
   void *mutable_msg() {
     return GetPointer<void *>(VT_MSG);
@@ -1664,7 +1602,7 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyField<uint8_t>(verifier, VT_MSG_TYPE) &&
            VerifyOffset(verifier, VT_MSG) &&
-           VerifyMessageType(verifier, msg(), msg_type()) &&
+           VerifyAnyMessage(verifier, msg(), msg_type()) &&
            VerifyOffset(verifier, VT_UID) &&
            verifier.Verify(uid()) &&
            verifier.EndTable();
@@ -1705,7 +1643,7 @@ template<> inline const Error *Message::msg_as<Error>() const {
 struct MessageBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_msg_type(MessageType msg_type) {
+  void add_msg_type(AnyMessage msg_type) {
     fbb_.AddElement<uint8_t>(Message::VT_MSG_TYPE, static_cast<uint8_t>(msg_type), 0);
   }
   void add_msg(flatbuffers::Offset<void> msg) {
@@ -1728,7 +1666,7 @@ struct MessageBuilder {
 
 inline flatbuffers::Offset<Message> CreateMessage(
     flatbuffers::FlatBufferBuilder &_fbb,
-    MessageType msg_type = MessageType::NONE,
+    AnyMessage msg_type = AnyMessage::NONE,
     flatbuffers::Offset<void> msg = 0,
     flatbuffers::Offset<flatbuffers::String> uid = 0) {
   MessageBuilder builder_(_fbb);
@@ -1740,7 +1678,7 @@ inline flatbuffers::Offset<Message> CreateMessage(
 
 inline flatbuffers::Offset<Message> CreateMessageDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    MessageType msg_type = MessageType::NONE,
+    AnyMessage msg_type = AnyMessage::NONE,
     flatbuffers::Offset<void> msg = 0,
     const char *uid = nullptr) {
   return torchcraft::fbs::CreateMessage(
@@ -3861,7 +3799,7 @@ struct FrameDiffT : public flatbuffers::NativeTable {
   std::vector<std::unique_ptr<ActionsByPlayerIdT>> actions;
   std::vector<std::unique_ptr<ResourcesByPlayerIdT>> resources;
   std::vector<std::unique_ptr<BulletT>> bullets;
-  std::vector<Creep> creep_map;
+  std::vector<Vec2> creep_map;
   int32_t reward;
   int32_t is_terminal;
   FrameDiffT()
@@ -3905,11 +3843,11 @@ struct FrameDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<flatbuffers::Offset<Bullet>> *mutable_bullets() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Bullet>> *>(VT_BULLETS);
   }
-  const flatbuffers::Vector<const Creep *> *creep_map() const {
-    return GetPointer<const flatbuffers::Vector<const Creep *> *>(VT_CREEP_MAP);
+  const flatbuffers::Vector<const Vec2 *> *creep_map() const {
+    return GetPointer<const flatbuffers::Vector<const Vec2 *> *>(VT_CREEP_MAP);
   }
-  flatbuffers::Vector<const Creep *> *mutable_creep_map() {
-    return GetPointer<flatbuffers::Vector<const Creep *> *>(VT_CREEP_MAP);
+  flatbuffers::Vector<const Vec2 *> *mutable_creep_map() {
+    return GetPointer<flatbuffers::Vector<const Vec2 *> *>(VT_CREEP_MAP);
   }
   int32_t reward() const {
     return GetField<int32_t>(VT_REWARD, 0);
@@ -3962,7 +3900,7 @@ struct FrameDiffBuilder {
   void add_bullets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bullet>>> bullets) {
     fbb_.AddOffset(FrameDiff::VT_BULLETS, bullets);
   }
-  void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<const Creep *>> creep_map) {
+  void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> creep_map) {
     fbb_.AddOffset(FrameDiff::VT_CREEP_MAP, creep_map);
   }
   void add_reward(int32_t reward) {
@@ -3989,7 +3927,7 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsByPlayerId>>> actions = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>>> resources = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bullet>>> bullets = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const Creep *>> creep_map = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> creep_map = 0,
     int32_t reward = 0,
     int32_t is_terminal = 0) {
   FrameDiffBuilder builder_(_fbb);
@@ -4009,7 +3947,7 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiffDirect(
     const std::vector<flatbuffers::Offset<ActionsByPlayerId>> *actions = nullptr,
     const std::vector<flatbuffers::Offset<ResourcesByPlayerId>> *resources = nullptr,
     const std::vector<flatbuffers::Offset<Bullet>> *bullets = nullptr,
-    const std::vector<const Creep *> *creep_map = nullptr,
+    const std::vector<const Vec2 *> *creep_map = nullptr,
     int32_t reward = 0,
     int32_t is_terminal = 0) {
   return torchcraft::fbs::CreateFrameDiff(
@@ -4018,7 +3956,7 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiffDirect(
       actions ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>>(*actions) : 0,
       resources ? _fbb.CreateVector<flatbuffers::Offset<ResourcesByPlayerId>>(*resources) : 0,
       bullets ? _fbb.CreateVector<flatbuffers::Offset<Bullet>>(*bullets) : 0,
-      creep_map ? _fbb.CreateVector<const Creep *>(*creep_map) : 0,
+      creep_map ? _fbb.CreateVector<const Vec2 *>(*creep_map) : 0,
       reward,
       is_terminal);
 }
@@ -4558,7 +4496,7 @@ inline void Message::UnPackTo(MessageT *_o, const flatbuffers::resolver_function
   (void)_o;
   (void)_resolver;
   { auto _e = msg_type(); _o->msg.type = _e; };
-  { auto _e = msg(); if (_e) _o->msg.value = MessageTypeUnion::UnPack(_e, msg_type(), _resolver); };
+  { auto _e = msg(); if (_e) _o->msg.value = AnyMessageUnion::UnPack(_e, msg_type(), _resolver); };
   { auto _e = uid(); if (_e) _o->uid = _e->str(); };
 }
 
@@ -5349,36 +5287,36 @@ inline void FrameOrFrameDiffUnion::Reset() {
   type = FrameOrFrameDiff::NONE;
 }
 
-inline bool VerifyMessageType(flatbuffers::Verifier &verifier, const void *obj, MessageType type) {
+inline bool VerifyAnyMessage(flatbuffers::Verifier &verifier, const void *obj, AnyMessage type) {
   switch (type) {
-    case MessageType::NONE: {
+    case AnyMessage::NONE: {
       return true;
     }
-    case MessageType::HandshakeClient: {
+    case AnyMessage::HandshakeClient: {
       auto ptr = reinterpret_cast<const HandshakeClient *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case MessageType::Commands: {
+    case AnyMessage::Commands: {
       auto ptr = reinterpret_cast<const Commands *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case MessageType::HandshakeServer: {
+    case AnyMessage::HandshakeServer: {
       auto ptr = reinterpret_cast<const HandshakeServer *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case MessageType::FrameState: {
+    case AnyMessage::FrameState: {
       auto ptr = reinterpret_cast<const FrameState *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case MessageType::PlayerLeft: {
+    case AnyMessage::PlayerLeft: {
       auto ptr = reinterpret_cast<const PlayerLeft *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case MessageType::EndGame: {
+    case AnyMessage::EndGame: {
       auto ptr = reinterpret_cast<const EndGame *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case MessageType::Error: {
+    case AnyMessage::Error: {
       auto ptr = reinterpret_cast<const Error *>(obj);
       return verifier.VerifyTable(ptr);
     }
@@ -5386,44 +5324,44 @@ inline bool VerifyMessageType(flatbuffers::Verifier &verifier, const void *obj, 
   }
 }
 
-inline bool VerifyMessageTypeVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types) {
+inline bool VerifyAnyMessageVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types) {
   if (values->size() != types->size()) return false;
   for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
-    if (!VerifyMessageType(
-        verifier,  values->Get(i), types->GetEnum<MessageType>(i))) {
+    if (!VerifyAnyMessage(
+        verifier,  values->Get(i), types->GetEnum<AnyMessage>(i))) {
       return false;
     }
   }
   return true;
 }
 
-inline void *MessageTypeUnion::UnPack(const void *obj, MessageType type, const flatbuffers::resolver_function_t *resolver) {
+inline void *AnyMessageUnion::UnPack(const void *obj, AnyMessage type, const flatbuffers::resolver_function_t *resolver) {
   switch (type) {
-    case MessageType::HandshakeClient: {
+    case AnyMessage::HandshakeClient: {
       auto ptr = reinterpret_cast<const HandshakeClient *>(obj);
       return ptr->UnPack(resolver);
     }
-    case MessageType::Commands: {
+    case AnyMessage::Commands: {
       auto ptr = reinterpret_cast<const Commands *>(obj);
       return ptr->UnPack(resolver);
     }
-    case MessageType::HandshakeServer: {
+    case AnyMessage::HandshakeServer: {
       auto ptr = reinterpret_cast<const HandshakeServer *>(obj);
       return ptr->UnPack(resolver);
     }
-    case MessageType::FrameState: {
+    case AnyMessage::FrameState: {
       auto ptr = reinterpret_cast<const FrameState *>(obj);
       return ptr->UnPack(resolver);
     }
-    case MessageType::PlayerLeft: {
+    case AnyMessage::PlayerLeft: {
       auto ptr = reinterpret_cast<const PlayerLeft *>(obj);
       return ptr->UnPack(resolver);
     }
-    case MessageType::EndGame: {
+    case AnyMessage::EndGame: {
       auto ptr = reinterpret_cast<const EndGame *>(obj);
       return ptr->UnPack(resolver);
     }
-    case MessageType::Error: {
+    case AnyMessage::Error: {
       auto ptr = reinterpret_cast<const Error *>(obj);
       return ptr->UnPack(resolver);
     }
@@ -5431,33 +5369,33 @@ inline void *MessageTypeUnion::UnPack(const void *obj, MessageType type, const f
   }
 }
 
-inline flatbuffers::Offset<void> MessageTypeUnion::Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher) const {
+inline flatbuffers::Offset<void> AnyMessageUnion::Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher) const {
   switch (type) {
-    case MessageType::HandshakeClient: {
+    case AnyMessage::HandshakeClient: {
       auto ptr = reinterpret_cast<const HandshakeClientT *>(value);
       return CreateHandshakeClient(_fbb, ptr, _rehasher).Union();
     }
-    case MessageType::Commands: {
+    case AnyMessage::Commands: {
       auto ptr = reinterpret_cast<const CommandsT *>(value);
       return CreateCommands(_fbb, ptr, _rehasher).Union();
     }
-    case MessageType::HandshakeServer: {
+    case AnyMessage::HandshakeServer: {
       auto ptr = reinterpret_cast<const HandshakeServerT *>(value);
       return CreateHandshakeServer(_fbb, ptr, _rehasher).Union();
     }
-    case MessageType::FrameState: {
+    case AnyMessage::FrameState: {
       auto ptr = reinterpret_cast<const FrameStateT *>(value);
       return CreateFrameState(_fbb, ptr, _rehasher).Union();
     }
-    case MessageType::PlayerLeft: {
+    case AnyMessage::PlayerLeft: {
       auto ptr = reinterpret_cast<const PlayerLeftT *>(value);
       return CreatePlayerLeft(_fbb, ptr, _rehasher).Union();
     }
-    case MessageType::EndGame: {
+    case AnyMessage::EndGame: {
       auto ptr = reinterpret_cast<const EndGameT *>(value);
       return CreateEndGame(_fbb, ptr, _rehasher).Union();
     }
-    case MessageType::Error: {
+    case AnyMessage::Error: {
       auto ptr = reinterpret_cast<const ErrorT *>(value);
       return CreateError(_fbb, ptr, _rehasher).Union();
     }
@@ -5465,33 +5403,33 @@ inline flatbuffers::Offset<void> MessageTypeUnion::Pack(flatbuffers::FlatBufferB
   }
 }
 
-inline MessageTypeUnion::MessageTypeUnion(const MessageTypeUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type), value(nullptr) {
+inline AnyMessageUnion::AnyMessageUnion(const AnyMessageUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type), value(nullptr) {
   switch (type) {
-    case MessageType::HandshakeClient: {
+    case AnyMessage::HandshakeClient: {
       assert(false);  // HandshakeClientT not copyable.
       break;
     }
-    case MessageType::Commands: {
+    case AnyMessage::Commands: {
       assert(false);  // CommandsT not copyable.
       break;
     }
-    case MessageType::HandshakeServer: {
+    case AnyMessage::HandshakeServer: {
       assert(false);  // HandshakeServerT not copyable.
       break;
     }
-    case MessageType::FrameState: {
+    case AnyMessage::FrameState: {
       assert(false);  // FrameStateT not copyable.
       break;
     }
-    case MessageType::PlayerLeft: {
+    case AnyMessage::PlayerLeft: {
       value = new PlayerLeftT(*reinterpret_cast<PlayerLeftT *>(u.value));
       break;
     }
-    case MessageType::EndGame: {
+    case AnyMessage::EndGame: {
       value = new EndGameT(*reinterpret_cast<EndGameT *>(u.value));
       break;
     }
-    case MessageType::Error: {
+    case AnyMessage::Error: {
       value = new ErrorT(*reinterpret_cast<ErrorT *>(u.value));
       break;
     }
@@ -5500,39 +5438,39 @@ inline MessageTypeUnion::MessageTypeUnion(const MessageTypeUnion &u) FLATBUFFERS
   }
 }
 
-inline void MessageTypeUnion::Reset() {
+inline void AnyMessageUnion::Reset() {
   switch (type) {
-    case MessageType::HandshakeClient: {
+    case AnyMessage::HandshakeClient: {
       auto ptr = reinterpret_cast<HandshakeClientT *>(value);
       delete ptr;
       break;
     }
-    case MessageType::Commands: {
+    case AnyMessage::Commands: {
       auto ptr = reinterpret_cast<CommandsT *>(value);
       delete ptr;
       break;
     }
-    case MessageType::HandshakeServer: {
+    case AnyMessage::HandshakeServer: {
       auto ptr = reinterpret_cast<HandshakeServerT *>(value);
       delete ptr;
       break;
     }
-    case MessageType::FrameState: {
+    case AnyMessage::FrameState: {
       auto ptr = reinterpret_cast<FrameStateT *>(value);
       delete ptr;
       break;
     }
-    case MessageType::PlayerLeft: {
+    case AnyMessage::PlayerLeft: {
       auto ptr = reinterpret_cast<PlayerLeftT *>(value);
       delete ptr;
       break;
     }
-    case MessageType::EndGame: {
+    case AnyMessage::EndGame: {
       auto ptr = reinterpret_cast<EndGameT *>(value);
       delete ptr;
       break;
     }
-    case MessageType::Error: {
+    case AnyMessage::Error: {
       auto ptr = reinterpret_cast<ErrorT *>(value);
       delete ptr;
       break;
@@ -5540,7 +5478,7 @@ inline void MessageTypeUnion::Reset() {
     default: break;
   }
   value = nullptr;
-  type = MessageType::NONE;
+  type = AnyMessage::NONE;
 }
 
 inline const torchcraft::fbs::Message *GetMessage(const void *buf) {

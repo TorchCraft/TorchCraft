@@ -31,10 +31,10 @@ class Replayer : public RefCounted {
   std::vector<Frame*> frames;
   std::unordered_map<int32_t, int32_t> numUnits;
   Map map;
-  // If keyframe = 0, every frame is a frame.
-  // Otherwise, every keyframe is a frame, and all others are diffs.
+  // If keyFrameInterval == 0, every frame is a frame.
+  // Otherwise, every keyFrameInterval is a frame, and all others are diffs.
   // Only affects saving/loading (replays are still large in memory)
-  uint32_t keyframe;
+  uint32_t keyFrameInterval;
 
  public:
   ~Replayer() {
@@ -54,10 +54,10 @@ class Replayer : public RefCounted {
     frames.push_back(new_frame);
   }
   void setKeyFrame(int32_t x) {
-    keyframe = x < 0 ? frames.size() + 1 : (uint32_t)x;
+    keyFrameInterval = x < 0 ? frames.size() + 1 : (uint32_t)x;
   }
   uint32_t getKeyFrame() {
-    return keyframe;
+    return keyFrameInterval;
   }
   size_t size() const {
     return frames.size();

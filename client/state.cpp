@@ -319,7 +319,6 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
   preUpdate();
 
-  // TODO There used to be a test here of whether a frame(diff) was present. Is it ever not?
   if (this->update_frame(end->frameOrFrameDiff())) {
     upd.emplace_back("frame");
   }

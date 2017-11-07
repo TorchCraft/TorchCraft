@@ -25,21 +25,18 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   auto width = o.map.width;
   auto data = o.map.data.data();
 
-  if (o.keyframe != 0)
-    out << 0 << " " << o.keyframe << " ";
+  if (o.keyFrameInterval != 0)
+    out << 0 << " " << o.keyFrameInterval << " ";
   out << height << " " << width << " ";
   out.write((const char*)data, height * width); // Write map data as raw bytes
 
-  auto kf = o.keyframe == 0 ? 1 : o.keyframe;
+  auto kf = o.keyFrameInterval == 0 ? 1 : o.keyFrameInterval;
 
-  //Serialize the frame state, either as a Frame or a FrameDiff
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
     if (i % kf == 0)
-      // It's a keyframe. Serialize a Frame.
       out << *o.frames[i] << " ";
     else
-      // It's not a keyframe. Serialize a FrameDiff.
       out << frame_diff(o.frames[i], o.frames[i - 1]) << " ";
   }
 
@@ -62,11 +59,11 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   in >> diffed;
 
   if (diffed == 0)
-    in >> o.keyframe >> height >> width;
+    in >> o.keyFrameInterval >> height >> width;
   else {
     height = diffed;
     in >> width;
-    o.keyframe = 0;
+    o.keyFrameInterval = 0;
   }
   diffed = (diffed == 0); // Every kf is a Frame, others are frame diffs
   if (height <= 0 || width <= 0 || height > 10000 || width > 10000)
@@ -80,11 +77,11 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
 
   o.frames.resize(nFrames);
   for (size_t i = 0; i < nFrames; i++) {
-    if (o.keyframe == 0) {
+    if (o.keyFrameInterval == 0) {
       o.frames[i] = new Frame();
       in >> *o.frames[i];
     } else {
-      if (i % o.keyframe == 0) {
+      if (i % o.keyFrameInterval == 0) {
         o.frames[i] = new Frame();
         in >> *o.frames[i];
       } else {

@@ -42,7 +42,7 @@ namespace torchcraft {
       OutStreamableFlatBuffer(
         flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder)
         : flatBufferBuilder(finishedFlatBufferBuilder) {
-          
+
           // Assert that the FlatBuffer is actually finished.
           // This is an internal FlatBuffers API call,
           // but they don't expose this information any other way.
@@ -51,8 +51,8 @@ namespace torchcraft {
 
       void write(std::ostream& out) const {
         auto flatbufferPointer = flatBufferBuilder.GetBufferPointer();
-        auto flatbufferSize = flatBufferBuilder.GetSize();
-        out << flatbufferSize;
+        size_t flatbufferSize = flatBufferBuilder.GetSize();
+        out.write(&flatbufferSize, sizeof(size_t));
         out.write(
           reinterpret_cast<char const*>(flatbufferPointer),
           flatbufferSize);
@@ -71,7 +71,7 @@ namespace torchcraft {
 
       void read(std::istream& in) {
         size_t bufferSize;
-        in >> bufferSize;
+        in.read(&bufferSize, sizeof(size_t));
 
         std::istream::char_type buffer[bufferSize];
         in.read(buffer, bufferSize);

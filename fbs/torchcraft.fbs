@@ -54,11 +54,6 @@ table Commands {
   commands:[Command];
 }
 
-enum FrameRepresentation : bool {
-  AsFrame,
-  AsFrameDiff
-}
-
 union FrameOrFrameDiff {
   Frame,
   FrameDiff
@@ -93,7 +88,7 @@ table Error {
   message:string;
 }
 
-union MessageType {
+union AnyMessage {
   // from client
   HandshakeClient,
   Commands,
@@ -107,7 +102,7 @@ union MessageType {
 }
 
 table Message {
-  msg:MessageType;
+  msg:AnyMessage;
   uid:string; // sender ID
 }
 
@@ -246,18 +241,13 @@ table UnitDiff {
   flags:long;
 }
 
-struct Creep {
-  x:int;
-  y:int;
-}
-
 table FrameDiff {
   pids:[int];
   //units:[[UnitDiff]];
   actions:[ActionsByPlayerId];
   resources:[ResourcesByPlayerId];
   bullets:[Bullet];
-  creep_map:[Creep];
+  creep_map:[Vec2];
   reward:int;
   is_terminal:int;
 }

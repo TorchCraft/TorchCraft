@@ -464,6 +464,7 @@ class Frame : public RefCounted {
   }
 
   void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::Frame table);
 }; // class Frame
 
 // Frame diffs

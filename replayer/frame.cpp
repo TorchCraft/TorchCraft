@@ -138,7 +138,6 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
 
   auto buildFbsResourcesByPlayerId = [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
     auto resources = resourcesPair.second;
-
     fbs::ResourcesBuilder fbsResourcesBuilder(builder);
     fbsResourcesBuilder.add_ore(resources.ore);
     fbsResourcesBuilder.add_gas(resources.gas);
@@ -184,6 +183,14 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
   fbsFrameBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
   fbsFrameBuilder.Finish();
 };
+
+void Frame::readFromFlatBufferTable(const fbs::Frame table) {
+  width = table.width();
+  height = table.height();
+  reward = table.reward();
+  is_terminal = table.is_terminal();
+  
+}
 
 namespace detail = replayer::detail;
 // This macro maps the member variables of Unit to some IDs

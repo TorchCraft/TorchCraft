@@ -199,11 +199,6 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
 };
 
 void Frame::readFromFlatBufferTable(const fbs::Frame& table) {
-
-  /*
-
-  Gonna replace these with the equivalent reads
-
   auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
 
     auto buildFbsUnit = [&builder](const Unit& unit) {
@@ -349,7 +344,6 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& table) {
   fbsFrameBuilder.add_units(builder.CreateVector(fbsUnitsByPlayerId));
   fbsFrameBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
   fbsFrameBuilder.Finish();
-  */
 }
 
 namespace detail = replayer::detail;

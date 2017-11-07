@@ -28,6 +28,14 @@ typedef int int32_t;
 
 namespace torchcraft {
 namespace replayer {
+
+class Frame;
+class FrameDiff;
+std::ostream& operator<<(std::ostream& out, const Frame& o);
+std::istream& operator>>(std::istream& in, Frame& o);
+std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
+std::istream& operator>>(std::istream& in, FrameDiff& o);
+
 struct Order {
   int32_t first_frame; // first frame number where order appeared
 
@@ -599,8 +607,6 @@ class Frame : public RefCounted {
     fbsFrameBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
   };
 }; // class Frame
-std::ostream& operator<<(std::ostream& out, const Frame& o);
-std::istream& operator>>(std::istream& in, Frame& o);
 
 // Frame diffs
 class FrameDiff;
@@ -651,8 +657,5 @@ Frame* frame_undiff(FrameDiff*, Frame*);
 Frame* frame_undiff(Frame*, FrameDiff*);
 void frame_undiff(Frame* result, FrameDiff*, Frame*);
 void frame_undiff(Frame* result, Frame*, FrameDiff*);
-
-  std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
-  std::istream& operator>>(std::istream& in, FrameDiff& o);
 } // namespace replayer
 } // namespace torchcraft

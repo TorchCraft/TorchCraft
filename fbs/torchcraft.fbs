@@ -88,7 +88,7 @@ table Error {
   message:string;
 }
 
-union MessageType {
+union AnyMessage {
   // from client
   HandshakeClient,
   Commands,
@@ -102,13 +102,11 @@ union MessageType {
 }
 
 table Message {
-  msg:MessageType;
+  msg:AnyMessage;
   uid:string; // sender ID
 }
 
 root_type Message;
-
-
 
 table Map {
   height:int;

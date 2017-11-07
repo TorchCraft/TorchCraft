@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "refcount.h"
+#include "streamable_flatbuffer.h"
 #include "../fbs/torchcraft_generated.h"
 
 #ifdef _MSC_VER
@@ -469,7 +470,7 @@ class Frame : public RefCounted {
     return (this->creep_map[ind / 8] >> (ind % 8)) & 1;
   }
 
-  void addToFlatBuffer(flatbuffers::FlatBufferBuilder& builder) {
+  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
     auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
       auto buildFbsUnit = [&builder](const Unit& unit) {
         auto buildFbsOrder = [&builder](const Order& order) {

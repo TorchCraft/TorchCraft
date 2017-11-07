@@ -10,7 +10,6 @@
 #include <algorithm>
 
 #include "frame.h"
-#include "streamable_flatbuffer.h"
 
 namespace replayer = torchcraft::replayer;
 
@@ -18,6 +17,33 @@ using Frame = replayer::Frame;
 using FrameDiff = replayer::FrameDiff;
 
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
+  out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
+      << o.max_health << " " << o.shield << " " << o.max_shield << " "
+      << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
+      << " " << o.flags << " " << o.visible << " " << o.type << " " << o.armor
+      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
+      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
+      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
+      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
+
+  out << o.orders.size() << " ";
+  for (auto& c : o.orders) {
+    out << c.first_frame << " " << c.type << " " << c.targetId << " "
+        << c.targetX << " " << c.targetY << " ";
+  }
+
+  out << o.command.frame << " " << o.command.type << " " << o.command.targetId
+      << " " << o.command.targetX << " " << o.command.targetY << " "
+      << o.command.extra << " ";
+
+  out << o.velocityX << " " << o.velocityY;
+  out << " " << o.playerId;
+  out << " " << o.resources;
+  out << " " << o.buildTechUpgradeType;
+  out << " " << o.remainingBuildTrainTime;
+  out << " " << o.remainingUpgradeResearchTime;
+  out << " " << o.spellCD;
+  out << " " << o.associatedUnit << " " << o.associatedCount;
   return out;
 }
 
@@ -197,66 +223,18 @@ std::vector<bool> bytes_to_bool(const std::vector<uint8_t>& arr) {
 }
 
 std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Frame& o) {
-
-  // Writes the creep map
-  out << o.creep_map.size() << " ";
-  out.write((const char*)o.creep_map.data(), o.creep_map.size());
-
-  out << o.height << " " << o.width << " ";
-
-  // Writes the Units
-  out << o.units.size() << " ";
-  for (auto& v : o.units) {
-    out << v.first << " " << v.second.size() << " ";
-    for (auto& u : v.second) {
-      out << u << " ";
-    }
-  }
-
-  // Writes the rest of frame
-  writeTail(out, o.actions, o.resources, o.bullets);
-
-  out << " " << o.reward << " " << o.is_terminal;
-  return out;
+  std::ostream& out,
+  const replayer::Frame& frame) {
+    flatbuffers::FlatBufferBuilder builder;
+    frame.addToFlatBufferBuilder(builder);
+    auto streamable = OutStreamableFlatBuffer(builder);
+    out << streamable;
+    return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
-  int nPlayer, creep_map_size;
+  //auto streamable = InStreamableFlatBuffer()
 
-  // Read the creep map
-  in >> creep_map_size;
-  in.ignore(1); // Ignores next space
-  o.creep_map.resize(creep_map_size);
-  in.read((char*)o.creep_map.data(), creep_map_size);
-
-  in >> o.height >> o.width;
-
-  // Read the units
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: units nPlayer < 0");
-  if (nPlayer > 9)
-    throw std::runtime_error("Corrupted replay: units nPlayer > 9");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int idPlayer, nUnits;
-    in >> idPlayer >> nUnits;
-    if (nUnits < 0)
-      throw std::runtime_error("Corrupted replay: nUnits < 0");
-    if (nUnits > 10000)
-      throw std::runtime_error("Corrupted replay: nUnits > 10000");
-    o.units[idPlayer] = std::vector<replayer::Unit>();
-    o.units[idPlayer].resize(nUnits);
-    for (int32_t j = 0; j < nUnits; j++) {
-      in >> o.units[idPlayer][j];
-    }
-  }
-
-  // Read everything else
-  readTail(in, o.actions, o.resources, o.bullets);
-
-  in >> o.reward >> o.is_terminal;
   return in;
 }
 

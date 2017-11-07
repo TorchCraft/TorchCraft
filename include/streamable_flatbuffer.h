@@ -7,6 +7,8 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#pragma once
+
 #include <iostream>
 #include <memory>
 #include <type_traits>
@@ -94,7 +96,6 @@ namespace torchcraft {
       }
   };
 
-  template <typename T>
   std::ostream& operator<<(std::ostream& oStream, const OutStreamableFlatBuffer& streamableFlatBuffer) {
     streamableFlatBuffer.write(oStream);
     return oStream;

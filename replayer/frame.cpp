@@ -16,200 +16,9 @@ namespace replayer = torchcraft::replayer;
 using Frame = replayer::Frame;
 using FrameDiff = replayer::FrameDiff;
 
-std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
-  out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
-      << o.max_health << " " << o.shield << " " << o.max_shield << " "
-      << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
-      << " " << o.flags << " " << o.visible << " " << o.type << " " << o.armor
-      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
-      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
-      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
-      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
-
-  out << o.orders.size() << " ";
-  for (auto& c : o.orders) {
-    out << c.first_frame << " " << c.type << " " << c.targetId << " "
-        << c.targetX << " " << c.targetY << " ";
-  }
-
-  out << o.command.frame << " " << o.command.type << " " << o.command.targetId
-      << " " << o.command.targetX << " " << o.command.targetY << " "
-      << o.command.extra << " ";
-
-  out << o.velocityX << " " << o.velocityY;
-  out << " " << o.playerId;
-  out << " " << o.resources;
-  out << " " << o.buildTechUpgradeType;
-  out << " " << o.remainingBuildTrainTime;
-  out << " " << o.remainingUpgradeResearchTime;
-  out << " " << o.spellCD;
-  out << " " << o.associatedUnit << " " << o.associatedCount;
+std::ostream& replayer::operator<<(std::ostream& out, const replayer::Frame& frame) {
+  //TODO: Do
   return out;
-}
-
-std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
-  in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >>
-      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.flags >>
-      o.visible >> o.type >> o.armor >> o.shieldArmor >> o.size >> o.pixel_x >>
-      o.pixel_y >> o.pixel_size_x >> o.pixel_size_y >> o.groundATK >>
-      o.airATK >> o.groundDmgType >> o.airDmgType >> o.groundRange >>
-      o.airRange;
-
-  int n_orders;
-  in >> n_orders;
-  if (n_orders < 0)
-    throw std::runtime_error("Corrupted replay: n_orders < 0");
-  if (n_orders > 10000)
-    throw std::runtime_error("Corrupted replay: n_orders > 10000");
-  o.orders.resize(n_orders);
-  for (int i = 0; i < n_orders; i++) {
-    auto& oi = o.orders[i];
-    in >> oi.first_frame >> oi.type >> oi.targetId >> oi.targetX >> oi.targetY;
-  }
-
-  in >> o.command.frame >> o.command.type >> o.command.targetId >>
-      o.command.targetX >> o.command.targetY >> o.command.extra;
-
-  in >> o.velocityX >> o.velocityY;
-  in >> o.playerId;
-  in >> o.resources;
-
-  in >> o.buildTechUpgradeType;
-  in >> o.remainingBuildTrainTime >> o.remainingUpgradeResearchTime;
-  in >> o.spellCD >> o.associatedUnit >> o.associatedCount;
-
-  return in;
-}
-
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Resources& r) {
-  out << r.ore << " " << r.gas << " ";
-  out << r.used_psi << " " << r.total_psi << " ";
-  out << r.upgrades << " " << r.upgrades_level << " " << r.techs;
-  return out;
-}
-
-std::istream& replayer::operator>>(std::istream& in, replayer::Resources& r) {
-  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >>
-      r.upgrades_level >> r.techs;
-  return in;
-}
-
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Bullet& o) {
-  out << o.type << " " << o.x << " " << o.y;
-  return out;
-}
-
-std::istream& replayer::operator>>(std::istream& in, replayer::Bullet& o) {
-  in >> o.type >> o.x >> o.y;
-  return in;
-}
-
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Action& o) {
-  out << o.uid << " " << o.aid << " " << o.action.size() << " ";
-  for (auto& a : o.action) {
-    out << a;
-  }
-  return out;
-}
-
-std::istream& replayer::operator>>(std::istream& in, replayer::Action& o) {
-  in >> o.uid >> o.aid;
-  int sizeA;
-  in >> sizeA;
-  if (sizeA < 0)
-    throw std::runtime_error("Corrupted replay: sizeA < 0");
-
-  o.action.resize(sizeA);
-  for (int32_t k = 0; k < sizeA; k++) {
-    in >> o.action[k];
-  }
-  return in;
-}
-
-void writeTail(
-    std::ostream& out,
-    const std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
-    const std::unordered_map<int32_t, replayer::Resources>& resources,
-    const std::vector<replayer::Bullet>& bullets) {
-  out << actions.size() << " ";
-  for (auto& v : actions) {
-    out << v.first << " " << v.second.size() << " ";
-    for (auto& u : v.second) {
-      out << u << " ";
-    }
-  }
-  out << resources.size() << " ";
-  for (auto& r : resources) {
-    out << r.first << " " << r.second << " ";
-  }
-  out << bullets.size();
-  for (auto& b : bullets) {
-    out << " " << b;
-  }
-}
-
-void readTail(
-    std::istream& in,
-    std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
-    std::unordered_map<int32_t, replayer::Resources>& resources,
-    std::vector<replayer::Bullet>& bullets) {
-  int nPlayer, nBullets;
-
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: actions nPlayer < 0");
-  if (nPlayer > 9)
-    throw std::runtime_error("Corrupted replay: actions nPlayer > 9");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int32_t idPlayer, nActions;
-    in >> idPlayer >> nActions;
-    if (nActions < 0)
-      throw std::runtime_error("Corrupted replay: nActions < 0");
-    if (nActions > 10000)
-      throw std::runtime_error("Corrupted replay: nActions > 10000");
-    actions[idPlayer] = std::vector<replayer::Action>();
-    actions[idPlayer].resize(nActions);
-    for (int32_t j = 0; j < nActions; j++) {
-      in >> actions[idPlayer][j];
-    }
-  }
-
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: resources nPlayer < 0");
-  if (nPlayer > 9)
-    throw std::runtime_error("Corrupted replay: resources nPlayer > 9");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int32_t idPlayer;
-    in >> idPlayer;
-    in >> resources[idPlayer];
-  }
-
-  in >> nBullets;
-  if (nBullets < 0)
-    throw std::runtime_error("Corrupted replay: nBullets < 0");
-  if (nBullets > 10000)
-    throw std::runtime_error("Corrupted replay: nBullets > 500");
-  bullets.resize(nBullets);
-  for (int32_t i = 0; i < nBullets; i++) {
-    in >> bullets[i];
-  }
-}
-
-std::ostream& replayer::operator<<(
-  std::ostream& out,
-  const replayer::Frame& frame) {
-    flatbuffers::FlatBufferBuilder builder;
-    frame.addToFlatBufferBuilder(builder);
-    auto streamable = OutStreamableFlatBuffer(builder);
-    streamable.write(out);
-    return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
@@ -217,6 +26,15 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   streamable.read(in);
   auto fbsFrame = streamable.flatBufferTable;
   //TODO: Actually read it
+  return in;
+}
+
+
+std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& o) {
+  return out;
+}
+
+std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
   return in;
 }
 
@@ -446,88 +264,6 @@ void replayer::frame_undiff(Frame* frame, FrameDiff* lhs, Frame* rhs) {
 
 void replayer::frame_undiff(Frame* frame, Frame* lhs, FrameDiff* rhs) {
   return detail::add(frame, lhs, rhs);
-}
-
-std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& o) {
-  out << o.pids.size();
-  for (auto& pid : o.pids)
-    out << " " << pid;
-  for (auto& player_unit : o.units) {
-    out << " " << player_unit.size();
-    for (auto& du : player_unit)
-      out << " " << du;
-  }
-  out << " " << o.creep_map.size();
-  for (auto pair : o.creep_map)
-    out << " " << pair.first << " " << pair.second;
-  out << " ";
-  writeTail(out, o.actions, o.resources, o.bullets);
-  out << " " << o.reward << " " << o.is_terminal;
-  return out;
-}
-
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const detail::UnitDiff& o) {
-  out << o.id << " " << o.velocityX << " " << o.velocityY;
-  out << " " << o.flags;
-  out << " " << o.var_ids.size();
-  for (size_t i = 0; i < o.var_ids.size(); i++)
-    out << " " << o.var_ids[i];
-  for (size_t i = 0; i < o.var_ids.size(); i++)
-    out << " " << o.var_diffs[i];
-  out << " " << o.order_size << " " << o.order_ids.size();
-  for (size_t i = 0; i < o.order_ids.size(); i++)
-    out << " " << o.order_ids[i];
-  for (size_t i = 0; i < o.order_ids.size(); i++)
-    out << " " << o.order_diffs[i];
-  return out;
-}
-
-std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
-  int32_t npids, n_creep_map_diff;
-  in >> npids;
-  o.pids.resize(npids);
-  o.units.resize(npids);
-  for (size_t i = 0; i < static_cast<size_t>(npids); i++)
-    in >> o.pids[i];
-  for (size_t i = 0, nunits = 0; i < static_cast<size_t>(npids); i++) {
-    in >> nunits;
-    o.units[i].resize(nunits);
-    for (size_t k = 0; k < nunits; k++)
-      in >> o.units[i][k];
-  }
-  in >> n_creep_map_diff;
-  for (size_t i = 0; i < static_cast<size_t>(n_creep_map_diff); i++) {
-    int32_t first, second;
-    in >> first >> second;
-    o.creep_map.insert(std::make_pair(first, second));
-  }
-  readTail(in, o.actions, o.resources, o.bullets);
-  in >> o.reward >> o.is_terminal;
-  return in;
-}
-
-std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
-  size_t nvars, norders;
-
-  in >> o.id >> o.velocityX >> o.velocityY;
-  in >> o.flags;
-  in >> nvars;
-  o.var_ids.resize(nvars);
-  o.var_diffs.resize(nvars);
-  for (size_t i = 0; i < nvars; i++)
-    in >> o.var_ids[i];
-  for (size_t i = 0; i < nvars; i++)
-    in >> o.var_diffs[i];
-  in >> o.order_size >> norders;
-  o.order_ids.resize(norders);
-  o.order_diffs.resize(norders);
-  for (size_t i = 0; i < norders; i++)
-    in >> o.order_ids[i];
-  for (size_t i = 0; i < norders; i++)
-    in >> o.order_diffs[i];
-  return in;
 }
 
 #define STRINGIFY2(X) #X

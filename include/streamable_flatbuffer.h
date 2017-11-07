@@ -65,45 +65,22 @@ namespace torchcraft {
       "Should be a FlatBuffer table.");
 
     public:
-      typedef std::function<bool (const flatbuffers::Verifier&)> tInvokeVerifier;
-      typedef std::function<T* (uint8_t*)> tInvokeReader;
-
-    private:
-      tInvokeVerifier invokeVerifier;
-      tInvokeReader invokeReader;
-
-    public:
-      std::shared_ptr<T> flatbuffer;
-      InStreamableFlatBuffer(
-        tInvokeVerifier toVerify,
-        tInvokeReader toRead):
-        invokeVerifier(toVerify),
-        invokeReader(toRead) {}
+      std::shared_ptr<const T> flatBufferTable;
 
       void read(std::istream& in) {
         size_t bufferSize;
         in >> bufferSize;
 
-        uint8_t buffer[bufferSize];
+        std::istream::char_type buffer[bufferSize];
         in.read(buffer, bufferSize);
 
-        flatbuffers::Verifier verifier(buffer, bufferSize);
-        if ( ! invokeVerifier(verifier)) {
+        flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(buffer), bufferSize);
+        if (verifier.VerifyBuffer<T>()) {
           throw std::runtime_error("Streaming FlatBuffer table failed verification");
-        }
+        };
 
-        flatbuffer = std::make_shared<T>(invokeReader(buffer));
+        auto table = flatbuffers::GetRoot<T>(buffer);
+        flatBufferTable = std::shared_ptr<const T>(table);
       }
   };
-
-  std::ostream& operator<<(std::ostream& oStream, const OutStreamableFlatBuffer& streamableFlatBuffer) {
-    streamableFlatBuffer.write(oStream);
-    return oStream;
-  }
-
-  template <typename T>
-  std::istream& operator>>(std::istream& iStream, InStreamableFlatBuffer<T>& streamableFlatBuffer) {
-    streamableFlatBuffer.read(iStream);
-    return iStream;
-  }
 }

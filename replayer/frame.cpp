@@ -228,13 +228,15 @@ std::ostream& replayer::operator<<(
     flatbuffers::FlatBufferBuilder builder;
     frame.addToFlatBufferBuilder(builder);
     auto streamable = OutStreamableFlatBuffer(builder);
-    out << streamable;
+    streamable.write(out);
     return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
-  //auto streamable = InStreamableFlatBuffer()
-
+  InStreamableFlatBuffer<const fbs::Frame> streamable;
+  streamable.read(in);
+  auto fbsFrame = streamable.flatBufferTable;
+  //TODO: Actually read it
   return in;
 }
 

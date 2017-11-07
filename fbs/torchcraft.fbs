@@ -88,7 +88,7 @@ table Error {
   message:string;
 }
 
-union AnyMessage {
+union MessageType {
   // from client
   HandshakeClient,
   Commands,
@@ -102,7 +102,7 @@ union AnyMessage {
 }
 
 table Message {
-  msg:AnyMessage;
+  msg:MessageType;
   uid:string; // sender ID
 }
 
@@ -223,10 +223,6 @@ table Frame {
   height:uint;
   reward:int;
   is_terminal:bool;
-}
-
-table FrameContainer {
-  frames:[Frame];
 }
 
 table UnitDiff {

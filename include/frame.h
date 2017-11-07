@@ -17,6 +17,8 @@
 #include <vector>
 
 #include "refcount.h"
+#include "streamable_flatbuffer.h"
+#include "../fbs/torchcraft_generated.h"
 
 #ifdef _MSC_VER
 typedef unsigned int uint32_t;
@@ -24,13 +26,18 @@ typedef unsigned short uint16_t;
 typedef int int32_t;
 #endif
 
-// TODO Check types !
-
 namespace torchcraft {
 namespace replayer {
+
+class Frame;
+class FrameDiff;
+std::ostream& operator<<(std::ostream& out, const Frame& o);
+std::istream& operator>>(std::istream& in, Frame& o);
+std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
+std::istream& operator>>(std::istream& in, FrameDiff& o);
+
 struct Order {
   int32_t first_frame; // first frame number where order appeared
-
   int32_t type; // see BWAPI::Orders::Enum
   int32_t targetId;
   int32_t targetX, targetY;
@@ -144,9 +151,6 @@ struct Unit {
     // clang-format on
   };
 };
-
-std::ostream& operator<<(std::ostream& out, const Unit& o);
-std::istream& operator>>(std::istream& in, Unit& o);
 
 struct Resources {
   int32_t ore;
@@ -288,24 +292,15 @@ struct Resources {
   // clang-format on
 };
 
-std::ostream& operator<<(std::ostream& out, const Resources& r);
-std::istream& operator>>(std::istream& in, Resources& r);
-
 struct Bullet {
   int32_t type, x, y;
 };
-
-std::ostream& operator<<(std::ostream& out, const Bullet& o);
-std::istream& operator>>(std::istream& in, Bullet& o);
 
 struct Action { // corresponds to a torchcraft message
   std::vector<int32_t> action;
   int32_t uid;
   int32_t aid;
 };
-
-std::ostream& operator<<(std::ostream& out, const Action& o);
-std::istream& operator>>(std::istream& in, Action& o);
 
 class Frame : public RefCounted {
  public:
@@ -467,9 +462,10 @@ class Frame : public RefCounted {
     auto ind = (y / 4) * (this->width / 4) + (x / 4); // Convert to buildtiles
     return (this->creep_map[ind / 8] >> (ind % 8)) & 1;
   }
+
+  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::Frame& table);
 }; // class Frame
-std::ostream& operator<<(std::ostream& out, const Frame& o);
-std::istream& operator>>(std::istream& in, Frame& o);
 
 // Frame diffs
 class FrameDiff;
@@ -520,10 +516,5 @@ Frame* frame_undiff(FrameDiff*, Frame*);
 Frame* frame_undiff(Frame*, FrameDiff*);
 void frame_undiff(Frame* result, FrameDiff*, Frame*);
 void frame_undiff(Frame* result, Frame*, FrameDiff*);
-
-std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
-std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);
-std::istream& operator>>(std::istream& in, FrameDiff& o);
-std::istream& operator>>(std::istream& in, detail::UnitDiff& o);
 } // namespace replayer
 } // namespace torchcraft

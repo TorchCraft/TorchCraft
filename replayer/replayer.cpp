@@ -9,6 +9,7 @@
 
 #include "replayer.h"
 #include <bitset>
+#include "../fbs/torchcraft_generated.h"
 
 #ifdef WITH_ZSTD
 #include "zstdstream.h"
@@ -24,12 +25,13 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   auto width = o.map.width;
   auto data = o.map.data.data();
 
-  if (o.keyframe != 0)
-    out << 0 << " " << o.keyframe << " ";
+  if (o.keyFrameInterval != 0)
+    out << 0 << " " << o.keyFrameInterval << " ";
   out << height << " " << width << " ";
   out.write((const char*)data, height * width); // Write map data as raw bytes
 
-  auto kf = o.keyframe == 0 ? 1 : o.keyframe;
+  auto kf = o.keyFrameInterval == 0 ? 1 : o.keyFrameInterval;
+
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
     if (i % kf == 0)
@@ -57,11 +59,11 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   in >> diffed;
 
   if (diffed == 0)
-    in >> o.keyframe >> height >> width;
+    in >> o.keyFrameInterval >> height >> width;
   else {
     height = diffed;
     in >> width;
-    o.keyframe = 0;
+    o.keyFrameInterval = 0;
   }
   diffed = (diffed == 0); // Every kf is a Frame, others are frame diffs
   if (height <= 0 || width <= 0 || height > 10000 || width > 10000)
@@ -72,13 +74,14 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   o.setRawMap(height, width, data);
   size_t nFrames;
   in >> nFrames;
+
   o.frames.resize(nFrames);
   for (size_t i = 0; i < nFrames; i++) {
-    if (o.keyframe == 0) {
+    if (o.keyFrameInterval == 0) {
       o.frames[i] = new Frame();
       in >> *o.frames[i];
     } else {
-      if (i % o.keyframe == 0) {
+      if (i % o.keyFrameInterval == 0) {
         o.frames[i] = new Frame();
         in >> *o.frames[i];
       } else {
@@ -100,6 +103,43 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   }
 
   return in;
+}
+
+void Replayer::write(std::ostream& out) const {
+
+/*
+  flatbuffers::FlatBufferBuilder fbsBuilder;
+
+  std::vector<flatbuffers::Offset<fbs::Frame>> fbsFrames;
+  std::transform(
+    frames.begin(),
+    frames.end(),
+    fbsFrames.begin(),
+    [&fbsBuilder](const Frame& frame) { frame.addToFlatBufferBuilder(fbsBuilder); });
+
+  auto fbsFrameContainer = fbs::CreateFrameContainer(fbsBuilder, fbsBuilder.CreateVector(fbsFrames));
+  */
+}
+
+void Replayer::read(std::istream& out) {
+
+  validate();
+}
+
+void Replayer::validate() {
+  auto throwCorruptedReplayException = [&](const char* problem) {
+    std::string message("Corrupted replay: ");
+    message.append(problem);
+    std::runtime_error(message.c_str());
+  };
+
+  //TODO: Orders in a frame > 10000
+  //TODO: Players with actions in a frame > 9
+  //TODO: Actions in a frame > 10000
+  //TODO: Players with resources in a frame > 9
+  //TODO: Bullets in a frame > 500
+  //TODO: Players with units > 9
+  //TODO: Untis in a frame > 10000
 }
 
 void Replayer::setMap(

@@ -1,0 +1,259 @@
+/**
+ * Copyright (c) 2015-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+namespace torchcraft.fbs;
+
+struct Vec2 {
+  x:int;
+  y:int;
+}
+
+table Command {
+  code:int;
+  args:[int];
+  str:string;
+}
+
+table Player {
+  id:int;
+  race:int;              // See torchcraft::BW::Race enum
+  name:string;
+  is_enemy:bool;
+}
+
+table HandshakeClient {
+  protocol:int;           // protocol for binary frame format
+  map:string;
+  window_size:Vec2;
+  window_pos:Vec2;
+  micro_mode:bool;
+}
+
+table HandshakeServer {
+  lag_frames:int;
+  map_size:Vec2;                // walk tile x and y
+  ground_height_data:[ubyte];   // walk tile resolution of ground heights
+  walkable_data:[ubyte];        // walk tile resolution of walkability
+  map_name:string;
+  is_replay:bool;
+  player_id:int;                // if is_replay == false
+  neutral_id:int;               // if is_replay == false
+  battle_frame_count:int;       // if micro_mode == true
+  buildable_data:[ubyte];       // walk tile resolution of buildability
+  start_locations:[Vec2];
+  players:[Player];
+}
+
+table Commands {
+  commands:[Command];
+}
+
+union FrameOrFrameDiff {
+  Frame,
+  FrameDiff
+}
+
+table FrameState {
+  frameOrFrameDiff:FrameOrFrameDiff;
+  deaths:[int];
+  frame_from_bwapi:int;
+  battle_frame_count:int;
+  commands_status:[byte];       // Status for previous commands (zero == success)
+
+  // if with_image
+  img_mode:string;
+  screen_position:Vec2;
+  visibility:[ubyte];
+  visibility_size:Vec2;
+  img_data:[ubyte];
+  img_size:Vec2;
+}
+
+table PlayerLeft {
+  player_left:string;
+}
+
+table EndGame {
+  frameOrFrameDiff:FrameOrFrameDiff;
+  game_won:bool;
+}
+
+table Error {
+  message:string;
+}
+
+union AnyMessage {
+  // from client
+  HandshakeClient,
+  Commands,
+
+  // from server
+  HandshakeServer,
+  FrameState,
+  PlayerLeft,
+  EndGame,
+  Error,
+}
+
+table Message {
+  msg:AnyMessage;
+  uid:string; // sender ID
+}
+
+root_type Message;
+
+table Map {
+  height:int;
+  width:int;
+  data:[ubyte];
+}
+
+table Action { // Corresponds to a TorchCraft message
+  action:[int];
+  uid:int;
+  aid:int;
+}
+
+table Resources {
+  ore:int;
+  gas:int;
+  used_psi:int;
+  total_psi:int;
+  upgrades:long;
+  upgrades_level:long;
+  techs:long;
+}
+
+table Order {
+  first_frame:int; //First frame number where order appeared
+  type:int; //Maps to BWAPI::Orders::Enum
+  targetId:int;
+  targetX:int;
+  targetY:int;
+  // Current implementation has equivalence operator that compares vars other than first_frame
+}
+
+table UnitCommand {
+  frame:int;
+  type:int; //Maps to BWAPI::UnitCommandTypes::Enum
+  targetId:int;
+  targetX:int;
+  targetY:int;
+  extra:int;
+}
+
+table Bullet {
+  type:int;
+  x:int;
+  y:int;
+}
+
+table Unit {
+  id:int;
+  x:int;
+  y:int;
+  health:int;
+  max_health:int;
+  shield:int;
+  max_shield:int;
+  energy:int;
+  maxCD:int;
+  groundCD:int;
+  airCD:int;
+  flags:long;
+  visible:bool;
+  type:int;
+  armor:int;
+  shieldArmor:int;
+  size:int;
+  pixel_x:int;
+  pixel_y:int;
+  pixel_size_x:int;
+  pixel_size_y:int;
+  groundATK:int;
+  airATK:int;
+  groundDmgType:int;
+  airDmgType:int;
+  groundRange:int;
+  airRange:int;
+  orders:[Order];
+  command:UnitCommand;
+  velocityX:double;
+  velocityY:double;
+  playerId:int;
+  resources:int;
+  buildTechUpgradeType:int;
+  remainingBuildTrainTime:int;
+  remainingUpgradeResearchTime:int;
+  spellCD:int;
+  associatedUnit:int; //addOn, nydusExit, transport, hatchery
+  associatedCount:int; //spiderMines, scarabs, interceptors, nuke
+}
+
+table UnitsByPlayerId {
+  playerId:int;
+  units:[Unit];
+}
+
+table ActionsByPlayerId {
+  playerId:int;
+  actions:[Action];
+}
+
+table ResourcesByPlayerId {
+  playerId:int;
+  resources:Resources;
+}
+
+table Frame {
+  units:[UnitsByPlayerId];
+  actions:[ActionsByPlayerId];
+  resources:[ResourcesByPlayerId];
+  bullets:[Bullet];
+  creep_map:[ubyte];
+  width:uint;
+  height:uint;
+  reward:int;
+  is_terminal:bool;
+}
+
+table UnitDiff {
+  id:int;
+  var_ids:[int];
+  var_diffs:[int];
+  order_ids:[int];
+  order_diffs:[int];
+  order_size:int;
+  velocityX:double;
+  velocityY:double;
+  flags:long;
+}
+
+table FrameDiff {
+  pids:[int];
+  //units:[[UnitDiff]];
+  actions:[ActionsByPlayerId];
+  resources:[ResourcesByPlayerId];
+  bullets:[Bullet];
+  creep_map:[Vec2];
+  reward:int;
+  is_terminal:int;
+}
+
+table UnitCount {
+  a:int;
+  b:int;
+}
+
+table Replayer {
+  frames:[Frame];
+  numUnits:[UnitCount];
+  map:Map;
+  keyFrame:int;
+}

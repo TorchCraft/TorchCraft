@@ -16,274 +16,340 @@ namespace replayer = torchcraft::replayer;
 using Frame = replayer::Frame;
 using FrameDiff = replayer::FrameDiff;
 
-std::ostream& replayer::operator<<(std::ostream& out, const replayer::Unit& o) {
-  out << o.id << " " << o.x << " " << o.y << " " << o.health << " "
-      << o.max_health << " " << o.shield << " " << o.max_shield << " "
-      << o.energy << " " << o.maxCD << " " << o.groundCD << " " << o.airCD
-      << " " << o.flags << " " << o.visible << " " << o.type << " " << o.armor
-      << " " << o.shieldArmor << " " << o.size << " " << o.pixel_x << " "
-      << o.pixel_y << " " << o.pixel_size_x << " " << o.pixel_size_y << " "
-      << o.groundATK << " " << o.airATK << " " << o.groundDmgType << " "
-      << o.airDmgType << " " << o.groundRange << " " << o.airRange << " ";
-
-  out << o.orders.size() << " ";
-  for (auto& c : o.orders) {
-    out << c.first_frame << " " << c.type << " " << c.targetId << " "
-        << c.targetX << " " << c.targetY << " ";
-  }
-
-  out << o.command.frame << " " << o.command.type << " " << o.command.targetId
-      << " " << o.command.targetX << " " << o.command.targetY << " "
-      << o.command.extra << " ";
-
-  out << o.velocityX << " " << o.velocityY;
-  out << " " << o.playerId;
-  out << " " << o.resources;
-  out << " " << o.buildTechUpgradeType;
-  out << " " << o.remainingBuildTrainTime;
-  out << " " << o.remainingUpgradeResearchTime;
-  out << " " << o.spellCD;
-  out << " " << o.associatedUnit << " " << o.associatedCount;
+std::ostream& replayer::operator<<(std::ostream& out, const replayer::Frame& frame) {
+  flatbuffers::FlatBufferBuilder builder;
+  frame.addToFlatBufferBuilder(builder);
+  OutStreamableFlatBuffer streamable(builder);
+  streamable.write(out);
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Unit& o) {
-  in >> o.id >> o.x >> o.y >> o.health >> o.max_health >> o.shield >>
-      o.max_shield >> o.energy >> o.maxCD >> o.groundCD >> o.airCD >> o.flags >>
-      o.visible >> o.type >> o.armor >> o.shieldArmor >> o.size >> o.pixel_x >>
-      o.pixel_y >> o.pixel_size_x >> o.pixel_size_y >> o.groundATK >>
-      o.airATK >> o.groundDmgType >> o.airDmgType >> o.groundRange >>
-      o.airRange;
-
-  int n_orders;
-  in >> n_orders;
-  if (n_orders < 0)
-    throw std::runtime_error("Corrupted replay: n_orders < 0");
-  if (n_orders > 10000)
-    throw std::runtime_error("Corrupted replay: n_orders > 10000");
-  o.orders.resize(n_orders);
-  for (int i = 0; i < n_orders; i++) {
-    auto& oi = o.orders[i];
-    in >> oi.first_frame >> oi.type >> oi.targetId >> oi.targetX >> oi.targetY;
-  }
-
-  in >> o.command.frame >> o.command.type >> o.command.targetId >>
-      o.command.targetX >> o.command.targetY >> o.command.extra;
-
-  in >> o.velocityX >> o.velocityY;
-  in >> o.playerId;
-  in >> o.resources;
-
-  in >> o.buildTechUpgradeType;
-  in >> o.remainingBuildTrainTime >> o.remainingUpgradeResearchTime;
-  in >> o.spellCD >> o.associatedUnit >> o.associatedCount;
-
+std::istream& replayer::operator>>(std::istream& in, replayer::Frame& frame) {
+  InStreamableFlatBuffer<const fbs::Frame> streamable;
+  streamable.read(in);
+  auto fbsFrame = streamable.flatBufferTable;
+  frame.readFromFlatBufferTable(*fbsFrame);
   return in;
 }
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Resources& r) {
-  out << r.ore << " " << r.gas << " ";
-  out << r.used_psi << " " << r.total_psi << " ";
-  out << r.upgrades << " " << r.upgrades_level << " " << r.techs;
+
+std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& frameDiff) {
+  flatbuffers::FlatBufferBuilder builder;
+  //frameDiff.addToFlatBufferBuilder(builder);
+  OutStreamableFlatBuffer streamable(builder);
+  streamable.write(out);
   return out;
 }
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Resources& r) {
-  in >> r.ore >> r.gas >> r.used_psi >> r.total_psi >> r.upgrades >>
-      r.upgrades_level >> r.techs;
+std::istream& replayer::operator>>(std::istream& in, FrameDiff& frameDiff) {
+  InStreamableFlatBuffer<const fbs::Frame> streamable;
+  streamable.read(in);
+  auto fbsFrame = streamable.flatBufferTable;
+  //frameDiff.readFromFlatBufferTable(fbsFrame);
   return in;
 }
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Bullet& o) {
-  out << o.type << " " << o.x << " " << o.y;
-  return out;
-}
+void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Bullet& o) {
-  in >> o.type >> o.x >> o.y;
-  return in;
-}
+  auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Action& o) {
-  out << o.uid << " " << o.aid << " " << o.action.size() << " ";
-  for (auto& a : o.action) {
-    out << a;
-  }
-  return out;
-}
+    auto buildFbsUnit = [&builder](const Unit& unit) {
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Action& o) {
-  in >> o.uid >> o.aid;
-  int sizeA;
-  in >> sizeA;
-  if (sizeA < 0)
-    throw std::runtime_error("Corrupted replay: sizeA < 0");
+      auto buildFbsOrder = [&builder](const Order& order) {
+        fbs::OrderBuilder fbsOrderBuilder(builder);
+        fbsOrderBuilder.add_first_frame(order.first_frame);
+        fbsOrderBuilder.add_type(order.type);
+        fbsOrderBuilder.add_targetId(order.targetId);
+        fbsOrderBuilder.add_targetX(order.targetX);
+        fbsOrderBuilder.add_targetY(order.targetY);
+        return fbsOrderBuilder.Finish();
+      };
 
-  o.action.resize(sizeA);
-  for (int32_t k = 0; k < sizeA; k++) {
-    in >> o.action[k];
-  }
-  return in;
-}
+      std::vector<flatbuffers::Offset<fbs::Order>> fbsOrders;
+      std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
 
-void writeTail(
-    std::ostream& out,
-    const std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
-    const std::unordered_map<int32_t, replayer::Resources>& resources,
-    const std::vector<replayer::Bullet>& bullets) {
-  out << actions.size() << " ";
-  for (auto& v : actions) {
-    out << v.first << " " << v.second.size() << " ";
-    for (auto& u : v.second) {
-      out << u << " ";
-    }
-  }
-  out << resources.size() << " ";
-  for (auto& r : resources) {
-    out << r.first << " " << r.second << " ";
-  }
-  out << bullets.size();
-  for (auto& b : bullets) {
-    out << " " << b;
-  }
-}
+      auto command = unit.command;
+      fbs::UnitCommandBuilder fbsUnitCommandBuilder(builder);
+      fbsUnitCommandBuilder.add_frame(command.frame);
+      fbsUnitCommandBuilder.add_type(command.type);
+      fbsUnitCommandBuilder.add_targetId(command.targetId);
+      fbsUnitCommandBuilder.add_targetX(command.targetX);
+      fbsUnitCommandBuilder.add_targetY(command.targetY);
+      fbsUnitCommandBuilder.add_extra(command.extra);
+      auto fbsCommand = fbsUnitCommandBuilder.Finish();
 
-void readTail(
-    std::istream& in,
-    std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
-    std::unordered_map<int32_t, replayer::Resources>& resources,
-    std::vector<replayer::Bullet>& bullets) {
-  int nPlayer, nBullets;
+      fbs::UnitBuilder fbsUnitBuilder(builder);
+      fbsUnitBuilder.add_id(unit.id);
+      fbsUnitBuilder.add_x(unit.x);
+      fbsUnitBuilder.add_y(unit.y);
+      fbsUnitBuilder.add_health(unit.health);
+      fbsUnitBuilder.add_max_health(unit.max_health);
+      fbsUnitBuilder.add_shield(unit.shield);
+      fbsUnitBuilder.add_max_shield(unit.max_shield);
+      fbsUnitBuilder.add_energy(unit.energy);
+      fbsUnitBuilder.add_maxCD(unit.maxCD);
+      fbsUnitBuilder.add_groundCD(unit.groundCD);
+      fbsUnitBuilder.add_airCD(unit.airCD);
+      fbsUnitBuilder.add_flags(unit.flags);
+      fbsUnitBuilder.add_visible(unit.visible);
+      fbsUnitBuilder.add_armor(unit.armor);
+      fbsUnitBuilder.add_shieldArmor(unit.shieldArmor);
+      fbsUnitBuilder.add_size(unit.size);
+      fbsUnitBuilder.add_pixel_x(unit.pixel_x);
+      fbsUnitBuilder.add_pixel_y(unit.pixel_y);
+      fbsUnitBuilder.add_pixel_size_x(unit.pixel_size_x);
+      fbsUnitBuilder.add_pixel_size_y(unit.pixel_size_y);
+      fbsUnitBuilder.add_groundATK(unit.groundATK);
+      fbsUnitBuilder.add_airATK(unit.airATK);
+      fbsUnitBuilder.add_groundDmgType(unit.groundDmgType);
+      fbsUnitBuilder.add_airDmgType(unit.airDmgType);
+      fbsUnitBuilder.add_groundRange(unit.groundRange);
+      fbsUnitBuilder.add_airRange(unit.airRange);
+      fbsUnitBuilder.add_velocityX(unit.velocityX);
+      fbsUnitBuilder.add_velocityY(unit.velocityY);
+      fbsUnitBuilder.add_playerId(unit.playerId);
+      fbsUnitBuilder.add_resources(unit.resources);
+      fbsUnitBuilder.add_buildTechUpgradeType(unit.buildTechUpgradeType);
+      fbsUnitBuilder.add_remainingBuildTrainTime(unit.remainingBuildTrainTime);
+      fbsUnitBuilder.add_remainingUpgradeResearchTime(unit.remainingUpgradeResearchTime);
+      fbsUnitBuilder.add_spellCD(unit.spellCD);
+      fbsUnitBuilder.add_associatedUnit(unit.associatedUnit);
+      fbsUnitBuilder.add_associatedCount(unit.associatedCount);
+      fbsUnitBuilder.add_command(fbsCommand);
+      fbsUnitBuilder.add_orders(builder.CreateVector(fbsOrders));
 
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: actions nPlayer < 0");
-  if (nPlayer > 9)
-    throw std::runtime_error("Corrupted replay: actions nPlayer > 9");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int32_t idPlayer, nActions;
-    in >> idPlayer >> nActions;
-    if (nActions < 0)
-      throw std::runtime_error("Corrupted replay: nActions < 0");
-    if (nActions > 10000)
-      throw std::runtime_error("Corrupted replay: nActions > 10000");
-    actions[idPlayer] = std::vector<replayer::Action>();
-    actions[idPlayer].resize(nActions);
-    for (int32_t j = 0; j < nActions; j++) {
-      in >> actions[idPlayer][j];
-    }
-  }
+      return fbsUnitBuilder.Finish();
+    };
 
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: resources nPlayer < 0");
-  if (nPlayer > 9)
-    throw std::runtime_error("Corrupted replay: resources nPlayer > 9");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int32_t idPlayer;
-    in >> idPlayer;
-    in >> resources[idPlayer];
-  }
+    std::vector<flatbuffers::Offset<fbs::Unit>> fbsUnits;
+    std::transform(unitPair.second.begin(), unitPair.second.end(), fbsUnits.begin(), buildFbsUnit);
 
-  in >> nBullets;
-  if (nBullets < 0)
-    throw std::runtime_error("Corrupted replay: nBullets < 0");
-  if (nBullets > 10000)
-    throw std::runtime_error("Corrupted replay: nBullets > 500");
-  bullets.resize(nBullets);
-  for (int32_t i = 0; i < nBullets; i++) {
-    in >> bullets[i];
-  }
-}
+    fbs::UnitsByPlayerIdBuilder fbsUnitsByPlayerIdBuilder(builder);
+    fbsUnitsByPlayerIdBuilder.add_playerId(unitPair.first);
+    fbsUnitsByPlayerIdBuilder.add_units(builder.CreateVector(fbsUnits));
+    return fbsUnitsByPlayerIdBuilder.Finish();
+  };
 
-// The boolean array better be divisible by 8
-std::vector<uint8_t> bool_to_bytes(const std::vector<bool>& arr) {
-  std::vector<uint8_t> ret;
-  ret.resize(arr.size() / 8);
-  for (size_t i = 0; i < arr.size(); i++) {
-    ret[i / 8] |= arr[i] << (i % 8);
-  }
-  return ret;
-}
-std::vector<bool> bytes_to_bool(const std::vector<uint8_t>& arr) {
-  std::vector<bool> ret;
-  ret.resize(arr.size() * 8);
-  for (size_t i = 0; i < arr.size(); i++) {
-    for (size_t k = 0; k < 8; k++) {
-      ret[i * 8 + k] = (arr[i] >> k) & 1;
-    }
-  }
-  return ret;
-}
+  auto buildFbsActionsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
 
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const replayer::Frame& o) {
+    auto buildFbsAction = [&builder](const Action& action) {
+      fbs::ActionBuilder fbsActionBuilder(builder);
+      fbsActionBuilder.add_action(builder.CreateVector(action.action));
+      fbsActionBuilder.add_uid(action.uid);
+      fbsActionBuilder.add_aid(action.aid);
+      return fbsActionBuilder.Finish();
+    };
 
-  // Writes the creep map
-  out << o.creep_map.size() << " ";
-  out.write((const char*)o.creep_map.data(), o.creep_map.size());
+    std::vector<flatbuffers::Offset<fbs::Action>> fbsActions;
+    std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), buildFbsAction);
 
-  out << o.height << " " << o.width << " ";
+    fbs::ActionsByPlayerIdBuilder fbsActionsByPlayerIdBuilder(builder);
+    fbsActionsByPlayerIdBuilder.add_playerId(actionPair.first);
+    fbsActionsByPlayerIdBuilder.add_actions(builder.CreateVector(fbsActions));
 
-  // Writes the Units
-  out << o.units.size() << " ";
-  for (auto& v : o.units) {
-    out << v.first << " " << v.second.size() << " ";
-    for (auto& u : v.second) {
-      out << u << " ";
-    }
-  }
+    return fbsActionsByPlayerIdBuilder.Finish();
+  };
 
-  // Writes the rest of frame
-  writeTail(out, o.actions, o.resources, o.bullets);
+  auto buildFbsResourcesByPlayerId = [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
+    auto resources = resourcesPair.second;
+    fbs::ResourcesBuilder fbsResourcesBuilder(builder);
+    fbsResourcesBuilder.add_ore(resources.ore);
+    fbsResourcesBuilder.add_gas(resources.gas);
+    fbsResourcesBuilder.add_used_psi(resources.used_psi);
+    fbsResourcesBuilder.add_total_psi(resources.total_psi);
+    fbsResourcesBuilder.add_upgrades(resources.upgrades);
+    fbsResourcesBuilder.add_upgrades_level(resources.upgrades_level);
+    fbsResourcesBuilder.add_techs(resources.techs);
 
-  out << " " << o.reward << " " << o.is_terminal;
-  return out;
-}
+    auto fbsResources = fbsResourcesBuilder.Finish();
+    fbs::ResourcesByPlayerIdBuilder fbsResourcesByPlayerIdBuilder(builder);
+    fbsResourcesByPlayerIdBuilder.add_playerId(resourcesPair.first);
+    fbsResourcesByPlayerIdBuilder.add_resources(fbsResources);
+    return fbsResourcesByPlayerIdBuilder.Finish();
+  };
 
-std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
-  int nPlayer, creep_map_size;
+  auto buildFbsBullet = [&builder](const Bullet& bullet) {
+    fbs::BulletBuilder fbsBulletBuilder(builder);
+    fbsBulletBuilder.add_type(bullet.type);
+    fbsBulletBuilder.add_x(bullet.x);
+    fbsBulletBuilder.add_y(bullet.y);
+    return fbsBulletBuilder.Finish();
+  };
 
-  // Read the creep map
-  in >> creep_map_size;
-  in.ignore(1); // Ignores next space
-  o.creep_map.resize(creep_map_size);
-  in.read((char*)o.creep_map.data(), creep_map_size);
+  std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
+  std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
+  std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
+  std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
+  std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId);
+  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId);
+  std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
 
-  in >> o.height >> o.width;
+  fbs::FrameBuilder fbsFrameBuilder(builder);
+  fbsFrameBuilder.add_width(width);
+  fbsFrameBuilder.add_height(height);
+  fbsFrameBuilder.add_reward(reward);
+  fbsFrameBuilder.add_is_terminal(is_terminal);
+  fbsFrameBuilder.add_creep_map(builder.CreateVector(creep_map));
+  fbsFrameBuilder.add_bullets(builder.CreateVector(fbsBullets));
+  fbsFrameBuilder.add_actions(builder.CreateVector(fbsActionsByPlayerId));
+  fbsFrameBuilder.add_units(builder.CreateVector(fbsUnitsByPlayerId));
+  fbsFrameBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
+  fbsFrameBuilder.Finish();
+};
 
-  // Read the units
-  in >> nPlayer;
-  if (nPlayer < 0)
-    throw std::runtime_error("Corrupted replay: units nPlayer < 0");
-  if (nPlayer > 9)
-    throw std::runtime_error("Corrupted replay: units nPlayer > 9");
-  for (int32_t i = 0; i < nPlayer; i++) {
-    int idPlayer, nUnits;
-    in >> idPlayer >> nUnits;
-    if (nUnits < 0)
-      throw std::runtime_error("Corrupted replay: nUnits < 0");
-    if (nUnits > 10000)
-      throw std::runtime_error("Corrupted replay: nUnits > 10000");
-    o.units[idPlayer] = std::vector<replayer::Unit>();
-    o.units[idPlayer].resize(nUnits);
-    for (int32_t j = 0; j < nUnits; j++) {
-      in >> o.units[idPlayer][j];
-    }
-  }
+void Frame::readFromFlatBufferTable(const fbs::Frame& table) {
 
-  // Read everything else
-  readTail(in, o.actions, o.resources, o.bullets);
+  /*
 
-  in >> o.reward >> o.is_terminal;
-  return in;
+  Gonna replace these with the equivalent reads
+
+  auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
+
+    auto buildFbsUnit = [&builder](const Unit& unit) {
+
+      auto buildFbsOrder = [&builder](const Order& order) {
+        fbs::OrderBuilder fbsOrderBuilder(builder);
+        fbsOrderBuilder.add_first_frame(order.first_frame);
+        fbsOrderBuilder.add_type(order.type);
+        fbsOrderBuilder.add_targetId(order.targetId);
+        fbsOrderBuilder.add_targetX(order.targetX);
+        fbsOrderBuilder.add_targetY(order.targetY);
+        return fbsOrderBuilder.Finish();
+      };
+
+      std::vector<flatbuffers::Offset<fbs::Order>> fbsOrders;
+      std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
+
+      auto command = unit.command;
+      fbs::UnitCommandBuilder fbsUnitCommandBuilder(builder);
+      fbsUnitCommandBuilder.add_frame(command.frame);
+      fbsUnitCommandBuilder.add_type(command.type);
+      fbsUnitCommandBuilder.add_targetId(command.targetId);
+      fbsUnitCommandBuilder.add_targetX(command.targetX);
+      fbsUnitCommandBuilder.add_targetY(command.targetY);
+      fbsUnitCommandBuilder.add_extra(command.extra);
+      auto fbsCommand = fbsUnitCommandBuilder.Finish();
+
+      fbs::UnitBuilder fbsUnitBuilder(builder);
+      fbsUnitBuilder.add_id(unit.id);
+      fbsUnitBuilder.add_x(unit.x);
+      fbsUnitBuilder.add_y(unit.y);
+      fbsUnitBuilder.add_health(unit.health);
+      fbsUnitBuilder.add_max_health(unit.max_health);
+      fbsUnitBuilder.add_shield(unit.shield);
+      fbsUnitBuilder.add_max_shield(unit.max_shield);
+      fbsUnitBuilder.add_energy(unit.energy);
+      fbsUnitBuilder.add_maxCD(unit.maxCD);
+      fbsUnitBuilder.add_groundCD(unit.groundCD);
+      fbsUnitBuilder.add_airCD(unit.airCD);
+      fbsUnitBuilder.add_flags(unit.flags);
+      fbsUnitBuilder.add_visible(unit.visible);
+      fbsUnitBuilder.add_armor(unit.armor);
+      fbsUnitBuilder.add_shieldArmor(unit.shieldArmor);
+      fbsUnitBuilder.add_size(unit.size);
+      fbsUnitBuilder.add_pixel_x(unit.pixel_x);
+      fbsUnitBuilder.add_pixel_y(unit.pixel_y);
+      fbsUnitBuilder.add_pixel_size_x(unit.pixel_size_x);
+      fbsUnitBuilder.add_pixel_size_y(unit.pixel_size_y);
+      fbsUnitBuilder.add_groundATK(unit.groundATK);
+      fbsUnitBuilder.add_airATK(unit.airATK);
+      fbsUnitBuilder.add_groundDmgType(unit.groundDmgType);
+      fbsUnitBuilder.add_airDmgType(unit.airDmgType);
+      fbsUnitBuilder.add_groundRange(unit.groundRange);
+      fbsUnitBuilder.add_airRange(unit.airRange);
+      fbsUnitBuilder.add_velocityX(unit.velocityX);
+      fbsUnitBuilder.add_velocityY(unit.velocityY);
+      fbsUnitBuilder.add_playerId(unit.playerId);
+      fbsUnitBuilder.add_resources(unit.resources);
+      fbsUnitBuilder.add_buildTechUpgradeType(unit.buildTechUpgradeType);
+      fbsUnitBuilder.add_remainingBuildTrainTime(unit.remainingBuildTrainTime);
+      fbsUnitBuilder.add_remainingUpgradeResearchTime(unit.remainingUpgradeResearchTime);
+      fbsUnitBuilder.add_spellCD(unit.spellCD);
+      fbsUnitBuilder.add_associatedUnit(unit.associatedUnit);
+      fbsUnitBuilder.add_associatedCount(unit.associatedCount);
+      fbsUnitBuilder.add_command(fbsCommand);
+      fbsUnitBuilder.add_orders(builder.CreateVector(fbsOrders));
+
+      return fbsUnitBuilder.Finish();
+    };
+
+    std::vector<flatbuffers::Offset<fbs::Unit>> fbsUnits;
+    std::transform(unitPair.second.begin(), unitPair.second.end(), fbsUnits.begin(), buildFbsUnit);
+
+    fbs::UnitsByPlayerIdBuilder fbsUnitsByPlayerIdBuilder(builder);
+    fbsUnitsByPlayerIdBuilder.add_playerId(unitPair.first);
+    fbsUnitsByPlayerIdBuilder.add_units(builder.CreateVector(fbsUnits));
+    return fbsUnitsByPlayerIdBuilder.Finish();
+  };
+
+  auto buildFbsActionsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
+
+    auto buildFbsAction = [&builder](const Action& action) {
+      fbs::ActionBuilder fbsActionBuilder(builder);
+      fbsActionBuilder.add_action(builder.CreateVector(action.action));
+      fbsActionBuilder.add_uid(action.uid);
+      fbsActionBuilder.add_aid(action.aid);
+      return fbsActionBuilder.Finish();
+    };
+
+    std::vector<flatbuffers::Offset<fbs::Action>> fbsActions;
+    std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), buildFbsAction);
+
+    fbs::ActionsByPlayerIdBuilder fbsActionsByPlayerIdBuilder(builder);
+    fbsActionsByPlayerIdBuilder.add_playerId(actionPair.first);
+    fbsActionsByPlayerIdBuilder.add_actions(builder.CreateVector(fbsActions));
+
+    return fbsActionsByPlayerIdBuilder.Finish();
+  };
+
+  auto buildFbsResourcesByPlayerId = [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
+    auto resources = resourcesPair.second;
+    fbs::ResourcesBuilder fbsResourcesBuilder(builder);
+    fbsResourcesBuilder.add_ore(resources.ore);
+    fbsResourcesBuilder.add_gas(resources.gas);
+    fbsResourcesBuilder.add_used_psi(resources.used_psi);
+    fbsResourcesBuilder.add_total_psi(resources.total_psi);
+    fbsResourcesBuilder.add_upgrades(resources.upgrades);
+    fbsResourcesBuilder.add_upgrades_level(resources.upgrades_level);
+    fbsResourcesBuilder.add_techs(resources.techs);
+
+    auto fbsResources = fbsResourcesBuilder.Finish();
+    fbs::ResourcesByPlayerIdBuilder fbsResourcesByPlayerIdBuilder(builder);
+    fbsResourcesByPlayerIdBuilder.add_playerId(resourcesPair.first);
+    fbsResourcesByPlayerIdBuilder.add_resources(fbsResources);
+    return fbsResourcesByPlayerIdBuilder.Finish();
+  };
+
+  auto buildFbsBullet = [&builder](const Bullet& bullet) {
+    fbs::BulletBuilder fbsBulletBuilder(builder);
+    fbsBulletBuilder.add_type(bullet.type);
+    fbsBulletBuilder.add_x(bullet.x);
+    fbsBulletBuilder.add_y(bullet.y);
+    return fbsBulletBuilder.Finish();
+  };
+
+  std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
+  std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
+  std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
+  std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
+  std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId);
+  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId);
+  std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
+
+  fbs::FrameBuilder fbsFrameBuilder(builder);
+  fbsFrameBuilder.add_width(width);
+  fbsFrameBuilder.add_height(height);
+  fbsFrameBuilder.add_reward(reward);
+  fbsFrameBuilder.add_is_terminal(is_terminal);
+  fbsFrameBuilder.add_creep_map(builder.CreateVector(creep_map));
+  fbsFrameBuilder.add_bullets(builder.CreateVector(fbsBullets));
+  fbsFrameBuilder.add_actions(builder.CreateVector(fbsActionsByPlayerId));
+  fbsFrameBuilder.add_units(builder.CreateVector(fbsUnitsByPlayerId));
+  fbsFrameBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
+  fbsFrameBuilder.Finish();
+  */
 }
 
 namespace detail = replayer::detail;
@@ -513,88 +579,6 @@ void replayer::frame_undiff(Frame* frame, FrameDiff* lhs, Frame* rhs) {
 
 void replayer::frame_undiff(Frame* frame, Frame* lhs, FrameDiff* rhs) {
   return detail::add(frame, lhs, rhs);
-}
-
-std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& o) {
-  out << o.pids.size();
-  for (auto& pid : o.pids)
-    out << " " << pid;
-  for (auto& player_unit : o.units) {
-    out << " " << player_unit.size();
-    for (auto& du : player_unit)
-      out << " " << du;
-  }
-  out << " " << o.creep_map.size();
-  for (auto pair : o.creep_map)
-    out << " " << pair.first << " " << pair.second;
-  out << " ";
-  writeTail(out, o.actions, o.resources, o.bullets);
-  out << " " << o.reward << " " << o.is_terminal;
-  return out;
-}
-
-std::ostream& replayer::operator<<(
-    std::ostream& out,
-    const detail::UnitDiff& o) {
-  out << o.id << " " << o.velocityX << " " << o.velocityY;
-  out << " " << o.flags;
-  out << " " << o.var_ids.size();
-  for (size_t i = 0; i < o.var_ids.size(); i++)
-    out << " " << o.var_ids[i];
-  for (size_t i = 0; i < o.var_ids.size(); i++)
-    out << " " << o.var_diffs[i];
-  out << " " << o.order_size << " " << o.order_ids.size();
-  for (size_t i = 0; i < o.order_ids.size(); i++)
-    out << " " << o.order_ids[i];
-  for (size_t i = 0; i < o.order_ids.size(); i++)
-    out << " " << o.order_diffs[i];
-  return out;
-}
-
-std::istream& replayer::operator>>(std::istream& in, FrameDiff& o) {
-  int32_t npids, n_creep_map_diff;
-  in >> npids;
-  o.pids.resize(npids);
-  o.units.resize(npids);
-  for (size_t i = 0; i < static_cast<size_t>(npids); i++)
-    in >> o.pids[i];
-  for (size_t i = 0, nunits = 0; i < static_cast<size_t>(npids); i++) {
-    in >> nunits;
-    o.units[i].resize(nunits);
-    for (size_t k = 0; k < nunits; k++)
-      in >> o.units[i][k];
-  }
-  in >> n_creep_map_diff;
-  for (size_t i = 0; i < static_cast<size_t>(n_creep_map_diff); i++) {
-    int32_t first, second;
-    in >> first >> second;
-    o.creep_map.insert(std::make_pair(first, second));
-  }
-  readTail(in, o.actions, o.resources, o.bullets);
-  in >> o.reward >> o.is_terminal;
-  return in;
-}
-
-std::istream& replayer::operator>>(std::istream& in, detail::UnitDiff& o) {
-  size_t nvars, norders;
-
-  in >> o.id >> o.velocityX >> o.velocityY;
-  in >> o.flags;
-  in >> nvars;
-  o.var_ids.resize(nvars);
-  o.var_diffs.resize(nvars);
-  for (size_t i = 0; i < nvars; i++)
-    in >> o.var_ids[i];
-  for (size_t i = 0; i < nvars; i++)
-    in >> o.var_diffs[i];
-  in >> o.order_size >> norders;
-  o.order_ids.resize(norders);
-  o.order_diffs.resize(norders);
-  for (size_t i = 0; i < norders; i++)
-    in >> o.order_ids[i];
-  for (size_t i = 0; i < norders; i++)
-    in >> o.order_diffs[i];
-  return in;
 }
 
 #define STRINGIFY2(X) #X

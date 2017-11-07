@@ -39,7 +39,6 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("player_id", &State::player_id)
       .def_readwrite("neutral_id", &State::neutral_id)
       .def_readwrite("replay", &State::replay)
-      .def_readwrite("frame_string", &State::frame_string)
       .def_readwrite("deaths", &State::deaths)
       .def_readwrite("frame_from_bwapi", &State::frame_from_bwapi)
       .def_readwrite("battle_frame_count", &State::battle_frame_count)

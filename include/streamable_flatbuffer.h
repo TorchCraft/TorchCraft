@@ -42,9 +42,11 @@ namespace torchcraft {
       OutStreamableFlatBuffer(
         flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder)
         : flatBufferBuilder(finishedFlatBufferBuilder) {
-          // TODO: Verify that it's actually finished.
-          // The actual .finished property is protected.
-          // How can we tell?
+          
+          // Assert that the FlatBuffer is actually finished.
+          // This is an internal FlatBuffers API call,
+          // but they don't expose this information any other way.
+          finishedFlatBufferBuilder.Finished();
         }
 
       void write(std::ostream& out) const {

@@ -28,7 +28,7 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& o) {
   InStreamableFlatBuffer<const fbs::Frame> streamable;
   streamable.read(in);
   auto fbsFrame = streamable.flatBufferTable;
-  //TODO: Actually read it
+  frame.readFromFlatBufferTable(fbsFrame);
   return in;
 }
 
@@ -189,7 +189,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame table) {
   height = table.height();
   reward = table.reward();
   is_terminal = table.is_terminal();
-  
+
 }
 
 namespace detail = replayer::detail;

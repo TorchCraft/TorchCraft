@@ -36,6 +36,9 @@
     <ClCompile Include="..\..\replayer\frame.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\replayer\frame_diff.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\user_actions.cc">
       <Filter>src</Filter>
     </ClCompile>

@@ -16,13 +16,13 @@ if (USE_MINI_OPENBWAPI)
     ../../openbw
     ../openbw
   )
-  
+
   if (NOT OPENBW_DIR)
     message(FATAL_ERROR "Couldn't find openbw. Specify the path to it with OPENBW_DIR environment variable")
   endif()
-  
+
   add_subdirectory(${OPENBW_DIR}/mini-openbwapi mini-openbwapi)
-  
+
   set(BWAPI_INCLUDE_DIRS ${OPENBW_DIR}/mini-openbwapi)
   set(BWAPI_LIBRARIES mini-openbwapi)
 else()
@@ -43,6 +43,7 @@ add_library(BWEnvObj OBJECT
   src/utils.cc
   src/zmq_server.cc
   ../replayer/frame.cpp
+  ../replayer/frame_diff.cpp
 )
 
 set_property(TARGET BWEnvObj PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -53,7 +54,7 @@ if (NOT USE_MINI_OPENBWAPI)
     src/module.cc
     $<TARGET_OBJECTS:BWEnvObj>
   )
-  
+
   target_link_libraries(BWEnv
     zmq
     ${BWAPI_LIBRARIES}

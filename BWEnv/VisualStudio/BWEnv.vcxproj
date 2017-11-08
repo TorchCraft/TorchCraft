@@ -212,6 +212,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="..\..\replayer\frame.cpp" />
+    <ClCompile Include="..\..\replayer\frame_diff.cpp" />
     <ClCompile Include="..\src\config_manager.cc" />
     <ClCompile Include="..\src\controller.cc" />
     <ClCompile Include="..\src\dll.cc" />

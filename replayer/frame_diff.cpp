@@ -90,6 +90,71 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
 
 void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
 
+  auto buildCreep = [](const fbs::FrameDiffCreep* fbsCreep) {
+    return std::make_pair(fbsCreep->index(), fbsCreep->creep());
+  };
+
+  auto frameDiff = this;
+
+  auto fbsUnits = fbsFrameDiff.units();
+  auto fbsActionsByPlayerIds = fbsFrameDiff.actions();
+  auto fbsResourcesByPlayerIds = fbsFrameDiff.resources();
+  auto fbsBullets = fbsFrameDiff.bullets();
+  auto fbsCreep = fbsFrameDiff.creep_map();
+  auto fbsPids = fbsFrameDiff.pids();
+
+/*
+  std::for_each(
+    fbsUnitsByPlayerIds->begin(),
+    fbsUnitsByPlayerIds->end(),
+    [frame, buildUnit](const fbs::UnitsByPlayerId* fbsUnitsByPlayerId) {
+      auto playerId = fbsUnitsByPlayerId->playerId();
+      auto fbsUnits = fbsUnitsByPlayerId->units();
+      auto units = frame->units[playerId];
+      std::transform(
+        fbsUnits->begin(),
+        fbsUnits->end(),
+        units.begin(),
+        buildUnit);
+    });
+
+*/
+  std::for_each(
+    fbsActionsByPlayerIds->begin(),
+    fbsActionsByPlayerIds->end(),
+    [frameDiff](const fbs::ActionsByPlayerId* fbsActionsByPlayerId) {
+      auto playerId = fbsActionsByPlayerId->playerId();
+      auto fbsActions = fbsActionsByPlayerId->actions();
+      auto actions = frameDiff->actions[playerId];
+      std::transform(
+        fbsActions->begin(),
+        fbsActions->end(),
+        actions.begin(),
+        buildAction);
+    });
+
+  std::transform(
+    fbsResourcesByPlayerIds->begin(),
+    fbsResourcesByPlayerIds->end(),
+    std::inserter(resources, resources.end()),
+    buildResources);
+
+  std::transform(
+    fbsBullets->begin(),
+    fbsBullets->end(),
+    bullets.begin(),
+    buildBullet);
+
+  std::transform(
+    fbsCreep->begin(),
+    fbsCreep->end(),
+    std::inserter(creep_map, creep_map.end()),
+    buildCreep);
+
+  std::copy(fbsPids->begin(), fbsPids->end(), pids.end());
+
+  reward = fbsFrameDiff.reward();
+  is_terminal = fbsFrameDiff.is_terminal();
 }
 
 namespace detail = replayer::detail;

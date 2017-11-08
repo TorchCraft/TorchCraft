@@ -225,7 +225,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
   std::for_each(
     fbsActionsByPlayerIds->begin(),
     fbsActionsByPlayerIds->end(),
-    [frame, buildAction](const fbs::ActionsByPlayerId* fbsActionsByPlayerId) {
+    [frame](const fbs::ActionsByPlayerId* fbsActionsByPlayerId) {
       auto playerId = fbsActionsByPlayerId->playerId();
       auto fbsActions = fbsActionsByPlayerId->actions();
       auto actions = frame->actions[playerId];

@@ -506,6 +506,9 @@ class FrameDiff {
   // Width and height never changes, so we don't diff them
   int reward;
   int is_terminal;
+
+  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff);
 };
 
 // These diffing functions will order the IDs of units in each frame, and thus

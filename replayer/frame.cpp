@@ -280,8 +280,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
   auto frame = this;
   auto fbsActionsByPlayerIds = fbsFrame.actions();
   auto fbsUnitsByPlayerIds = fbsFrame.units();
-  auto fbsResourcesByPlyerIds = fbsFrame.resources();
-  auto fbsResources = fbsFrame.resources();
+  auto fbsResourcesByPlayerIds = fbsFrame.resources();
   auto fbsBullets = fbsFrame.bullets();
   auto fbsCreep = fbsFrame.creep_map();
 
@@ -314,8 +313,8 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     });
 
   std::transform(
-    fbsResources->begin(),
-    fbsResources->end(),
+    fbsResourcesByPlayerIds->begin(),
+    fbsResourcesByPlayerIds->end(),
     std::inserter(resources, resources.end()),
     buildResources);
 

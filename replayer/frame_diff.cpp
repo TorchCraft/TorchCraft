@@ -18,20 +18,36 @@ using FrameDiff = replayer::FrameDiff;
 
 std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& frameDiff) {
   flatbuffers::FlatBufferBuilder builder;
-  //frameDiff.addToFlatBufferBuilder(builder);
+  frameDiff.addToFlatBufferBuilder(builder);
   OutStreamableFlatBuffer streamable(builder);
   streamable.write(out);
   return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, FrameDiff& frameDiff) {
-  InStreamableFlatBuffer<const fbs::Frame> streamable;
+  InStreamableFlatBuffer<const fbs::FrameDiff> streamable;
   streamable.read(in);
-  auto fbsFrame = streamable.flatBufferTable;
-  //frameDiff.readFromFlatBufferTable(fbsFrame);
+  auto fbsFrameDiff = streamable.flatBufferTable;
+  frameDiff.readFromFlatBufferTable(*fbsFrameDiff);
   return in;
 }
 
+void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
+  fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
+  //pids
+  //units
+  //actions
+  //resources
+  //bullets
+  //creep_map
+  //reward
+  //isTerminal
+  fbsFrameDiffBuilder.Finish();
+}
+
+void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
+
+}
 
 namespace detail = replayer::detail;
 // This macro maps the member variables of Unit to some IDs

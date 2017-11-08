@@ -42,7 +42,7 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
     return fbsFrameDiffCreepBuilder.Finish();
   };
 
-  auto buildFbsUnitDiffs = [&builder](const std::vector<detail::UnitDiff>& unitDiffs) {
+  auto buildFbsUnitDiffContainer = [&builder](const std::vector<detail::UnitDiff>& unitDiffs) {
     auto buildFbsUnitDiff = [&builder](const detail::UnitDiff& unitDiff) {
       fbs::UnitDiffBuilder fbsUnitDiffBuilder(builder);
       fbsUnitDiffBuilder.add_var_ids(builder.CreateVector(unitDiff.var_ids));
@@ -60,24 +60,24 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
     std::vector<flatbuffers::Offset<fbs::UnitDiff>> fbsUnitDiffs;
     std::transform(unitDiffs.begin(), unitDiffs.end(), fbsUnitDiffs.begin(), buildFbsUnitDiff);
 
-    fbs::UnitDiffsBuilder fbsUnitDiffsBuilder(builder);
-    fbsUnitDiffsBuilder.add_unitDiffs(builder.CreateVector(fbsUnitDiffs));
-    return fbsUnitDiffsBuilder.Finish();
+    fbs::UnitDiffContainerBuilder fbsUnitDiffContainerBuilder(builder);
+    fbsUnitDiffContainerBuilder.add_units(builder.CreateVector(fbsUnitDiffs));
+    return fbsUnitDiffContainerBuilder.Finish();
   };
 
-  std::vector<flatbuffers::Offset<fbs::UnitDiffs>> fbsUnitDiffs;
+  std::vector<flatbuffers::Offset<fbs::UnitDiffContainer>> fbsUnitDiffContainers;
   std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
   std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
   std::vector<flatbuffers::Offset<fbs::FrameDiffCreep>> fbsCreep;
-  std::transform(units.begin(), units.end(), fbsUnitDiffs.begin(), buildFbsUnitDiffs);
+  std::transform(units.begin(), units.end(), fbsUnitDiffContainers.begin(), buildFbsUnitDiffContainer);
   std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
   std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
   std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet(builder));
   std::transform(creep_map.begin(), creep_map.end(), fbsCreep.begin(), buildFbsFrameDiffCreep);
 
   fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
-  fbsFrameDiffBuilder.add_units(builder.CreateVector(fbsUnitDiffs));
+  fbsFrameDiffBuilder.add_unitDiffContainers(builder.CreateVector(fbsUnitDiffContainers));
   fbsFrameDiffBuilder.add_actions(builder.CreateVector(fbsActionsByPlayerId));
   fbsFrameDiffBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
   fbsFrameDiffBuilder.add_bullets(builder.CreateVector(fbsBullets));
@@ -90,35 +90,49 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
 
 void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
 
+  auto buildUnits = [](const fbs::UnitDiffContainer* fbsUnitDiffContainer) {
+    auto buildUnit = [](const fbs::UnitDiff* fbsUnitDiff) {
+      detail::UnitDiff unitDiff;
+      auto fbsVarIds = fbsUnitDiff->var_ids();
+      auto fbsVarDiffs = fbsUnitDiff->var_diffs();
+      auto fbsOrderIds = fbsUnitDiff->order_ids();
+      auto fbsOrderDiffs = fbsUnitDiff->order_diffs();
+      std::copy(fbsVarIds->begin(), fbsVarIds->end(), unitDiff.var_ids.begin());
+      std::copy(fbsVarDiffs->begin(), fbsVarDiffs->end(), unitDiff.var_diffs.begin());
+      std::copy(fbsOrderIds->begin(), fbsOrderIds->end(), unitDiff.order_ids.begin());
+      std::copy(fbsOrderDiffs->begin(), fbsOrderDiffs->end(), unitDiff.order_diffs.begin());
+      unitDiff.id = fbsUnitDiff->id();
+      unitDiff.order_size = fbsUnitDiff->order_size();
+      unitDiff.velocityX = fbsUnitDiff->velocityX();
+      unitDiff.velocityY = fbsUnitDiff->velocityY();
+      unitDiff.flags = fbsUnitDiff->flags();
+      return unitDiff;
+    };
+
+    auto fbsUnitDiffs = fbsUnitDiffContainer->units();
+    std::vector<detail::UnitDiff> unitDiffs;
+    std::transform(fbsUnitDiffs->begin(), fbsUnitDiffs->end(), unitDiffs.begin(), buildUnit);
+    return unitDiffs;
+  };
+
   auto buildCreep = [](const fbs::FrameDiffCreep* fbsCreep) {
     return std::make_pair(fbsCreep->index(), fbsCreep->creep());
   };
 
   auto frameDiff = this;
-
-  auto fbsUnits = fbsFrameDiff.units();
+  auto fbsUnitDiffContainers = fbsFrameDiff.unitDiffContainers();
   auto fbsActionsByPlayerIds = fbsFrameDiff.actions();
   auto fbsResourcesByPlayerIds = fbsFrameDiff.resources();
   auto fbsBullets = fbsFrameDiff.bullets();
   auto fbsCreep = fbsFrameDiff.creep_map();
   auto fbsPids = fbsFrameDiff.pids();
 
-/*
-  std::for_each(
-    fbsUnitsByPlayerIds->begin(),
-    fbsUnitsByPlayerIds->end(),
-    [frame, buildUnit](const fbs::UnitsByPlayerId* fbsUnitsByPlayerId) {
-      auto playerId = fbsUnitsByPlayerId->playerId();
-      auto fbsUnits = fbsUnitsByPlayerId->units();
-      auto units = frame->units[playerId];
-      std::transform(
-        fbsUnits->begin(),
-        fbsUnits->end(),
-        units.begin(),
-        buildUnit);
-    });
+  std::transform(
+    fbsUnitDiffContainers->begin(),
+    fbsUnitDiffContainers->end(),
+    units.begin(),
+    buildUnits);
 
-*/
   std::for_each(
     fbsActionsByPlayerIds->begin(),
     fbsActionsByPlayerIds->end(),
@@ -148,10 +162,10 @@ void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
   std::transform(
     fbsCreep->begin(),
     fbsCreep->end(),
-    std::inserter(creep_map, creep_map.end()),
+    std::inserter(creep_map, creep_map.begin()),
     buildCreep);
 
-  std::copy(fbsPids->begin(), fbsPids->end(), pids.end());
+  std::copy(fbsPids->begin(), fbsPids->end(), pids.begin());
 
   reward = fbsFrameDiff.reward();
   is_terminal = fbsFrameDiff.is_terminal();

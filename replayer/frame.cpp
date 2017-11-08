@@ -239,7 +239,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
   std::transform(
     fbsResourcesByPlayerIds->begin(),
     fbsResourcesByPlayerIds->end(),
-    std::inserter(resources, resources.end()),
+    std::inserter(resources, resources.begin()),
     buildResources);
 
   std::transform(

@@ -235,8 +235,8 @@ table UnitDiff {
   flags:long;
 }
 
-table UnitDiffs {
-  unitDiffs:[UnitDiff];
+table UnitDiffContainer {
+  units:[UnitDiff];
 }
 
 table FrameDiffCreep {
@@ -246,7 +246,7 @@ table FrameDiffCreep {
 
 table FrameDiff {
   pids:[int];
-  units:[UnitDiffs];
+  unitDiffContainers:[UnitDiffContainer];
   actions:[ActionsByPlayerId];
   resources:[ResourcesByPlayerId];
   bullets:[Bullet];

@@ -113,14 +113,13 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
     return fbsUnitsByPlayerIdBuilder.Finish();
   };
 
-std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
+  std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
-
   std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
   std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
   std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
   std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
-  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));  
+  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
   std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet(builder));
 
   fbs::FrameBuilder fbsFrameBuilder(builder);
@@ -201,9 +200,6 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     unit.orders = orders;
     return unit;
   };
-
-  //TODO: Replace action converter
-  //TODO: Replace resources converter
 
   auto frame = this;
   auto fbsActionsByPlayerIds = fbsFrame.actions();

@@ -10,11 +10,11 @@
 #include <algorithm>
 
 #include "frame.h"
+#include "flatbuffer_conversions.h"
 
 namespace replayer = torchcraft::replayer;
 
 using Frame = replayer::Frame;
-using FrameDiff = replayer::FrameDiff;
 
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Frame& frame) {
   flatbuffers::FlatBufferBuilder builder;
@@ -113,59 +113,17 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
     return fbsUnitsByPlayerIdBuilder.Finish();
   };
 
-  auto buildFbsActionsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
-
-    auto buildFbsAction = [&builder](const Action& action) {
-      fbs::ActionBuilder fbsActionBuilder(builder);
-      fbsActionBuilder.add_action(builder.CreateVector(action.action));
-      fbsActionBuilder.add_uid(action.uid);
-      fbsActionBuilder.add_aid(action.aid);
-      return fbsActionBuilder.Finish();
-    };
-
-    std::vector<flatbuffers::Offset<fbs::Action>> fbsActions;
-    std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), buildFbsAction);
-
-    fbs::ActionsByPlayerIdBuilder fbsActionsByPlayerIdBuilder(builder);
-    fbsActionsByPlayerIdBuilder.add_playerId(actionPair.first);
-    fbsActionsByPlayerIdBuilder.add_actions(builder.CreateVector(fbsActions));
-
-    return fbsActionsByPlayerIdBuilder.Finish();
-  };
-
-  auto buildFbsResourcesByPlayerId = [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
-    auto resources = resourcesPair.second;
-    fbs::ResourcesBuilder fbsResourcesBuilder(builder);
-    fbsResourcesBuilder.add_ore(resources.ore);
-    fbsResourcesBuilder.add_gas(resources.gas);
-    fbsResourcesBuilder.add_used_psi(resources.used_psi);
-    fbsResourcesBuilder.add_total_psi(resources.total_psi);
-    fbsResourcesBuilder.add_upgrades(resources.upgrades);
-    fbsResourcesBuilder.add_upgrades_level(resources.upgrades_level);
-    fbsResourcesBuilder.add_techs(resources.techs);
-
-    auto fbsResources = fbsResourcesBuilder.Finish();
-    fbs::ResourcesByPlayerIdBuilder fbsResourcesByPlayerIdBuilder(builder);
-    fbsResourcesByPlayerIdBuilder.add_playerId(resourcesPair.first);
-    fbsResourcesByPlayerIdBuilder.add_resources(fbsResources);
-    return fbsResourcesByPlayerIdBuilder.Finish();
-  };
-
-  auto buildFbsBullet = [&builder](const Bullet& bullet) {
-    fbs::BulletBuilder fbsBulletBuilder(builder);
-    fbsBulletBuilder.add_type(bullet.type);
-    fbsBulletBuilder.add_x(bullet.x);
-    fbsBulletBuilder.add_y(bullet.y);
-    return fbsBulletBuilder.Finish();
-  };
+  //TODO: Replaces actions converter
+  //TODO: Replace resources converter
+  //TODO: Replace bullet converter
 
   std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
   std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
-  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
-  std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId);
-  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId);
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet(builder));
+  std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
+  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
   std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
 
   fbs::FrameBuilder fbsFrameBuilder(builder);
@@ -247,35 +205,8 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     return unit;
   };
 
-  auto buildAction = [](const fbs::Action* fbsAction) {
-    Action action;
-    auto fbsActionInts = fbsAction->action();
-    std::copy(fbsActionInts->begin(), fbsActionInts->end(), action.action.begin());
-    action.uid = fbsAction->uid();
-    action.aid = fbsAction->aid();
-    return action;
-  };
-
-  auto buildResources = [](const fbs::ResourcesByPlayerId* fbsResourcesByPlayerId) {
-    auto fbsResources = fbsResourcesByPlayerId->resources();
-    auto resources = std::make_pair(fbsResourcesByPlayerId->playerId(), Resources()) ;
-    resources.second.ore = fbsResources->ore();
-    resources.second.gas = fbsResources->gas();
-    resources.second.used_psi = fbsResources->used_psi();
-    resources.second.total_psi = fbsResources->total_psi();
-    resources.second.upgrades = fbsResources->upgrades();
-    resources.second.upgrades_level = fbsResources->upgrades_level();
-    resources.second.techs = fbsResources->techs();
-    return resources;
-  };
-
-  auto buildBullet = [](const fbs::Bullet* fbsBullet) {
-    Bullet bullet;
-    bullet.type = fbsBullet->type();
-    bullet.x = fbsBullet->x();
-    bullet.y = fbsBullet->y();
-    return bullet;
-  };
+  //TODO: Replace action converter
+  //TODO: Replace resources converter
 
   auto frame = this;
   auto fbsActionsByPlayerIds = fbsFrame.actions();

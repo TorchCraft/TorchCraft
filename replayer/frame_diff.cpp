@@ -10,6 +10,7 @@
 #include <algorithm>
 
 #include "frame.h"
+#include "flatbuffer_conversions.h"
 
 namespace replayer = torchcraft::replayer;
 
@@ -45,8 +46,7 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
   std::vector<flatbuffers::Offset<fbs::FrameDiffCreep>> fbsCreep;
   std::transform(creep_map.begin(), creep_map.end(), fbsCreep.begin(), buildFbsFrameDiffCreep);
 
-  //pids
-  //units
+    //units
   //actions
   //resources
   //bullets

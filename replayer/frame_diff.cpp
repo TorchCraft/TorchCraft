@@ -34,14 +34,16 @@ std::istream& replayer::operator>>(std::istream& in, FrameDiff& frameDiff) {
 
 void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
   fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
+
+  std::vector<fbs::Vec2> creep_map;
   //pids
   //units
   //actions
   //resources
   //bullets
-  //creep_map
-  //reward
-  //isTerminal
+  fbsFrameDiffBuilder.add_creep_map(builder.CreateVector(creep_map));
+  fbsFrameDiffBuilder.add_reward(reward);
+  fbsFrameDiffBuilder.add_is_terminal(is_terminal);
   fbsFrameDiffBuilder.Finish();
 }
 

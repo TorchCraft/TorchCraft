@@ -43,13 +43,17 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
     return fbsFrameDiffCreepBuilder.Finish();
   };
 
+  std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
+  std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
+  std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
   std::vector<flatbuffers::Offset<fbs::FrameDiffCreep>> fbsCreep;
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet(builder));
+  std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
+  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
   std::transform(creep_map.begin(), creep_map.end(), fbsCreep.begin(), buildFbsFrameDiffCreep);
 
-    //units
-  //actions
-  //resources
-  //bullets
+  //units
+
   fbsFrameDiffBuilder.add_pids(builder.CreateVector(pids));
   fbsFrameDiffBuilder.add_creep_map(builder.CreateVector(fbsCreep));
   fbsFrameDiffBuilder.add_reward(reward);

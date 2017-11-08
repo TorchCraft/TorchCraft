@@ -235,13 +235,18 @@ table UnitDiff {
   flags:long;
 }
 
+table FrameDiffCreep {
+  index:int;
+  creep:int;
+}
+
 table FrameDiff {
   pids:[int];
   //units:[[UnitDiff]];
   actions:[ActionsByPlayerId];
   resources:[ResourcesByPlayerId];
   bullets:[Bullet];
-  creep_map:[Vec2];
+  creep_map:[FrameDiffCreep];
   reward:int;
   is_terminal:int;
 }

@@ -295,11 +295,12 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
   };
 
   auto frame = this;
-  auto fbsBullets = fbsFrame.bullets();
-  auto fbsResources = fbsFrame.resources();
   auto fbsActionsByPlayerIds = fbsFrame.actions();
   auto fbsUnitsByPlayerIds = fbsFrame.units();
   auto fbsResourcesByPlyerIds = fbsFrame.resources();
+  auto fbsResources = fbsFrame.resources();
+  auto fbsBullets = fbsFrame.bullets();
+  auto fbsCreep = fbsFrame.creep_map();
 
   std::for_each(
     fbsUnitsByPlayerIds->begin(),
@@ -330,22 +331,23 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     });
 
   std::transform(
-    fbsBullets->begin(),
-    fbsBullets->end(),
-    bullets.begin(),
-    buildBullet);
-
-  std::transform(
     fbsResources->begin(),
     fbsResources->end(),
     std::inserter(resources, resources.end()),
     buildResources);
 
+  std::transform(
+    fbsBullets->begin(),
+    fbsBullets->end(),
+    bullets.begin(),
+    buildBullet);
+
+  std::copy(fbsCreep->begin(), fbsCreep->end(), creep_map.begin());
+
   width = fbsFrame.width();
   height = fbsFrame.height();
   reward = fbsFrame.reward();
   is_terminal = fbsFrame.is_terminal();
-  //Creep map
 }
 
 namespace detail = replayer::detail;

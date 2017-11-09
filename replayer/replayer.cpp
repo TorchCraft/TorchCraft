@@ -102,28 +102,9 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
     o.numUnits[key] = val;
   }
 
+  o.validate();
+
   return in;
-}
-
-void Replayer::write(std::ostream& out) const {
-
-/*
-  flatbuffers::FlatBufferBuilder fbsBuilder;
-
-  std::vector<flatbuffers::Offset<fbs::Frame>> fbsFrames;
-  std::transform(
-    frames.begin(),
-    frames.end(),
-    fbsFrames.begin(),
-    [&fbsBuilder](const Frame& frame) { frame.addToFlatBufferBuilder(fbsBuilder); });
-
-  auto fbsFrameContainer = fbs::CreateFrameContainer(fbsBuilder, fbsBuilder.CreateVector(fbsFrames));
-  */
-}
-
-void Replayer::read(std::istream& out) {
-
-  validate();
 }
 
 void Replayer::validate() {

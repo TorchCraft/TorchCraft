@@ -226,29 +226,32 @@ std::vector<std::string> State::update(
   return upd;
 }
 
-bool State::update_frame(const void* frameOrFrameDiff) {
-
-  auto asFrame = static_cast<const fbs::Frame*>(frameOrFrameDiff);
-  if (asFrame) {
-    //TODO: Unpack
-    //this->frame = asFrame;
-    return true;
+bool State::update_frame(const void* flatBuffer, fbs::FrameOrFrameDiff type) {
+  switch (type) {
+    case fbs::FrameOrFrameDiff::Frame: {
+      auto frameFlatBuffer = reinterpret_cast<const fbs::Frame*>(flatBuffer);
+      frame->readFromFlatBufferTable(*frameFlatBuffer);
+      return true;
+    }
+    case fbs::FrameOrFrameDiff::FrameDiff:  {
+      auto frameDiffFlatBuffer = reinterpret_cast<const fbs::FrameDiff*>(flatBuffer);
+      replayer::FrameDiff frameDiff;
+      frameDiff.readFromFlatBufferTable(*frameDiffFlatBuffer);
+      replayer::frame_undiff(frame, frame, &frameDiff);
+      return true;
+    }
+    default:
+      return false;
   }
-  auto asFrameDiff = static_cast<const fbs::FrameDiff*>(frameOrFrameDiff);
-  if (asFrameDiff) {
-    //TODO: Unpack
-    //replayer::frame_undiff(this->frame, this->frame, asFrameDiff);
-    return true;
-  }
-
-  return false;
 }
 
 std::vector<std::string> State::update(const torchcraft::fbs::FrameState* frameState) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (this->update_frame(frameState->frameOrFrameDiff())) {
+  if (this->update_frame(
+    frameState->frameOrFrameDiff(),
+    frameState->frameOrFrameDiff_type())) {
     upd.emplace_back("frame");
   }
 
@@ -319,7 +322,9 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (this->update_frame(end->frameOrFrameDiff())) {
+  if (this->update_frame(
+    end->frameOrFrameDiff(),
+    end->frameOrFrameDiff_type())) {
     upd.emplace_back("frame");
   }
 

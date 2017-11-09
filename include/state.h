@@ -181,7 +181,7 @@ class State : public RefCounted {
   void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
-  bool update_frame(const void* frameOrFrameDiff);
+  bool update_frame(const void* flatBuffer, fbs::FrameOrFrameDiff type);
 
   bool microBattles_;
   std::set<BW::UnitType> onlyConsiderTypes_;

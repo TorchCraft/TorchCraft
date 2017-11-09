@@ -215,6 +215,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
       auto playerId = fbsUnitsByPlayerId->playerId();
       auto fbsUnits = fbsUnitsByPlayerId->units();
       auto units = frame->units[playerId];
+      units.clear();
       std::transform(
         fbsUnits->begin(),
         fbsUnits->end(),
@@ -229,6 +230,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
       auto playerId = fbsActionsByPlayerId->playerId();
       auto fbsActions = fbsActionsByPlayerId->actions();
       auto actions = frame->actions[playerId];
+      actions.clear();
       std::transform(
         fbsActions->begin(),
         fbsActions->end(),
@@ -236,12 +238,14 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
         buildAction);
     });
 
+  resources.clear();
   std::transform(
     fbsResourcesByPlayerIds->begin(),
     fbsResourcesByPlayerIds->end(),
     std::inserter(resources, resources.begin()),
     buildResources);
 
+  bullets.clear();
   std::transform(
     fbsBullets->begin(),
     fbsBullets->end(),

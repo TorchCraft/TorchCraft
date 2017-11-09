@@ -34,7 +34,7 @@ namespace torchcraft {
   //    t       The flatbuffer
   //  }
 
-  void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder) {
+  inline void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder) {
 
     // Assert that the FlatBuffer is actually finished.
     // This is an internal FlatBuffers API call,
@@ -50,7 +50,7 @@ namespace torchcraft {
   }
 
   template <typename T>
-  std::shared_ptr<const T> readFlatBufferTableFromStream(std::istream& in) {
+  inline std::shared_ptr<const T> readFlatBufferTableFromStream(std::istream& in) {
 
     static_assert(
       std::is_base_of<flatbuffers::Table, T>::value,

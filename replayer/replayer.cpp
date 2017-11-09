@@ -30,11 +30,11 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   out << height << " " << width << " ";
   out.write((const char*)data, height * width); // Write map data as raw bytes
 
-  auto kf = o.keyFrameInterval == 0 ? 1 : o.keyFrameInterval;
+  auto keyFrameInterval = o.keyFrameInterval || 1;
 
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
-    if (i % kf == 0)
+    if (i % keyFrameInterval == 0)
       out << *o.frames[i] << " ";
     else
       out << frame_diff(o.frames[i], o.frames[i - 1]) << " ";
@@ -108,19 +108,42 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
 }
 
 void Replayer::validate() {
-  auto throwCorruptedReplayException = [&](const char* problem) {
+  auto frameThrow = [&](const char* problem) {
     std::string message("Corrupted replay: ");
     message.append(problem);
     std::runtime_error(message.c_str());
   };
 
-  //TODO: Orders in a frame > 10000
-  //TODO: Players with actions in a frame > 9
-  //TODO: Actions in a frame > 10000
-  //TODO: Players with resources in a frame > 9
-  //TODO: Bullets in a frame > 500
-  //TODO: Players with units > 9
-  //TODO: Untis in a frame > 10000
+  std::for_each(frames.begin(), frames.end(), [frameThrow](Frame* frame) {
+    if (frame->bullets.size() > 500) {
+      frameThrow("There are an excessive number of bullets in a frame.");
+    }
+    if (frame->actions.size() > 9) {
+      frameThrow("Actions exist for an excessive number of players.");
+    }
+    if (frame->resources.size() > 9) {
+      frameThrow("Resources exist for an excessive number of players.");
+    }
+    if (frame->units.size() > 9) {
+      frameThrow("Units exist for an excessive number of players.");
+    }
+    if (std::any_of(
+      frame->actions.begin(),
+      frame->actions.end(),
+      [frameThrow](const std::pair<const int, const std::vector<Action>&> actions) {
+        return actions.second.size() > 10000;
+      })) {
+        frameThrow("A player has an excessive number of actions.");
+      }
+    if (std::any_of(
+      frame->units.begin(),
+      frame->units.end(),
+      [frameThrow](const std::pair<const int, const std::vector<Unit>&> units) {
+        return units.second.  size() > 10000;
+      })) {
+        frameThrow("A player has an excessive number of units.");
+      }
+  });
 }
 
 void Replayer::setMap(

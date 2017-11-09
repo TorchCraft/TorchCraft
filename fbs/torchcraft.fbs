@@ -108,13 +108,7 @@ table Message {
 
 root_type Message;
 
-table Map {
-  height:int;
-  width:int;
-  data:[ubyte];
-}
-
-table Action { // Corresponds to a TorchCraft message
+struct Action {
   action:[int];
   uid:int;
   aid:int;
@@ -130,25 +124,25 @@ table Resources {
   techs:long;
 }
 
-table Order {
-  first_frame:int; //First frame number where order appeared
-  type:int; //Maps to BWAPI::Orders::Enum
+struct Order {
+  first_frame:int; // First frame number where order appeared
+  type:int; //  Maps to BWAPI::Orders::Enum
   targetId:int;
   targetX:int;
   targetY:int;
   // Current implementation has equivalence operator that compares vars other than first_frame
 }
 
-table UnitCommand {
+struct UnitCommand {
   frame:int;
-  type:int; //Maps to BWAPI::UnitCommandTypes::Enum
+  type:int; // Maps to BWAPI::UnitCommandTypes::Enum
   targetId:int;
   targetX:int;
   targetY:int;
   extra:int;
 }
 
-table Bullet {
+struct Bullet {
   type:int;
   x:int;
   y:int;
@@ -192,21 +186,21 @@ table Unit {
   remainingBuildTrainTime:int;
   remainingUpgradeResearchTime:int;
   spellCD:int;
-  associatedUnit:int; //addOn, nydusExit, transport, hatchery
-  associatedCount:int; //spiderMines, scarabs, interceptors, nuke
+  associatedUnit:int; // addOn, nydusExit, transport, hatchery
+  associatedCount:int; // spiderMines, scarabs, interceptors, nuke
 }
 
-table UnitsByPlayerId {
+struct UnitsByPlayerId {
   playerId:int;
   units:[Unit];
 }
 
-table ActionsByPlayerId {
+struct ActionsByPlayerId {
   playerId:int;
   actions:[Action];
 }
 
-table ResourcesByPlayerId {
+struct ResourcesByPlayerId {
   playerId:int;
   resources:Resources;
 }
@@ -235,11 +229,11 @@ table UnitDiff {
   flags:long;
 }
 
-table UnitDiffContainer {
+struct UnitDiffContainer {
   units:[UnitDiff];
 }
 
-table FrameDiffCreep {
+struct FrameDiffCreep {
   index:int;
   creep:int;
 }
@@ -253,16 +247,4 @@ table FrameDiff {
   creep_map:[FrameDiffCreep];
   reward:int;
   is_terminal:int;
-}
-
-table UnitCount {
-  a:int;
-  b:int;
-}
-
-table Replayer {
-  frames:[Frame];
-  numUnits:[UnitCount];
-  map:Map;
-  keyFrame:int;
 }

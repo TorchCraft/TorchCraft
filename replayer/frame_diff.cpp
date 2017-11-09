@@ -20,16 +20,13 @@ using FrameDiff = replayer::FrameDiff;
 std::ostream& replayer::operator<<(std::ostream& out, const FrameDiff& frameDiff) {
   flatbuffers::FlatBufferBuilder builder;
   frameDiff.addToFlatBufferBuilder(builder);
-  OutStreamableFlatBuffer streamable(builder);
-  streamable.write(out);
+  writeFlatBufferToStream(out, builder);
   return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, FrameDiff& frameDiff) {
-  InStreamableFlatBuffer<const fbs::FrameDiff> streamable;
-  streamable.read(in);
-  auto fbsFrameDiff = streamable.flatBufferTable;
-  frameDiff.readFromFlatBufferTable(*fbsFrameDiff);
+  auto flatBufferTable = readFlatBufferTableFromStream<fbs::FrameDiff>(in);
+  frameDiff.readFromFlatBufferTable(*flatBufferTable);
   return in;
 }
 

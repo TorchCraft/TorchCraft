@@ -19,16 +19,13 @@ using Frame = replayer::Frame;
 std::ostream& replayer::operator<<(std::ostream& out, const replayer::Frame& frame) {
   flatbuffers::FlatBufferBuilder builder;
   frame.addToFlatBufferBuilder(builder);
-  OutStreamableFlatBuffer streamable(builder);
-  streamable.write(out);
+  writeFlatBufferToStream(out, builder);
   return out;
 }
 
 std::istream& replayer::operator>>(std::istream& in, replayer::Frame& frame) {
-  InStreamableFlatBuffer<const fbs::Frame> streamable;
-  streamable.read(in);
-  auto fbsFrame = streamable.flatBufferTable;
-  frame.readFromFlatBufferTable(*fbsFrame);
+  auto flatBufferTable = readFlatBufferTableFromStream<fbs::Frame>(in);
+  frame.readFromFlatBufferTable(*flatBufferTable);
   return in;
 }
 

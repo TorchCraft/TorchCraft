@@ -274,15 +274,7 @@ bool Client::receive(std::vector<std::string>& updates) {
           reinterpret_cast<const torchcraft::fbs::HandshakeServer*>(
               msg->msg()));
       break;
-    // TODO These message types were not explicitly handled in the Lua version
     case torchcraft::fbs::Any::PlayerLeft: {
-      auto left =
-          reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(msg->msg())
-              ->player_left();
-      std::cerr << "[Warning] Unhandled message from server: "
-                << torchcraft::fbs::EnumNameAny(msg->msg_type())
-                << "(player_left=\"" << (left ? left->str() : "(null)") << "\")"
-                << std::endl;
       updates = state_->update(
           reinterpret_cast<const torchcraft::fbs::PlayerLeft*>(msg->msg()));
       break;

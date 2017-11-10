@@ -108,7 +108,7 @@ table Message {
 
 root_type Message;
 
-struct Action {
+table Action {
   action:[int];
   uid:int;
   aid:int;
@@ -190,17 +190,17 @@ table Unit {
   associatedCount:int; // spiderMines, scarabs, interceptors, nuke
 }
 
-struct UnitsByPlayerId {
+table UnitsByPlayerId {
   playerId:int;
   units:[Unit];
 }
 
-struct ActionsByPlayerId {
+table ActionsByPlayerId {
   playerId:int;
   actions:[Action];
 }
 
-struct ResourcesByPlayerId {
+table ResourcesByPlayerId {
   playerId:int;
   resources:Resources;
 }
@@ -229,7 +229,7 @@ table UnitDiff {
   flags:long;
 }
 
-struct UnitDiffContainer {
+table UnitDiffContainer {
   units:[UnitDiff];
 }
 

@@ -21,8 +21,7 @@
 #include "frame.h"
 #include "recorder.h"
 #include "zmq_server.h"
-
-#include "../fbs/torchcraft_generated.h"
+#include "torchcraft_generated.h"
 
 class ZMQ_server;
 namespace replayer = torchcraft::replayer;

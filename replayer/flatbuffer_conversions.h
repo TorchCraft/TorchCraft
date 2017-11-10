@@ -9,6 +9,11 @@
 
 #pragma once
 
+#include <algorithm>
+#include <vector>
+#include "torchcraft_generated.h"
+#include "flatbuffers.h"
+
 namespace torchcraft {
  namespace replayer {
 
@@ -56,14 +61,8 @@ namespace torchcraft {
      };
    };
 
-   auto buildFbsBullet = [](flatbuffers::FlatBufferBuilder& builder) {
-     return [&builder](const Bullet& bullet) {
-       fbs::BulletBuilder fbsBulletBuilder(builder);
-       fbsBulletBuilder.add_type(bullet.type);
-       fbsBulletBuilder.add_x(bullet.x);
-       fbsBulletBuilder.add_y(bullet.y);
-       return fbsBulletBuilder.Finish();
-     };
+   auto buildFbsBullet = [](const Bullet& bullet) {
+     return fbs::Bullet(bullet.type, bullet.x, bullet.y);
    };
 
    // Deserialize from FlatBuffers

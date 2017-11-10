@@ -14,7 +14,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include "zmq.hpp"
 #include "controller.h"
-#include "../fbs/torchcraft_generated.h"
+#include "torchcraft_generated.h"
 
 class Controller;
 

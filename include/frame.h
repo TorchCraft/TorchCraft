@@ -17,8 +17,7 @@
 #include <vector>
 
 #include "refcount.h"
-#include "streamable_flatbuffer.h"
-#include "../fbs/torchcraft_generated.h"
+#include "torchcraft_generated.h"
 
 #ifdef _MSC_VER
 typedef unsigned int uint32_t;

@@ -4,7 +4,7 @@
 #ifndef FLATBUFFERS_GENERATED_TORCHCRAFT_TORCHCRAFT_FBS_H_
 #define FLATBUFFERS_GENERATED_TORCHCRAFT_TORCHCRAFT_FBS_H_
 
-#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers.h"
 
 namespace torchcraft {
 namespace fbs {
@@ -41,9 +41,6 @@ struct ErrorT;
 struct Message;
 struct MessageT;
 
-struct Map;
-struct MapT;
-
 struct Action;
 struct ActionT;
 
@@ -51,13 +48,10 @@ struct Resources;
 struct ResourcesT;
 
 struct Order;
-struct OrderT;
 
 struct UnitCommand;
-struct UnitCommandT;
 
 struct Bullet;
-struct BulletT;
 
 struct Unit;
 struct UnitT;
@@ -81,16 +75,9 @@ struct UnitDiffContainer;
 struct UnitDiffContainerT;
 
 struct FrameDiffCreep;
-struct FrameDiffCreepT;
 
 struct FrameDiff;
 struct FrameDiffT;
-
-struct UnitCount;
-struct UnitCountT;
-
-struct Replayer;
-struct ReplayerT;
 
 enum class FrameOrFrameDiff : uint8_t {
   NONE = 0,
@@ -389,6 +376,194 @@ MANUALLY_ALIGNED_STRUCT(4) Vec2 FLATBUFFERS_FINAL_CLASS {
   }
 };
 STRUCT_END(Vec2, 8);
+
+MANUALLY_ALIGNED_STRUCT(4) Order FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t first_frame_;
+  int32_t type_;
+  int32_t targetId_;
+  int32_t targetX_;
+  int32_t targetY_;
+
+ public:
+  Order() {
+    memset(this, 0, sizeof(Order));
+  }
+  Order(const Order &_o) {
+    memcpy(this, &_o, sizeof(Order));
+  }
+  Order(int32_t _first_frame, int32_t _type, int32_t _targetId, int32_t _targetX, int32_t _targetY)
+      : first_frame_(flatbuffers::EndianScalar(_first_frame)),
+        type_(flatbuffers::EndianScalar(_type)),
+        targetId_(flatbuffers::EndianScalar(_targetId)),
+        targetX_(flatbuffers::EndianScalar(_targetX)),
+        targetY_(flatbuffers::EndianScalar(_targetY)) {
+  }
+  int32_t first_frame() const {
+    return flatbuffers::EndianScalar(first_frame_);
+  }
+  void mutate_first_frame(int32_t _first_frame) {
+    flatbuffers::WriteScalar(&first_frame_, _first_frame);
+  }
+  int32_t type() const {
+    return flatbuffers::EndianScalar(type_);
+  }
+  void mutate_type(int32_t _type) {
+    flatbuffers::WriteScalar(&type_, _type);
+  }
+  int32_t targetId() const {
+    return flatbuffers::EndianScalar(targetId_);
+  }
+  void mutate_targetId(int32_t _targetId) {
+    flatbuffers::WriteScalar(&targetId_, _targetId);
+  }
+  int32_t targetX() const {
+    return flatbuffers::EndianScalar(targetX_);
+  }
+  void mutate_targetX(int32_t _targetX) {
+    flatbuffers::WriteScalar(&targetX_, _targetX);
+  }
+  int32_t targetY() const {
+    return flatbuffers::EndianScalar(targetY_);
+  }
+  void mutate_targetY(int32_t _targetY) {
+    flatbuffers::WriteScalar(&targetY_, _targetY);
+  }
+};
+STRUCT_END(Order, 20);
+
+MANUALLY_ALIGNED_STRUCT(4) UnitCommand FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t frame_;
+  int32_t type_;
+  int32_t targetId_;
+  int32_t targetX_;
+  int32_t targetY_;
+  int32_t extra_;
+
+ public:
+  UnitCommand() {
+    memset(this, 0, sizeof(UnitCommand));
+  }
+  UnitCommand(const UnitCommand &_o) {
+    memcpy(this, &_o, sizeof(UnitCommand));
+  }
+  UnitCommand(int32_t _frame, int32_t _type, int32_t _targetId, int32_t _targetX, int32_t _targetY, int32_t _extra)
+      : frame_(flatbuffers::EndianScalar(_frame)),
+        type_(flatbuffers::EndianScalar(_type)),
+        targetId_(flatbuffers::EndianScalar(_targetId)),
+        targetX_(flatbuffers::EndianScalar(_targetX)),
+        targetY_(flatbuffers::EndianScalar(_targetY)),
+        extra_(flatbuffers::EndianScalar(_extra)) {
+  }
+  int32_t frame() const {
+    return flatbuffers::EndianScalar(frame_);
+  }
+  void mutate_frame(int32_t _frame) {
+    flatbuffers::WriteScalar(&frame_, _frame);
+  }
+  int32_t type() const {
+    return flatbuffers::EndianScalar(type_);
+  }
+  void mutate_type(int32_t _type) {
+    flatbuffers::WriteScalar(&type_, _type);
+  }
+  int32_t targetId() const {
+    return flatbuffers::EndianScalar(targetId_);
+  }
+  void mutate_targetId(int32_t _targetId) {
+    flatbuffers::WriteScalar(&targetId_, _targetId);
+  }
+  int32_t targetX() const {
+    return flatbuffers::EndianScalar(targetX_);
+  }
+  void mutate_targetX(int32_t _targetX) {
+    flatbuffers::WriteScalar(&targetX_, _targetX);
+  }
+  int32_t targetY() const {
+    return flatbuffers::EndianScalar(targetY_);
+  }
+  void mutate_targetY(int32_t _targetY) {
+    flatbuffers::WriteScalar(&targetY_, _targetY);
+  }
+  int32_t extra() const {
+    return flatbuffers::EndianScalar(extra_);
+  }
+  void mutate_extra(int32_t _extra) {
+    flatbuffers::WriteScalar(&extra_, _extra);
+  }
+};
+STRUCT_END(UnitCommand, 24);
+
+MANUALLY_ALIGNED_STRUCT(4) Bullet FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t type_;
+  int32_t x_;
+  int32_t y_;
+
+ public:
+  Bullet() {
+    memset(this, 0, sizeof(Bullet));
+  }
+  Bullet(const Bullet &_o) {
+    memcpy(this, &_o, sizeof(Bullet));
+  }
+  Bullet(int32_t _type, int32_t _x, int32_t _y)
+      : type_(flatbuffers::EndianScalar(_type)),
+        x_(flatbuffers::EndianScalar(_x)),
+        y_(flatbuffers::EndianScalar(_y)) {
+  }
+  int32_t type() const {
+    return flatbuffers::EndianScalar(type_);
+  }
+  void mutate_type(int32_t _type) {
+    flatbuffers::WriteScalar(&type_, _type);
+  }
+  int32_t x() const {
+    return flatbuffers::EndianScalar(x_);
+  }
+  void mutate_x(int32_t _x) {
+    flatbuffers::WriteScalar(&x_, _x);
+  }
+  int32_t y() const {
+    return flatbuffers::EndianScalar(y_);
+  }
+  void mutate_y(int32_t _y) {
+    flatbuffers::WriteScalar(&y_, _y);
+  }
+};
+STRUCT_END(Bullet, 12);
+
+MANUALLY_ALIGNED_STRUCT(4) FrameDiffCreep FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t index_;
+  int32_t creep_;
+
+ public:
+  FrameDiffCreep() {
+    memset(this, 0, sizeof(FrameDiffCreep));
+  }
+  FrameDiffCreep(const FrameDiffCreep &_o) {
+    memcpy(this, &_o, sizeof(FrameDiffCreep));
+  }
+  FrameDiffCreep(int32_t _index, int32_t _creep)
+      : index_(flatbuffers::EndianScalar(_index)),
+        creep_(flatbuffers::EndianScalar(_creep)) {
+  }
+  int32_t index() const {
+    return flatbuffers::EndianScalar(index_);
+  }
+  void mutate_index(int32_t _index) {
+    flatbuffers::WriteScalar(&index_, _index);
+  }
+  int32_t creep() const {
+    return flatbuffers::EndianScalar(creep_);
+  }
+  void mutate_creep(int32_t _creep) {
+    flatbuffers::WriteScalar(&creep_, _creep);
+  }
+};
+STRUCT_END(FrameDiffCreep, 8);
 
 struct CommandT : public flatbuffers::NativeTable {
   typedef Command TableType;
@@ -1693,105 +1868,6 @@ inline flatbuffers::Offset<Message> CreateMessageDirect(
 
 flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder &_fbb, const MessageT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct MapT : public flatbuffers::NativeTable {
-  typedef Map TableType;
-  int32_t height;
-  int32_t width;
-  std::vector<uint8_t> data;
-  MapT()
-      : height(0),
-        width(0) {
-  }
-};
-
-struct Map FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef MapT NativeTableType;
-  enum {
-    VT_HEIGHT = 4,
-    VT_WIDTH = 6,
-    VT_DATA = 8
-  };
-  int32_t height() const {
-    return GetField<int32_t>(VT_HEIGHT, 0);
-  }
-  bool mutate_height(int32_t _height) {
-    return SetField<int32_t>(VT_HEIGHT, _height, 0);
-  }
-  int32_t width() const {
-    return GetField<int32_t>(VT_WIDTH, 0);
-  }
-  bool mutate_width(int32_t _width) {
-    return SetField<int32_t>(VT_WIDTH, _width, 0);
-  }
-  const flatbuffers::Vector<uint8_t> *data() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
-  }
-  flatbuffers::Vector<uint8_t> *mutable_data() {
-    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_DATA);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_HEIGHT) &&
-           VerifyField<int32_t>(verifier, VT_WIDTH) &&
-           VerifyOffset(verifier, VT_DATA) &&
-           verifier.Verify(data()) &&
-           verifier.EndTable();
-  }
-  MapT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(MapT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Map> Pack(flatbuffers::FlatBufferBuilder &_fbb, const MapT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct MapBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_height(int32_t height) {
-    fbb_.AddElement<int32_t>(Map::VT_HEIGHT, height, 0);
-  }
-  void add_width(int32_t width) {
-    fbb_.AddElement<int32_t>(Map::VT_WIDTH, width, 0);
-  }
-  void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
-    fbb_.AddOffset(Map::VT_DATA, data);
-  }
-  explicit MapBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  MapBuilder &operator=(const MapBuilder &);
-  flatbuffers::Offset<Map> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Map>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Map> CreateMap(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t height = 0,
-    int32_t width = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0) {
-  MapBuilder builder_(_fbb);
-  builder_.add_data(data);
-  builder_.add_width(width);
-  builder_.add_height(height);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<Map> CreateMapDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t height = 0,
-    int32_t width = 0,
-    const std::vector<uint8_t> *data = nullptr) {
-  return torchcraft::fbs::CreateMap(
-      _fbb,
-      height,
-      width,
-      data ? _fbb.CreateVector<uint8_t>(*data) : 0);
-}
-
-flatbuffers::Offset<Map> CreateMap(flatbuffers::FlatBufferBuilder &_fbb, const MapT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 struct ActionT : public flatbuffers::NativeTable {
   typedef Action TableType;
   std::vector<int32_t> action;
@@ -2038,342 +2114,6 @@ inline flatbuffers::Offset<Resources> CreateResources(
 
 flatbuffers::Offset<Resources> CreateResources(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct OrderT : public flatbuffers::NativeTable {
-  typedef Order TableType;
-  int32_t first_frame;
-  int32_t type;
-  int32_t targetId;
-  int32_t targetX;
-  int32_t targetY;
-  OrderT()
-      : first_frame(0),
-        type(0),
-        targetId(0),
-        targetX(0),
-        targetY(0) {
-  }
-};
-
-struct Order FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef OrderT NativeTableType;
-  enum {
-    VT_FIRST_FRAME = 4,
-    VT_TYPE = 6,
-    VT_TARGETID = 8,
-    VT_TARGETX = 10,
-    VT_TARGETY = 12
-  };
-  int32_t first_frame() const {
-    return GetField<int32_t>(VT_FIRST_FRAME, 0);
-  }
-  bool mutate_first_frame(int32_t _first_frame) {
-    return SetField<int32_t>(VT_FIRST_FRAME, _first_frame, 0);
-  }
-  int32_t type() const {
-    return GetField<int32_t>(VT_TYPE, 0);
-  }
-  bool mutate_type(int32_t _type) {
-    return SetField<int32_t>(VT_TYPE, _type, 0);
-  }
-  int32_t targetId() const {
-    return GetField<int32_t>(VT_TARGETID, 0);
-  }
-  bool mutate_targetId(int32_t _targetId) {
-    return SetField<int32_t>(VT_TARGETID, _targetId, 0);
-  }
-  int32_t targetX() const {
-    return GetField<int32_t>(VT_TARGETX, 0);
-  }
-  bool mutate_targetX(int32_t _targetX) {
-    return SetField<int32_t>(VT_TARGETX, _targetX, 0);
-  }
-  int32_t targetY() const {
-    return GetField<int32_t>(VT_TARGETY, 0);
-  }
-  bool mutate_targetY(int32_t _targetY) {
-    return SetField<int32_t>(VT_TARGETY, _targetY, 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_FIRST_FRAME) &&
-           VerifyField<int32_t>(verifier, VT_TYPE) &&
-           VerifyField<int32_t>(verifier, VT_TARGETID) &&
-           VerifyField<int32_t>(verifier, VT_TARGETX) &&
-           VerifyField<int32_t>(verifier, VT_TARGETY) &&
-           verifier.EndTable();
-  }
-  OrderT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(OrderT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Order> Pack(flatbuffers::FlatBufferBuilder &_fbb, const OrderT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct OrderBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_first_frame(int32_t first_frame) {
-    fbb_.AddElement<int32_t>(Order::VT_FIRST_FRAME, first_frame, 0);
-  }
-  void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(Order::VT_TYPE, type, 0);
-  }
-  void add_targetId(int32_t targetId) {
-    fbb_.AddElement<int32_t>(Order::VT_TARGETID, targetId, 0);
-  }
-  void add_targetX(int32_t targetX) {
-    fbb_.AddElement<int32_t>(Order::VT_TARGETX, targetX, 0);
-  }
-  void add_targetY(int32_t targetY) {
-    fbb_.AddElement<int32_t>(Order::VT_TARGETY, targetY, 0);
-  }
-  explicit OrderBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  OrderBuilder &operator=(const OrderBuilder &);
-  flatbuffers::Offset<Order> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Order>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Order> CreateOrder(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t first_frame = 0,
-    int32_t type = 0,
-    int32_t targetId = 0,
-    int32_t targetX = 0,
-    int32_t targetY = 0) {
-  OrderBuilder builder_(_fbb);
-  builder_.add_targetY(targetY);
-  builder_.add_targetX(targetX);
-  builder_.add_targetId(targetId);
-  builder_.add_type(type);
-  builder_.add_first_frame(first_frame);
-  return builder_.Finish();
-}
-
-flatbuffers::Offset<Order> CreateOrder(flatbuffers::FlatBufferBuilder &_fbb, const OrderT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct UnitCommandT : public flatbuffers::NativeTable {
-  typedef UnitCommand TableType;
-  int32_t frame;
-  int32_t type;
-  int32_t targetId;
-  int32_t targetX;
-  int32_t targetY;
-  int32_t extra;
-  UnitCommandT()
-      : frame(0),
-        type(0),
-        targetId(0),
-        targetX(0),
-        targetY(0),
-        extra(0) {
-  }
-};
-
-struct UnitCommand FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef UnitCommandT NativeTableType;
-  enum {
-    VT_FRAME = 4,
-    VT_TYPE = 6,
-    VT_TARGETID = 8,
-    VT_TARGETX = 10,
-    VT_TARGETY = 12,
-    VT_EXTRA = 14
-  };
-  int32_t frame() const {
-    return GetField<int32_t>(VT_FRAME, 0);
-  }
-  bool mutate_frame(int32_t _frame) {
-    return SetField<int32_t>(VT_FRAME, _frame, 0);
-  }
-  int32_t type() const {
-    return GetField<int32_t>(VT_TYPE, 0);
-  }
-  bool mutate_type(int32_t _type) {
-    return SetField<int32_t>(VT_TYPE, _type, 0);
-  }
-  int32_t targetId() const {
-    return GetField<int32_t>(VT_TARGETID, 0);
-  }
-  bool mutate_targetId(int32_t _targetId) {
-    return SetField<int32_t>(VT_TARGETID, _targetId, 0);
-  }
-  int32_t targetX() const {
-    return GetField<int32_t>(VT_TARGETX, 0);
-  }
-  bool mutate_targetX(int32_t _targetX) {
-    return SetField<int32_t>(VT_TARGETX, _targetX, 0);
-  }
-  int32_t targetY() const {
-    return GetField<int32_t>(VT_TARGETY, 0);
-  }
-  bool mutate_targetY(int32_t _targetY) {
-    return SetField<int32_t>(VT_TARGETY, _targetY, 0);
-  }
-  int32_t extra() const {
-    return GetField<int32_t>(VT_EXTRA, 0);
-  }
-  bool mutate_extra(int32_t _extra) {
-    return SetField<int32_t>(VT_EXTRA, _extra, 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_FRAME) &&
-           VerifyField<int32_t>(verifier, VT_TYPE) &&
-           VerifyField<int32_t>(verifier, VT_TARGETID) &&
-           VerifyField<int32_t>(verifier, VT_TARGETX) &&
-           VerifyField<int32_t>(verifier, VT_TARGETY) &&
-           VerifyField<int32_t>(verifier, VT_EXTRA) &&
-           verifier.EndTable();
-  }
-  UnitCommandT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(UnitCommandT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<UnitCommand> Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitCommandT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct UnitCommandBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_frame(int32_t frame) {
-    fbb_.AddElement<int32_t>(UnitCommand::VT_FRAME, frame, 0);
-  }
-  void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(UnitCommand::VT_TYPE, type, 0);
-  }
-  void add_targetId(int32_t targetId) {
-    fbb_.AddElement<int32_t>(UnitCommand::VT_TARGETID, targetId, 0);
-  }
-  void add_targetX(int32_t targetX) {
-    fbb_.AddElement<int32_t>(UnitCommand::VT_TARGETX, targetX, 0);
-  }
-  void add_targetY(int32_t targetY) {
-    fbb_.AddElement<int32_t>(UnitCommand::VT_TARGETY, targetY, 0);
-  }
-  void add_extra(int32_t extra) {
-    fbb_.AddElement<int32_t>(UnitCommand::VT_EXTRA, extra, 0);
-  }
-  explicit UnitCommandBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  UnitCommandBuilder &operator=(const UnitCommandBuilder &);
-  flatbuffers::Offset<UnitCommand> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<UnitCommand>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<UnitCommand> CreateUnitCommand(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t frame = 0,
-    int32_t type = 0,
-    int32_t targetId = 0,
-    int32_t targetX = 0,
-    int32_t targetY = 0,
-    int32_t extra = 0) {
-  UnitCommandBuilder builder_(_fbb);
-  builder_.add_extra(extra);
-  builder_.add_targetY(targetY);
-  builder_.add_targetX(targetX);
-  builder_.add_targetId(targetId);
-  builder_.add_type(type);
-  builder_.add_frame(frame);
-  return builder_.Finish();
-}
-
-flatbuffers::Offset<UnitCommand> CreateUnitCommand(flatbuffers::FlatBufferBuilder &_fbb, const UnitCommandT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct BulletT : public flatbuffers::NativeTable {
-  typedef Bullet TableType;
-  int32_t type;
-  int32_t x;
-  int32_t y;
-  BulletT()
-      : type(0),
-        x(0),
-        y(0) {
-  }
-};
-
-struct Bullet FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef BulletT NativeTableType;
-  enum {
-    VT_TYPE = 4,
-    VT_X = 6,
-    VT_Y = 8
-  };
-  int32_t type() const {
-    return GetField<int32_t>(VT_TYPE, 0);
-  }
-  bool mutate_type(int32_t _type) {
-    return SetField<int32_t>(VT_TYPE, _type, 0);
-  }
-  int32_t x() const {
-    return GetField<int32_t>(VT_X, 0);
-  }
-  bool mutate_x(int32_t _x) {
-    return SetField<int32_t>(VT_X, _x, 0);
-  }
-  int32_t y() const {
-    return GetField<int32_t>(VT_Y, 0);
-  }
-  bool mutate_y(int32_t _y) {
-    return SetField<int32_t>(VT_Y, _y, 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_TYPE) &&
-           VerifyField<int32_t>(verifier, VT_X) &&
-           VerifyField<int32_t>(verifier, VT_Y) &&
-           verifier.EndTable();
-  }
-  BulletT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(BulletT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Bullet> Pack(flatbuffers::FlatBufferBuilder &_fbb, const BulletT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct BulletBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_type(int32_t type) {
-    fbb_.AddElement<int32_t>(Bullet::VT_TYPE, type, 0);
-  }
-  void add_x(int32_t x) {
-    fbb_.AddElement<int32_t>(Bullet::VT_X, x, 0);
-  }
-  void add_y(int32_t y) {
-    fbb_.AddElement<int32_t>(Bullet::VT_Y, y, 0);
-  }
-  explicit BulletBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  BulletBuilder &operator=(const BulletBuilder &);
-  flatbuffers::Offset<Bullet> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Bullet>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Bullet> CreateBullet(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t type = 0,
-    int32_t x = 0,
-    int32_t y = 0) {
-  BulletBuilder builder_(_fbb);
-  builder_.add_y(y);
-  builder_.add_x(x);
-  builder_.add_type(type);
-  return builder_.Finish();
-}
-
-flatbuffers::Offset<Bullet> CreateBullet(flatbuffers::FlatBufferBuilder &_fbb, const BulletT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 struct UnitT : public flatbuffers::NativeTable {
   typedef Unit TableType;
   int32_t id;
@@ -2403,8 +2143,8 @@ struct UnitT : public flatbuffers::NativeTable {
   int32_t airDmgType;
   int32_t groundRange;
   int32_t airRange;
-  std::vector<std::unique_ptr<OrderT>> orders;
-  std::unique_ptr<UnitCommandT> command;
+  std::vector<Order> orders;
+  std::unique_ptr<UnitCommand> command;
   double velocityX;
   double velocityY;
   int32_t playerId;
@@ -2661,17 +2401,17 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_airRange(int32_t _airRange) {
     return SetField<int32_t>(VT_AIRRANGE, _airRange, 0);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<Order>> *orders() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Order>> *>(VT_ORDERS);
+  const flatbuffers::Vector<const Order *> *orders() const {
+    return GetPointer<const flatbuffers::Vector<const Order *> *>(VT_ORDERS);
   }
-  flatbuffers::Vector<flatbuffers::Offset<Order>> *mutable_orders() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Order>> *>(VT_ORDERS);
+  flatbuffers::Vector<const Order *> *mutable_orders() {
+    return GetPointer<flatbuffers::Vector<const Order *> *>(VT_ORDERS);
   }
   const UnitCommand *command() const {
-    return GetPointer<const UnitCommand *>(VT_COMMAND);
+    return GetStruct<const UnitCommand *>(VT_COMMAND);
   }
   UnitCommand *mutable_command() {
-    return GetPointer<UnitCommand *>(VT_COMMAND);
+    return GetStruct<UnitCommand *>(VT_COMMAND);
   }
   double velocityX() const {
     return GetField<double>(VT_VELOCITYX, 0.0);
@@ -2764,9 +2504,7 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_AIRRANGE) &&
            VerifyOffset(verifier, VT_ORDERS) &&
            verifier.Verify(orders()) &&
-           verifier.VerifyVectorOfTables(orders()) &&
-           VerifyOffset(verifier, VT_COMMAND) &&
-           verifier.VerifyTable(command()) &&
+           VerifyField<UnitCommand>(verifier, VT_COMMAND) &&
            VerifyField<double>(verifier, VT_VELOCITYX) &&
            VerifyField<double>(verifier, VT_VELOCITYY) &&
            VerifyField<int32_t>(verifier, VT_PLAYERID) &&
@@ -2868,11 +2606,11 @@ struct UnitBuilder {
   void add_airRange(int32_t airRange) {
     fbb_.AddElement<int32_t>(Unit::VT_AIRRANGE, airRange, 0);
   }
-  void add_orders(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Order>>> orders) {
+  void add_orders(flatbuffers::Offset<flatbuffers::Vector<const Order *>> orders) {
     fbb_.AddOffset(Unit::VT_ORDERS, orders);
   }
-  void add_command(flatbuffers::Offset<UnitCommand> command) {
-    fbb_.AddOffset(Unit::VT_COMMAND, command);
+  void add_command(const UnitCommand *command) {
+    fbb_.AddStruct(Unit::VT_COMMAND, command);
   }
   void add_velocityX(double velocityX) {
     fbb_.AddElement<double>(Unit::VT_VELOCITYX, velocityX, 0.0);
@@ -2945,8 +2683,8 @@ inline flatbuffers::Offset<Unit> CreateUnit(
     int32_t airDmgType = 0,
     int32_t groundRange = 0,
     int32_t airRange = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Order>>> orders = 0,
-    flatbuffers::Offset<UnitCommand> command = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Order *>> orders = 0,
+    const UnitCommand *command = 0,
     double velocityX = 0.0,
     double velocityY = 0.0,
     int32_t playerId = 0,
@@ -3029,8 +2767,8 @@ inline flatbuffers::Offset<Unit> CreateUnitDirect(
     int32_t airDmgType = 0,
     int32_t groundRange = 0,
     int32_t airRange = 0,
-    const std::vector<flatbuffers::Offset<Order>> *orders = nullptr,
-    flatbuffers::Offset<UnitCommand> command = 0,
+    const std::vector<const Order *> *orders = nullptr,
+    const UnitCommand *command = 0,
     double velocityX = 0.0,
     double velocityY = 0.0,
     int32_t playerId = 0,
@@ -3070,7 +2808,7 @@ inline flatbuffers::Offset<Unit> CreateUnitDirect(
       airDmgType,
       groundRange,
       airRange,
-      orders ? _fbb.CreateVector<flatbuffers::Offset<Order>>(*orders) : 0,
+      orders ? _fbb.CreateVector<const Order *>(*orders) : 0,
       command,
       velocityX,
       velocityY,
@@ -3329,7 +3067,7 @@ struct FrameT : public flatbuffers::NativeTable {
   std::vector<std::unique_ptr<UnitsByPlayerIdT>> units;
   std::vector<std::unique_ptr<ActionsByPlayerIdT>> actions;
   std::vector<std::unique_ptr<ResourcesByPlayerIdT>> resources;
-  std::vector<std::unique_ptr<BulletT>> bullets;
+  std::vector<Bullet> bullets;
   std::vector<uint8_t> creep_map;
   uint32_t width;
   uint32_t height;
@@ -3374,11 +3112,11 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>> *mutable_resources() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>> *>(VT_RESOURCES);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<Bullet>> *bullets() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Bullet>> *>(VT_BULLETS);
+  const flatbuffers::Vector<const Bullet *> *bullets() const {
+    return GetPointer<const flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
   }
-  flatbuffers::Vector<flatbuffers::Offset<Bullet>> *mutable_bullets() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Bullet>> *>(VT_BULLETS);
+  flatbuffers::Vector<const Bullet *> *mutable_bullets() {
+    return GetPointer<flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
   }
   const flatbuffers::Vector<uint8_t> *creep_map() const {
     return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_CREEP_MAP);
@@ -3423,7 +3161,6 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(resources()) &&
            VerifyOffset(verifier, VT_BULLETS) &&
            verifier.Verify(bullets()) &&
-           verifier.VerifyVectorOfTables(bullets()) &&
            VerifyOffset(verifier, VT_CREEP_MAP) &&
            verifier.Verify(creep_map()) &&
            VerifyField<uint32_t>(verifier, VT_WIDTH) &&
@@ -3449,7 +3186,7 @@ struct FrameBuilder {
   void add_resources(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>>> resources) {
     fbb_.AddOffset(Frame::VT_RESOURCES, resources);
   }
-  void add_bullets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bullet>>> bullets) {
+  void add_bullets(flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets) {
     fbb_.AddOffset(Frame::VT_BULLETS, bullets);
   }
   void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> creep_map) {
@@ -3484,7 +3221,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitsByPlayerId>>> units = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsByPlayerId>>> actions = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>>> resources = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bullet>>> bullets = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> creep_map = 0,
     uint32_t width = 0,
     uint32_t height = 0,
@@ -3508,7 +3245,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
     const std::vector<flatbuffers::Offset<UnitsByPlayerId>> *units = nullptr,
     const std::vector<flatbuffers::Offset<ActionsByPlayerId>> *actions = nullptr,
     const std::vector<flatbuffers::Offset<ResourcesByPlayerId>> *resources = nullptr,
-    const std::vector<flatbuffers::Offset<Bullet>> *bullets = nullptr,
+    const std::vector<const Bullet *> *bullets = nullptr,
     const std::vector<uint8_t> *creep_map = nullptr,
     uint32_t width = 0,
     uint32_t height = 0,
@@ -3519,7 +3256,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
       units ? _fbb.CreateVector<flatbuffers::Offset<UnitsByPlayerId>>(*units) : 0,
       actions ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>>(*actions) : 0,
       resources ? _fbb.CreateVector<flatbuffers::Offset<ResourcesByPlayerId>>(*resources) : 0,
-      bullets ? _fbb.CreateVector<flatbuffers::Offset<Bullet>>(*bullets) : 0,
+      bullets ? _fbb.CreateVector<const Bullet *>(*bullets) : 0,
       creep_map ? _fbb.CreateVector<uint8_t>(*creep_map) : 0,
       width,
       height,
@@ -3796,86 +3533,14 @@ inline flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainerDirect(
 
 flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainer(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffContainerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct FrameDiffCreepT : public flatbuffers::NativeTable {
-  typedef FrameDiffCreep TableType;
-  int32_t index;
-  int32_t creep;
-  FrameDiffCreepT()
-      : index(0),
-        creep(0) {
-  }
-};
-
-struct FrameDiffCreep FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef FrameDiffCreepT NativeTableType;
-  enum {
-    VT_INDEX = 4,
-    VT_CREEP = 6
-  };
-  int32_t index() const {
-    return GetField<int32_t>(VT_INDEX, 0);
-  }
-  bool mutate_index(int32_t _index) {
-    return SetField<int32_t>(VT_INDEX, _index, 0);
-  }
-  int32_t creep() const {
-    return GetField<int32_t>(VT_CREEP, 0);
-  }
-  bool mutate_creep(int32_t _creep) {
-    return SetField<int32_t>(VT_CREEP, _creep, 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_INDEX) &&
-           VerifyField<int32_t>(verifier, VT_CREEP) &&
-           verifier.EndTable();
-  }
-  FrameDiffCreepT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(FrameDiffCreepT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<FrameDiffCreep> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffCreepT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct FrameDiffCreepBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_index(int32_t index) {
-    fbb_.AddElement<int32_t>(FrameDiffCreep::VT_INDEX, index, 0);
-  }
-  void add_creep(int32_t creep) {
-    fbb_.AddElement<int32_t>(FrameDiffCreep::VT_CREEP, creep, 0);
-  }
-  explicit FrameDiffCreepBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  FrameDiffCreepBuilder &operator=(const FrameDiffCreepBuilder &);
-  flatbuffers::Offset<FrameDiffCreep> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<FrameDiffCreep>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<FrameDiffCreep> CreateFrameDiffCreep(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t index = 0,
-    int32_t creep = 0) {
-  FrameDiffCreepBuilder builder_(_fbb);
-  builder_.add_creep(creep);
-  builder_.add_index(index);
-  return builder_.Finish();
-}
-
-flatbuffers::Offset<FrameDiffCreep> CreateFrameDiffCreep(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffCreepT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 struct FrameDiffT : public flatbuffers::NativeTable {
   typedef FrameDiff TableType;
   std::vector<int32_t> pids;
   std::vector<std::unique_ptr<UnitDiffContainerT>> unitDiffContainers;
   std::vector<std::unique_ptr<ActionsByPlayerIdT>> actions;
   std::vector<std::unique_ptr<ResourcesByPlayerIdT>> resources;
-  std::vector<std::unique_ptr<BulletT>> bullets;
-  std::vector<std::unique_ptr<FrameDiffCreepT>> creep_map;
+  std::vector<Bullet> bullets;
+  std::vector<FrameDiffCreep> creep_map;
   int32_t reward;
   int32_t is_terminal;
   FrameDiffT()
@@ -3920,17 +3585,17 @@ struct FrameDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>> *mutable_resources() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>> *>(VT_RESOURCES);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<Bullet>> *bullets() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Bullet>> *>(VT_BULLETS);
+  const flatbuffers::Vector<const Bullet *> *bullets() const {
+    return GetPointer<const flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
   }
-  flatbuffers::Vector<flatbuffers::Offset<Bullet>> *mutable_bullets() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Bullet>> *>(VT_BULLETS);
+  flatbuffers::Vector<const Bullet *> *mutable_bullets() {
+    return GetPointer<flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
   }
-  const flatbuffers::Vector<flatbuffers::Offset<FrameDiffCreep>> *creep_map() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<FrameDiffCreep>> *>(VT_CREEP_MAP);
+  const flatbuffers::Vector<const FrameDiffCreep *> *creep_map() const {
+    return GetPointer<const flatbuffers::Vector<const FrameDiffCreep *> *>(VT_CREEP_MAP);
   }
-  flatbuffers::Vector<flatbuffers::Offset<FrameDiffCreep>> *mutable_creep_map() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<FrameDiffCreep>> *>(VT_CREEP_MAP);
+  flatbuffers::Vector<const FrameDiffCreep *> *mutable_creep_map() {
+    return GetPointer<flatbuffers::Vector<const FrameDiffCreep *> *>(VT_CREEP_MAP);
   }
   int32_t reward() const {
     return GetField<int32_t>(VT_REWARD, 0);
@@ -3959,10 +3624,8 @@ struct FrameDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(resources()) &&
            VerifyOffset(verifier, VT_BULLETS) &&
            verifier.Verify(bullets()) &&
-           verifier.VerifyVectorOfTables(bullets()) &&
            VerifyOffset(verifier, VT_CREEP_MAP) &&
            verifier.Verify(creep_map()) &&
-           verifier.VerifyVectorOfTables(creep_map()) &&
            VerifyField<int32_t>(verifier, VT_REWARD) &&
            VerifyField<int32_t>(verifier, VT_IS_TERMINAL) &&
            verifier.EndTable();
@@ -3987,10 +3650,10 @@ struct FrameDiffBuilder {
   void add_resources(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>>> resources) {
     fbb_.AddOffset(FrameDiff::VT_RESOURCES, resources);
   }
-  void add_bullets(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bullet>>> bullets) {
+  void add_bullets(flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets) {
     fbb_.AddOffset(FrameDiff::VT_BULLETS, bullets);
   }
-  void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FrameDiffCreep>>> creep_map) {
+  void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<const FrameDiffCreep *>> creep_map) {
     fbb_.AddOffset(FrameDiff::VT_CREEP_MAP, creep_map);
   }
   void add_reward(int32_t reward) {
@@ -4017,8 +3680,8 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>>> unitDiffContainers = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsByPlayerId>>> actions = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>>> resources = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Bullet>>> bullets = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<FrameDiffCreep>>> creep_map = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const FrameDiffCreep *>> creep_map = 0,
     int32_t reward = 0,
     int32_t is_terminal = 0) {
   FrameDiffBuilder builder_(_fbb);
@@ -4039,8 +3702,8 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiffDirect(
     const std::vector<flatbuffers::Offset<UnitDiffContainer>> *unitDiffContainers = nullptr,
     const std::vector<flatbuffers::Offset<ActionsByPlayerId>> *actions = nullptr,
     const std::vector<flatbuffers::Offset<ResourcesByPlayerId>> *resources = nullptr,
-    const std::vector<flatbuffers::Offset<Bullet>> *bullets = nullptr,
-    const std::vector<flatbuffers::Offset<FrameDiffCreep>> *creep_map = nullptr,
+    const std::vector<const Bullet *> *bullets = nullptr,
+    const std::vector<const FrameDiffCreep *> *creep_map = nullptr,
     int32_t reward = 0,
     int32_t is_terminal = 0) {
   return torchcraft::fbs::CreateFrameDiff(
@@ -4049,203 +3712,13 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiffDirect(
       unitDiffContainers ? _fbb.CreateVector<flatbuffers::Offset<UnitDiffContainer>>(*unitDiffContainers) : 0,
       actions ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>>(*actions) : 0,
       resources ? _fbb.CreateVector<flatbuffers::Offset<ResourcesByPlayerId>>(*resources) : 0,
-      bullets ? _fbb.CreateVector<flatbuffers::Offset<Bullet>>(*bullets) : 0,
-      creep_map ? _fbb.CreateVector<flatbuffers::Offset<FrameDiffCreep>>(*creep_map) : 0,
+      bullets ? _fbb.CreateVector<const Bullet *>(*bullets) : 0,
+      creep_map ? _fbb.CreateVector<const FrameDiffCreep *>(*creep_map) : 0,
       reward,
       is_terminal);
 }
 
 flatbuffers::Offset<FrameDiff> CreateFrameDiff(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct UnitCountT : public flatbuffers::NativeTable {
-  typedef UnitCount TableType;
-  int32_t a;
-  int32_t b;
-  UnitCountT()
-      : a(0),
-        b(0) {
-  }
-};
-
-struct UnitCount FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef UnitCountT NativeTableType;
-  enum {
-    VT_A = 4,
-    VT_B = 6
-  };
-  int32_t a() const {
-    return GetField<int32_t>(VT_A, 0);
-  }
-  bool mutate_a(int32_t _a) {
-    return SetField<int32_t>(VT_A, _a, 0);
-  }
-  int32_t b() const {
-    return GetField<int32_t>(VT_B, 0);
-  }
-  bool mutate_b(int32_t _b) {
-    return SetField<int32_t>(VT_B, _b, 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_A) &&
-           VerifyField<int32_t>(verifier, VT_B) &&
-           verifier.EndTable();
-  }
-  UnitCountT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(UnitCountT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<UnitCount> Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitCountT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct UnitCountBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_a(int32_t a) {
-    fbb_.AddElement<int32_t>(UnitCount::VT_A, a, 0);
-  }
-  void add_b(int32_t b) {
-    fbb_.AddElement<int32_t>(UnitCount::VT_B, b, 0);
-  }
-  explicit UnitCountBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  UnitCountBuilder &operator=(const UnitCountBuilder &);
-  flatbuffers::Offset<UnitCount> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<UnitCount>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<UnitCount> CreateUnitCount(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t a = 0,
-    int32_t b = 0) {
-  UnitCountBuilder builder_(_fbb);
-  builder_.add_b(b);
-  builder_.add_a(a);
-  return builder_.Finish();
-}
-
-flatbuffers::Offset<UnitCount> CreateUnitCount(flatbuffers::FlatBufferBuilder &_fbb, const UnitCountT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
-struct ReplayerT : public flatbuffers::NativeTable {
-  typedef Replayer TableType;
-  std::vector<std::unique_ptr<FrameT>> frames;
-  std::vector<std::unique_ptr<UnitCountT>> numUnits;
-  std::unique_ptr<MapT> map;
-  int32_t keyFrame;
-  ReplayerT()
-      : keyFrame(0) {
-  }
-};
-
-struct Replayer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef ReplayerT NativeTableType;
-  enum {
-    VT_FRAMES = 4,
-    VT_NUMUNITS = 6,
-    VT_MAP = 8,
-    VT_KEYFRAME = 10
-  };
-  const flatbuffers::Vector<flatbuffers::Offset<Frame>> *frames() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Frame>> *>(VT_FRAMES);
-  }
-  flatbuffers::Vector<flatbuffers::Offset<Frame>> *mutable_frames() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Frame>> *>(VT_FRAMES);
-  }
-  const flatbuffers::Vector<flatbuffers::Offset<UnitCount>> *numUnits() const {
-    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UnitCount>> *>(VT_NUMUNITS);
-  }
-  flatbuffers::Vector<flatbuffers::Offset<UnitCount>> *mutable_numUnits() {
-    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<UnitCount>> *>(VT_NUMUNITS);
-  }
-  const Map *map() const {
-    return GetPointer<const Map *>(VT_MAP);
-  }
-  Map *mutable_map() {
-    return GetPointer<Map *>(VT_MAP);
-  }
-  int32_t keyFrame() const {
-    return GetField<int32_t>(VT_KEYFRAME, 0);
-  }
-  bool mutate_keyFrame(int32_t _keyFrame) {
-    return SetField<int32_t>(VT_KEYFRAME, _keyFrame, 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_FRAMES) &&
-           verifier.Verify(frames()) &&
-           verifier.VerifyVectorOfTables(frames()) &&
-           VerifyOffset(verifier, VT_NUMUNITS) &&
-           verifier.Verify(numUnits()) &&
-           verifier.VerifyVectorOfTables(numUnits()) &&
-           VerifyOffset(verifier, VT_MAP) &&
-           verifier.VerifyTable(map()) &&
-           VerifyField<int32_t>(verifier, VT_KEYFRAME) &&
-           verifier.EndTable();
-  }
-  ReplayerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(ReplayerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Replayer> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ReplayerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct ReplayerBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_frames(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Frame>>> frames) {
-    fbb_.AddOffset(Replayer::VT_FRAMES, frames);
-  }
-  void add_numUnits(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitCount>>> numUnits) {
-    fbb_.AddOffset(Replayer::VT_NUMUNITS, numUnits);
-  }
-  void add_map(flatbuffers::Offset<Map> map) {
-    fbb_.AddOffset(Replayer::VT_MAP, map);
-  }
-  void add_keyFrame(int32_t keyFrame) {
-    fbb_.AddElement<int32_t>(Replayer::VT_KEYFRAME, keyFrame, 0);
-  }
-  explicit ReplayerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  ReplayerBuilder &operator=(const ReplayerBuilder &);
-  flatbuffers::Offset<Replayer> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Replayer>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Replayer> CreateReplayer(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Frame>>> frames = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitCount>>> numUnits = 0,
-    flatbuffers::Offset<Map> map = 0,
-    int32_t keyFrame = 0) {
-  ReplayerBuilder builder_(_fbb);
-  builder_.add_keyFrame(keyFrame);
-  builder_.add_map(map);
-  builder_.add_numUnits(numUnits);
-  builder_.add_frames(frames);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<Replayer> CreateReplayerDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<flatbuffers::Offset<Frame>> *frames = nullptr,
-    const std::vector<flatbuffers::Offset<UnitCount>> *numUnits = nullptr,
-    flatbuffers::Offset<Map> map = 0,
-    int32_t keyFrame = 0) {
-  return torchcraft::fbs::CreateReplayer(
-      _fbb,
-      frames ? _fbb.CreateVector<flatbuffers::Offset<Frame>>(*frames) : 0,
-      numUnits ? _fbb.CreateVector<flatbuffers::Offset<UnitCount>>(*numUnits) : 0,
-      map,
-      keyFrame);
-}
-
-flatbuffers::Offset<Replayer> CreateReplayer(flatbuffers::FlatBufferBuilder &_fbb, const ReplayerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 inline CommandT *Command::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new CommandT();
@@ -4612,38 +4085,6 @@ inline flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder
       _uid);
 }
 
-inline MapT *Map::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new MapT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Map::UnPackTo(MapT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = height(); _o->height = _e; };
-  { auto _e = width(); _o->width = _e; };
-  { auto _e = data(); if (_e) { _o->data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->data[_i] = _e->Get(_i); } } };
-}
-
-inline flatbuffers::Offset<Map> Map::Pack(flatbuffers::FlatBufferBuilder &_fbb, const MapT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateMap(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Map> CreateMap(flatbuffers::FlatBufferBuilder &_fbb, const MapT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const MapT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _height = _o->height;
-  auto _width = _o->width;
-  auto _data = _o->data.size() ? _fbb.CreateVector(_o->data) : 0;
-  return torchcraft::fbs::CreateMap(
-      _fbb,
-      _height,
-      _width,
-      _data);
-}
-
 inline ActionT *Action::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new ActionT();
   UnPackTo(_o, _resolver);
@@ -4720,117 +4161,6 @@ inline flatbuffers::Offset<Resources> CreateResources(flatbuffers::FlatBufferBui
       _techs);
 }
 
-inline OrderT *Order::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new OrderT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Order::UnPackTo(OrderT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = first_frame(); _o->first_frame = _e; };
-  { auto _e = type(); _o->type = _e; };
-  { auto _e = targetId(); _o->targetId = _e; };
-  { auto _e = targetX(); _o->targetX = _e; };
-  { auto _e = targetY(); _o->targetY = _e; };
-}
-
-inline flatbuffers::Offset<Order> Order::Pack(flatbuffers::FlatBufferBuilder &_fbb, const OrderT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateOrder(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Order> CreateOrder(flatbuffers::FlatBufferBuilder &_fbb, const OrderT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const OrderT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _first_frame = _o->first_frame;
-  auto _type = _o->type;
-  auto _targetId = _o->targetId;
-  auto _targetX = _o->targetX;
-  auto _targetY = _o->targetY;
-  return torchcraft::fbs::CreateOrder(
-      _fbb,
-      _first_frame,
-      _type,
-      _targetId,
-      _targetX,
-      _targetY);
-}
-
-inline UnitCommandT *UnitCommand::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new UnitCommandT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void UnitCommand::UnPackTo(UnitCommandT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = frame(); _o->frame = _e; };
-  { auto _e = type(); _o->type = _e; };
-  { auto _e = targetId(); _o->targetId = _e; };
-  { auto _e = targetX(); _o->targetX = _e; };
-  { auto _e = targetY(); _o->targetY = _e; };
-  { auto _e = extra(); _o->extra = _e; };
-}
-
-inline flatbuffers::Offset<UnitCommand> UnitCommand::Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitCommandT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateUnitCommand(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<UnitCommand> CreateUnitCommand(flatbuffers::FlatBufferBuilder &_fbb, const UnitCommandT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const UnitCommandT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _frame = _o->frame;
-  auto _type = _o->type;
-  auto _targetId = _o->targetId;
-  auto _targetX = _o->targetX;
-  auto _targetY = _o->targetY;
-  auto _extra = _o->extra;
-  return torchcraft::fbs::CreateUnitCommand(
-      _fbb,
-      _frame,
-      _type,
-      _targetId,
-      _targetX,
-      _targetY,
-      _extra);
-}
-
-inline BulletT *Bullet::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new BulletT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Bullet::UnPackTo(BulletT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = type(); _o->type = _e; };
-  { auto _e = x(); _o->x = _e; };
-  { auto _e = y(); _o->y = _e; };
-}
-
-inline flatbuffers::Offset<Bullet> Bullet::Pack(flatbuffers::FlatBufferBuilder &_fbb, const BulletT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateBullet(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Bullet> CreateBullet(flatbuffers::FlatBufferBuilder &_fbb, const BulletT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const BulletT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _type = _o->type;
-  auto _x = _o->x;
-  auto _y = _o->y;
-  return torchcraft::fbs::CreateBullet(
-      _fbb,
-      _type,
-      _x,
-      _y);
-}
-
 inline UnitT *Unit::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new UnitT();
   UnPackTo(_o, _resolver);
@@ -4867,8 +4197,8 @@ inline void Unit::UnPackTo(UnitT *_o, const flatbuffers::resolver_function_t *_r
   { auto _e = airDmgType(); _o->airDmgType = _e; };
   { auto _e = groundRange(); _o->groundRange = _e; };
   { auto _e = airRange(); _o->airRange = _e; };
-  { auto _e = orders(); if (_e) { _o->orders.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->orders[_i] = std::unique_ptr<OrderT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = command(); if (_e) _o->command = std::unique_ptr<UnitCommandT>(_e->UnPack(_resolver)); };
+  { auto _e = orders(); if (_e) { _o->orders.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->orders[_i] = *_e->Get(_i); } } };
+  { auto _e = command(); if (_e) _o->command = std::unique_ptr<UnitCommand>(new UnitCommand(*_e)); };
   { auto _e = velocityX(); _o->velocityX = _e; };
   { auto _e = velocityY(); _o->velocityY = _e; };
   { auto _e = playerId(); _o->playerId = _e; };
@@ -4916,8 +4246,8 @@ inline flatbuffers::Offset<Unit> CreateUnit(flatbuffers::FlatBufferBuilder &_fbb
   auto _airDmgType = _o->airDmgType;
   auto _groundRange = _o->groundRange;
   auto _airRange = _o->airRange;
-  auto _orders = _o->orders.size() ? _fbb.CreateVector<flatbuffers::Offset<Order>> (_o->orders.size(), [](size_t i, _VectorArgs *__va) { return CreateOrder(*__va->__fbb, __va->__o->orders[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _command = _o->command ? CreateUnitCommand(_fbb, _o->command.get(), _rehasher) : 0;
+  auto _orders = _o->orders.size() ? _fbb.CreateVectorOfStructs(_o->orders) : 0;
+  auto _command = _o->command ? _o->command.get() : 0;
   auto _velocityX = _o->velocityX;
   auto _velocityY = _o->velocityY;
   auto _playerId = _o->playerId;
@@ -5070,7 +4400,7 @@ inline void Frame::UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *
   { auto _e = units(); if (_e) { _o->units.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->units[_i] = std::unique_ptr<UnitsByPlayerIdT>(_e->Get(_i)->UnPack(_resolver)); } } };
   { auto _e = actions(); if (_e) { _o->actions.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->actions[_i] = std::unique_ptr<ActionsByPlayerIdT>(_e->Get(_i)->UnPack(_resolver)); } } };
   { auto _e = resources(); if (_e) { _o->resources.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->resources[_i] = std::unique_ptr<ResourcesByPlayerIdT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = bullets(); if (_e) { _o->bullets.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->bullets[_i] = std::unique_ptr<BulletT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = bullets(); if (_e) { _o->bullets.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->bullets[_i] = *_e->Get(_i); } } };
   { auto _e = creep_map(); if (_e) { _o->creep_map.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->creep_map[_i] = _e->Get(_i); } } };
   { auto _e = width(); _o->width = _e; };
   { auto _e = height(); _o->height = _e; };
@@ -5089,7 +4419,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
   auto _units = _o->units.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitsByPlayerId>> (_o->units.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitsByPlayerId(*__va->__fbb, __va->__o->units[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _actions = _o->actions.size() ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>> (_o->actions.size(), [](size_t i, _VectorArgs *__va) { return CreateActionsByPlayerId(*__va->__fbb, __va->__o->actions[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _resources = _o->resources.size() ? _fbb.CreateVector<flatbuffers::Offset<ResourcesByPlayerId>> (_o->resources.size(), [](size_t i, _VectorArgs *__va) { return CreateResourcesByPlayerId(*__va->__fbb, __va->__o->resources[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _bullets = _o->bullets.size() ? _fbb.CreateVector<flatbuffers::Offset<Bullet>> (_o->bullets.size(), [](size_t i, _VectorArgs *__va) { return CreateBullet(*__va->__fbb, __va->__o->bullets[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _bullets = _o->bullets.size() ? _fbb.CreateVectorOfStructs(_o->bullets) : 0;
   auto _creep_map = _o->creep_map.size() ? _fbb.CreateVector(_o->creep_map) : 0;
   auto _width = _o->width;
   auto _height = _o->height;
@@ -5184,35 +4514,6 @@ inline flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainer(flatbuffer
       _units);
 }
 
-inline FrameDiffCreepT *FrameDiffCreep::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new FrameDiffCreepT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void FrameDiffCreep::UnPackTo(FrameDiffCreepT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = index(); _o->index = _e; };
-  { auto _e = creep(); _o->creep = _e; };
-}
-
-inline flatbuffers::Offset<FrameDiffCreep> FrameDiffCreep::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffCreepT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateFrameDiffCreep(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<FrameDiffCreep> CreateFrameDiffCreep(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffCreepT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameDiffCreepT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _index = _o->index;
-  auto _creep = _o->creep;
-  return torchcraft::fbs::CreateFrameDiffCreep(
-      _fbb,
-      _index,
-      _creep);
-}
-
 inline FrameDiffT *FrameDiff::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new FrameDiffT();
   UnPackTo(_o, _resolver);
@@ -5226,8 +4527,8 @@ inline void FrameDiff::UnPackTo(FrameDiffT *_o, const flatbuffers::resolver_func
   { auto _e = unitDiffContainers(); if (_e) { _o->unitDiffContainers.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->unitDiffContainers[_i] = std::unique_ptr<UnitDiffContainerT>(_e->Get(_i)->UnPack(_resolver)); } } };
   { auto _e = actions(); if (_e) { _o->actions.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->actions[_i] = std::unique_ptr<ActionsByPlayerIdT>(_e->Get(_i)->UnPack(_resolver)); } } };
   { auto _e = resources(); if (_e) { _o->resources.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->resources[_i] = std::unique_ptr<ResourcesByPlayerIdT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = bullets(); if (_e) { _o->bullets.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->bullets[_i] = std::unique_ptr<BulletT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = creep_map(); if (_e) { _o->creep_map.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->creep_map[_i] = std::unique_ptr<FrameDiffCreepT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = bullets(); if (_e) { _o->bullets.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->bullets[_i] = *_e->Get(_i); } } };
+  { auto _e = creep_map(); if (_e) { _o->creep_map.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->creep_map[_i] = *_e->Get(_i); } } };
   { auto _e = reward(); _o->reward = _e; };
   { auto _e = is_terminal(); _o->is_terminal = _e; };
 }
@@ -5244,8 +4545,8 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(flatbuffers::FlatBufferBui
   auto _unitDiffContainers = _o->unitDiffContainers.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitDiffContainer>> (_o->unitDiffContainers.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitDiffContainer(*__va->__fbb, __va->__o->unitDiffContainers[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _actions = _o->actions.size() ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>> (_o->actions.size(), [](size_t i, _VectorArgs *__va) { return CreateActionsByPlayerId(*__va->__fbb, __va->__o->actions[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _resources = _o->resources.size() ? _fbb.CreateVector<flatbuffers::Offset<ResourcesByPlayerId>> (_o->resources.size(), [](size_t i, _VectorArgs *__va) { return CreateResourcesByPlayerId(*__va->__fbb, __va->__o->resources[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _bullets = _o->bullets.size() ? _fbb.CreateVector<flatbuffers::Offset<Bullet>> (_o->bullets.size(), [](size_t i, _VectorArgs *__va) { return CreateBullet(*__va->__fbb, __va->__o->bullets[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _creep_map = _o->creep_map.size() ? _fbb.CreateVector<flatbuffers::Offset<FrameDiffCreep>> (_o->creep_map.size(), [](size_t i, _VectorArgs *__va) { return CreateFrameDiffCreep(*__va->__fbb, __va->__o->creep_map[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _bullets = _o->bullets.size() ? _fbb.CreateVectorOfStructs(_o->bullets) : 0;
+  auto _creep_map = _o->creep_map.size() ? _fbb.CreateVectorOfStructs(_o->creep_map) : 0;
   auto _reward = _o->reward;
   auto _is_terminal = _o->is_terminal;
   return torchcraft::fbs::CreateFrameDiff(
@@ -5258,70 +4559,6 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(flatbuffers::FlatBufferBui
       _creep_map,
       _reward,
       _is_terminal);
-}
-
-inline UnitCountT *UnitCount::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new UnitCountT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void UnitCount::UnPackTo(UnitCountT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = a(); _o->a = _e; };
-  { auto _e = b(); _o->b = _e; };
-}
-
-inline flatbuffers::Offset<UnitCount> UnitCount::Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitCountT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateUnitCount(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<UnitCount> CreateUnitCount(flatbuffers::FlatBufferBuilder &_fbb, const UnitCountT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const UnitCountT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _a = _o->a;
-  auto _b = _o->b;
-  return torchcraft::fbs::CreateUnitCount(
-      _fbb,
-      _a,
-      _b);
-}
-
-inline ReplayerT *Replayer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new ReplayerT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void Replayer::UnPackTo(ReplayerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = frames(); if (_e) { _o->frames.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->frames[_i] = std::unique_ptr<FrameT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = numUnits(); if (_e) { _o->numUnits.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->numUnits[_i] = std::unique_ptr<UnitCountT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = map(); if (_e) _o->map = std::unique_ptr<MapT>(_e->UnPack(_resolver)); };
-  { auto _e = keyFrame(); _o->keyFrame = _e; };
-}
-
-inline flatbuffers::Offset<Replayer> Replayer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ReplayerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateReplayer(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<Replayer> CreateReplayer(flatbuffers::FlatBufferBuilder &_fbb, const ReplayerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ReplayerT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _frames = _o->frames.size() ? _fbb.CreateVector<flatbuffers::Offset<Frame>> (_o->frames.size(), [](size_t i, _VectorArgs *__va) { return CreateFrame(*__va->__fbb, __va->__o->frames[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _numUnits = _o->numUnits.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitCount>> (_o->numUnits.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitCount(*__va->__fbb, __va->__o->numUnits[i].get(), __va->__rehasher); }, &_va ) : 0;
-  auto _map = _o->map ? CreateMap(_fbb, _o->map.get(), _rehasher) : 0;
-  auto _keyFrame = _o->keyFrame;
-  return torchcraft::fbs::CreateReplayer(
-      _fbb,
-      _frames,
-      _numUnits,
-      _map,
-      _keyFrame);
 }
 
 inline bool VerifyFrameOrFrameDiff(flatbuffers::Verifier &verifier, const void *obj, FrameOrFrameDiff type) {

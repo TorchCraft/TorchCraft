@@ -15,8 +15,7 @@
 #include "client.h"
 #include "connection.h"
 #include "state.h"
-
-#include "fbs/torchcraft_generated.h"
+#include "torchcraft_generated.h"
 
 namespace {
 

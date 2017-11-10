@@ -10,7 +10,9 @@
 #include <algorithm>
 
 #include "frame.h"
+#include "torchcraft_generated.h"
 #include "flatbuffer_conversions.h"
+#include "streamable_flatbuffer.h"
 
 namespace replayer = torchcraft::replayer;
 
@@ -30,33 +32,29 @@ std::istream& replayer::operator>>(std::istream& in, replayer::Frame& frame) {
 }
 
 void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
-
   auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
-
     auto buildFbsUnit = [&builder](const Unit& unit) {
-
       auto buildFbsOrder = [&builder](const Order& order) {
-        fbs::OrderBuilder fbsOrderBuilder(builder);
-        fbsOrderBuilder.add_first_frame(order.first_frame);
-        fbsOrderBuilder.add_type(order.type);
-        fbsOrderBuilder.add_targetId(order.targetId);
-        fbsOrderBuilder.add_targetX(order.targetX);
-        fbsOrderBuilder.add_targetY(order.targetY);
-        return fbsOrderBuilder.Finish();
+        fbs::Order fbsOrder(
+          order.first_frame,
+          order.type,
+          order.targetId,
+          order.targetX,
+          order.targetY);
+        return fbsOrder;
       };
 
-      std::vector<flatbuffers::Offset<fbs::Order>> fbsOrders;
+      std::vector<fbs::Order> fbsOrders;
       std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
 
       auto command = unit.command;
-      fbs::UnitCommandBuilder fbsUnitCommandBuilder(builder);
-      fbsUnitCommandBuilder.add_frame(command.frame);
-      fbsUnitCommandBuilder.add_type(command.type);
-      fbsUnitCommandBuilder.add_targetId(command.targetId);
-      fbsUnitCommandBuilder.add_targetX(command.targetX);
-      fbsUnitCommandBuilder.add_targetY(command.targetY);
-      fbsUnitCommandBuilder.add_extra(command.extra);
-      auto fbsCommand = fbsUnitCommandBuilder.Finish();
+      fbs::UnitCommand fbsCommand(
+        command.frame,
+        command.type,
+        command.targetId,
+        command.targetX,
+        command.targetY,
+        command.extra);
 
       fbs::UnitBuilder fbsUnitBuilder(builder);
       fbsUnitBuilder.add_id(unit.id);
@@ -95,8 +93,8 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
       fbsUnitBuilder.add_spellCD(unit.spellCD);
       fbsUnitBuilder.add_associatedUnit(unit.associatedUnit);
       fbsUnitBuilder.add_associatedCount(unit.associatedCount);
-      fbsUnitBuilder.add_command(fbsCommand);
-      fbsUnitBuilder.add_orders(builder.CreateVector(fbsOrders));
+      fbsUnitBuilder.add_command(&fbsCommand);
+      fbsUnitBuilder.add_orders(builder.CreateVectorOfStructs(fbsOrders));
 
       return fbsUnitBuilder.Finish();
     };
@@ -113,19 +111,19 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
   std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
-  std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
+  std::vector<fbs::Bullet> fbsBullets;
   std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
   std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
   std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
-  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet(builder));
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
 
   fbs::FrameBuilder fbsFrameBuilder(builder);
   fbsFrameBuilder.add_width(width);
   fbsFrameBuilder.add_height(height);
   fbsFrameBuilder.add_reward(reward);
   fbsFrameBuilder.add_is_terminal(is_terminal);
-  fbsFrameBuilder.add_creep_map(builder.CreateVector(creep_map));
-  fbsFrameBuilder.add_bullets(builder.CreateVector(fbsBullets));
+  //fbsFrameBuilder.add_creep_map(builder.CreateVectorOfStructs(creep_map));
+  fbsFrameBuilder.add_bullets(builder.CreateVectorOfStructs(fbsBullets));
   fbsFrameBuilder.add_actions(builder.CreateVector(fbsActionsByPlayerId));
   fbsFrameBuilder.add_units(builder.CreateVector(fbsUnitsByPlayerId));
   fbsFrameBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
@@ -133,9 +131,7 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
 };
 
 void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
-
   auto buildUnit = [](const fbs::Unit* fbsUnit) {
-
     auto buildOrder = [](const fbs::Order* fbsOrder) {
       Order order;
       order.first_frame = fbsOrder->first_frame();

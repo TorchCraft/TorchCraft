@@ -10,10 +10,8 @@
 #pragma once
 
 #include <iostream>
-#include <memory>
-#include <type_traits>
 
-#include "../fbs/flatbuffers/flatbuffers.h"
+#include "flatbuffers.h"
 
 namespace torchcraft {
 
@@ -34,40 +32,8 @@ namespace torchcraft {
   //    t       The flatbuffer
   //  }
 
-  inline void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder) {
-
-    // Assert that the FlatBuffer is actually finished.
-    // This is an internal FlatBuffers API call,
-    // but they don't expose this information any other way.
-    finishedFlatBufferBuilder.Finished();
-
-    auto flatbufferPointer = finishedFlatBufferBuilder.GetBufferPointer();
-    size_t flatbufferSize = finishedFlatBufferBuilder.GetSize();
-    out.write(reinterpret_cast<char*>(&flatbufferSize), sizeof(size_t));
-    out.write(
-      reinterpret_cast<char*>(flatbufferPointer),
-      flatbufferSize);
-  }
+  void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder);
 
   template <typename T>
-  inline std::shared_ptr<const T> readFlatBufferTableFromStream(std::istream& in) {
-
-    static_assert(
-      std::is_base_of<flatbuffers::Table, T>::value,
-      "Should be a FlatBuffer table.");
-
-    size_t bufferSize;
-    in.read(reinterpret_cast<char*>(&bufferSize), sizeof(size_t));
-
-    char buffer[bufferSize];
-    in.read(buffer, bufferSize);
-
-    flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(buffer), bufferSize);
-    if (verifier.VerifyBuffer<T>()) {
-      throw std::runtime_error("Streaming FlatBuffer table failed verification");
-    };
-
-    auto table = flatbuffers::GetRoot<T>(buffer);
-    return std::shared_ptr<const T>(table);
-  };
+  std::shared_ptr<const T> readFlatBufferTableFromStream(std::istream& in);
 }

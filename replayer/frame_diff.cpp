@@ -10,7 +10,9 @@
 #include <algorithm>
 
 #include "frame.h"
+#include "torchcraft_generated.h"
 #include "flatbuffer_conversions.h"
+#include "streamable_flatbuffer.h"
 
 namespace replayer = torchcraft::replayer;
 
@@ -32,11 +34,8 @@ std::istream& replayer::operator>>(std::istream& in, FrameDiff& frameDiff) {
 
 void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
 
-  auto buildFbsFrameDiffCreep = [&builder](const std::pair<int32_t, int32_t> creepPair) {
-    fbs::FrameDiffCreepBuilder fbsFrameDiffCreepBuilder(builder);
-    fbsFrameDiffCreepBuilder.add_index(creepPair.first);
-    fbsFrameDiffCreepBuilder.add_creep(creepPair.second);
-    return fbsFrameDiffCreepBuilder.Finish();
+  auto buildFbsFrameDiffCreep = [](const std::pair<int32_t, int32_t> creepPair) {
+    return fbs::FrameDiffCreep(creepPair.first, creepPair.second);
   };
 
   auto buildFbsUnitDiffContainer = [&builder](const std::vector<detail::UnitDiff>& unitDiffs) {
@@ -65,20 +64,20 @@ void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) 
   std::vector<flatbuffers::Offset<fbs::UnitDiffContainer>> fbsUnitDiffContainers;
   std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId;
   std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId;
-  std::vector<flatbuffers::Offset<fbs::Bullet>> fbsBullets;
-  std::vector<flatbuffers::Offset<fbs::FrameDiffCreep>> fbsCreep;
+  std::vector<fbs::Bullet> fbsBullets;
+  std::vector<fbs::FrameDiffCreep> fbsCreep;
   std::transform(units.begin(), units.end(), fbsUnitDiffContainers.begin(), buildFbsUnitDiffContainer);
   std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
   std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
-  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet(builder));
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
   std::transform(creep_map.begin(), creep_map.end(), fbsCreep.begin(), buildFbsFrameDiffCreep);
 
   fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
   fbsFrameDiffBuilder.add_unitDiffContainers(builder.CreateVector(fbsUnitDiffContainers));
   fbsFrameDiffBuilder.add_actions(builder.CreateVector(fbsActionsByPlayerId));
   fbsFrameDiffBuilder.add_resources(builder.CreateVector(fbsResourcesByPlayerId));
-  fbsFrameDiffBuilder.add_bullets(builder.CreateVector(fbsBullets));
-  fbsFrameDiffBuilder.add_creep_map(builder.CreateVector(fbsCreep));
+  fbsFrameDiffBuilder.add_bullets(builder.CreateVectorOfStructs(fbsBullets));
+  fbsFrameDiffBuilder.add_creep_map(builder.CreateVectorOfStructs(fbsCreep));
   fbsFrameDiffBuilder.add_pids(builder.CreateVector(pids));
   fbsFrameDiffBuilder.add_reward(reward);
   fbsFrameDiffBuilder.add_is_terminal(is_terminal);

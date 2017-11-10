@@ -33,6 +33,9 @@
     <ClCompile Include="..\src\recorder.cc">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\replayer\streamable_flatbuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\replayer\frame.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -60,6 +63,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\recorder.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\streamable_flatbuffer.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\frame.h">

@@ -122,7 +122,6 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
   fbsFrameBuilder.add_height(height);
   fbsFrameBuilder.add_reward(reward);
   fbsFrameBuilder.add_is_terminal(is_terminal);
-  //fbsFrameBuilder.add_creep_map(builder.CreateVectorOfStructs(creep_map));
   fbsFrameBuilder.add_bullets(builder.CreateVectorOfStructs(fbsBullets));
   fbsFrameBuilder.add_actions(builder.CreateVector(fbsActionsByPlayerId));
   fbsFrameBuilder.add_units(builder.CreateVector(fbsUnitsByPlayerId));

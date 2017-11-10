@@ -10,6 +10,7 @@
 #pragma once
 
 #include <iostream>
+#include <memory>
 
 #include "flatbuffers.h"
 
@@ -25,7 +26,7 @@ namespace torchcraft {
   // to read a chunk the stream in advance; and the amount of stream you need
   // to read is dynamic; so these methods reads/write metadata
   // (the size of the stored Flatbuffer) to enable streaming.
-  //
+
   // Serialization format:
   //  {
   //    size_t  The flatbuffer's size,
@@ -35,5 +36,19 @@ namespace torchcraft {
   void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder);
 
   template <typename T>
-  std::shared_ptr<const T> readFlatBufferTableFromStream(std::istream& in);
+  inline std::shared_ptr<const T> readFlatBufferTableFromStream(std::istream& in) {
+    size_t bufferSize;
+    in.read(reinterpret_cast<char*>(&bufferSize), sizeof(size_t));
+
+    char buffer[bufferSize];
+    in.read(buffer, bufferSize);
+
+    flatbuffers::Verifier verifier(reinterpret_cast<uint8_t*>(buffer), bufferSize);
+    if (verifier.VerifyBuffer<T>()) {
+      throw std::runtime_error("Streaming FlatBuffer table failed verification");
+    };
+
+    auto table = flatbuffers::GetRoot<T>(buffer);
+    return std::shared_ptr<const T>(table);
+  }
 }

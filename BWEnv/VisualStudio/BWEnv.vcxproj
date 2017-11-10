@@ -211,6 +211,7 @@
     <ClCompile Include="$(SolutionDir)\..\src\main.cc">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="..\..\replayer\streamable_flatbuffer.cpp" />
     <ClCompile Include="..\..\replayer\frame.cpp" />
     <ClCompile Include="..\..\replayer\frame_diff.cpp" />
     <ClCompile Include="..\src\config_manager.cc" />
@@ -224,6 +225,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\frame.h" />
+    <ClInclude Include="..\..\include\streamable_flatbuffer.h" />
     <ClInclude Include="..\include\config_manager.h" />
     <ClInclude Include="..\include\controller.h" />
     <ClInclude Include="..\include\module.h" />

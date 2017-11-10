@@ -43,6 +43,7 @@ add_library(BWEnvObj OBJECT
   src/user_actions.cc
   src/utils.cc
   src/zmq_server.cc
+  ../replayer/streamable_flatbuffer.cpp
   ../replayer/frame.cpp
   ../replayer/frame_diff.cpp
 )

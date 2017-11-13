@@ -1,5 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.6)
+ENABLE_TESTING()
 
 # This CMake file is used _only_ really to install torchcraft in lua
 IF(LUAROCKS_PREFIX)
@@ -7,11 +8,31 @@ IF(LUAROCKS_PREFIX)
     STRING(REGEX REPLACE "(.*)lib/luarocks/rocks.*" "\\1" CMAKE_INSTALL_PREFIX  "${LUAROCKS_PREFIX}")
     MESSAGE(STATUS "Prefix inferred from Luarocks: ${CMAKE_INSTALL_PREFIX}")
 ENDIF()
+
+IF(NOT MSVC)
+  ADD_SUBDIRECTORY(test)
+ENDIF(NOT MSVC)
+
 FIND_PACKAGE(Torch REQUIRED)
 FIND_PACKAGE(PkgConfig REQUIRED)
 PKG_CHECK_MODULES(ZSTD libzstd>=1.0)
 
+SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "-std=c++11 -Wall -fPIC -O2")
+IF(NOT MSVC)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall\
+ -Wno-missing-braces")
+  SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+ELSE(NOT MSVC)
+  # Link against static ZMQ version
+  ADD_DEFINITIONS(-DWITHOUT_POSIX)
+  ADD_DEFINITIONS(-DBETTER_ENUMS_HAVE_CONSTEXPR -DNOMINMAX -D_USE_MATH_DEFINES)
+  # Denote error re functions with no return statement (with have a few in
+  # cbwapi) to warning level 3
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /w34716")
+  SET(CMAKE_CXX_FLAGS_RELEASE "-Ox -DNDEBUG")
+ENDIF(NOT MSVC)
 IF(ZSTD_FOUND)
     ADD_DEFINITIONS(-DWITH_ZSTD)
 ENDIF()
@@ -64,3 +85,18 @@ INSTALL(TARGETS tc_lib
 
 ADD_TORCH_PACKAGE(torchcraft "" "${luasrc}" "TorchCraft")
 INSTALL(FILES DESTINATION "${Torch_INSTALL_LUA_PATH_SUBDIR}/torchcraft")
+
+# C++ Tests
+FILE(GLOB headers include/*.h)
+FILE(GLOB cpptest test/*.cpp)
+ADD_LIBRARY(tc_test MODULE ${cpptest})
+IF(APPLE)
+   SET_TARGET_PROPERTIES(torchcraft PROPERTIES
+       LINK_FLAGS "-undefined dynamic_lookup")
+ENDIF()
+TARGET_LINK_LIBRARIES(tc_test torchcraft luaT zmq)
+INSTALL(FILES ${headers}
+        DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"
+)
+#INSTALL(TARGETS torchcraft
+#    LIBRARY DESTINATION ${Torch_INSTALL_LIB})

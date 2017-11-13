@@ -87,7 +87,7 @@ ADD_TORCH_PACKAGE(torchcraft "" "${luasrc}" "TorchCraft")
 INSTALL(FILES DESTINATION "${Torch_INSTALL_LUA_PATH_SUBDIR}/torchcraft")
 
 # C++ Tests
-FILE(GLOB headers include/*.h)
+FILE(GLOB headers test/*.h)
 FILE(GLOB cpptest test/*.cpp)
 ADD_LIBRARY(tc_test MODULE ${cpptest})
 IF(APPLE)
@@ -98,5 +98,3 @@ TARGET_LINK_LIBRARIES(tc_test torchcraft luaT zmq)
 INSTALL(FILES ${headers}
         DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"
 )
-#INSTALL(TARGETS torchcraft
-#    LIBRARY DESTINATION ${Torch_INSTALL_LIB})

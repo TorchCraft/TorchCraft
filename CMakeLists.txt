@@ -94,7 +94,7 @@ IF(APPLE)
    SET_TARGET_PROPERTIES(torchcraft PROPERTIES
        LINK_FLAGS "-undefined dynamic_lookup")
 ENDIF()
-TARGET_LINK_LIBRARIES(tc_test torchcraft luaT zmq)
+TARGET_LINK_LIBRARIES(tc_test torchcraft)
 INSTALL(FILES ${headers}
         DESTINATION "${Torch_INSTALL_INCLUDE}/torchcraft"
 )

@@ -8,15 +8,15 @@
  */
 
  #include "test.h"
- 
- CASE(
+
+ TCASE(
      "Frame is unchanged through serialization cycle"
      "[replayer/frame]") {
 
    EXPECT(true);
  }
 
- CASE(
+ TCASE(
      "This test should always fail"
      "[replayer/frame]") {
 

@@ -1,15 +1,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.8)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
-SET(CMAKE_CXX_STANDARD 14)
-SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Dlest_FEATURE_AUTO_REGISTER=1")
+SET(CMAKE_CXX_STANDARD 14)
 
 IF(ATEN)
   FIND_PACKAGE(ATen REQUIRED)
 ENDIF(ATEN)
-
 
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR})
@@ -30,10 +27,11 @@ FOREACH(TDIR replayer)
 
   # Link with --whole-archive so that tests are discoverable
   IF(APPLE)
-    TARGET_LINK_LIBRARIES("test_${TDIR}" -Wl,-all_load "_test_${TDIR}" torchcraft)
+    TARGET_LINK_LIBRARIES("test_${TDIR}"
+    -Wl,-all_load "_test_${TDIR}")
   ELSE()
     TARGET_LINK_LIBRARIES("test_${TDIR}"
-      -Wl,--whole-archive "_test_${TDIR}" torchcraft -Wl,--no-whole-archive)
+      -Wl,--whole-archive "_test_${TDIR}" -Wl,--no-whole-archive)
   ENDIF()
 
   ADD_TEST(NAME ${TDIR} COMMAND "test_${TDIR}")

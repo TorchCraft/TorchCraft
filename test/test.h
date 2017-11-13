@@ -12,7 +12,8 @@
 #include "lest/lest.hpp"
 
 // Enable auto-registration
-#define CASE(name) lest_CASE(specification(), name)
+#define TCASE(name) lest_CASE(specification(), name)
+
 #undef SCENARIO
 #define SCENARIO(name) lest_CASE(specification(), lest::text("Scenario: ") + name)
 

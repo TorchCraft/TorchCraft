@@ -256,7 +256,7 @@ void updateUserValueAndPush(
 
   // Still up to date?
   lua_getfield(L, -1, "__numUpdates");
-  if (lua_tonumber(L, -1) == (long) s->numUpdates) {
+  if ((long) lua_tonumber(L, -1) == (long) s->numUpdates) {
     lua_pop(L, 1);
     lua_getfield(L, -1, m.c_str());
     lua_remove(L, -2);

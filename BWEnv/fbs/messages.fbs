@@ -130,7 +130,6 @@ struct Order {
   targetId:int;
   targetX:int;
   targetY:int;
-  // Current implementation has equivalence operator that compares vars other than first_frame
 }
 
 struct UnitCommand {

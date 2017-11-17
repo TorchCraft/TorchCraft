@@ -214,7 +214,7 @@ extern "C" int replayerGetMap(lua_State* L) {
   luaT_pushudata(L, heightmap, "torch.ByteTensor");
   luaT_pushudata(L, buildmap, "torch.ByteTensor");
   lua_createtable(L, start_loc_x.size(), 0);
-  for (int i = 0; i < start_loc_x.size(); i++) {
+  for (uint i = 0; i < start_loc_x.size(); i++) {
     lua_createtable(L, 2, 0);
     lua_pushinteger(L, start_loc_x[i]);
     lua_setfield(L, -2, "x");

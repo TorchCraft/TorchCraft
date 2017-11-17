@@ -49,6 +49,17 @@ std::istream& operator>>(std::istream& in, FrameDiff& o);
 std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);
 std::istream& operator>>(std::istream& in, detail::UnitDiff& o);
 
+
+struct Bullet {
+  int32_t type, x, y;
+};
+
+struct Action { // corresponds to a torchcraft message
+  std::vector<int32_t> action;
+  int32_t uid;
+  int32_t aid;
+};
+
 struct Order {
   int32_t first_frame; // first frame number where order appeared
   int32_t type; // see BWAPI::Orders::Enum
@@ -303,16 +314,6 @@ struct Resources {
     Unknown            = 1ll << 46,
   };
   // clang-format on
-};
-
-struct Bullet {
-  int32_t type, x, y;
-};
-
-struct Action { // corresponds to a torchcraft message
-  std::vector<int32_t> action;
-  int32_t uid;
-  int32_t aid;
 };
 
 class Frame : public RefCounted {

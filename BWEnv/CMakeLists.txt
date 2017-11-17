@@ -43,6 +43,9 @@ add_library(BWEnvObj OBJECT
   src/utils.cc
   src/zmq_server.cc
   ../replayer/frame.cpp
+  ../replayer/frame_diff.cpp
+  ../replayer/frame_serialization.cpp
+  ../replayer/frame_diff_serialization.cpp
 )
 
 set_property(TARGET BWEnvObj PROPERTY POSITION_INDEPENDENT_CODE ON)

@@ -34,10 +34,17 @@ namespace replayer {
 //    t       The flatbuffer
 //  }
 
-void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder);
+static void writeFlatBufferToStream(std::ostream& out, flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder) {
+  auto flatbufferPointer = finishedFlatBufferBuilder.GetBufferPointer();
+  size_t flatbufferSize = finishedFlatBufferBuilder.GetSize();
+  out.write(reinterpret_cast<char*>(&flatbufferSize), sizeof(size_t));
+  out.write(
+    reinterpret_cast<char*>(flatbufferPointer),
+    flatbufferSize);
+}
 
 template <typename T>
-void readFlatBufferTableFromStream(
+static void readFlatBufferTableFromStream(
   std::istream& in,
   std::function<void(const T&)> tableReader) {
     size_t bufferSize;

@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "refcount.h"
-#include "BWEnv/fbs/messages_generated.h"
+#include "messages_generated.h"
 
 #ifdef _MSC_VER
 typedef unsigned int uint32_t;

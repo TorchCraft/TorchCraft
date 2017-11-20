@@ -12,7 +12,7 @@
 #include <iostream>
 #include <memory>
 
-#include "BWEnv/fbs/flatbuffers.h"
+#include "flatbuffers.h"
 
 namespace torchcraft {
 namespace replayer {

@@ -24,9 +24,9 @@ namespace fbs {
 struct HandshakeServer;
 struct StateUpdate;
 struct EndGame;
-struct FrameData;
 struct PlayerLeft;
 struct Error;
+enum class FrameOrFrameDiff : uint8_t;
 } // namespace fbs
 } // namespace torchcraft
 
@@ -182,7 +182,7 @@ class State : public RefCounted {
   void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
-  bool update_frame(const torchcraft::fbs::FrameData* fd);
+  bool update_frame(const torchcraft::fbs::FrameOrFrameDiff* fd);
 
   bool microBattles_;
   std::set<BW::UnitType> onlyConsiderTypes_;

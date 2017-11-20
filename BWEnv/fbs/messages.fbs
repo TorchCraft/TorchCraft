@@ -54,13 +54,13 @@ table Commands {
   commands:[Command];
 }
 
-table FrameData {
- data:[ubyte];
- is_diff:bool;
+union FrameOrFrameDiff {
+  Frame,
+  FrameDiff
 }
 
 table StateUpdate {
-  data:FrameData;
+  data:FrameOrFrameDiff;
   deaths:[int];
   frame_from_bwapi:int;
   battle_frame_count:int;
@@ -80,7 +80,7 @@ table PlayerLeft {
 }
 
 table EndGame {
-  data:FrameData;
+  data:FrameOrFrameDiff;
   game_won:bool;
 }
 

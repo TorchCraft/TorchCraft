@@ -227,7 +227,11 @@ std::vector<std::string> State::update(
   return upd;
 }
 
-bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
+bool State::update_frame(const torchcraft::fbs::FrameOrFrameDiff* fd) {
+  /*
+  
+  TODO: Implement!
+  
   if (fd->data() == nullptr)
     return false;
   if (fd->is_diff()) {
@@ -243,6 +247,9 @@ bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
     ss >> *this->frame;
   }
   return true;
+  */
+  
+  return false;
 }
 
 std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* frame) {
@@ -250,7 +257,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* frame
   preUpdate();
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::StateUpdate::VT_DATA)) {
-    if (this->update_frame(frame->data())) {
+    if (this->update_frame((fbs::FrameOrFrameDiff*) frame->data())) {
       upd.emplace_back("frame");
     }
   }
@@ -323,7 +330,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
   preUpdate();
 
   if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
-    if (this->update_frame(end->data())) {
+    if (this->update_frame((fbs::FrameOrFrameDiff*) end->data())) {
       upd.emplace_back("frame");
     }
   }

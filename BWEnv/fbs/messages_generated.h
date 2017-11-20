@@ -26,9 +26,6 @@ struct HandshakeServerT;
 struct Commands;
 struct CommandsT;
 
-struct FrameData;
-struct FrameDataT;
-
 struct StateUpdate;
 struct StateUpdateT;
 
@@ -81,6 +78,102 @@ struct FrameDiffCreep;
 
 struct FrameDiff;
 struct FrameDiffT;
+
+enum class FrameOrFrameDiff : uint8_t {
+  NONE = 0,
+  Frame = 1,
+  FrameDiff = 2,
+  MIN = NONE,
+  MAX = FrameDiff
+};
+
+inline FrameOrFrameDiff (&EnumValuesFrameOrFrameDiff())[3] {
+  static FrameOrFrameDiff values[] = {
+    FrameOrFrameDiff::NONE,
+    FrameOrFrameDiff::Frame,
+    FrameOrFrameDiff::FrameDiff
+  };
+  return values;
+}
+
+inline const char **EnumNamesFrameOrFrameDiff() {
+  static const char *names[] = {
+    "NONE",
+    "Frame",
+    "FrameDiff",
+    nullptr
+  };
+  return names;
+}
+
+inline const char *EnumNameFrameOrFrameDiff(FrameOrFrameDiff e) {
+  const size_t index = static_cast<int>(e);
+  return EnumNamesFrameOrFrameDiff()[index];
+}
+
+template<typename T> struct FrameOrFrameDiffTraits {
+  static const FrameOrFrameDiff enum_value = FrameOrFrameDiff::NONE;
+};
+
+template<> struct FrameOrFrameDiffTraits<Frame> {
+  static const FrameOrFrameDiff enum_value = FrameOrFrameDiff::Frame;
+};
+
+template<> struct FrameOrFrameDiffTraits<FrameDiff> {
+  static const FrameOrFrameDiff enum_value = FrameOrFrameDiff::FrameDiff;
+};
+
+struct FrameOrFrameDiffUnion {
+  FrameOrFrameDiff type;
+  void *value;
+
+  FrameOrFrameDiffUnion() : type(FrameOrFrameDiff::NONE), value(nullptr) {}
+  FrameOrFrameDiffUnion(FrameOrFrameDiffUnion&& u) FLATBUFFERS_NOEXCEPT :
+    type(FrameOrFrameDiff::NONE), value(nullptr)
+    { std::swap(type, u.type); std::swap(value, u.value); }
+  FrameOrFrameDiffUnion(const FrameOrFrameDiffUnion &) FLATBUFFERS_NOEXCEPT;
+  FrameOrFrameDiffUnion &operator=(const FrameOrFrameDiffUnion &u) FLATBUFFERS_NOEXCEPT
+    { FrameOrFrameDiffUnion t(u); std::swap(type, t.type); std::swap(value, t.value); return *this; }
+  FrameOrFrameDiffUnion &operator=(FrameOrFrameDiffUnion &&u) FLATBUFFERS_NOEXCEPT
+    { std::swap(type, u.type); std::swap(value, u.value); return *this; }
+  ~FrameOrFrameDiffUnion() { Reset(); }
+
+  void Reset();
+
+#ifndef FLATBUFFERS_CPP98_STL
+  template <typename T>
+  void Set(T&& val) {
+    Reset();
+    type = FrameOrFrameDiffTraits<typename T::TableType>::enum_value;
+    if (type != FrameOrFrameDiff::NONE) {
+      value = new T(std::forward<T>(val));
+    }
+  }
+#endif  // FLATBUFFERS_CPP98_STL
+
+  static void *UnPack(const void *obj, FrameOrFrameDiff type, const flatbuffers::resolver_function_t *resolver);
+  flatbuffers::Offset<void> Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher = nullptr) const;
+
+  FrameT *AsFrame() {
+    return type == FrameOrFrameDiff::Frame ?
+      reinterpret_cast<FrameT *>(value) : nullptr;
+  }
+  const FrameT *AsFrame() const {
+    return type == FrameOrFrameDiff::Frame ?
+      reinterpret_cast<const FrameT *>(value) : nullptr;
+  }
+  FrameDiffT *AsFrameDiff() {
+    return type == FrameOrFrameDiff::FrameDiff ?
+      reinterpret_cast<FrameDiffT *>(value) : nullptr;
+  }
+  const FrameDiffT *AsFrameDiff() const {
+    return type == FrameOrFrameDiff::FrameDiff ?
+      reinterpret_cast<const FrameDiffT *>(value) : nullptr;
+  }
+};
+
+bool VerifyFrameOrFrameDiff(flatbuffers::Verifier &verifier, const void *obj, FrameOrFrameDiff type);
+bool VerifyFrameOrFrameDiffVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
 
 enum class Any : uint8_t {
   NONE = 0,
@@ -1136,91 +1229,9 @@ inline flatbuffers::Offset<Commands> CreateCommandsDirect(
 
 flatbuffers::Offset<Commands> CreateCommands(flatbuffers::FlatBufferBuilder &_fbb, const CommandsT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct FrameDataT : public flatbuffers::NativeTable {
-  typedef FrameData TableType;
-  std::vector<uint8_t> data;
-  bool is_diff;
-  FrameDataT()
-      : is_diff(false) {
-  }
-};
-
-struct FrameData FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef FrameDataT NativeTableType;
-  enum {
-    VT_DATA = 4,
-    VT_IS_DIFF = 6
-  };
-  const flatbuffers::Vector<uint8_t> *data() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
-  }
-  flatbuffers::Vector<uint8_t> *mutable_data() {
-    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_DATA);
-  }
-  bool is_diff() const {
-    return GetField<uint8_t>(VT_IS_DIFF, 0) != 0;
-  }
-  bool mutate_is_diff(bool _is_diff) {
-    return SetField<uint8_t>(VT_IS_DIFF, static_cast<uint8_t>(_is_diff), 0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_DATA) &&
-           verifier.Verify(data()) &&
-           VerifyField<uint8_t>(verifier, VT_IS_DIFF) &&
-           verifier.EndTable();
-  }
-  FrameDataT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(FrameDataT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<FrameData> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-};
-
-struct FrameDataBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
-    fbb_.AddOffset(FrameData::VT_DATA, data);
-  }
-  void add_is_diff(bool is_diff) {
-    fbb_.AddElement<uint8_t>(FrameData::VT_IS_DIFF, static_cast<uint8_t>(is_diff), 0);
-  }
-  explicit FrameDataBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  FrameDataBuilder &operator=(const FrameDataBuilder &);
-  flatbuffers::Offset<FrameData> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<FrameData>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<FrameData> CreateFrameData(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0,
-    bool is_diff = false) {
-  FrameDataBuilder builder_(_fbb);
-  builder_.add_data(data);
-  builder_.add_is_diff(is_diff);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<FrameData> CreateFrameDataDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<uint8_t> *data = nullptr,
-    bool is_diff = false) {
-  return torchcraft::fbs::CreateFrameData(
-      _fbb,
-      data ? _fbb.CreateVector<uint8_t>(*data) : 0,
-      is_diff);
-}
-
-flatbuffers::Offset<FrameData> CreateFrameData(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
-
 struct StateUpdateT : public flatbuffers::NativeTable {
   typedef StateUpdate TableType;
-  std::unique_ptr<FrameDataT> data;
+  FrameOrFrameDiffUnion data;
   std::vector<int32_t> deaths;
   int32_t frame_from_bwapi;
   int32_t battle_frame_count;
@@ -1240,23 +1251,37 @@ struct StateUpdateT : public flatbuffers::NativeTable {
 struct StateUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef StateUpdateT NativeTableType;
   enum {
-    VT_DATA = 4,
-    VT_DEATHS = 6,
-    VT_FRAME_FROM_BWAPI = 8,
-    VT_BATTLE_FRAME_COUNT = 10,
-    VT_COMMANDS_STATUS = 12,
-    VT_IMG_MODE = 14,
-    VT_SCREEN_POSITION = 16,
-    VT_VISIBILITY = 18,
-    VT_VISIBILITY_SIZE = 20,
-    VT_IMG_DATA = 22,
-    VT_IMG_SIZE = 24
+    VT_DATA_TYPE = 4,
+    VT_DATA = 6,
+    VT_DEATHS = 8,
+    VT_FRAME_FROM_BWAPI = 10,
+    VT_BATTLE_FRAME_COUNT = 12,
+    VT_COMMANDS_STATUS = 14,
+    VT_IMG_MODE = 16,
+    VT_SCREEN_POSITION = 18,
+    VT_VISIBILITY = 20,
+    VT_VISIBILITY_SIZE = 22,
+    VT_IMG_DATA = 24,
+    VT_IMG_SIZE = 26
   };
-  const FrameData *data() const {
-    return GetPointer<const FrameData *>(VT_DATA);
+  FrameOrFrameDiff data_type() const {
+    return static_cast<FrameOrFrameDiff>(GetField<uint8_t>(VT_DATA_TYPE, 0));
   }
-  FrameData *mutable_data() {
-    return GetPointer<FrameData *>(VT_DATA);
+  bool mutate_data_type(FrameOrFrameDiff _data_type) {
+    return SetField<uint8_t>(VT_DATA_TYPE, static_cast<uint8_t>(_data_type), 0);
+  }
+  const void *data() const {
+    return GetPointer<const void *>(VT_DATA);
+  }
+  template<typename T> const T *data_as() const;
+  const Frame *data_as_Frame() const {
+    return data_type() == FrameOrFrameDiff::Frame ? static_cast<const Frame *>(data()) : nullptr;
+  }
+  const FrameDiff *data_as_FrameDiff() const {
+    return data_type() == FrameOrFrameDiff::FrameDiff ? static_cast<const FrameDiff *>(data()) : nullptr;
+  }
+  void *mutable_data() {
+    return GetPointer<void *>(VT_DATA);
   }
   const flatbuffers::Vector<int32_t> *deaths() const {
     return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_DEATHS);
@@ -1320,8 +1345,9 @@ struct StateUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_DATA_TYPE) &&
            VerifyOffset(verifier, VT_DATA) &&
-           verifier.VerifyTable(data()) &&
+           VerifyFrameOrFrameDiff(verifier, data(), data_type()) &&
            VerifyOffset(verifier, VT_DEATHS) &&
            verifier.Verify(deaths()) &&
            VerifyField<int32_t>(verifier, VT_FRAME_FROM_BWAPI) &&
@@ -1344,10 +1370,21 @@ struct StateUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   static flatbuffers::Offset<StateUpdate> Pack(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
+template<> inline const Frame *StateUpdate::data_as<Frame>() const {
+  return data_as_Frame();
+}
+
+template<> inline const FrameDiff *StateUpdate::data_as<FrameDiff>() const {
+  return data_as_FrameDiff();
+}
+
 struct StateUpdateBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_data(flatbuffers::Offset<FrameData> data) {
+  void add_data_type(FrameOrFrameDiff data_type) {
+    fbb_.AddElement<uint8_t>(StateUpdate::VT_DATA_TYPE, static_cast<uint8_t>(data_type), 0);
+  }
+  void add_data(flatbuffers::Offset<void> data) {
     fbb_.AddOffset(StateUpdate::VT_DATA, data);
   }
   void add_deaths(flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths) {
@@ -1394,7 +1431,8 @@ struct StateUpdateBuilder {
 
 inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<FrameData> data = 0,
+    FrameOrFrameDiff data_type = FrameOrFrameDiff::NONE,
+    flatbuffers::Offset<void> data = 0,
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths = 0,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
@@ -1417,12 +1455,14 @@ inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(
   builder_.add_frame_from_bwapi(frame_from_bwapi);
   builder_.add_deaths(deaths);
   builder_.add_data(data);
+  builder_.add_data_type(data_type);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<StateUpdate> CreateStateUpdateDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<FrameData> data = 0,
+    FrameOrFrameDiff data_type = FrameOrFrameDiff::NONE,
+    flatbuffers::Offset<void> data = 0,
     const std::vector<int32_t> *deaths = nullptr,
     int32_t frame_from_bwapi = 0,
     int32_t battle_frame_count = 0,
@@ -1435,6 +1475,7 @@ inline flatbuffers::Offset<StateUpdate> CreateStateUpdateDirect(
     const Vec2 *img_size = 0) {
   return torchcraft::fbs::CreateStateUpdate(
       _fbb,
+      data_type,
       data,
       deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0,
       frame_from_bwapi,
@@ -1517,7 +1558,7 @@ flatbuffers::Offset<PlayerLeft> CreatePlayerLeft(flatbuffers::FlatBufferBuilder 
 
 struct EndGameT : public flatbuffers::NativeTable {
   typedef EndGame TableType;
-  std::unique_ptr<FrameDataT> data;
+  FrameOrFrameDiffUnion data;
   bool game_won;
   EndGameT()
       : game_won(false) {
@@ -1527,14 +1568,28 @@ struct EndGameT : public flatbuffers::NativeTable {
 struct EndGame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef EndGameT NativeTableType;
   enum {
-    VT_DATA = 4,
-    VT_GAME_WON = 6
+    VT_DATA_TYPE = 4,
+    VT_DATA = 6,
+    VT_GAME_WON = 8
   };
-  const FrameData *data() const {
-    return GetPointer<const FrameData *>(VT_DATA);
+  FrameOrFrameDiff data_type() const {
+    return static_cast<FrameOrFrameDiff>(GetField<uint8_t>(VT_DATA_TYPE, 0));
   }
-  FrameData *mutable_data() {
-    return GetPointer<FrameData *>(VT_DATA);
+  bool mutate_data_type(FrameOrFrameDiff _data_type) {
+    return SetField<uint8_t>(VT_DATA_TYPE, static_cast<uint8_t>(_data_type), 0);
+  }
+  const void *data() const {
+    return GetPointer<const void *>(VT_DATA);
+  }
+  template<typename T> const T *data_as() const;
+  const Frame *data_as_Frame() const {
+    return data_type() == FrameOrFrameDiff::Frame ? static_cast<const Frame *>(data()) : nullptr;
+  }
+  const FrameDiff *data_as_FrameDiff() const {
+    return data_type() == FrameOrFrameDiff::FrameDiff ? static_cast<const FrameDiff *>(data()) : nullptr;
+  }
+  void *mutable_data() {
+    return GetPointer<void *>(VT_DATA);
   }
   bool game_won() const {
     return GetField<uint8_t>(VT_GAME_WON, 0) != 0;
@@ -1544,8 +1599,9 @@ struct EndGame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_DATA_TYPE) &&
            VerifyOffset(verifier, VT_DATA) &&
-           verifier.VerifyTable(data()) &&
+           VerifyFrameOrFrameDiff(verifier, data(), data_type()) &&
            VerifyField<uint8_t>(verifier, VT_GAME_WON) &&
            verifier.EndTable();
   }
@@ -1554,10 +1610,21 @@ struct EndGame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   static flatbuffers::Offset<EndGame> Pack(flatbuffers::FlatBufferBuilder &_fbb, const EndGameT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
+template<> inline const Frame *EndGame::data_as<Frame>() const {
+  return data_as_Frame();
+}
+
+template<> inline const FrameDiff *EndGame::data_as<FrameDiff>() const {
+  return data_as_FrameDiff();
+}
+
 struct EndGameBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_data(flatbuffers::Offset<FrameData> data) {
+  void add_data_type(FrameOrFrameDiff data_type) {
+    fbb_.AddElement<uint8_t>(EndGame::VT_DATA_TYPE, static_cast<uint8_t>(data_type), 0);
+  }
+  void add_data(flatbuffers::Offset<void> data) {
     fbb_.AddOffset(EndGame::VT_DATA, data);
   }
   void add_game_won(bool game_won) {
@@ -1577,11 +1644,13 @@ struct EndGameBuilder {
 
 inline flatbuffers::Offset<EndGame> CreateEndGame(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<FrameData> data = 0,
+    FrameOrFrameDiff data_type = FrameOrFrameDiff::NONE,
+    flatbuffers::Offset<void> data = 0,
     bool game_won = false) {
   EndGameBuilder builder_(_fbb);
   builder_.add_data(data);
   builder_.add_game_won(game_won);
+  builder_.add_data_type(data_type);
   return builder_.Finish();
 }
 
@@ -3841,35 +3910,6 @@ inline flatbuffers::Offset<Commands> CreateCommands(flatbuffers::FlatBufferBuild
       _commands);
 }
 
-inline FrameDataT *FrameData::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new FrameDataT();
-  UnPackTo(_o, _resolver);
-  return _o;
-}
-
-inline void FrameData::UnPackTo(FrameDataT *_o, const flatbuffers::resolver_function_t *_resolver) const {
-  (void)_o;
-  (void)_resolver;
-  { auto _e = data(); if (_e) { _o->data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->data[_i] = _e->Get(_i); } } };
-  { auto _e = is_diff(); _o->is_diff = _e; };
-}
-
-inline flatbuffers::Offset<FrameData> FrameData::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateFrameData(_fbb, _o, _rehasher);
-}
-
-inline flatbuffers::Offset<FrameData> CreateFrameData(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
-  (void)_rehasher;
-  (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameDataT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _data = _o->data.size() ? _fbb.CreateVector(_o->data) : 0;
-  auto _is_diff = _o->is_diff;
-  return torchcraft::fbs::CreateFrameData(
-      _fbb,
-      _data,
-      _is_diff);
-}
-
 inline StateUpdateT *StateUpdate::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new StateUpdateT();
   UnPackTo(_o, _resolver);
@@ -3879,7 +3919,8 @@ inline StateUpdateT *StateUpdate::UnPack(const flatbuffers::resolver_function_t 
 inline void StateUpdate::UnPackTo(StateUpdateT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
-  { auto _e = data(); if (_e) _o->data = std::unique_ptr<FrameDataT>(_e->UnPack(_resolver)); };
+  { auto _e = data_type(); _o->data.type = _e; };
+  { auto _e = data(); if (_e) _o->data.value = FrameOrFrameDiffUnion::UnPack(_e, data_type(), _resolver); };
   { auto _e = deaths(); if (_e) { _o->deaths.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->deaths[_i] = _e->Get(_i); } } };
   { auto _e = frame_from_bwapi(); _o->frame_from_bwapi = _e; };
   { auto _e = battle_frame_count(); _o->battle_frame_count = _e; };
@@ -3900,7 +3941,8 @@ inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(flatbuffers::FlatBuffe
   (void)_rehasher;
   (void)_o;
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const StateUpdateT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _data = _o->data ? CreateFrameData(_fbb, _o->data.get(), _rehasher) : 0;
+  auto _data_type = _o->data.type;
+  auto _data = _o->data.Pack(_fbb);
   auto _deaths = _o->deaths.size() ? _fbb.CreateVector(_o->deaths) : 0;
   auto _frame_from_bwapi = _o->frame_from_bwapi;
   auto _battle_frame_count = _o->battle_frame_count;
@@ -3913,6 +3955,7 @@ inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(flatbuffers::FlatBuffe
   auto _img_size = _o->img_size ? _o->img_size.get() : 0;
   return torchcraft::fbs::CreateStateUpdate(
       _fbb,
+      _data_type,
       _data,
       _deaths,
       _frame_from_bwapi,
@@ -3961,7 +4004,8 @@ inline EndGameT *EndGame::UnPack(const flatbuffers::resolver_function_t *_resolv
 inline void EndGame::UnPackTo(EndGameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
-  { auto _e = data(); if (_e) _o->data = std::unique_ptr<FrameDataT>(_e->UnPack(_resolver)); };
+  { auto _e = data_type(); _o->data.type = _e; };
+  { auto _e = data(); if (_e) _o->data.value = FrameOrFrameDiffUnion::UnPack(_e, data_type(), _resolver); };
   { auto _e = game_won(); _o->game_won = _e; };
 }
 
@@ -3973,10 +4017,12 @@ inline flatbuffers::Offset<EndGame> CreateEndGame(flatbuffers::FlatBufferBuilder
   (void)_rehasher;
   (void)_o;
   struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const EndGameT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
-  auto _data = _o->data ? CreateFrameData(_fbb, _o->data.get(), _rehasher) : 0;
+  auto _data_type = _o->data.type;
+  auto _data = _o->data.Pack(_fbb);
   auto _game_won = _o->game_won;
   return torchcraft::fbs::CreateEndGame(
       _fbb,
+      _data_type,
       _data,
       _game_won);
 }
@@ -4515,6 +4561,95 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(flatbuffers::FlatBufferBui
       _is_terminal);
 }
 
+inline bool VerifyFrameOrFrameDiff(flatbuffers::Verifier &verifier, const void *obj, FrameOrFrameDiff type) {
+  switch (type) {
+    case FrameOrFrameDiff::NONE: {
+      return true;
+    }
+    case FrameOrFrameDiff::Frame: {
+      auto ptr = reinterpret_cast<const Frame *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case FrameOrFrameDiff::FrameDiff: {
+      auto ptr = reinterpret_cast<const FrameDiff *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    default: return false;
+  }
+}
+
+inline bool VerifyFrameOrFrameDiffVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types) {
+  if (values->size() != types->size()) return false;
+  for (flatbuffers::uoffset_t i = 0; i < values->size(); ++i) {
+    if (!VerifyFrameOrFrameDiff(
+        verifier,  values->Get(i), types->GetEnum<FrameOrFrameDiff>(i))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+inline void *FrameOrFrameDiffUnion::UnPack(const void *obj, FrameOrFrameDiff type, const flatbuffers::resolver_function_t *resolver) {
+  switch (type) {
+    case FrameOrFrameDiff::Frame: {
+      auto ptr = reinterpret_cast<const Frame *>(obj);
+      return ptr->UnPack(resolver);
+    }
+    case FrameOrFrameDiff::FrameDiff: {
+      auto ptr = reinterpret_cast<const FrameDiff *>(obj);
+      return ptr->UnPack(resolver);
+    }
+    default: return nullptr;
+  }
+}
+
+inline flatbuffers::Offset<void> FrameOrFrameDiffUnion::Pack(flatbuffers::FlatBufferBuilder &_fbb, const flatbuffers::rehasher_function_t *_rehasher) const {
+  switch (type) {
+    case FrameOrFrameDiff::Frame: {
+      auto ptr = reinterpret_cast<const FrameT *>(value);
+      return CreateFrame(_fbb, ptr, _rehasher).Union();
+    }
+    case FrameOrFrameDiff::FrameDiff: {
+      auto ptr = reinterpret_cast<const FrameDiffT *>(value);
+      return CreateFrameDiff(_fbb, ptr, _rehasher).Union();
+    }
+    default: return 0;
+  }
+}
+
+inline FrameOrFrameDiffUnion::FrameOrFrameDiffUnion(const FrameOrFrameDiffUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type), value(nullptr) {
+  switch (type) {
+    case FrameOrFrameDiff::Frame: {
+      assert(false);  // FrameT not copyable.
+      break;
+    }
+    case FrameOrFrameDiff::FrameDiff: {
+      assert(false);  // FrameDiffT not copyable.
+      break;
+    }
+    default:
+      break;
+  }
+}
+
+inline void FrameOrFrameDiffUnion::Reset() {
+  switch (type) {
+    case FrameOrFrameDiff::Frame: {
+      auto ptr = reinterpret_cast<FrameT *>(value);
+      delete ptr;
+      break;
+    }
+    case FrameOrFrameDiff::FrameDiff: {
+      auto ptr = reinterpret_cast<FrameDiffT *>(value);
+      delete ptr;
+      break;
+    }
+    default: break;
+  }
+  value = nullptr;
+  type = FrameOrFrameDiff::NONE;
+}
+
 inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type) {
   switch (type) {
     case Any::NONE: {
@@ -4654,7 +4789,7 @@ inline AnyUnion::AnyUnion(const AnyUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type)
       break;
     }
     case Any::EndGame: {
-      assert(false);  // EndGameT not copyable.
+      value = new EndGameT(*reinterpret_cast<EndGameT *>(u.value));
       break;
     }
     case Any::Error: {

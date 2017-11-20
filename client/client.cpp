@@ -253,9 +253,9 @@ bool Client::receive(std::vector<std::string>& updates) {
   switch (msg->msg_type()) {
     case torchcraft::fbs::Any::Frame: {
       auto frameMsg =
-          reinterpret_cast<const torchcraft::fbs::Frame*>(msg->msg());
+          reinterpret_cast<const torchcraft::fbs::StateUpdate*>(msg->msg());
       if (flatbuffers::IsFieldPresent(
-              frameMsg, torchcraft::fbs::Frame::VT_COMMANDS_STATUS)) {
+              frameMsg, torchcraft::fbs::StateUpdate::VT_COMMANDS_STATUS)) {
         auto& cs = *frameMsg->commands_status();
         lastCommandsStatus_.resize(cs.size());
         for (size_t i = 0; i < cs.size(); i++) {

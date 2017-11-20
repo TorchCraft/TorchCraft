@@ -29,8 +29,8 @@ struct CommandsT;
 struct FrameData;
 struct FrameDataT;
 
-struct Frame;
-struct FrameT;
+struct StateUpdate;
+struct StateUpdateT;
 
 struct PlayerLeft;
 struct PlayerLeftT;
@@ -68,8 +68,8 @@ struct ActionsByPlayerIdT;
 struct ResourcesByPlayerId;
 struct ResourcesByPlayerIdT;
 
-struct KeyFrame;
-struct KeyFrameT;
+struct Frame;
+struct FrameT;
 
 struct UnitDiff;
 struct UnitDiffT;
@@ -1218,8 +1218,8 @@ inline flatbuffers::Offset<FrameData> CreateFrameDataDirect(
 
 flatbuffers::Offset<FrameData> CreateFrameData(flatbuffers::FlatBufferBuilder &_fbb, const FrameDataT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct FrameT : public flatbuffers::NativeTable {
-  typedef Frame TableType;
+struct StateUpdateT : public flatbuffers::NativeTable {
+  typedef StateUpdate TableType;
   std::unique_ptr<FrameDataT> data;
   std::vector<int32_t> deaths;
   int32_t frame_from_bwapi;
@@ -1231,14 +1231,14 @@ struct FrameT : public flatbuffers::NativeTable {
   std::unique_ptr<Vec2> visibility_size;
   std::vector<uint8_t> img_data;
   std::unique_ptr<Vec2> img_size;
-  FrameT()
+  StateUpdateT()
       : frame_from_bwapi(0),
         battle_frame_count(0) {
   }
 };
 
-struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef FrameT NativeTableType;
+struct StateUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef StateUpdateT NativeTableType;
   enum {
     VT_DATA = 4,
     VT_DEATHS = 6,
@@ -1339,60 +1339,60 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<Vec2>(verifier, VT_IMG_SIZE) &&
            verifier.EndTable();
   }
-  FrameT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<Frame> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+  StateUpdateT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(StateUpdateT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<StateUpdate> Pack(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
-struct FrameBuilder {
+struct StateUpdateBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_data(flatbuffers::Offset<FrameData> data) {
-    fbb_.AddOffset(Frame::VT_DATA, data);
+    fbb_.AddOffset(StateUpdate::VT_DATA, data);
   }
   void add_deaths(flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths) {
-    fbb_.AddOffset(Frame::VT_DEATHS, deaths);
+    fbb_.AddOffset(StateUpdate::VT_DEATHS, deaths);
   }
   void add_frame_from_bwapi(int32_t frame_from_bwapi) {
-    fbb_.AddElement<int32_t>(Frame::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0);
+    fbb_.AddElement<int32_t>(StateUpdate::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0);
   }
   void add_battle_frame_count(int32_t battle_frame_count) {
-    fbb_.AddElement<int32_t>(Frame::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0);
+    fbb_.AddElement<int32_t>(StateUpdate::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0);
   }
   void add_commands_status(flatbuffers::Offset<flatbuffers::Vector<int8_t>> commands_status) {
-    fbb_.AddOffset(Frame::VT_COMMANDS_STATUS, commands_status);
+    fbb_.AddOffset(StateUpdate::VT_COMMANDS_STATUS, commands_status);
   }
   void add_img_mode(flatbuffers::Offset<flatbuffers::String> img_mode) {
-    fbb_.AddOffset(Frame::VT_IMG_MODE, img_mode);
+    fbb_.AddOffset(StateUpdate::VT_IMG_MODE, img_mode);
   }
   void add_screen_position(const Vec2 *screen_position) {
-    fbb_.AddStruct(Frame::VT_SCREEN_POSITION, screen_position);
+    fbb_.AddStruct(StateUpdate::VT_SCREEN_POSITION, screen_position);
   }
   void add_visibility(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> visibility) {
-    fbb_.AddOffset(Frame::VT_VISIBILITY, visibility);
+    fbb_.AddOffset(StateUpdate::VT_VISIBILITY, visibility);
   }
   void add_visibility_size(const Vec2 *visibility_size) {
-    fbb_.AddStruct(Frame::VT_VISIBILITY_SIZE, visibility_size);
+    fbb_.AddStruct(StateUpdate::VT_VISIBILITY_SIZE, visibility_size);
   }
   void add_img_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> img_data) {
-    fbb_.AddOffset(Frame::VT_IMG_DATA, img_data);
+    fbb_.AddOffset(StateUpdate::VT_IMG_DATA, img_data);
   }
   void add_img_size(const Vec2 *img_size) {
-    fbb_.AddStruct(Frame::VT_IMG_SIZE, img_size);
+    fbb_.AddStruct(StateUpdate::VT_IMG_SIZE, img_size);
   }
-  explicit FrameBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit StateUpdateBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  FrameBuilder &operator=(const FrameBuilder &);
-  flatbuffers::Offset<Frame> Finish() {
+  StateUpdateBuilder &operator=(const StateUpdateBuilder &);
+  flatbuffers::Offset<StateUpdate> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Frame>(end);
+    auto o = flatbuffers::Offset<StateUpdate>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<Frame> CreateFrame(
+inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<FrameData> data = 0,
     flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths = 0,
@@ -1405,7 +1405,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
     const Vec2 *visibility_size = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> img_data = 0,
     const Vec2 *img_size = 0) {
-  FrameBuilder builder_(_fbb);
+  StateUpdateBuilder builder_(_fbb);
   builder_.add_img_size(img_size);
   builder_.add_img_data(img_data);
   builder_.add_visibility_size(visibility_size);
@@ -1420,7 +1420,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<Frame> CreateFrameDirect(
+inline flatbuffers::Offset<StateUpdate> CreateStateUpdateDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<FrameData> data = 0,
     const std::vector<int32_t> *deaths = nullptr,
@@ -1433,7 +1433,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
     const Vec2 *visibility_size = 0,
     const std::vector<uint8_t> *img_data = nullptr,
     const Vec2 *img_size = 0) {
-  return torchcraft::fbs::CreateFrame(
+  return torchcraft::fbs::CreateStateUpdate(
       _fbb,
       data,
       deaths ? _fbb.CreateVector<int32_t>(*deaths) : 0,
@@ -1448,7 +1448,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
       img_size);
 }
 
-flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+flatbuffers::Offset<StateUpdate> CreateStateUpdate(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 struct PlayerLeftT : public flatbuffers::NativeTable {
   typedef PlayerLeft TableType;
@@ -2993,8 +2993,8 @@ inline flatbuffers::Offset<ResourcesByPlayerId> CreateResourcesByPlayerId(
 
 flatbuffers::Offset<ResourcesByPlayerId> CreateResourcesByPlayerId(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesByPlayerIdT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct KeyFrameT : public flatbuffers::NativeTable {
-  typedef KeyFrame TableType;
+struct FrameT : public flatbuffers::NativeTable {
+  typedef Frame TableType;
   std::vector<std::unique_ptr<UnitsByPlayerIdT>> units;
   std::vector<std::unique_ptr<ActionsByPlayerIdT>> actions;
   std::vector<std::unique_ptr<ResourcesByPlayerIdT>> resources;
@@ -3004,7 +3004,7 @@ struct KeyFrameT : public flatbuffers::NativeTable {
   uint32_t height;
   int32_t reward;
   bool is_terminal;
-  KeyFrameT()
+  FrameT()
       : width(0),
         height(0),
         reward(0),
@@ -3012,8 +3012,8 @@ struct KeyFrameT : public flatbuffers::NativeTable {
   }
 };
 
-struct KeyFrame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef KeyFrameT NativeTableType;
+struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef FrameT NativeTableType;
   enum {
     VT_UNITS = 4,
     VT_ACTIONS = 6,
@@ -3100,54 +3100,54 @@ struct KeyFrame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_IS_TERMINAL) &&
            verifier.EndTable();
   }
-  KeyFrameT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(KeyFrameT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<KeyFrame> Pack(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+  FrameT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Frame> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
-struct KeyFrameBuilder {
+struct FrameBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_units(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitsByPlayerId>>> units) {
-    fbb_.AddOffset(KeyFrame::VT_UNITS, units);
+    fbb_.AddOffset(Frame::VT_UNITS, units);
   }
   void add_actions(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsByPlayerId>>> actions) {
-    fbb_.AddOffset(KeyFrame::VT_ACTIONS, actions);
+    fbb_.AddOffset(Frame::VT_ACTIONS, actions);
   }
   void add_resources(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesByPlayerId>>> resources) {
-    fbb_.AddOffset(KeyFrame::VT_RESOURCES, resources);
+    fbb_.AddOffset(Frame::VT_RESOURCES, resources);
   }
   void add_bullets(flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets) {
-    fbb_.AddOffset(KeyFrame::VT_BULLETS, bullets);
+    fbb_.AddOffset(Frame::VT_BULLETS, bullets);
   }
   void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> creep_map) {
-    fbb_.AddOffset(KeyFrame::VT_CREEP_MAP, creep_map);
+    fbb_.AddOffset(Frame::VT_CREEP_MAP, creep_map);
   }
   void add_width(uint32_t width) {
-    fbb_.AddElement<uint32_t>(KeyFrame::VT_WIDTH, width, 0);
+    fbb_.AddElement<uint32_t>(Frame::VT_WIDTH, width, 0);
   }
   void add_height(uint32_t height) {
-    fbb_.AddElement<uint32_t>(KeyFrame::VT_HEIGHT, height, 0);
+    fbb_.AddElement<uint32_t>(Frame::VT_HEIGHT, height, 0);
   }
   void add_reward(int32_t reward) {
-    fbb_.AddElement<int32_t>(KeyFrame::VT_REWARD, reward, 0);
+    fbb_.AddElement<int32_t>(Frame::VT_REWARD, reward, 0);
   }
   void add_is_terminal(bool is_terminal) {
-    fbb_.AddElement<uint8_t>(KeyFrame::VT_IS_TERMINAL, static_cast<uint8_t>(is_terminal), 0);
+    fbb_.AddElement<uint8_t>(Frame::VT_IS_TERMINAL, static_cast<uint8_t>(is_terminal), 0);
   }
-  explicit KeyFrameBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit FrameBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  KeyFrameBuilder &operator=(const KeyFrameBuilder &);
-  flatbuffers::Offset<KeyFrame> Finish() {
+  FrameBuilder &operator=(const FrameBuilder &);
+  flatbuffers::Offset<Frame> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<KeyFrame>(end);
+    auto o = flatbuffers::Offset<Frame>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(
+inline flatbuffers::Offset<Frame> CreateFrame(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitsByPlayerId>>> units = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsByPlayerId>>> actions = 0,
@@ -3158,7 +3158,7 @@ inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(
     uint32_t height = 0,
     int32_t reward = 0,
     bool is_terminal = false) {
-  KeyFrameBuilder builder_(_fbb);
+  FrameBuilder builder_(_fbb);
   builder_.add_reward(reward);
   builder_.add_height(height);
   builder_.add_width(width);
@@ -3171,7 +3171,7 @@ inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<KeyFrame> CreateKeyFrameDirect(
+inline flatbuffers::Offset<Frame> CreateFrameDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const std::vector<flatbuffers::Offset<UnitsByPlayerId>> *units = nullptr,
     const std::vector<flatbuffers::Offset<ActionsByPlayerId>> *actions = nullptr,
@@ -3182,7 +3182,7 @@ inline flatbuffers::Offset<KeyFrame> CreateKeyFrameDirect(
     uint32_t height = 0,
     int32_t reward = 0,
     bool is_terminal = false) {
-  return torchcraft::fbs::CreateKeyFrame(
+  return torchcraft::fbs::CreateFrame(
       _fbb,
       units ? _fbb.CreateVector<flatbuffers::Offset<UnitsByPlayerId>>(*units) : 0,
       actions ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>>(*actions) : 0,
@@ -3195,7 +3195,7 @@ inline flatbuffers::Offset<KeyFrame> CreateKeyFrameDirect(
       is_terminal);
 }
 
-flatbuffers::Offset<KeyFrame> CreateKeyFrame(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 struct UnitDiffT : public flatbuffers::NativeTable {
   typedef UnitDiff TableType;
@@ -3870,13 +3870,13 @@ inline flatbuffers::Offset<FrameData> CreateFrameData(flatbuffers::FlatBufferBui
       _is_diff);
 }
 
-inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new FrameT();
+inline StateUpdateT *StateUpdate::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new StateUpdateT();
   UnPackTo(_o, _resolver);
   return _o;
 }
 
-inline void Frame::UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+inline void StateUpdate::UnPackTo(StateUpdateT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
   { auto _e = data(); if (_e) _o->data = std::unique_ptr<FrameDataT>(_e->UnPack(_resolver)); };
@@ -3892,14 +3892,14 @@ inline void Frame::UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *
   { auto _e = img_size(); if (_e) _o->img_size = std::unique_ptr<Vec2>(new Vec2(*_e)); };
 }
 
-inline flatbuffers::Offset<Frame> Frame::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateFrame(_fbb, _o, _rehasher);
+inline flatbuffers::Offset<StateUpdate> StateUpdate::Pack(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateStateUpdate(_fbb, _o, _rehasher);
 }
 
-inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const StateUpdateT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _data = _o->data ? CreateFrameData(_fbb, _o->data.get(), _rehasher) : 0;
   auto _deaths = _o->deaths.size() ? _fbb.CreateVector(_o->deaths) : 0;
   auto _frame_from_bwapi = _o->frame_from_bwapi;
@@ -3911,7 +3911,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
   auto _visibility_size = _o->visibility_size ? _o->visibility_size.get() : 0;
   auto _img_data = _o->img_data.size() ? _fbb.CreateVector(_o->img_data) : 0;
   auto _img_size = _o->img_size ? _o->img_size.get() : 0;
-  return torchcraft::fbs::CreateFrame(
+  return torchcraft::fbs::CreateStateUpdate(
       _fbb,
       _data,
       _deaths,
@@ -4342,13 +4342,13 @@ inline flatbuffers::Offset<ResourcesByPlayerId> CreateResourcesByPlayerId(flatbu
       _resources);
 }
 
-inline KeyFrameT *KeyFrame::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new KeyFrameT();
+inline FrameT *Frame::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new FrameT();
   UnPackTo(_o, _resolver);
   return _o;
 }
 
-inline void KeyFrame::UnPackTo(KeyFrameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+inline void Frame::UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
   { auto _e = units(); if (_e) { _o->units.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->units[_i] = std::unique_ptr<UnitsByPlayerIdT>(_e->Get(_i)->UnPack(_resolver)); } } };
@@ -4362,14 +4362,14 @@ inline void KeyFrame::UnPackTo(KeyFrameT *_o, const flatbuffers::resolver_functi
   { auto _e = is_terminal(); _o->is_terminal = _e; };
 }
 
-inline flatbuffers::Offset<KeyFrame> KeyFrame::Pack(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateKeyFrame(_fbb, _o, _rehasher);
+inline flatbuffers::Offset<Frame> Frame::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateFrame(_fbb, _o, _rehasher);
 }
 
-inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_fbb, const FrameT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const KeyFrameT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _units = _o->units.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitsByPlayerId>> (_o->units.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitsByPlayerId(*__va->__fbb, __va->__o->units[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _actions = _o->actions.size() ? _fbb.CreateVector<flatbuffers::Offset<ActionsByPlayerId>> (_o->actions.size(), [](size_t i, _VectorArgs *__va) { return CreateActionsByPlayerId(*__va->__fbb, __va->__o->actions[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _resources = _o->resources.size() ? _fbb.CreateVector<flatbuffers::Offset<ResourcesByPlayerId>> (_o->resources.size(), [](size_t i, _VectorArgs *__va) { return CreateResourcesByPlayerId(*__va->__fbb, __va->__o->resources[i].get(), __va->__rehasher); }, &_va ) : 0;
@@ -4379,7 +4379,7 @@ inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(flatbuffers::FlatBufferBuild
   auto _height = _o->height;
   auto _reward = _o->reward;
   auto _is_terminal = _o->is_terminal;
-  return torchcraft::fbs::CreateKeyFrame(
+  return torchcraft::fbs::CreateFrame(
       _fbb,
       _units,
       _actions,

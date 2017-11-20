@@ -23,5 +23,5 @@ IF(ATEN_FOUND)
 ENDIF(ATEN_FOUND)
 
 ADD_EXECUTABLE("main_test" main_test.cpp)
-ADD_TEST(NAME "runOurTests" COMMAND "main_test")
+ADD_TEST(NAME "runTorchCraftTests" COMMAND "main_test")
 TARGET_LINK_LIBRARIES("main_test" torchcraft)

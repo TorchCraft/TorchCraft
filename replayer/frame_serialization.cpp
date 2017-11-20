@@ -24,5 +24,14 @@ std::istream& operator>>(std::istream& in, Frame& o) {
   return in;
 }
 
+
+void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
+  // DG TODO: Implement
+}
+
+void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrameDiff) {
+  // DG TODO: Implement
+}
+
 } // namespace replayer
 } // namespace torchcraft

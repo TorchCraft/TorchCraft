@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "refcount.h"
+#include "BWEnv/fbs/messages_generated.h"
 
 #ifdef _MSC_VER
 typedef unsigned int uint32_t;
@@ -325,6 +326,9 @@ class Frame : public RefCounted {
   void filter(int32_t x, int32_t y, Frame& o) const;
   void combine(const Frame& next_frame);
   bool getCreepAt(uint32_t x, uint32_t y);
+  
+  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::Frame& table);
 }; // class Frame
 
 // Frame diffs
@@ -365,6 +369,9 @@ class FrameDiff {
   // Width and height never changes, so we don't diff them
   int reward;
   int is_terminal;
+  
+  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff);
 };
 
 void writeTail(

@@ -144,7 +144,7 @@ class State : public RefCounted {
   void reset();
   std::vector<std::string> update(
       const torchcraft::fbs::HandshakeServer* handshake);
-  std::vector<std::string> update(const torchcraft::fbs::StateUpdate* frame);
+  std::vector<std::string> update(const torchcraft::fbs::StateUpdate* stateUpdate);
   std::vector<std::string> update(const torchcraft::fbs::EndGame* end);
   std::vector<std::string> update(const torchcraft::fbs::PlayerLeft* left);
   std::vector<std::string> update(const torchcraft::fbs::Error* error);
@@ -182,7 +182,7 @@ class State : public RefCounted {
   void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
-  bool update_frame(const torchcraft::fbs::FrameOrFrameDiff* fd);
+  bool update_frame(const void* flatBuffer, const torchcraft::fbs::FrameOrFrameDiff type);
 
   bool microBattles_;
   std::set<BW::UnitType> onlyConsiderTypes_;

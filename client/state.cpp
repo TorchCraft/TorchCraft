@@ -228,10 +228,10 @@ std::vector<std::string> State::update(
 }
 
 bool State::update_frame(const torchcraft::fbs::FrameOrFrameDiff* fd) {
+  
+  // DG TODO: Implement
+  
   /*
-  
-  TODO: Implement!
-  
   if (fd->data() == nullptr)
     return false;
   if (fd->is_diff()) {

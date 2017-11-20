@@ -35,20 +35,10 @@ class Frame;
 class FrameDiff;
 namespace detail { class UnitDiff; }
 
-std::ostream& operator<<(std::ostream& out, const Unit& o);
-std::istream& operator>>(std::istream& in, Unit& o);
-std::ostream& operator<<(std::ostream& out, const Resources& r);
-std::istream& operator>>(std::istream& in, Resources& r);
-std::ostream& operator<<(std::ostream& out, const Bullet& o);
-std::istream& operator>>(std::istream& in, Bullet& o);
-std::ostream& operator<<(std::ostream& out, const Action& o);
-std::istream& operator>>(std::istream& in, Action& o);
 std::ostream& operator<<(std::ostream& out, const Frame& o);
 std::istream& operator>>(std::istream& in, Frame& o);
 std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
 std::istream& operator>>(std::istream& in, FrameDiff& o);
-std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);
-std::istream& operator>>(std::istream& in, detail::UnitDiff& o);
 
 struct Bullet {
   int32_t type, x, y;

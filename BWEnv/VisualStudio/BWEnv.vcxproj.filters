@@ -33,13 +33,12 @@
     <ClCompile Include="..\src\recorder.cc">
       <Filter>src</Filter>
     </ClCompile>
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\replayer\frame.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\replayer\frame_serialization.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\replayer\keyframe.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\replayer\keyframe_serialization.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\replayer\frame_diff.cpp">

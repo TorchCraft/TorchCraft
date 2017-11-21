@@ -230,12 +230,12 @@ std::vector<std::string> State::update(
 bool State::update_frame(const void* flatBuffer, const torchcraft::fbs::FrameOrFrameDiff type) {
   switch (type) {
     case fbs::FrameOrFrameDiff::Frame: {
-      auto frameFlatBuffer = reinterpret_cast<const fbs::Frame*>(flatBuffer);
+      auto frameFlatBuffer = static_cast<const fbs::Frame*>(flatBuffer);
       frame->readFromFlatBufferTable(*frameFlatBuffer);
       return true;
     }
     case fbs::FrameOrFrameDiff::FrameDiff:  {
-      auto frameDiffFlatBuffer = reinterpret_cast<const fbs::FrameDiff*>(flatBuffer);
+      auto frameDiffFlatBuffer = static_cast<const fbs::FrameDiff*>(flatBuffer);
       replayer::FrameDiff frameDiff;
       frameDiff.readFromFlatBufferTable(*frameDiffFlatBuffer);
       replayer::frame_undiff(frame, frame, &frameDiff);

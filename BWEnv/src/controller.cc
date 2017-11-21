@@ -602,7 +602,9 @@ void Controller::serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& fram
     frameOrFrameDiff.value = builder.GetBufferPointer();
   }
   
-  if (prev_sent_frame) { prev_sent_frame->decref(); }
+  if (prev_sent_frame == nullptr) {
+    prev_sent_frame->decref();
+  }
   prev_sent_frame = last_frame;
   last_frame = nullptr;
 }

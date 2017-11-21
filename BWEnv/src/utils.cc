@@ -245,8 +245,11 @@ std::string readIni(const std::string& filename, const std::string& section, con
   long filesize = ftell(f);
   data.resize(filesize);
   fseek(f, 0, SEEK_SET);
-  fread(data.data(), filesize, 1, f);
+  auto elementsRead = fread(data.data(), filesize, 1, f);
   fclose(f);
+  if (!elementsRead) {
+    return {};
+  }
   bool correct_section = section.empty();
   const char* c = data.data();
   const char* e = c + data.size();

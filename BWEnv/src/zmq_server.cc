@@ -189,8 +189,8 @@ void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshak
   sendFBObject(this->sock.get(), handshake);
 }
 
-void ZMQ_server::sendFrame(const torchcraft::fbs::FrameT* frame) {
-  sendFBObject(this->sock.get(), frame);
+void ZMQ_server::sendFrame(const torchcraft::fbs::StateUpdateT* stateUpdate) {
+  sendFBObject(this->sock.get(), stateUpdate);
 }
 
 void ZMQ_server::sendPlayerLeft(const torchcraft::fbs::PlayerLeftT* pl) {

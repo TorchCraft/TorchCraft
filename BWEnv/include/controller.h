@@ -139,7 +139,7 @@ class Controller {
   bool is_client;
 
  private:
-  void serializeFrameData(torchcraft::fbs::FrameDataT*);
+  void serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff);
   std::unique_ptr<ConfigManager> config_;
   bool sent_battle_end_frame = false;
   bool game_ended = false;
@@ -161,7 +161,7 @@ class Controller {
   bool blocking_ = true;
   int max_frame_time_ms_ = 50;
   std::vector<std::pair<std::vector<int>, std::string>> draw_cmds_;
-  torchcraft::fbs::FrameT tcframe_;
+  torchcraft::fbs::StateUpdateT tcframe_;
 };
 
 #endif // TORCHCRAFT_CONTROL_H_

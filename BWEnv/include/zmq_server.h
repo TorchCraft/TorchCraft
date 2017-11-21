@@ -38,7 +38,7 @@ public:
   void connect();
   void close();
   void sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake);
-  void sendFrame(const torchcraft::fbs::FrameT* frame);
+  void sendFrame(const torchcraft::fbs::StateUpdateT* stateUpdate);
   void sendPlayerLeft(const torchcraft::fbs::PlayerLeftT *pl);
   void sendEndGame(const torchcraft::fbs::EndGameT *endgame);
   void sendError(const torchcraft::fbs::ErrorT *error);

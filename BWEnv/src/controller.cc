@@ -578,6 +578,7 @@ int Controller::getAttackFrames(int unitID) {
   int unitType = BWAPI::Broodwar->getUnit(unitID)->getType().getID();
   // From
   // https://docs.google.com/spreadsheets/d/1bsvPvFil-kpvEUfSG74U3E5PLSTC02JxSkiR8QdLMuw/edit#gid=0
+  // Photon Cannons may also have a value.
   if (unitType == BWAPI::UnitTypes::Enum::Protoss_Dragoon) {
     attackFrames += 5;
   } else if (unitType == BWAPI::UnitTypes::Enum::Zerg_Devourer) {
@@ -586,21 +587,23 @@ int Controller::getAttackFrames(int unitID) {
   return attackFrames;
 }
 
-void Controller::serializeFrameData(torchcraft::fbs::FrameDataT* data) {
-  std::ostringstream out;
-  if (prev_sent_frame == nullptr) {
-    out << *last_frame;
-    data->is_diff = false;
-  } else {
-    out << replayer::frame_diff(last_frame, prev_sent_frame);
-    data->is_diff = true;
+void Controller::serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff) {
+  {
+    flatbuffers::FlatBufferBuilder builder;
+    if (prev_sent_frame == nullptr) {
+      frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::Frame;
+      last_frame->addToFlatBufferBuilder(builder);
+    } else {
+      frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::FrameDiff;
+      auto frameDiff = replayer::frame_diff(last_frame, prev_sent_frame);
+      frameDiff.addToFlatBufferBuilder(builder);      
+    }
+    frameOrFrameDiff.value = builder.GetBufferPointer();
   }
-  if (prev_sent_frame != nullptr)
-    prev_sent_frame->decref();
+  
+  if (prev_sent_frame) { prev_sent_frame->decref(); }
   prev_sent_frame = last_frame;
   last_frame = nullptr;
-  auto s = out.str();
-  data->data.assign(s.data(), s.data() + s.size());
 }
 
 void Controller::endGame() {
@@ -608,9 +611,10 @@ void Controller::endGame() {
       output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
   torchcraft::fbs::EndGameT endg;
-  endg.data.reset(new torchcraft::fbs::FrameDataT());
-  if (last_frame != nullptr)
-    this->serializeFrameData(endg.data.get());
+  endg.data.Reset();
+  if (last_frame != nullptr) {
+    this->serializeFrameData(endg.data);
+  }
   endg.game_won = this->is_winner;
 
   clearPendingReceive();
@@ -806,10 +810,7 @@ void Controller::onFrame() {
       }
     }
 
-    if (!this->tcframe_.data)
-      this->tcframe_.data.reset(new torchcraft::fbs::FrameDataT());
-    this->serializeFrameData(this->tcframe_.data.get());
-
+    this->serializeFrameData(this->tcframe_.data);
     this->tcframe_.deaths = this->deaths;
     this->deaths.clear();
 

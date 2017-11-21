@@ -588,7 +588,8 @@ int Controller::getAttackFrames(int unitID) {
 }
 
 void Controller::serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff) {
-  {
+  frameOrFrameDiff.Reset();
+  {    
     flatbuffers::FlatBufferBuilder builder;
     if (prev_sent_frame == nullptr) {
       frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::Frame;
@@ -611,7 +612,6 @@ void Controller::endGame() {
       output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
   torchcraft::fbs::EndGameT endg;
-  endg.data.Reset();
   if (last_frame != nullptr) {
     this->serializeFrameData(endg.data);
   }

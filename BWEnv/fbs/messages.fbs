@@ -59,7 +59,7 @@ table FrameData {
  is_diff:bool;
 }
 
-table Frame {
+table StateUpdate {
   data:FrameData;
   deaths:[int];
   frame_from_bwapi:int;
@@ -204,10 +204,10 @@ table ResourcesOfPlayer {
   resources:Resources;
 }
 
-table KeyFrame {
-  units:[UnitsOfPlayer];
-  actions:[ActionsOfPlayer];
-  resources:[ResourcesOfPlayer];
+table Frame {
+  units:[UnitsByPlayerId];
+  actions:[ActionsByPlayerId];
+  resources:[ResourcesByPlayerId];
   bullets:[Bullet];
   creep_map:[ubyte];
   width:uint;

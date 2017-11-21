@@ -107,3 +107,143 @@ table Message {
 }
 
 root_type Message;
+
+table Action {
+  action:[int];
+  uid:int;
+  aid:int;
+}
+
+table Resources {
+  ore:int;
+  gas:int;
+  used_psi:int;
+  total_psi:int;
+  upgrades:long;
+  upgrades_level:long;
+  techs:long;
+}
+
+struct Order {
+  first_frame:int; // First frame number where order appeared
+  type:int; //  Maps to BWAPI::Orders::Enum
+  targetId:int;
+  targetX:int;
+  targetY:int;
+}
+
+struct UnitCommand {
+  frame:int;
+  type:int; // Maps to BWAPI::UnitCommandTypes::Enum
+  targetId:int;
+  targetX:int;
+  targetY:int;
+  extra:int;
+}
+
+struct Bullet {
+  type:int;
+  x:int;
+  y:int;
+}
+
+table Unit {
+  id:int;
+  x:int;
+  y:int;
+  health:int;
+  max_health:int;
+  shield:int;
+  max_shield:int;
+  energy:int;
+  maxCD:int;
+  groundCD:int;
+  airCD:int;
+  flags:long;
+  visible:bool;
+  type:int;
+  armor:int;
+  shieldArmor:int;
+  size:int;
+  pixel_x:int;
+  pixel_y:int;
+  pixel_size_x:int;
+  pixel_size_y:int;
+  groundATK:int;
+  airATK:int;
+  groundDmgType:int;
+  airDmgType:int;
+  groundRange:int;
+  airRange:int;
+  orders:[Order];
+  command:UnitCommand;
+  velocityX:double;
+  velocityY:double;
+  playerId:int;
+  resources:int;
+  buildTechUpgradeType:int;
+  remainingBuildTrainTime:int;
+  remainingUpgradeResearchTime:int;
+  spellCD:int;
+  associatedUnit:int; // addOn, nydusExit, transport, hatchery
+  associatedCount:int; // spiderMines, scarabs, interceptors, nuke
+}
+
+table UnitsOfPlayer {
+  playerId:int;
+  units:[Unit];
+}
+
+table ActionsOfPlayer {
+  playerId:int;
+  actions:[Action];
+}
+
+table ResourcesOfPlayer {
+  playerId:int;
+  resources:Resources;
+}
+
+table KeyFrame {
+  units:[UnitsOfPlayer];
+  actions:[ActionsOfPlayer];
+  resources:[ResourcesOfPlayer];
+  bullets:[Bullet];
+  creep_map:[ubyte];
+  width:uint;
+  height:uint;
+  reward:int;
+  is_terminal:bool;
+}
+
+table UnitDiff {
+  id:int;
+  var_ids:[int];
+  var_diffs:[int];
+  order_ids:[int];
+  order_diffs:[int];
+  order_size:int;
+  velocityX:double;
+  velocityY:double;
+  flags:long;
+}
+
+table UnitDiffContainer {
+  units:[UnitDiff];
+}
+
+struct FrameDiffCreep {
+  index:int;
+  creep:int;
+}
+
+table FrameDiff {
+  pids:[int];
+  unitDiffContainers:[UnitDiffContainer];
+  actions:[ActionsOfPlayer];
+  resources:[ResourcesOfPlayer];
+  bullets:[Bullet];
+  creep_map:[FrameDiffCreep];
+  reward:int;
+  is_terminal:int;
+}

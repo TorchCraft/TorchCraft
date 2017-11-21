@@ -71,7 +71,6 @@ class State : public RefCounted {
 
   // game state
   Frame* frame; // this will allow for easy reset (XXX)
-  std::string frame_string;
   std::vector<int> deaths;
   int frame_from_bwapi;
   int battle_frame_count; // if micro mode

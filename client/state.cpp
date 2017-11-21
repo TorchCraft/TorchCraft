@@ -35,7 +35,6 @@ State::State(const State& other)
       neutral_id(other.neutral_id),
       replay(other.replay),
       frame(new Frame(other.frame)),
-      // frame_string(other.frame_string)  // save some cycles
       deaths(other.deaths),
       frame_from_bwapi(other.frame_from_bwapi),
       battle_frame_count(other.battle_frame_count),
@@ -88,7 +87,6 @@ void swap(State& a, State& b) {
   swap(a.neutral_id, b.neutral_id);
   swap(a.replay, b.replay);
   swap(a.frame, b.frame);
-  swap(a.frame_string, b.frame_string);
   swap(a.deaths, b.deaths);
   swap(a.frame_from_bwapi, b.frame_from_bwapi);
   swap(a.battle_frame_count, b.battle_frame_count);
@@ -126,7 +124,6 @@ void State::reset() {
   map_name.clear();
   start_locations.clear();
   player_info.clear();
-  frame_string.clear();
   frame->clear();
   deaths.clear();
   frame_from_bwapi = 0;
@@ -234,16 +231,15 @@ bool State::update_frame(const torchcraft::fbs::FrameData* fd) {
   if (fd->data() == nullptr)
     return false;
   if (fd->is_diff()) {
-    this->frame_string = "";
     std::istringstream ss(std::string(
         reinterpret_cast<const char*>(fd->data()->data()), fd->data()->size()));
     replayer::FrameDiff diff;
     ss >> diff;
     replayer::frame_undiff(this->frame, this->frame, &diff);
   } else {
-    this->frame_string = std::string(
+    auto frame_string = std::string(
         reinterpret_cast<const char*>(fd->data()->data()), fd->data()->size());
-    std::istringstream ss(this->frame_string);
+    std::istringstream ss(frame_string);
     ss >> *this->frame;
   }
   return true;
@@ -255,7 +251,6 @@ std::vector<std::string> State::update(const torchcraft::fbs::Frame* frame) {
 
   if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::Frame::VT_DATA)) {
     if (this->update_frame(frame->data())) {
-      upd.emplace_back("frame_string");
       upd.emplace_back("frame");
     }
   }
@@ -329,7 +324,6 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
 
   if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
     if (this->update_frame(end->data())) {
-      upd.emplace_back("frame_string");
       upd.emplace_back("frame");
     }
   }

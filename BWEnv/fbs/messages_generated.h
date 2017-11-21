@@ -44,6 +44,44 @@ struct ErrorT;
 struct Message;
 struct MessageT;
 
+struct Action;
+struct ActionT;
+
+struct Resources;
+struct ResourcesT;
+
+struct Order;
+
+struct UnitCommand;
+
+struct Bullet;
+
+struct Unit;
+struct UnitT;
+
+struct UnitsOfPlayer;
+struct UnitsOfPlayerT;
+
+struct ActionsOfPlayer;
+struct ActionsOfPlayerT;
+
+struct ResourcesOfPlayer;
+struct ResourcesOfPlayerT;
+
+struct KeyFrame;
+struct KeyFrameT;
+
+struct UnitDiff;
+struct UnitDiffT;
+
+struct UnitDiffContainer;
+struct UnitDiffContainerT;
+
+struct FrameDiffCreep;
+
+struct FrameDiff;
+struct FrameDiffT;
+
 enum class Any : uint8_t {
   NONE = 0,
   HandshakeClient = 1,
@@ -245,6 +283,194 @@ MANUALLY_ALIGNED_STRUCT(4) Vec2 FLATBUFFERS_FINAL_CLASS {
   }
 };
 STRUCT_END(Vec2, 8);
+
+MANUALLY_ALIGNED_STRUCT(4) Order FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t first_frame_;
+  int32_t type_;
+  int32_t targetId_;
+  int32_t targetX_;
+  int32_t targetY_;
+
+ public:
+  Order() {
+    memset(this, 0, sizeof(Order));
+  }
+  Order(const Order &_o) {
+    memcpy(this, &_o, sizeof(Order));
+  }
+  Order(int32_t _first_frame, int32_t _type, int32_t _targetId, int32_t _targetX, int32_t _targetY)
+      : first_frame_(flatbuffers::EndianScalar(_first_frame)),
+        type_(flatbuffers::EndianScalar(_type)),
+        targetId_(flatbuffers::EndianScalar(_targetId)),
+        targetX_(flatbuffers::EndianScalar(_targetX)),
+        targetY_(flatbuffers::EndianScalar(_targetY)) {
+  }
+  int32_t first_frame() const {
+    return flatbuffers::EndianScalar(first_frame_);
+  }
+  void mutate_first_frame(int32_t _first_frame) {
+    flatbuffers::WriteScalar(&first_frame_, _first_frame);
+  }
+  int32_t type() const {
+    return flatbuffers::EndianScalar(type_);
+  }
+  void mutate_type(int32_t _type) {
+    flatbuffers::WriteScalar(&type_, _type);
+  }
+  int32_t targetId() const {
+    return flatbuffers::EndianScalar(targetId_);
+  }
+  void mutate_targetId(int32_t _targetId) {
+    flatbuffers::WriteScalar(&targetId_, _targetId);
+  }
+  int32_t targetX() const {
+    return flatbuffers::EndianScalar(targetX_);
+  }
+  void mutate_targetX(int32_t _targetX) {
+    flatbuffers::WriteScalar(&targetX_, _targetX);
+  }
+  int32_t targetY() const {
+    return flatbuffers::EndianScalar(targetY_);
+  }
+  void mutate_targetY(int32_t _targetY) {
+    flatbuffers::WriteScalar(&targetY_, _targetY);
+  }
+};
+STRUCT_END(Order, 20);
+
+MANUALLY_ALIGNED_STRUCT(4) UnitCommand FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t frame_;
+  int32_t type_;
+  int32_t targetId_;
+  int32_t targetX_;
+  int32_t targetY_;
+  int32_t extra_;
+
+ public:
+  UnitCommand() {
+    memset(this, 0, sizeof(UnitCommand));
+  }
+  UnitCommand(const UnitCommand &_o) {
+    memcpy(this, &_o, sizeof(UnitCommand));
+  }
+  UnitCommand(int32_t _frame, int32_t _type, int32_t _targetId, int32_t _targetX, int32_t _targetY, int32_t _extra)
+      : frame_(flatbuffers::EndianScalar(_frame)),
+        type_(flatbuffers::EndianScalar(_type)),
+        targetId_(flatbuffers::EndianScalar(_targetId)),
+        targetX_(flatbuffers::EndianScalar(_targetX)),
+        targetY_(flatbuffers::EndianScalar(_targetY)),
+        extra_(flatbuffers::EndianScalar(_extra)) {
+  }
+  int32_t frame() const {
+    return flatbuffers::EndianScalar(frame_);
+  }
+  void mutate_frame(int32_t _frame) {
+    flatbuffers::WriteScalar(&frame_, _frame);
+  }
+  int32_t type() const {
+    return flatbuffers::EndianScalar(type_);
+  }
+  void mutate_type(int32_t _type) {
+    flatbuffers::WriteScalar(&type_, _type);
+  }
+  int32_t targetId() const {
+    return flatbuffers::EndianScalar(targetId_);
+  }
+  void mutate_targetId(int32_t _targetId) {
+    flatbuffers::WriteScalar(&targetId_, _targetId);
+  }
+  int32_t targetX() const {
+    return flatbuffers::EndianScalar(targetX_);
+  }
+  void mutate_targetX(int32_t _targetX) {
+    flatbuffers::WriteScalar(&targetX_, _targetX);
+  }
+  int32_t targetY() const {
+    return flatbuffers::EndianScalar(targetY_);
+  }
+  void mutate_targetY(int32_t _targetY) {
+    flatbuffers::WriteScalar(&targetY_, _targetY);
+  }
+  int32_t extra() const {
+    return flatbuffers::EndianScalar(extra_);
+  }
+  void mutate_extra(int32_t _extra) {
+    flatbuffers::WriteScalar(&extra_, _extra);
+  }
+};
+STRUCT_END(UnitCommand, 24);
+
+MANUALLY_ALIGNED_STRUCT(4) Bullet FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t type_;
+  int32_t x_;
+  int32_t y_;
+
+ public:
+  Bullet() {
+    memset(this, 0, sizeof(Bullet));
+  }
+  Bullet(const Bullet &_o) {
+    memcpy(this, &_o, sizeof(Bullet));
+  }
+  Bullet(int32_t _type, int32_t _x, int32_t _y)
+      : type_(flatbuffers::EndianScalar(_type)),
+        x_(flatbuffers::EndianScalar(_x)),
+        y_(flatbuffers::EndianScalar(_y)) {
+  }
+  int32_t type() const {
+    return flatbuffers::EndianScalar(type_);
+  }
+  void mutate_type(int32_t _type) {
+    flatbuffers::WriteScalar(&type_, _type);
+  }
+  int32_t x() const {
+    return flatbuffers::EndianScalar(x_);
+  }
+  void mutate_x(int32_t _x) {
+    flatbuffers::WriteScalar(&x_, _x);
+  }
+  int32_t y() const {
+    return flatbuffers::EndianScalar(y_);
+  }
+  void mutate_y(int32_t _y) {
+    flatbuffers::WriteScalar(&y_, _y);
+  }
+};
+STRUCT_END(Bullet, 12);
+
+MANUALLY_ALIGNED_STRUCT(4) FrameDiffCreep FLATBUFFERS_FINAL_CLASS {
+ private:
+  int32_t index_;
+  int32_t creep_;
+
+ public:
+  FrameDiffCreep() {
+    memset(this, 0, sizeof(FrameDiffCreep));
+  }
+  FrameDiffCreep(const FrameDiffCreep &_o) {
+    memcpy(this, &_o, sizeof(FrameDiffCreep));
+  }
+  FrameDiffCreep(int32_t _index, int32_t _creep)
+      : index_(flatbuffers::EndianScalar(_index)),
+        creep_(flatbuffers::EndianScalar(_creep)) {
+  }
+  int32_t index() const {
+    return flatbuffers::EndianScalar(index_);
+  }
+  void mutate_index(int32_t _index) {
+    flatbuffers::WriteScalar(&index_, _index);
+  }
+  int32_t creep() const {
+    return flatbuffers::EndianScalar(creep_);
+  }
+  void mutate_creep(int32_t _creep) {
+    flatbuffers::WriteScalar(&creep_, _creep);
+  }
+};
+STRUCT_END(FrameDiffCreep, 8);
 
 struct CommandT : public flatbuffers::NativeTable {
   typedef Command TableType;
@@ -1573,6 +1799,1858 @@ inline flatbuffers::Offset<Message> CreateMessageDirect(
 
 flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder &_fbb, const MessageT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
+struct ActionT : public flatbuffers::NativeTable {
+  typedef Action TableType;
+  std::vector<int32_t> action;
+  int32_t uid;
+  int32_t aid;
+  ActionT()
+      : uid(0),
+        aid(0) {
+  }
+};
+
+struct Action FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ActionT NativeTableType;
+  enum {
+    VT_ACTION = 4,
+    VT_UID = 6,
+    VT_AID = 8
+  };
+  const flatbuffers::Vector<int32_t> *action() const {
+    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_ACTION);
+  }
+  flatbuffers::Vector<int32_t> *mutable_action() {
+    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_ACTION);
+  }
+  int32_t uid() const {
+    return GetField<int32_t>(VT_UID, 0);
+  }
+  bool mutate_uid(int32_t _uid) {
+    return SetField<int32_t>(VT_UID, _uid, 0);
+  }
+  int32_t aid() const {
+    return GetField<int32_t>(VT_AID, 0);
+  }
+  bool mutate_aid(int32_t _aid) {
+    return SetField<int32_t>(VT_AID, _aid, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_ACTION) &&
+           verifier.Verify(action()) &&
+           VerifyField<int32_t>(verifier, VT_UID) &&
+           VerifyField<int32_t>(verifier, VT_AID) &&
+           verifier.EndTable();
+  }
+  ActionT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(ActionT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Action> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ActionT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct ActionBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_action(flatbuffers::Offset<flatbuffers::Vector<int32_t>> action) {
+    fbb_.AddOffset(Action::VT_ACTION, action);
+  }
+  void add_uid(int32_t uid) {
+    fbb_.AddElement<int32_t>(Action::VT_UID, uid, 0);
+  }
+  void add_aid(int32_t aid) {
+    fbb_.AddElement<int32_t>(Action::VT_AID, aid, 0);
+  }
+  explicit ActionBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ActionBuilder &operator=(const ActionBuilder &);
+  flatbuffers::Offset<Action> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<Action>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Action> CreateAction(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> action = 0,
+    int32_t uid = 0,
+    int32_t aid = 0) {
+  ActionBuilder builder_(_fbb);
+  builder_.add_aid(aid);
+  builder_.add_uid(uid);
+  builder_.add_action(action);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Action> CreateActionDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<int32_t> *action = nullptr,
+    int32_t uid = 0,
+    int32_t aid = 0) {
+  return torchcraft::fbs::CreateAction(
+      _fbb,
+      action ? _fbb.CreateVector<int32_t>(*action) : 0,
+      uid,
+      aid);
+}
+
+flatbuffers::Offset<Action> CreateAction(flatbuffers::FlatBufferBuilder &_fbb, const ActionT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct ResourcesT : public flatbuffers::NativeTable {
+  typedef Resources TableType;
+  int32_t ore;
+  int32_t gas;
+  int32_t used_psi;
+  int32_t total_psi;
+  int64_t upgrades;
+  int64_t upgrades_level;
+  int64_t techs;
+  ResourcesT()
+      : ore(0),
+        gas(0),
+        used_psi(0),
+        total_psi(0),
+        upgrades(0),
+        upgrades_level(0),
+        techs(0) {
+  }
+};
+
+struct Resources FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ResourcesT NativeTableType;
+  enum {
+    VT_ORE = 4,
+    VT_GAS = 6,
+    VT_USED_PSI = 8,
+    VT_TOTAL_PSI = 10,
+    VT_UPGRADES = 12,
+    VT_UPGRADES_LEVEL = 14,
+    VT_TECHS = 16
+  };
+  int32_t ore() const {
+    return GetField<int32_t>(VT_ORE, 0);
+  }
+  bool mutate_ore(int32_t _ore) {
+    return SetField<int32_t>(VT_ORE, _ore, 0);
+  }
+  int32_t gas() const {
+    return GetField<int32_t>(VT_GAS, 0);
+  }
+  bool mutate_gas(int32_t _gas) {
+    return SetField<int32_t>(VT_GAS, _gas, 0);
+  }
+  int32_t used_psi() const {
+    return GetField<int32_t>(VT_USED_PSI, 0);
+  }
+  bool mutate_used_psi(int32_t _used_psi) {
+    return SetField<int32_t>(VT_USED_PSI, _used_psi, 0);
+  }
+  int32_t total_psi() const {
+    return GetField<int32_t>(VT_TOTAL_PSI, 0);
+  }
+  bool mutate_total_psi(int32_t _total_psi) {
+    return SetField<int32_t>(VT_TOTAL_PSI, _total_psi, 0);
+  }
+  int64_t upgrades() const {
+    return GetField<int64_t>(VT_UPGRADES, 0);
+  }
+  bool mutate_upgrades(int64_t _upgrades) {
+    return SetField<int64_t>(VT_UPGRADES, _upgrades, 0);
+  }
+  int64_t upgrades_level() const {
+    return GetField<int64_t>(VT_UPGRADES_LEVEL, 0);
+  }
+  bool mutate_upgrades_level(int64_t _upgrades_level) {
+    return SetField<int64_t>(VT_UPGRADES_LEVEL, _upgrades_level, 0);
+  }
+  int64_t techs() const {
+    return GetField<int64_t>(VT_TECHS, 0);
+  }
+  bool mutate_techs(int64_t _techs) {
+    return SetField<int64_t>(VT_TECHS, _techs, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_ORE) &&
+           VerifyField<int32_t>(verifier, VT_GAS) &&
+           VerifyField<int32_t>(verifier, VT_USED_PSI) &&
+           VerifyField<int32_t>(verifier, VT_TOTAL_PSI) &&
+           VerifyField<int64_t>(verifier, VT_UPGRADES) &&
+           VerifyField<int64_t>(verifier, VT_UPGRADES_LEVEL) &&
+           VerifyField<int64_t>(verifier, VT_TECHS) &&
+           verifier.EndTable();
+  }
+  ResourcesT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(ResourcesT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Resources> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct ResourcesBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_ore(int32_t ore) {
+    fbb_.AddElement<int32_t>(Resources::VT_ORE, ore, 0);
+  }
+  void add_gas(int32_t gas) {
+    fbb_.AddElement<int32_t>(Resources::VT_GAS, gas, 0);
+  }
+  void add_used_psi(int32_t used_psi) {
+    fbb_.AddElement<int32_t>(Resources::VT_USED_PSI, used_psi, 0);
+  }
+  void add_total_psi(int32_t total_psi) {
+    fbb_.AddElement<int32_t>(Resources::VT_TOTAL_PSI, total_psi, 0);
+  }
+  void add_upgrades(int64_t upgrades) {
+    fbb_.AddElement<int64_t>(Resources::VT_UPGRADES, upgrades, 0);
+  }
+  void add_upgrades_level(int64_t upgrades_level) {
+    fbb_.AddElement<int64_t>(Resources::VT_UPGRADES_LEVEL, upgrades_level, 0);
+  }
+  void add_techs(int64_t techs) {
+    fbb_.AddElement<int64_t>(Resources::VT_TECHS, techs, 0);
+  }
+  explicit ResourcesBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ResourcesBuilder &operator=(const ResourcesBuilder &);
+  flatbuffers::Offset<Resources> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<Resources>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Resources> CreateResources(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t ore = 0,
+    int32_t gas = 0,
+    int32_t used_psi = 0,
+    int32_t total_psi = 0,
+    int64_t upgrades = 0,
+    int64_t upgrades_level = 0,
+    int64_t techs = 0) {
+  ResourcesBuilder builder_(_fbb);
+  builder_.add_techs(techs);
+  builder_.add_upgrades_level(upgrades_level);
+  builder_.add_upgrades(upgrades);
+  builder_.add_total_psi(total_psi);
+  builder_.add_used_psi(used_psi);
+  builder_.add_gas(gas);
+  builder_.add_ore(ore);
+  return builder_.Finish();
+}
+
+flatbuffers::Offset<Resources> CreateResources(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct UnitT : public flatbuffers::NativeTable {
+  typedef Unit TableType;
+  int32_t id;
+  int32_t x;
+  int32_t y;
+  int32_t health;
+  int32_t max_health;
+  int32_t shield;
+  int32_t max_shield;
+  int32_t energy;
+  int32_t maxCD;
+  int32_t groundCD;
+  int32_t airCD;
+  int64_t flags;
+  bool visible;
+  int32_t type;
+  int32_t armor;
+  int32_t shieldArmor;
+  int32_t size;
+  int32_t pixel_x;
+  int32_t pixel_y;
+  int32_t pixel_size_x;
+  int32_t pixel_size_y;
+  int32_t groundATK;
+  int32_t airATK;
+  int32_t groundDmgType;
+  int32_t airDmgType;
+  int32_t groundRange;
+  int32_t airRange;
+  std::vector<Order> orders;
+  std::unique_ptr<UnitCommand> command;
+  double velocityX;
+  double velocityY;
+  int32_t playerId;
+  int32_t resources;
+  int32_t buildTechUpgradeType;
+  int32_t remainingBuildTrainTime;
+  int32_t remainingUpgradeResearchTime;
+  int32_t spellCD;
+  int32_t associatedUnit;
+  int32_t associatedCount;
+  UnitT()
+      : id(0),
+        x(0),
+        y(0),
+        health(0),
+        max_health(0),
+        shield(0),
+        max_shield(0),
+        energy(0),
+        maxCD(0),
+        groundCD(0),
+        airCD(0),
+        flags(0),
+        visible(false),
+        type(0),
+        armor(0),
+        shieldArmor(0),
+        size(0),
+        pixel_x(0),
+        pixel_y(0),
+        pixel_size_x(0),
+        pixel_size_y(0),
+        groundATK(0),
+        airATK(0),
+        groundDmgType(0),
+        airDmgType(0),
+        groundRange(0),
+        airRange(0),
+        velocityX(0.0),
+        velocityY(0.0),
+        playerId(0),
+        resources(0),
+        buildTechUpgradeType(0),
+        remainingBuildTrainTime(0),
+        remainingUpgradeResearchTime(0),
+        spellCD(0),
+        associatedUnit(0),
+        associatedCount(0) {
+  }
+};
+
+struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef UnitT NativeTableType;
+  enum {
+    VT_ID = 4,
+    VT_X = 6,
+    VT_Y = 8,
+    VT_HEALTH = 10,
+    VT_MAX_HEALTH = 12,
+    VT_SHIELD = 14,
+    VT_MAX_SHIELD = 16,
+    VT_ENERGY = 18,
+    VT_MAXCD = 20,
+    VT_GROUNDCD = 22,
+    VT_AIRCD = 24,
+    VT_FLAGS = 26,
+    VT_VISIBLE = 28,
+    VT_TYPE = 30,
+    VT_ARMOR = 32,
+    VT_SHIELDARMOR = 34,
+    VT_SIZE = 36,
+    VT_PIXEL_X = 38,
+    VT_PIXEL_Y = 40,
+    VT_PIXEL_SIZE_X = 42,
+    VT_PIXEL_SIZE_Y = 44,
+    VT_GROUNDATK = 46,
+    VT_AIRATK = 48,
+    VT_GROUNDDMGTYPE = 50,
+    VT_AIRDMGTYPE = 52,
+    VT_GROUNDRANGE = 54,
+    VT_AIRRANGE = 56,
+    VT_ORDERS = 58,
+    VT_COMMAND = 60,
+    VT_VELOCITYX = 62,
+    VT_VELOCITYY = 64,
+    VT_PLAYERID = 66,
+    VT_RESOURCES = 68,
+    VT_BUILDTECHUPGRADETYPE = 70,
+    VT_REMAININGBUILDTRAINTIME = 72,
+    VT_REMAININGUPGRADERESEARCHTIME = 74,
+    VT_SPELLCD = 76,
+    VT_ASSOCIATEDUNIT = 78,
+    VT_ASSOCIATEDCOUNT = 80
+  };
+  int32_t id() const {
+    return GetField<int32_t>(VT_ID, 0);
+  }
+  bool mutate_id(int32_t _id) {
+    return SetField<int32_t>(VT_ID, _id, 0);
+  }
+  int32_t x() const {
+    return GetField<int32_t>(VT_X, 0);
+  }
+  bool mutate_x(int32_t _x) {
+    return SetField<int32_t>(VT_X, _x, 0);
+  }
+  int32_t y() const {
+    return GetField<int32_t>(VT_Y, 0);
+  }
+  bool mutate_y(int32_t _y) {
+    return SetField<int32_t>(VT_Y, _y, 0);
+  }
+  int32_t health() const {
+    return GetField<int32_t>(VT_HEALTH, 0);
+  }
+  bool mutate_health(int32_t _health) {
+    return SetField<int32_t>(VT_HEALTH, _health, 0);
+  }
+  int32_t max_health() const {
+    return GetField<int32_t>(VT_MAX_HEALTH, 0);
+  }
+  bool mutate_max_health(int32_t _max_health) {
+    return SetField<int32_t>(VT_MAX_HEALTH, _max_health, 0);
+  }
+  int32_t shield() const {
+    return GetField<int32_t>(VT_SHIELD, 0);
+  }
+  bool mutate_shield(int32_t _shield) {
+    return SetField<int32_t>(VT_SHIELD, _shield, 0);
+  }
+  int32_t max_shield() const {
+    return GetField<int32_t>(VT_MAX_SHIELD, 0);
+  }
+  bool mutate_max_shield(int32_t _max_shield) {
+    return SetField<int32_t>(VT_MAX_SHIELD, _max_shield, 0);
+  }
+  int32_t energy() const {
+    return GetField<int32_t>(VT_ENERGY, 0);
+  }
+  bool mutate_energy(int32_t _energy) {
+    return SetField<int32_t>(VT_ENERGY, _energy, 0);
+  }
+  int32_t maxCD() const {
+    return GetField<int32_t>(VT_MAXCD, 0);
+  }
+  bool mutate_maxCD(int32_t _maxCD) {
+    return SetField<int32_t>(VT_MAXCD, _maxCD, 0);
+  }
+  int32_t groundCD() const {
+    return GetField<int32_t>(VT_GROUNDCD, 0);
+  }
+  bool mutate_groundCD(int32_t _groundCD) {
+    return SetField<int32_t>(VT_GROUNDCD, _groundCD, 0);
+  }
+  int32_t airCD() const {
+    return GetField<int32_t>(VT_AIRCD, 0);
+  }
+  bool mutate_airCD(int32_t _airCD) {
+    return SetField<int32_t>(VT_AIRCD, _airCD, 0);
+  }
+  int64_t flags() const {
+    return GetField<int64_t>(VT_FLAGS, 0);
+  }
+  bool mutate_flags(int64_t _flags) {
+    return SetField<int64_t>(VT_FLAGS, _flags, 0);
+  }
+  bool visible() const {
+    return GetField<uint8_t>(VT_VISIBLE, 0) != 0;
+  }
+  bool mutate_visible(bool _visible) {
+    return SetField<uint8_t>(VT_VISIBLE, static_cast<uint8_t>(_visible), 0);
+  }
+  int32_t type() const {
+    return GetField<int32_t>(VT_TYPE, 0);
+  }
+  bool mutate_type(int32_t _type) {
+    return SetField<int32_t>(VT_TYPE, _type, 0);
+  }
+  int32_t armor() const {
+    return GetField<int32_t>(VT_ARMOR, 0);
+  }
+  bool mutate_armor(int32_t _armor) {
+    return SetField<int32_t>(VT_ARMOR, _armor, 0);
+  }
+  int32_t shieldArmor() const {
+    return GetField<int32_t>(VT_SHIELDARMOR, 0);
+  }
+  bool mutate_shieldArmor(int32_t _shieldArmor) {
+    return SetField<int32_t>(VT_SHIELDARMOR, _shieldArmor, 0);
+  }
+  int32_t size() const {
+    return GetField<int32_t>(VT_SIZE, 0);
+  }
+  bool mutate_size(int32_t _size) {
+    return SetField<int32_t>(VT_SIZE, _size, 0);
+  }
+  int32_t pixel_x() const {
+    return GetField<int32_t>(VT_PIXEL_X, 0);
+  }
+  bool mutate_pixel_x(int32_t _pixel_x) {
+    return SetField<int32_t>(VT_PIXEL_X, _pixel_x, 0);
+  }
+  int32_t pixel_y() const {
+    return GetField<int32_t>(VT_PIXEL_Y, 0);
+  }
+  bool mutate_pixel_y(int32_t _pixel_y) {
+    return SetField<int32_t>(VT_PIXEL_Y, _pixel_y, 0);
+  }
+  int32_t pixel_size_x() const {
+    return GetField<int32_t>(VT_PIXEL_SIZE_X, 0);
+  }
+  bool mutate_pixel_size_x(int32_t _pixel_size_x) {
+    return SetField<int32_t>(VT_PIXEL_SIZE_X, _pixel_size_x, 0);
+  }
+  int32_t pixel_size_y() const {
+    return GetField<int32_t>(VT_PIXEL_SIZE_Y, 0);
+  }
+  bool mutate_pixel_size_y(int32_t _pixel_size_y) {
+    return SetField<int32_t>(VT_PIXEL_SIZE_Y, _pixel_size_y, 0);
+  }
+  int32_t groundATK() const {
+    return GetField<int32_t>(VT_GROUNDATK, 0);
+  }
+  bool mutate_groundATK(int32_t _groundATK) {
+    return SetField<int32_t>(VT_GROUNDATK, _groundATK, 0);
+  }
+  int32_t airATK() const {
+    return GetField<int32_t>(VT_AIRATK, 0);
+  }
+  bool mutate_airATK(int32_t _airATK) {
+    return SetField<int32_t>(VT_AIRATK, _airATK, 0);
+  }
+  int32_t groundDmgType() const {
+    return GetField<int32_t>(VT_GROUNDDMGTYPE, 0);
+  }
+  bool mutate_groundDmgType(int32_t _groundDmgType) {
+    return SetField<int32_t>(VT_GROUNDDMGTYPE, _groundDmgType, 0);
+  }
+  int32_t airDmgType() const {
+    return GetField<int32_t>(VT_AIRDMGTYPE, 0);
+  }
+  bool mutate_airDmgType(int32_t _airDmgType) {
+    return SetField<int32_t>(VT_AIRDMGTYPE, _airDmgType, 0);
+  }
+  int32_t groundRange() const {
+    return GetField<int32_t>(VT_GROUNDRANGE, 0);
+  }
+  bool mutate_groundRange(int32_t _groundRange) {
+    return SetField<int32_t>(VT_GROUNDRANGE, _groundRange, 0);
+  }
+  int32_t airRange() const {
+    return GetField<int32_t>(VT_AIRRANGE, 0);
+  }
+  bool mutate_airRange(int32_t _airRange) {
+    return SetField<int32_t>(VT_AIRRANGE, _airRange, 0);
+  }
+  const flatbuffers::Vector<const Order *> *orders() const {
+    return GetPointer<const flatbuffers::Vector<const Order *> *>(VT_ORDERS);
+  }
+  flatbuffers::Vector<const Order *> *mutable_orders() {
+    return GetPointer<flatbuffers::Vector<const Order *> *>(VT_ORDERS);
+  }
+  const UnitCommand *command() const {
+    return GetStruct<const UnitCommand *>(VT_COMMAND);
+  }
+  UnitCommand *mutable_command() {
+    return GetStruct<UnitCommand *>(VT_COMMAND);
+  }
+  double velocityX() const {
+    return GetField<double>(VT_VELOCITYX, 0.0);
+  }
+  bool mutate_velocityX(double _velocityX) {
+    return SetField<double>(VT_VELOCITYX, _velocityX, 0.0);
+  }
+  double velocityY() const {
+    return GetField<double>(VT_VELOCITYY, 0.0);
+  }
+  bool mutate_velocityY(double _velocityY) {
+    return SetField<double>(VT_VELOCITYY, _velocityY, 0.0);
+  }
+  int32_t playerId() const {
+    return GetField<int32_t>(VT_PLAYERID, 0);
+  }
+  bool mutate_playerId(int32_t _playerId) {
+    return SetField<int32_t>(VT_PLAYERID, _playerId, 0);
+  }
+  int32_t resources() const {
+    return GetField<int32_t>(VT_RESOURCES, 0);
+  }
+  bool mutate_resources(int32_t _resources) {
+    return SetField<int32_t>(VT_RESOURCES, _resources, 0);
+  }
+  int32_t buildTechUpgradeType() const {
+    return GetField<int32_t>(VT_BUILDTECHUPGRADETYPE, 0);
+  }
+  bool mutate_buildTechUpgradeType(int32_t _buildTechUpgradeType) {
+    return SetField<int32_t>(VT_BUILDTECHUPGRADETYPE, _buildTechUpgradeType, 0);
+  }
+  int32_t remainingBuildTrainTime() const {
+    return GetField<int32_t>(VT_REMAININGBUILDTRAINTIME, 0);
+  }
+  bool mutate_remainingBuildTrainTime(int32_t _remainingBuildTrainTime) {
+    return SetField<int32_t>(VT_REMAININGBUILDTRAINTIME, _remainingBuildTrainTime, 0);
+  }
+  int32_t remainingUpgradeResearchTime() const {
+    return GetField<int32_t>(VT_REMAININGUPGRADERESEARCHTIME, 0);
+  }
+  bool mutate_remainingUpgradeResearchTime(int32_t _remainingUpgradeResearchTime) {
+    return SetField<int32_t>(VT_REMAININGUPGRADERESEARCHTIME, _remainingUpgradeResearchTime, 0);
+  }
+  int32_t spellCD() const {
+    return GetField<int32_t>(VT_SPELLCD, 0);
+  }
+  bool mutate_spellCD(int32_t _spellCD) {
+    return SetField<int32_t>(VT_SPELLCD, _spellCD, 0);
+  }
+  int32_t associatedUnit() const {
+    return GetField<int32_t>(VT_ASSOCIATEDUNIT, 0);
+  }
+  bool mutate_associatedUnit(int32_t _associatedUnit) {
+    return SetField<int32_t>(VT_ASSOCIATEDUNIT, _associatedUnit, 0);
+  }
+  int32_t associatedCount() const {
+    return GetField<int32_t>(VT_ASSOCIATEDCOUNT, 0);
+  }
+  bool mutate_associatedCount(int32_t _associatedCount) {
+    return SetField<int32_t>(VT_ASSOCIATEDCOUNT, _associatedCount, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyField<int32_t>(verifier, VT_X) &&
+           VerifyField<int32_t>(verifier, VT_Y) &&
+           VerifyField<int32_t>(verifier, VT_HEALTH) &&
+           VerifyField<int32_t>(verifier, VT_MAX_HEALTH) &&
+           VerifyField<int32_t>(verifier, VT_SHIELD) &&
+           VerifyField<int32_t>(verifier, VT_MAX_SHIELD) &&
+           VerifyField<int32_t>(verifier, VT_ENERGY) &&
+           VerifyField<int32_t>(verifier, VT_MAXCD) &&
+           VerifyField<int32_t>(verifier, VT_GROUNDCD) &&
+           VerifyField<int32_t>(verifier, VT_AIRCD) &&
+           VerifyField<int64_t>(verifier, VT_FLAGS) &&
+           VerifyField<uint8_t>(verifier, VT_VISIBLE) &&
+           VerifyField<int32_t>(verifier, VT_TYPE) &&
+           VerifyField<int32_t>(verifier, VT_ARMOR) &&
+           VerifyField<int32_t>(verifier, VT_SHIELDARMOR) &&
+           VerifyField<int32_t>(verifier, VT_SIZE) &&
+           VerifyField<int32_t>(verifier, VT_PIXEL_X) &&
+           VerifyField<int32_t>(verifier, VT_PIXEL_Y) &&
+           VerifyField<int32_t>(verifier, VT_PIXEL_SIZE_X) &&
+           VerifyField<int32_t>(verifier, VT_PIXEL_SIZE_Y) &&
+           VerifyField<int32_t>(verifier, VT_GROUNDATK) &&
+           VerifyField<int32_t>(verifier, VT_AIRATK) &&
+           VerifyField<int32_t>(verifier, VT_GROUNDDMGTYPE) &&
+           VerifyField<int32_t>(verifier, VT_AIRDMGTYPE) &&
+           VerifyField<int32_t>(verifier, VT_GROUNDRANGE) &&
+           VerifyField<int32_t>(verifier, VT_AIRRANGE) &&
+           VerifyOffset(verifier, VT_ORDERS) &&
+           verifier.Verify(orders()) &&
+           VerifyField<UnitCommand>(verifier, VT_COMMAND) &&
+           VerifyField<double>(verifier, VT_VELOCITYX) &&
+           VerifyField<double>(verifier, VT_VELOCITYY) &&
+           VerifyField<int32_t>(verifier, VT_PLAYERID) &&
+           VerifyField<int32_t>(verifier, VT_RESOURCES) &&
+           VerifyField<int32_t>(verifier, VT_BUILDTECHUPGRADETYPE) &&
+           VerifyField<int32_t>(verifier, VT_REMAININGBUILDTRAINTIME) &&
+           VerifyField<int32_t>(verifier, VT_REMAININGUPGRADERESEARCHTIME) &&
+           VerifyField<int32_t>(verifier, VT_SPELLCD) &&
+           VerifyField<int32_t>(verifier, VT_ASSOCIATEDUNIT) &&
+           VerifyField<int32_t>(verifier, VT_ASSOCIATEDCOUNT) &&
+           verifier.EndTable();
+  }
+  UnitT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(UnitT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<Unit> Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct UnitBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_id(int32_t id) {
+    fbb_.AddElement<int32_t>(Unit::VT_ID, id, 0);
+  }
+  void add_x(int32_t x) {
+    fbb_.AddElement<int32_t>(Unit::VT_X, x, 0);
+  }
+  void add_y(int32_t y) {
+    fbb_.AddElement<int32_t>(Unit::VT_Y, y, 0);
+  }
+  void add_health(int32_t health) {
+    fbb_.AddElement<int32_t>(Unit::VT_HEALTH, health, 0);
+  }
+  void add_max_health(int32_t max_health) {
+    fbb_.AddElement<int32_t>(Unit::VT_MAX_HEALTH, max_health, 0);
+  }
+  void add_shield(int32_t shield) {
+    fbb_.AddElement<int32_t>(Unit::VT_SHIELD, shield, 0);
+  }
+  void add_max_shield(int32_t max_shield) {
+    fbb_.AddElement<int32_t>(Unit::VT_MAX_SHIELD, max_shield, 0);
+  }
+  void add_energy(int32_t energy) {
+    fbb_.AddElement<int32_t>(Unit::VT_ENERGY, energy, 0);
+  }
+  void add_maxCD(int32_t maxCD) {
+    fbb_.AddElement<int32_t>(Unit::VT_MAXCD, maxCD, 0);
+  }
+  void add_groundCD(int32_t groundCD) {
+    fbb_.AddElement<int32_t>(Unit::VT_GROUNDCD, groundCD, 0);
+  }
+  void add_airCD(int32_t airCD) {
+    fbb_.AddElement<int32_t>(Unit::VT_AIRCD, airCD, 0);
+  }
+  void add_flags(int64_t flags) {
+    fbb_.AddElement<int64_t>(Unit::VT_FLAGS, flags, 0);
+  }
+  void add_visible(bool visible) {
+    fbb_.AddElement<uint8_t>(Unit::VT_VISIBLE, static_cast<uint8_t>(visible), 0);
+  }
+  void add_type(int32_t type) {
+    fbb_.AddElement<int32_t>(Unit::VT_TYPE, type, 0);
+  }
+  void add_armor(int32_t armor) {
+    fbb_.AddElement<int32_t>(Unit::VT_ARMOR, armor, 0);
+  }
+  void add_shieldArmor(int32_t shieldArmor) {
+    fbb_.AddElement<int32_t>(Unit::VT_SHIELDARMOR, shieldArmor, 0);
+  }
+  void add_size(int32_t size) {
+    fbb_.AddElement<int32_t>(Unit::VT_SIZE, size, 0);
+  }
+  void add_pixel_x(int32_t pixel_x) {
+    fbb_.AddElement<int32_t>(Unit::VT_PIXEL_X, pixel_x, 0);
+  }
+  void add_pixel_y(int32_t pixel_y) {
+    fbb_.AddElement<int32_t>(Unit::VT_PIXEL_Y, pixel_y, 0);
+  }
+  void add_pixel_size_x(int32_t pixel_size_x) {
+    fbb_.AddElement<int32_t>(Unit::VT_PIXEL_SIZE_X, pixel_size_x, 0);
+  }
+  void add_pixel_size_y(int32_t pixel_size_y) {
+    fbb_.AddElement<int32_t>(Unit::VT_PIXEL_SIZE_Y, pixel_size_y, 0);
+  }
+  void add_groundATK(int32_t groundATK) {
+    fbb_.AddElement<int32_t>(Unit::VT_GROUNDATK, groundATK, 0);
+  }
+  void add_airATK(int32_t airATK) {
+    fbb_.AddElement<int32_t>(Unit::VT_AIRATK, airATK, 0);
+  }
+  void add_groundDmgType(int32_t groundDmgType) {
+    fbb_.AddElement<int32_t>(Unit::VT_GROUNDDMGTYPE, groundDmgType, 0);
+  }
+  void add_airDmgType(int32_t airDmgType) {
+    fbb_.AddElement<int32_t>(Unit::VT_AIRDMGTYPE, airDmgType, 0);
+  }
+  void add_groundRange(int32_t groundRange) {
+    fbb_.AddElement<int32_t>(Unit::VT_GROUNDRANGE, groundRange, 0);
+  }
+  void add_airRange(int32_t airRange) {
+    fbb_.AddElement<int32_t>(Unit::VT_AIRRANGE, airRange, 0);
+  }
+  void add_orders(flatbuffers::Offset<flatbuffers::Vector<const Order *>> orders) {
+    fbb_.AddOffset(Unit::VT_ORDERS, orders);
+  }
+  void add_command(const UnitCommand *command) {
+    fbb_.AddStruct(Unit::VT_COMMAND, command);
+  }
+  void add_velocityX(double velocityX) {
+    fbb_.AddElement<double>(Unit::VT_VELOCITYX, velocityX, 0.0);
+  }
+  void add_velocityY(double velocityY) {
+    fbb_.AddElement<double>(Unit::VT_VELOCITYY, velocityY, 0.0);
+  }
+  void add_playerId(int32_t playerId) {
+    fbb_.AddElement<int32_t>(Unit::VT_PLAYERID, playerId, 0);
+  }
+  void add_resources(int32_t resources) {
+    fbb_.AddElement<int32_t>(Unit::VT_RESOURCES, resources, 0);
+  }
+  void add_buildTechUpgradeType(int32_t buildTechUpgradeType) {
+    fbb_.AddElement<int32_t>(Unit::VT_BUILDTECHUPGRADETYPE, buildTechUpgradeType, 0);
+  }
+  void add_remainingBuildTrainTime(int32_t remainingBuildTrainTime) {
+    fbb_.AddElement<int32_t>(Unit::VT_REMAININGBUILDTRAINTIME, remainingBuildTrainTime, 0);
+  }
+  void add_remainingUpgradeResearchTime(int32_t remainingUpgradeResearchTime) {
+    fbb_.AddElement<int32_t>(Unit::VT_REMAININGUPGRADERESEARCHTIME, remainingUpgradeResearchTime, 0);
+  }
+  void add_spellCD(int32_t spellCD) {
+    fbb_.AddElement<int32_t>(Unit::VT_SPELLCD, spellCD, 0);
+  }
+  void add_associatedUnit(int32_t associatedUnit) {
+    fbb_.AddElement<int32_t>(Unit::VT_ASSOCIATEDUNIT, associatedUnit, 0);
+  }
+  void add_associatedCount(int32_t associatedCount) {
+    fbb_.AddElement<int32_t>(Unit::VT_ASSOCIATEDCOUNT, associatedCount, 0);
+  }
+  explicit UnitBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  UnitBuilder &operator=(const UnitBuilder &);
+  flatbuffers::Offset<Unit> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<Unit>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<Unit> CreateUnit(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t id = 0,
+    int32_t x = 0,
+    int32_t y = 0,
+    int32_t health = 0,
+    int32_t max_health = 0,
+    int32_t shield = 0,
+    int32_t max_shield = 0,
+    int32_t energy = 0,
+    int32_t maxCD = 0,
+    int32_t groundCD = 0,
+    int32_t airCD = 0,
+    int64_t flags = 0,
+    bool visible = false,
+    int32_t type = 0,
+    int32_t armor = 0,
+    int32_t shieldArmor = 0,
+    int32_t size = 0,
+    int32_t pixel_x = 0,
+    int32_t pixel_y = 0,
+    int32_t pixel_size_x = 0,
+    int32_t pixel_size_y = 0,
+    int32_t groundATK = 0,
+    int32_t airATK = 0,
+    int32_t groundDmgType = 0,
+    int32_t airDmgType = 0,
+    int32_t groundRange = 0,
+    int32_t airRange = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Order *>> orders = 0,
+    const UnitCommand *command = 0,
+    double velocityX = 0.0,
+    double velocityY = 0.0,
+    int32_t playerId = 0,
+    int32_t resources = 0,
+    int32_t buildTechUpgradeType = 0,
+    int32_t remainingBuildTrainTime = 0,
+    int32_t remainingUpgradeResearchTime = 0,
+    int32_t spellCD = 0,
+    int32_t associatedUnit = 0,
+    int32_t associatedCount = 0) {
+  UnitBuilder builder_(_fbb);
+  builder_.add_velocityY(velocityY);
+  builder_.add_velocityX(velocityX);
+  builder_.add_flags(flags);
+  builder_.add_associatedCount(associatedCount);
+  builder_.add_associatedUnit(associatedUnit);
+  builder_.add_spellCD(spellCD);
+  builder_.add_remainingUpgradeResearchTime(remainingUpgradeResearchTime);
+  builder_.add_remainingBuildTrainTime(remainingBuildTrainTime);
+  builder_.add_buildTechUpgradeType(buildTechUpgradeType);
+  builder_.add_resources(resources);
+  builder_.add_playerId(playerId);
+  builder_.add_command(command);
+  builder_.add_orders(orders);
+  builder_.add_airRange(airRange);
+  builder_.add_groundRange(groundRange);
+  builder_.add_airDmgType(airDmgType);
+  builder_.add_groundDmgType(groundDmgType);
+  builder_.add_airATK(airATK);
+  builder_.add_groundATK(groundATK);
+  builder_.add_pixel_size_y(pixel_size_y);
+  builder_.add_pixel_size_x(pixel_size_x);
+  builder_.add_pixel_y(pixel_y);
+  builder_.add_pixel_x(pixel_x);
+  builder_.add_size(size);
+  builder_.add_shieldArmor(shieldArmor);
+  builder_.add_armor(armor);
+  builder_.add_type(type);
+  builder_.add_airCD(airCD);
+  builder_.add_groundCD(groundCD);
+  builder_.add_maxCD(maxCD);
+  builder_.add_energy(energy);
+  builder_.add_max_shield(max_shield);
+  builder_.add_shield(shield);
+  builder_.add_max_health(max_health);
+  builder_.add_health(health);
+  builder_.add_y(y);
+  builder_.add_x(x);
+  builder_.add_id(id);
+  builder_.add_visible(visible);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<Unit> CreateUnitDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t id = 0,
+    int32_t x = 0,
+    int32_t y = 0,
+    int32_t health = 0,
+    int32_t max_health = 0,
+    int32_t shield = 0,
+    int32_t max_shield = 0,
+    int32_t energy = 0,
+    int32_t maxCD = 0,
+    int32_t groundCD = 0,
+    int32_t airCD = 0,
+    int64_t flags = 0,
+    bool visible = false,
+    int32_t type = 0,
+    int32_t armor = 0,
+    int32_t shieldArmor = 0,
+    int32_t size = 0,
+    int32_t pixel_x = 0,
+    int32_t pixel_y = 0,
+    int32_t pixel_size_x = 0,
+    int32_t pixel_size_y = 0,
+    int32_t groundATK = 0,
+    int32_t airATK = 0,
+    int32_t groundDmgType = 0,
+    int32_t airDmgType = 0,
+    int32_t groundRange = 0,
+    int32_t airRange = 0,
+    const std::vector<const Order *> *orders = nullptr,
+    const UnitCommand *command = 0,
+    double velocityX = 0.0,
+    double velocityY = 0.0,
+    int32_t playerId = 0,
+    int32_t resources = 0,
+    int32_t buildTechUpgradeType = 0,
+    int32_t remainingBuildTrainTime = 0,
+    int32_t remainingUpgradeResearchTime = 0,
+    int32_t spellCD = 0,
+    int32_t associatedUnit = 0,
+    int32_t associatedCount = 0) {
+  return torchcraft::fbs::CreateUnit(
+      _fbb,
+      id,
+      x,
+      y,
+      health,
+      max_health,
+      shield,
+      max_shield,
+      energy,
+      maxCD,
+      groundCD,
+      airCD,
+      flags,
+      visible,
+      type,
+      armor,
+      shieldArmor,
+      size,
+      pixel_x,
+      pixel_y,
+      pixel_size_x,
+      pixel_size_y,
+      groundATK,
+      airATK,
+      groundDmgType,
+      airDmgType,
+      groundRange,
+      airRange,
+      orders ? _fbb.CreateVector<const Order *>(*orders) : 0,
+      command,
+      velocityX,
+      velocityY,
+      playerId,
+      resources,
+      buildTechUpgradeType,
+      remainingBuildTrainTime,
+      remainingUpgradeResearchTime,
+      spellCD,
+      associatedUnit,
+      associatedCount);
+}
+
+flatbuffers::Offset<Unit> CreateUnit(flatbuffers::FlatBufferBuilder &_fbb, const UnitT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct UnitsOfPlayerT : public flatbuffers::NativeTable {
+  typedef UnitsOfPlayer TableType;
+  int32_t playerId;
+  std::vector<std::unique_ptr<UnitT>> units;
+  UnitsOfPlayerT()
+      : playerId(0) {
+  }
+};
+
+struct UnitsOfPlayer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef UnitsOfPlayerT NativeTableType;
+  enum {
+    VT_PLAYERID = 4,
+    VT_UNITS = 6
+  };
+  int32_t playerId() const {
+    return GetField<int32_t>(VT_PLAYERID, 0);
+  }
+  bool mutate_playerId(int32_t _playerId) {
+    return SetField<int32_t>(VT_PLAYERID, _playerId, 0);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<Unit>> *units() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Unit>> *>(VT_UNITS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<Unit>> *mutable_units() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Unit>> *>(VT_UNITS);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_PLAYERID) &&
+           VerifyOffset(verifier, VT_UNITS) &&
+           verifier.Verify(units()) &&
+           verifier.VerifyVectorOfTables(units()) &&
+           verifier.EndTable();
+  }
+  UnitsOfPlayerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(UnitsOfPlayerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<UnitsOfPlayer> Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitsOfPlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct UnitsOfPlayerBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_playerId(int32_t playerId) {
+    fbb_.AddElement<int32_t>(UnitsOfPlayer::VT_PLAYERID, playerId, 0);
+  }
+  void add_units(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Unit>>> units) {
+    fbb_.AddOffset(UnitsOfPlayer::VT_UNITS, units);
+  }
+  explicit UnitsOfPlayerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  UnitsOfPlayerBuilder &operator=(const UnitsOfPlayerBuilder &);
+  flatbuffers::Offset<UnitsOfPlayer> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<UnitsOfPlayer>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<UnitsOfPlayer> CreateUnitsOfPlayer(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t playerId = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Unit>>> units = 0) {
+  UnitsOfPlayerBuilder builder_(_fbb);
+  builder_.add_units(units);
+  builder_.add_playerId(playerId);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<UnitsOfPlayer> CreateUnitsOfPlayerDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t playerId = 0,
+    const std::vector<flatbuffers::Offset<Unit>> *units = nullptr) {
+  return torchcraft::fbs::CreateUnitsOfPlayer(
+      _fbb,
+      playerId,
+      units ? _fbb.CreateVector<flatbuffers::Offset<Unit>>(*units) : 0);
+}
+
+flatbuffers::Offset<UnitsOfPlayer> CreateUnitsOfPlayer(flatbuffers::FlatBufferBuilder &_fbb, const UnitsOfPlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct ActionsOfPlayerT : public flatbuffers::NativeTable {
+  typedef ActionsOfPlayer TableType;
+  int32_t playerId;
+  std::vector<std::unique_ptr<ActionT>> actions;
+  ActionsOfPlayerT()
+      : playerId(0) {
+  }
+};
+
+struct ActionsOfPlayer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ActionsOfPlayerT NativeTableType;
+  enum {
+    VT_PLAYERID = 4,
+    VT_ACTIONS = 6
+  };
+  int32_t playerId() const {
+    return GetField<int32_t>(VT_PLAYERID, 0);
+  }
+  bool mutate_playerId(int32_t _playerId) {
+    return SetField<int32_t>(VT_PLAYERID, _playerId, 0);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<Action>> *actions() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Action>> *>(VT_ACTIONS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<Action>> *mutable_actions() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Action>> *>(VT_ACTIONS);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_PLAYERID) &&
+           VerifyOffset(verifier, VT_ACTIONS) &&
+           verifier.Verify(actions()) &&
+           verifier.VerifyVectorOfTables(actions()) &&
+           verifier.EndTable();
+  }
+  ActionsOfPlayerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(ActionsOfPlayerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<ActionsOfPlayer> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ActionsOfPlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct ActionsOfPlayerBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_playerId(int32_t playerId) {
+    fbb_.AddElement<int32_t>(ActionsOfPlayer::VT_PLAYERID, playerId, 0);
+  }
+  void add_actions(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Action>>> actions) {
+    fbb_.AddOffset(ActionsOfPlayer::VT_ACTIONS, actions);
+  }
+  explicit ActionsOfPlayerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ActionsOfPlayerBuilder &operator=(const ActionsOfPlayerBuilder &);
+  flatbuffers::Offset<ActionsOfPlayer> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<ActionsOfPlayer>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ActionsOfPlayer> CreateActionsOfPlayer(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t playerId = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Action>>> actions = 0) {
+  ActionsOfPlayerBuilder builder_(_fbb);
+  builder_.add_actions(actions);
+  builder_.add_playerId(playerId);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<ActionsOfPlayer> CreateActionsOfPlayerDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t playerId = 0,
+    const std::vector<flatbuffers::Offset<Action>> *actions = nullptr) {
+  return torchcraft::fbs::CreateActionsOfPlayer(
+      _fbb,
+      playerId,
+      actions ? _fbb.CreateVector<flatbuffers::Offset<Action>>(*actions) : 0);
+}
+
+flatbuffers::Offset<ActionsOfPlayer> CreateActionsOfPlayer(flatbuffers::FlatBufferBuilder &_fbb, const ActionsOfPlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct ResourcesOfPlayerT : public flatbuffers::NativeTable {
+  typedef ResourcesOfPlayer TableType;
+  int32_t playerId;
+  std::unique_ptr<ResourcesT> resources;
+  ResourcesOfPlayerT()
+      : playerId(0) {
+  }
+};
+
+struct ResourcesOfPlayer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef ResourcesOfPlayerT NativeTableType;
+  enum {
+    VT_PLAYERID = 4,
+    VT_RESOURCES = 6
+  };
+  int32_t playerId() const {
+    return GetField<int32_t>(VT_PLAYERID, 0);
+  }
+  bool mutate_playerId(int32_t _playerId) {
+    return SetField<int32_t>(VT_PLAYERID, _playerId, 0);
+  }
+  const Resources *resources() const {
+    return GetPointer<const Resources *>(VT_RESOURCES);
+  }
+  Resources *mutable_resources() {
+    return GetPointer<Resources *>(VT_RESOURCES);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_PLAYERID) &&
+           VerifyOffset(verifier, VT_RESOURCES) &&
+           verifier.VerifyTable(resources()) &&
+           verifier.EndTable();
+  }
+  ResourcesOfPlayerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(ResourcesOfPlayerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<ResourcesOfPlayer> Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesOfPlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct ResourcesOfPlayerBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_playerId(int32_t playerId) {
+    fbb_.AddElement<int32_t>(ResourcesOfPlayer::VT_PLAYERID, playerId, 0);
+  }
+  void add_resources(flatbuffers::Offset<Resources> resources) {
+    fbb_.AddOffset(ResourcesOfPlayer::VT_RESOURCES, resources);
+  }
+  explicit ResourcesOfPlayerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  ResourcesOfPlayerBuilder &operator=(const ResourcesOfPlayerBuilder &);
+  flatbuffers::Offset<ResourcesOfPlayer> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<ResourcesOfPlayer>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<ResourcesOfPlayer> CreateResourcesOfPlayer(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t playerId = 0,
+    flatbuffers::Offset<Resources> resources = 0) {
+  ResourcesOfPlayerBuilder builder_(_fbb);
+  builder_.add_resources(resources);
+  builder_.add_playerId(playerId);
+  return builder_.Finish();
+}
+
+flatbuffers::Offset<ResourcesOfPlayer> CreateResourcesOfPlayer(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesOfPlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct KeyFrameT : public flatbuffers::NativeTable {
+  typedef KeyFrame TableType;
+  std::vector<std::unique_ptr<UnitsOfPlayerT>> units;
+  std::vector<std::unique_ptr<ActionsOfPlayerT>> actions;
+  std::vector<std::unique_ptr<ResourcesOfPlayerT>> resources;
+  std::vector<Bullet> bullets;
+  std::vector<uint8_t> creep_map;
+  uint32_t width;
+  uint32_t height;
+  int32_t reward;
+  bool is_terminal;
+  KeyFrameT()
+      : width(0),
+        height(0),
+        reward(0),
+        is_terminal(false) {
+  }
+};
+
+struct KeyFrame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef KeyFrameT NativeTableType;
+  enum {
+    VT_UNITS = 4,
+    VT_ACTIONS = 6,
+    VT_RESOURCES = 8,
+    VT_BULLETS = 10,
+    VT_CREEP_MAP = 12,
+    VT_WIDTH = 14,
+    VT_HEIGHT = 16,
+    VT_REWARD = 18,
+    VT_IS_TERMINAL = 20
+  };
+  const flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>> *units() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>> *>(VT_UNITS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>> *mutable_units() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>> *>(VT_UNITS);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *actions() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *>(VT_ACTIONS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *mutable_actions() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *>(VT_ACTIONS);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *resources() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *>(VT_RESOURCES);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *mutable_resources() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *>(VT_RESOURCES);
+  }
+  const flatbuffers::Vector<const Bullet *> *bullets() const {
+    return GetPointer<const flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
+  }
+  flatbuffers::Vector<const Bullet *> *mutable_bullets() {
+    return GetPointer<flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
+  }
+  const flatbuffers::Vector<uint8_t> *creep_map() const {
+    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_CREEP_MAP);
+  }
+  flatbuffers::Vector<uint8_t> *mutable_creep_map() {
+    return GetPointer<flatbuffers::Vector<uint8_t> *>(VT_CREEP_MAP);
+  }
+  uint32_t width() const {
+    return GetField<uint32_t>(VT_WIDTH, 0);
+  }
+  bool mutate_width(uint32_t _width) {
+    return SetField<uint32_t>(VT_WIDTH, _width, 0);
+  }
+  uint32_t height() const {
+    return GetField<uint32_t>(VT_HEIGHT, 0);
+  }
+  bool mutate_height(uint32_t _height) {
+    return SetField<uint32_t>(VT_HEIGHT, _height, 0);
+  }
+  int32_t reward() const {
+    return GetField<int32_t>(VT_REWARD, 0);
+  }
+  bool mutate_reward(int32_t _reward) {
+    return SetField<int32_t>(VT_REWARD, _reward, 0);
+  }
+  bool is_terminal() const {
+    return GetField<uint8_t>(VT_IS_TERMINAL, 0) != 0;
+  }
+  bool mutate_is_terminal(bool _is_terminal) {
+    return SetField<uint8_t>(VT_IS_TERMINAL, static_cast<uint8_t>(_is_terminal), 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_UNITS) &&
+           verifier.Verify(units()) &&
+           verifier.VerifyVectorOfTables(units()) &&
+           VerifyOffset(verifier, VT_ACTIONS) &&
+           verifier.Verify(actions()) &&
+           verifier.VerifyVectorOfTables(actions()) &&
+           VerifyOffset(verifier, VT_RESOURCES) &&
+           verifier.Verify(resources()) &&
+           verifier.VerifyVectorOfTables(resources()) &&
+           VerifyOffset(verifier, VT_BULLETS) &&
+           verifier.Verify(bullets()) &&
+           VerifyOffset(verifier, VT_CREEP_MAP) &&
+           verifier.Verify(creep_map()) &&
+           VerifyField<uint32_t>(verifier, VT_WIDTH) &&
+           VerifyField<uint32_t>(verifier, VT_HEIGHT) &&
+           VerifyField<int32_t>(verifier, VT_REWARD) &&
+           VerifyField<uint8_t>(verifier, VT_IS_TERMINAL) &&
+           verifier.EndTable();
+  }
+  KeyFrameT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(KeyFrameT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<KeyFrame> Pack(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct KeyFrameBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_units(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>>> units) {
+    fbb_.AddOffset(KeyFrame::VT_UNITS, units);
+  }
+  void add_actions(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>>> actions) {
+    fbb_.AddOffset(KeyFrame::VT_ACTIONS, actions);
+  }
+  void add_resources(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>>> resources) {
+    fbb_.AddOffset(KeyFrame::VT_RESOURCES, resources);
+  }
+  void add_bullets(flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets) {
+    fbb_.AddOffset(KeyFrame::VT_BULLETS, bullets);
+  }
+  void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> creep_map) {
+    fbb_.AddOffset(KeyFrame::VT_CREEP_MAP, creep_map);
+  }
+  void add_width(uint32_t width) {
+    fbb_.AddElement<uint32_t>(KeyFrame::VT_WIDTH, width, 0);
+  }
+  void add_height(uint32_t height) {
+    fbb_.AddElement<uint32_t>(KeyFrame::VT_HEIGHT, height, 0);
+  }
+  void add_reward(int32_t reward) {
+    fbb_.AddElement<int32_t>(KeyFrame::VT_REWARD, reward, 0);
+  }
+  void add_is_terminal(bool is_terminal) {
+    fbb_.AddElement<uint8_t>(KeyFrame::VT_IS_TERMINAL, static_cast<uint8_t>(is_terminal), 0);
+  }
+  explicit KeyFrameBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  KeyFrameBuilder &operator=(const KeyFrameBuilder &);
+  flatbuffers::Offset<KeyFrame> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<KeyFrame>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>>> units = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>>> actions = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>>> resources = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> creep_map = 0,
+    uint32_t width = 0,
+    uint32_t height = 0,
+    int32_t reward = 0,
+    bool is_terminal = false) {
+  KeyFrameBuilder builder_(_fbb);
+  builder_.add_reward(reward);
+  builder_.add_height(height);
+  builder_.add_width(width);
+  builder_.add_creep_map(creep_map);
+  builder_.add_bullets(bullets);
+  builder_.add_resources(resources);
+  builder_.add_actions(actions);
+  builder_.add_units(units);
+  builder_.add_is_terminal(is_terminal);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<KeyFrame> CreateKeyFrameDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<flatbuffers::Offset<UnitsOfPlayer>> *units = nullptr,
+    const std::vector<flatbuffers::Offset<ActionsOfPlayer>> *actions = nullptr,
+    const std::vector<flatbuffers::Offset<ResourcesOfPlayer>> *resources = nullptr,
+    const std::vector<const Bullet *> *bullets = nullptr,
+    const std::vector<uint8_t> *creep_map = nullptr,
+    uint32_t width = 0,
+    uint32_t height = 0,
+    int32_t reward = 0,
+    bool is_terminal = false) {
+  return torchcraft::fbs::CreateKeyFrame(
+      _fbb,
+      units ? _fbb.CreateVector<flatbuffers::Offset<UnitsOfPlayer>>(*units) : 0,
+      actions ? _fbb.CreateVector<flatbuffers::Offset<ActionsOfPlayer>>(*actions) : 0,
+      resources ? _fbb.CreateVector<flatbuffers::Offset<ResourcesOfPlayer>>(*resources) : 0,
+      bullets ? _fbb.CreateVector<const Bullet *>(*bullets) : 0,
+      creep_map ? _fbb.CreateVector<uint8_t>(*creep_map) : 0,
+      width,
+      height,
+      reward,
+      is_terminal);
+}
+
+flatbuffers::Offset<KeyFrame> CreateKeyFrame(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct UnitDiffT : public flatbuffers::NativeTable {
+  typedef UnitDiff TableType;
+  int32_t id;
+  std::vector<int32_t> var_ids;
+  std::vector<int32_t> var_diffs;
+  std::vector<int32_t> order_ids;
+  std::vector<int32_t> order_diffs;
+  int32_t order_size;
+  double velocityX;
+  double velocityY;
+  int64_t flags;
+  UnitDiffT()
+      : id(0),
+        order_size(0),
+        velocityX(0.0),
+        velocityY(0.0),
+        flags(0) {
+  }
+};
+
+struct UnitDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef UnitDiffT NativeTableType;
+  enum {
+    VT_ID = 4,
+    VT_VAR_IDS = 6,
+    VT_VAR_DIFFS = 8,
+    VT_ORDER_IDS = 10,
+    VT_ORDER_DIFFS = 12,
+    VT_ORDER_SIZE = 14,
+    VT_VELOCITYX = 16,
+    VT_VELOCITYY = 18,
+    VT_FLAGS = 20
+  };
+  int32_t id() const {
+    return GetField<int32_t>(VT_ID, 0);
+  }
+  bool mutate_id(int32_t _id) {
+    return SetField<int32_t>(VT_ID, _id, 0);
+  }
+  const flatbuffers::Vector<int32_t> *var_ids() const {
+    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_VAR_IDS);
+  }
+  flatbuffers::Vector<int32_t> *mutable_var_ids() {
+    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_VAR_IDS);
+  }
+  const flatbuffers::Vector<int32_t> *var_diffs() const {
+    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_VAR_DIFFS);
+  }
+  flatbuffers::Vector<int32_t> *mutable_var_diffs() {
+    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_VAR_DIFFS);
+  }
+  const flatbuffers::Vector<int32_t> *order_ids() const {
+    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_ORDER_IDS);
+  }
+  flatbuffers::Vector<int32_t> *mutable_order_ids() {
+    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_ORDER_IDS);
+  }
+  const flatbuffers::Vector<int32_t> *order_diffs() const {
+    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_ORDER_DIFFS);
+  }
+  flatbuffers::Vector<int32_t> *mutable_order_diffs() {
+    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_ORDER_DIFFS);
+  }
+  int32_t order_size() const {
+    return GetField<int32_t>(VT_ORDER_SIZE, 0);
+  }
+  bool mutate_order_size(int32_t _order_size) {
+    return SetField<int32_t>(VT_ORDER_SIZE, _order_size, 0);
+  }
+  double velocityX() const {
+    return GetField<double>(VT_VELOCITYX, 0.0);
+  }
+  bool mutate_velocityX(double _velocityX) {
+    return SetField<double>(VT_VELOCITYX, _velocityX, 0.0);
+  }
+  double velocityY() const {
+    return GetField<double>(VT_VELOCITYY, 0.0);
+  }
+  bool mutate_velocityY(double _velocityY) {
+    return SetField<double>(VT_VELOCITYY, _velocityY, 0.0);
+  }
+  int64_t flags() const {
+    return GetField<int64_t>(VT_FLAGS, 0);
+  }
+  bool mutate_flags(int64_t _flags) {
+    return SetField<int64_t>(VT_FLAGS, _flags, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyOffset(verifier, VT_VAR_IDS) &&
+           verifier.Verify(var_ids()) &&
+           VerifyOffset(verifier, VT_VAR_DIFFS) &&
+           verifier.Verify(var_diffs()) &&
+           VerifyOffset(verifier, VT_ORDER_IDS) &&
+           verifier.Verify(order_ids()) &&
+           VerifyOffset(verifier, VT_ORDER_DIFFS) &&
+           verifier.Verify(order_diffs()) &&
+           VerifyField<int32_t>(verifier, VT_ORDER_SIZE) &&
+           VerifyField<double>(verifier, VT_VELOCITYX) &&
+           VerifyField<double>(verifier, VT_VELOCITYY) &&
+           VerifyField<int64_t>(verifier, VT_FLAGS) &&
+           verifier.EndTable();
+  }
+  UnitDiffT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(UnitDiffT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<UnitDiff> Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct UnitDiffBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_id(int32_t id) {
+    fbb_.AddElement<int32_t>(UnitDiff::VT_ID, id, 0);
+  }
+  void add_var_ids(flatbuffers::Offset<flatbuffers::Vector<int32_t>> var_ids) {
+    fbb_.AddOffset(UnitDiff::VT_VAR_IDS, var_ids);
+  }
+  void add_var_diffs(flatbuffers::Offset<flatbuffers::Vector<int32_t>> var_diffs) {
+    fbb_.AddOffset(UnitDiff::VT_VAR_DIFFS, var_diffs);
+  }
+  void add_order_ids(flatbuffers::Offset<flatbuffers::Vector<int32_t>> order_ids) {
+    fbb_.AddOffset(UnitDiff::VT_ORDER_IDS, order_ids);
+  }
+  void add_order_diffs(flatbuffers::Offset<flatbuffers::Vector<int32_t>> order_diffs) {
+    fbb_.AddOffset(UnitDiff::VT_ORDER_DIFFS, order_diffs);
+  }
+  void add_order_size(int32_t order_size) {
+    fbb_.AddElement<int32_t>(UnitDiff::VT_ORDER_SIZE, order_size, 0);
+  }
+  void add_velocityX(double velocityX) {
+    fbb_.AddElement<double>(UnitDiff::VT_VELOCITYX, velocityX, 0.0);
+  }
+  void add_velocityY(double velocityY) {
+    fbb_.AddElement<double>(UnitDiff::VT_VELOCITYY, velocityY, 0.0);
+  }
+  void add_flags(int64_t flags) {
+    fbb_.AddElement<int64_t>(UnitDiff::VT_FLAGS, flags, 0);
+  }
+  explicit UnitDiffBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  UnitDiffBuilder &operator=(const UnitDiffBuilder &);
+  flatbuffers::Offset<UnitDiff> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<UnitDiff>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<UnitDiff> CreateUnitDiff(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t id = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> var_ids = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> var_diffs = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> order_ids = 0,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> order_diffs = 0,
+    int32_t order_size = 0,
+    double velocityX = 0.0,
+    double velocityY = 0.0,
+    int64_t flags = 0) {
+  UnitDiffBuilder builder_(_fbb);
+  builder_.add_flags(flags);
+  builder_.add_velocityY(velocityY);
+  builder_.add_velocityX(velocityX);
+  builder_.add_order_size(order_size);
+  builder_.add_order_diffs(order_diffs);
+  builder_.add_order_ids(order_ids);
+  builder_.add_var_diffs(var_diffs);
+  builder_.add_var_ids(var_ids);
+  builder_.add_id(id);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<UnitDiff> CreateUnitDiffDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    int32_t id = 0,
+    const std::vector<int32_t> *var_ids = nullptr,
+    const std::vector<int32_t> *var_diffs = nullptr,
+    const std::vector<int32_t> *order_ids = nullptr,
+    const std::vector<int32_t> *order_diffs = nullptr,
+    int32_t order_size = 0,
+    double velocityX = 0.0,
+    double velocityY = 0.0,
+    int64_t flags = 0) {
+  return torchcraft::fbs::CreateUnitDiff(
+      _fbb,
+      id,
+      var_ids ? _fbb.CreateVector<int32_t>(*var_ids) : 0,
+      var_diffs ? _fbb.CreateVector<int32_t>(*var_diffs) : 0,
+      order_ids ? _fbb.CreateVector<int32_t>(*order_ids) : 0,
+      order_diffs ? _fbb.CreateVector<int32_t>(*order_diffs) : 0,
+      order_size,
+      velocityX,
+      velocityY,
+      flags);
+}
+
+flatbuffers::Offset<UnitDiff> CreateUnitDiff(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct UnitDiffContainerT : public flatbuffers::NativeTable {
+  typedef UnitDiffContainer TableType;
+  std::vector<std::unique_ptr<UnitDiffT>> units;
+  UnitDiffContainerT() {
+  }
+};
+
+struct UnitDiffContainer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef UnitDiffContainerT NativeTableType;
+  enum {
+    VT_UNITS = 4
+  };
+  const flatbuffers::Vector<flatbuffers::Offset<UnitDiff>> *units() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UnitDiff>> *>(VT_UNITS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<UnitDiff>> *mutable_units() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<UnitDiff>> *>(VT_UNITS);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_UNITS) &&
+           verifier.Verify(units()) &&
+           verifier.VerifyVectorOfTables(units()) &&
+           verifier.EndTable();
+  }
+  UnitDiffContainerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(UnitDiffContainerT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<UnitDiffContainer> Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffContainerT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct UnitDiffContainerBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_units(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitDiff>>> units) {
+    fbb_.AddOffset(UnitDiffContainer::VT_UNITS, units);
+  }
+  explicit UnitDiffContainerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  UnitDiffContainerBuilder &operator=(const UnitDiffContainerBuilder &);
+  flatbuffers::Offset<UnitDiffContainer> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<UnitDiffContainer>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainer(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitDiff>>> units = 0) {
+  UnitDiffContainerBuilder builder_(_fbb);
+  builder_.add_units(units);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainerDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<flatbuffers::Offset<UnitDiff>> *units = nullptr) {
+  return torchcraft::fbs::CreateUnitDiffContainer(
+      _fbb,
+      units ? _fbb.CreateVector<flatbuffers::Offset<UnitDiff>>(*units) : 0);
+}
+
+flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainer(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffContainerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
+struct FrameDiffT : public flatbuffers::NativeTable {
+  typedef FrameDiff TableType;
+  std::vector<int32_t> pids;
+  std::vector<std::unique_ptr<UnitDiffContainerT>> unitDiffContainers;
+  std::vector<std::unique_ptr<ActionsOfPlayerT>> actions;
+  std::vector<std::unique_ptr<ResourcesOfPlayerT>> resources;
+  std::vector<Bullet> bullets;
+  std::vector<FrameDiffCreep> creep_map;
+  int32_t reward;
+  int32_t is_terminal;
+  FrameDiffT()
+      : reward(0),
+        is_terminal(0) {
+  }
+};
+
+struct FrameDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef FrameDiffT NativeTableType;
+  enum {
+    VT_PIDS = 4,
+    VT_UNITDIFFCONTAINERS = 6,
+    VT_ACTIONS = 8,
+    VT_RESOURCES = 10,
+    VT_BULLETS = 12,
+    VT_CREEP_MAP = 14,
+    VT_REWARD = 16,
+    VT_IS_TERMINAL = 18
+  };
+  const flatbuffers::Vector<int32_t> *pids() const {
+    return GetPointer<const flatbuffers::Vector<int32_t> *>(VT_PIDS);
+  }
+  flatbuffers::Vector<int32_t> *mutable_pids() {
+    return GetPointer<flatbuffers::Vector<int32_t> *>(VT_PIDS);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>> *unitDiffContainers() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>> *>(VT_UNITDIFFCONTAINERS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>> *mutable_unitDiffContainers() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>> *>(VT_UNITDIFFCONTAINERS);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *actions() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *>(VT_ACTIONS);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *mutable_actions() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>> *>(VT_ACTIONS);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *resources() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *>(VT_RESOURCES);
+  }
+  flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *mutable_resources() {
+    return GetPointer<flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>> *>(VT_RESOURCES);
+  }
+  const flatbuffers::Vector<const Bullet *> *bullets() const {
+    return GetPointer<const flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
+  }
+  flatbuffers::Vector<const Bullet *> *mutable_bullets() {
+    return GetPointer<flatbuffers::Vector<const Bullet *> *>(VT_BULLETS);
+  }
+  const flatbuffers::Vector<const FrameDiffCreep *> *creep_map() const {
+    return GetPointer<const flatbuffers::Vector<const FrameDiffCreep *> *>(VT_CREEP_MAP);
+  }
+  flatbuffers::Vector<const FrameDiffCreep *> *mutable_creep_map() {
+    return GetPointer<flatbuffers::Vector<const FrameDiffCreep *> *>(VT_CREEP_MAP);
+  }
+  int32_t reward() const {
+    return GetField<int32_t>(VT_REWARD, 0);
+  }
+  bool mutate_reward(int32_t _reward) {
+    return SetField<int32_t>(VT_REWARD, _reward, 0);
+  }
+  int32_t is_terminal() const {
+    return GetField<int32_t>(VT_IS_TERMINAL, 0);
+  }
+  bool mutate_is_terminal(int32_t _is_terminal) {
+    return SetField<int32_t>(VT_IS_TERMINAL, _is_terminal, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_PIDS) &&
+           verifier.Verify(pids()) &&
+           VerifyOffset(verifier, VT_UNITDIFFCONTAINERS) &&
+           verifier.Verify(unitDiffContainers()) &&
+           verifier.VerifyVectorOfTables(unitDiffContainers()) &&
+           VerifyOffset(verifier, VT_ACTIONS) &&
+           verifier.Verify(actions()) &&
+           verifier.VerifyVectorOfTables(actions()) &&
+           VerifyOffset(verifier, VT_RESOURCES) &&
+           verifier.Verify(resources()) &&
+           verifier.VerifyVectorOfTables(resources()) &&
+           VerifyOffset(verifier, VT_BULLETS) &&
+           verifier.Verify(bullets()) &&
+           VerifyOffset(verifier, VT_CREEP_MAP) &&
+           verifier.Verify(creep_map()) &&
+           VerifyField<int32_t>(verifier, VT_REWARD) &&
+           VerifyField<int32_t>(verifier, VT_IS_TERMINAL) &&
+           verifier.EndTable();
+  }
+  FrameDiffT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(FrameDiffT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<FrameDiff> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+};
+
+struct FrameDiffBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_pids(flatbuffers::Offset<flatbuffers::Vector<int32_t>> pids) {
+    fbb_.AddOffset(FrameDiff::VT_PIDS, pids);
+  }
+  void add_unitDiffContainers(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>>> unitDiffContainers) {
+    fbb_.AddOffset(FrameDiff::VT_UNITDIFFCONTAINERS, unitDiffContainers);
+  }
+  void add_actions(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>>> actions) {
+    fbb_.AddOffset(FrameDiff::VT_ACTIONS, actions);
+  }
+  void add_resources(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>>> resources) {
+    fbb_.AddOffset(FrameDiff::VT_RESOURCES, resources);
+  }
+  void add_bullets(flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets) {
+    fbb_.AddOffset(FrameDiff::VT_BULLETS, bullets);
+  }
+  void add_creep_map(flatbuffers::Offset<flatbuffers::Vector<const FrameDiffCreep *>> creep_map) {
+    fbb_.AddOffset(FrameDiff::VT_CREEP_MAP, creep_map);
+  }
+  void add_reward(int32_t reward) {
+    fbb_.AddElement<int32_t>(FrameDiff::VT_REWARD, reward, 0);
+  }
+  void add_is_terminal(int32_t is_terminal) {
+    fbb_.AddElement<int32_t>(FrameDiff::VT_IS_TERMINAL, is_terminal, 0);
+  }
+  explicit FrameDiffBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  FrameDiffBuilder &operator=(const FrameDiffBuilder &);
+  flatbuffers::Offset<FrameDiff> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<FrameDiff>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<int32_t>> pids = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<UnitDiffContainer>>> unitDiffContainers = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ActionsOfPlayer>>> actions = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<ResourcesOfPlayer>>> resources = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets = 0,
+    flatbuffers::Offset<flatbuffers::Vector<const FrameDiffCreep *>> creep_map = 0,
+    int32_t reward = 0,
+    int32_t is_terminal = 0) {
+  FrameDiffBuilder builder_(_fbb);
+  builder_.add_is_terminal(is_terminal);
+  builder_.add_reward(reward);
+  builder_.add_creep_map(creep_map);
+  builder_.add_bullets(bullets);
+  builder_.add_resources(resources);
+  builder_.add_actions(actions);
+  builder_.add_unitDiffContainers(unitDiffContainers);
+  builder_.add_pids(pids);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<FrameDiff> CreateFrameDiffDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<int32_t> *pids = nullptr,
+    const std::vector<flatbuffers::Offset<UnitDiffContainer>> *unitDiffContainers = nullptr,
+    const std::vector<flatbuffers::Offset<ActionsOfPlayer>> *actions = nullptr,
+    const std::vector<flatbuffers::Offset<ResourcesOfPlayer>> *resources = nullptr,
+    const std::vector<const Bullet *> *bullets = nullptr,
+    const std::vector<const FrameDiffCreep *> *creep_map = nullptr,
+    int32_t reward = 0,
+    int32_t is_terminal = 0) {
+  return torchcraft::fbs::CreateFrameDiff(
+      _fbb,
+      pids ? _fbb.CreateVector<int32_t>(*pids) : 0,
+      unitDiffContainers ? _fbb.CreateVector<flatbuffers::Offset<UnitDiffContainer>>(*unitDiffContainers) : 0,
+      actions ? _fbb.CreateVector<flatbuffers::Offset<ActionsOfPlayer>>(*actions) : 0,
+      resources ? _fbb.CreateVector<flatbuffers::Offset<ResourcesOfPlayer>>(*resources) : 0,
+      bullets ? _fbb.CreateVector<const Bullet *>(*bullets) : 0,
+      creep_map ? _fbb.CreateVector<const FrameDiffCreep *>(*creep_map) : 0,
+      reward,
+      is_terminal);
+}
+
+flatbuffers::Offset<FrameDiff> CreateFrameDiff(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+
 inline CommandT *Command::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
   auto _o = new CommandT();
   UnPackTo(_o, _resolver);
@@ -1959,6 +4037,482 @@ inline flatbuffers::Offset<Message> CreateMessage(flatbuffers::FlatBufferBuilder
       _msg_type,
       _msg,
       _uid);
+}
+
+inline ActionT *Action::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new ActionT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Action::UnPackTo(ActionT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = action(); if (_e) { _o->action.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->action[_i] = _e->Get(_i); } } };
+  { auto _e = uid(); _o->uid = _e; };
+  { auto _e = aid(); _o->aid = _e; };
+}
+
+inline flatbuffers::Offset<Action> Action::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ActionT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateAction(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Action> CreateAction(flatbuffers::FlatBufferBuilder &_fbb, const ActionT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ActionT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _action = _o->action.size() ? _fbb.CreateVector(_o->action) : 0;
+  auto _uid = _o->uid;
+  auto _aid = _o->aid;
+  return torchcraft::fbs::CreateAction(
+      _fbb,
+      _action,
+      _uid,
+      _aid);
+}
+
+inline ResourcesT *Resources::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new ResourcesT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Resources::UnPackTo(ResourcesT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = ore(); _o->ore = _e; };
+  { auto _e = gas(); _o->gas = _e; };
+  { auto _e = used_psi(); _o->used_psi = _e; };
+  { auto _e = total_psi(); _o->total_psi = _e; };
+  { auto _e = upgrades(); _o->upgrades = _e; };
+  { auto _e = upgrades_level(); _o->upgrades_level = _e; };
+  { auto _e = techs(); _o->techs = _e; };
+}
+
+inline flatbuffers::Offset<Resources> Resources::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateResources(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Resources> CreateResources(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ResourcesT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _ore = _o->ore;
+  auto _gas = _o->gas;
+  auto _used_psi = _o->used_psi;
+  auto _total_psi = _o->total_psi;
+  auto _upgrades = _o->upgrades;
+  auto _upgrades_level = _o->upgrades_level;
+  auto _techs = _o->techs;
+  return torchcraft::fbs::CreateResources(
+      _fbb,
+      _ore,
+      _gas,
+      _used_psi,
+      _total_psi,
+      _upgrades,
+      _upgrades_level,
+      _techs);
+}
+
+inline UnitT *Unit::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new UnitT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void Unit::UnPackTo(UnitT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = id(); _o->id = _e; };
+  { auto _e = x(); _o->x = _e; };
+  { auto _e = y(); _o->y = _e; };
+  { auto _e = health(); _o->health = _e; };
+  { auto _e = max_health(); _o->max_health = _e; };
+  { auto _e = shield(); _o->shield = _e; };
+  { auto _e = max_shield(); _o->max_shield = _e; };
+  { auto _e = energy(); _o->energy = _e; };
+  { auto _e = maxCD(); _o->maxCD = _e; };
+  { auto _e = groundCD(); _o->groundCD = _e; };
+  { auto _e = airCD(); _o->airCD = _e; };
+  { auto _e = flags(); _o->flags = _e; };
+  { auto _e = visible(); _o->visible = _e; };
+  { auto _e = type(); _o->type = _e; };
+  { auto _e = armor(); _o->armor = _e; };
+  { auto _e = shieldArmor(); _o->shieldArmor = _e; };
+  { auto _e = size(); _o->size = _e; };
+  { auto _e = pixel_x(); _o->pixel_x = _e; };
+  { auto _e = pixel_y(); _o->pixel_y = _e; };
+  { auto _e = pixel_size_x(); _o->pixel_size_x = _e; };
+  { auto _e = pixel_size_y(); _o->pixel_size_y = _e; };
+  { auto _e = groundATK(); _o->groundATK = _e; };
+  { auto _e = airATK(); _o->airATK = _e; };
+  { auto _e = groundDmgType(); _o->groundDmgType = _e; };
+  { auto _e = airDmgType(); _o->airDmgType = _e; };
+  { auto _e = groundRange(); _o->groundRange = _e; };
+  { auto _e = airRange(); _o->airRange = _e; };
+  { auto _e = orders(); if (_e) { _o->orders.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->orders[_i] = *_e->Get(_i); } } };
+  { auto _e = command(); if (_e) _o->command = std::unique_ptr<UnitCommand>(new UnitCommand(*_e)); };
+  { auto _e = velocityX(); _o->velocityX = _e; };
+  { auto _e = velocityY(); _o->velocityY = _e; };
+  { auto _e = playerId(); _o->playerId = _e; };
+  { auto _e = resources(); _o->resources = _e; };
+  { auto _e = buildTechUpgradeType(); _o->buildTechUpgradeType = _e; };
+  { auto _e = remainingBuildTrainTime(); _o->remainingBuildTrainTime = _e; };
+  { auto _e = remainingUpgradeResearchTime(); _o->remainingUpgradeResearchTime = _e; };
+  { auto _e = spellCD(); _o->spellCD = _e; };
+  { auto _e = associatedUnit(); _o->associatedUnit = _e; };
+  { auto _e = associatedCount(); _o->associatedCount = _e; };
+}
+
+inline flatbuffers::Offset<Unit> Unit::Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateUnit(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<Unit> CreateUnit(flatbuffers::FlatBufferBuilder &_fbb, const UnitT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const UnitT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _id = _o->id;
+  auto _x = _o->x;
+  auto _y = _o->y;
+  auto _health = _o->health;
+  auto _max_health = _o->max_health;
+  auto _shield = _o->shield;
+  auto _max_shield = _o->max_shield;
+  auto _energy = _o->energy;
+  auto _maxCD = _o->maxCD;
+  auto _groundCD = _o->groundCD;
+  auto _airCD = _o->airCD;
+  auto _flags = _o->flags;
+  auto _visible = _o->visible;
+  auto _type = _o->type;
+  auto _armor = _o->armor;
+  auto _shieldArmor = _o->shieldArmor;
+  auto _size = _o->size;
+  auto _pixel_x = _o->pixel_x;
+  auto _pixel_y = _o->pixel_y;
+  auto _pixel_size_x = _o->pixel_size_x;
+  auto _pixel_size_y = _o->pixel_size_y;
+  auto _groundATK = _o->groundATK;
+  auto _airATK = _o->airATK;
+  auto _groundDmgType = _o->groundDmgType;
+  auto _airDmgType = _o->airDmgType;
+  auto _groundRange = _o->groundRange;
+  auto _airRange = _o->airRange;
+  auto _orders = _o->orders.size() ? _fbb.CreateVectorOfStructs(_o->orders) : 0;
+  auto _command = _o->command ? _o->command.get() : 0;
+  auto _velocityX = _o->velocityX;
+  auto _velocityY = _o->velocityY;
+  auto _playerId = _o->playerId;
+  auto _resources = _o->resources;
+  auto _buildTechUpgradeType = _o->buildTechUpgradeType;
+  auto _remainingBuildTrainTime = _o->remainingBuildTrainTime;
+  auto _remainingUpgradeResearchTime = _o->remainingUpgradeResearchTime;
+  auto _spellCD = _o->spellCD;
+  auto _associatedUnit = _o->associatedUnit;
+  auto _associatedCount = _o->associatedCount;
+  return torchcraft::fbs::CreateUnit(
+      _fbb,
+      _id,
+      _x,
+      _y,
+      _health,
+      _max_health,
+      _shield,
+      _max_shield,
+      _energy,
+      _maxCD,
+      _groundCD,
+      _airCD,
+      _flags,
+      _visible,
+      _type,
+      _armor,
+      _shieldArmor,
+      _size,
+      _pixel_x,
+      _pixel_y,
+      _pixel_size_x,
+      _pixel_size_y,
+      _groundATK,
+      _airATK,
+      _groundDmgType,
+      _airDmgType,
+      _groundRange,
+      _airRange,
+      _orders,
+      _command,
+      _velocityX,
+      _velocityY,
+      _playerId,
+      _resources,
+      _buildTechUpgradeType,
+      _remainingBuildTrainTime,
+      _remainingUpgradeResearchTime,
+      _spellCD,
+      _associatedUnit,
+      _associatedCount);
+}
+
+inline UnitsOfPlayerT *UnitsOfPlayer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new UnitsOfPlayerT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void UnitsOfPlayer::UnPackTo(UnitsOfPlayerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = playerId(); _o->playerId = _e; };
+  { auto _e = units(); if (_e) { _o->units.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->units[_i] = std::unique_ptr<UnitT>(_e->Get(_i)->UnPack(_resolver)); } } };
+}
+
+inline flatbuffers::Offset<UnitsOfPlayer> UnitsOfPlayer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitsOfPlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateUnitsOfPlayer(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<UnitsOfPlayer> CreateUnitsOfPlayer(flatbuffers::FlatBufferBuilder &_fbb, const UnitsOfPlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const UnitsOfPlayerT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _playerId = _o->playerId;
+  auto _units = _o->units.size() ? _fbb.CreateVector<flatbuffers::Offset<Unit>> (_o->units.size(), [](size_t i, _VectorArgs *__va) { return CreateUnit(*__va->__fbb, __va->__o->units[i].get(), __va->__rehasher); }, &_va ) : 0;
+  return torchcraft::fbs::CreateUnitsOfPlayer(
+      _fbb,
+      _playerId,
+      _units);
+}
+
+inline ActionsOfPlayerT *ActionsOfPlayer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new ActionsOfPlayerT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void ActionsOfPlayer::UnPackTo(ActionsOfPlayerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = playerId(); _o->playerId = _e; };
+  { auto _e = actions(); if (_e) { _o->actions.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->actions[_i] = std::unique_ptr<ActionT>(_e->Get(_i)->UnPack(_resolver)); } } };
+}
+
+inline flatbuffers::Offset<ActionsOfPlayer> ActionsOfPlayer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ActionsOfPlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateActionsOfPlayer(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<ActionsOfPlayer> CreateActionsOfPlayer(flatbuffers::FlatBufferBuilder &_fbb, const ActionsOfPlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ActionsOfPlayerT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _playerId = _o->playerId;
+  auto _actions = _o->actions.size() ? _fbb.CreateVector<flatbuffers::Offset<Action>> (_o->actions.size(), [](size_t i, _VectorArgs *__va) { return CreateAction(*__va->__fbb, __va->__o->actions[i].get(), __va->__rehasher); }, &_va ) : 0;
+  return torchcraft::fbs::CreateActionsOfPlayer(
+      _fbb,
+      _playerId,
+      _actions);
+}
+
+inline ResourcesOfPlayerT *ResourcesOfPlayer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new ResourcesOfPlayerT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void ResourcesOfPlayer::UnPackTo(ResourcesOfPlayerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = playerId(); _o->playerId = _e; };
+  { auto _e = resources(); if (_e) _o->resources = std::unique_ptr<ResourcesT>(_e->UnPack(_resolver)); };
+}
+
+inline flatbuffers::Offset<ResourcesOfPlayer> ResourcesOfPlayer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesOfPlayerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateResourcesOfPlayer(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<ResourcesOfPlayer> CreateResourcesOfPlayer(flatbuffers::FlatBufferBuilder &_fbb, const ResourcesOfPlayerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const ResourcesOfPlayerT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _playerId = _o->playerId;
+  auto _resources = _o->resources ? CreateResources(_fbb, _o->resources.get(), _rehasher) : 0;
+  return torchcraft::fbs::CreateResourcesOfPlayer(
+      _fbb,
+      _playerId,
+      _resources);
+}
+
+inline KeyFrameT *KeyFrame::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new KeyFrameT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void KeyFrame::UnPackTo(KeyFrameT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = units(); if (_e) { _o->units.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->units[_i] = std::unique_ptr<UnitsOfPlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = actions(); if (_e) { _o->actions.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->actions[_i] = std::unique_ptr<ActionsOfPlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = resources(); if (_e) { _o->resources.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->resources[_i] = std::unique_ptr<ResourcesOfPlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = bullets(); if (_e) { _o->bullets.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->bullets[_i] = *_e->Get(_i); } } };
+  { auto _e = creep_map(); if (_e) { _o->creep_map.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->creep_map[_i] = _e->Get(_i); } } };
+  { auto _e = width(); _o->width = _e; };
+  { auto _e = height(); _o->height = _e; };
+  { auto _e = reward(); _o->reward = _e; };
+  { auto _e = is_terminal(); _o->is_terminal = _e; };
+}
+
+inline flatbuffers::Offset<KeyFrame> KeyFrame::Pack(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateKeyFrame(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<KeyFrame> CreateKeyFrame(flatbuffers::FlatBufferBuilder &_fbb, const KeyFrameT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const KeyFrameT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _units = _o->units.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitsOfPlayer>> (_o->units.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitsOfPlayer(*__va->__fbb, __va->__o->units[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _actions = _o->actions.size() ? _fbb.CreateVector<flatbuffers::Offset<ActionsOfPlayer>> (_o->actions.size(), [](size_t i, _VectorArgs *__va) { return CreateActionsOfPlayer(*__va->__fbb, __va->__o->actions[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _resources = _o->resources.size() ? _fbb.CreateVector<flatbuffers::Offset<ResourcesOfPlayer>> (_o->resources.size(), [](size_t i, _VectorArgs *__va) { return CreateResourcesOfPlayer(*__va->__fbb, __va->__o->resources[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _bullets = _o->bullets.size() ? _fbb.CreateVectorOfStructs(_o->bullets) : 0;
+  auto _creep_map = _o->creep_map.size() ? _fbb.CreateVector(_o->creep_map) : 0;
+  auto _width = _o->width;
+  auto _height = _o->height;
+  auto _reward = _o->reward;
+  auto _is_terminal = _o->is_terminal;
+  return torchcraft::fbs::CreateKeyFrame(
+      _fbb,
+      _units,
+      _actions,
+      _resources,
+      _bullets,
+      _creep_map,
+      _width,
+      _height,
+      _reward,
+      _is_terminal);
+}
+
+inline UnitDiffT *UnitDiff::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new UnitDiffT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void UnitDiff::UnPackTo(UnitDiffT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = id(); _o->id = _e; };
+  { auto _e = var_ids(); if (_e) { _o->var_ids.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->var_ids[_i] = _e->Get(_i); } } };
+  { auto _e = var_diffs(); if (_e) { _o->var_diffs.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->var_diffs[_i] = _e->Get(_i); } } };
+  { auto _e = order_ids(); if (_e) { _o->order_ids.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->order_ids[_i] = _e->Get(_i); } } };
+  { auto _e = order_diffs(); if (_e) { _o->order_diffs.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->order_diffs[_i] = _e->Get(_i); } } };
+  { auto _e = order_size(); _o->order_size = _e; };
+  { auto _e = velocityX(); _o->velocityX = _e; };
+  { auto _e = velocityY(); _o->velocityY = _e; };
+  { auto _e = flags(); _o->flags = _e; };
+}
+
+inline flatbuffers::Offset<UnitDiff> UnitDiff::Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateUnitDiff(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<UnitDiff> CreateUnitDiff(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const UnitDiffT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _id = _o->id;
+  auto _var_ids = _o->var_ids.size() ? _fbb.CreateVector(_o->var_ids) : 0;
+  auto _var_diffs = _o->var_diffs.size() ? _fbb.CreateVector(_o->var_diffs) : 0;
+  auto _order_ids = _o->order_ids.size() ? _fbb.CreateVector(_o->order_ids) : 0;
+  auto _order_diffs = _o->order_diffs.size() ? _fbb.CreateVector(_o->order_diffs) : 0;
+  auto _order_size = _o->order_size;
+  auto _velocityX = _o->velocityX;
+  auto _velocityY = _o->velocityY;
+  auto _flags = _o->flags;
+  return torchcraft::fbs::CreateUnitDiff(
+      _fbb,
+      _id,
+      _var_ids,
+      _var_diffs,
+      _order_ids,
+      _order_diffs,
+      _order_size,
+      _velocityX,
+      _velocityY,
+      _flags);
+}
+
+inline UnitDiffContainerT *UnitDiffContainer::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new UnitDiffContainerT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void UnitDiffContainer::UnPackTo(UnitDiffContainerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = units(); if (_e) { _o->units.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->units[_i] = std::unique_ptr<UnitDiffT>(_e->Get(_i)->UnPack(_resolver)); } } };
+}
+
+inline flatbuffers::Offset<UnitDiffContainer> UnitDiffContainer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffContainerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateUnitDiffContainer(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<UnitDiffContainer> CreateUnitDiffContainer(flatbuffers::FlatBufferBuilder &_fbb, const UnitDiffContainerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const UnitDiffContainerT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _units = _o->units.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitDiff>> (_o->units.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitDiff(*__va->__fbb, __va->__o->units[i].get(), __va->__rehasher); }, &_va ) : 0;
+  return torchcraft::fbs::CreateUnitDiffContainer(
+      _fbb,
+      _units);
+}
+
+inline FrameDiffT *FrameDiff::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new FrameDiffT();
+  UnPackTo(_o, _resolver);
+  return _o;
+}
+
+inline void FrameDiff::UnPackTo(FrameDiffT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+  (void)_o;
+  (void)_resolver;
+  { auto _e = pids(); if (_e) { _o->pids.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->pids[_i] = _e->Get(_i); } } };
+  { auto _e = unitDiffContainers(); if (_e) { _o->unitDiffContainers.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->unitDiffContainers[_i] = std::unique_ptr<UnitDiffContainerT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = actions(); if (_e) { _o->actions.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->actions[_i] = std::unique_ptr<ActionsOfPlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = resources(); if (_e) { _o->resources.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->resources[_i] = std::unique_ptr<ResourcesOfPlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
+  { auto _e = bullets(); if (_e) { _o->bullets.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->bullets[_i] = *_e->Get(_i); } } };
+  { auto _e = creep_map(); if (_e) { _o->creep_map.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->creep_map[_i] = *_e->Get(_i); } } };
+  { auto _e = reward(); _o->reward = _e; };
+  { auto _e = is_terminal(); _o->is_terminal = _e; };
+}
+
+inline flatbuffers::Offset<FrameDiff> FrameDiff::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateFrameDiff(_fbb, _o, _rehasher);
+}
+
+inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(flatbuffers::FlatBufferBuilder &_fbb, const FrameDiffT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+  (void)_rehasher;
+  (void)_o;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameDiffT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  auto _pids = _o->pids.size() ? _fbb.CreateVector(_o->pids) : 0;
+  auto _unitDiffContainers = _o->unitDiffContainers.size() ? _fbb.CreateVector<flatbuffers::Offset<UnitDiffContainer>> (_o->unitDiffContainers.size(), [](size_t i, _VectorArgs *__va) { return CreateUnitDiffContainer(*__va->__fbb, __va->__o->unitDiffContainers[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _actions = _o->actions.size() ? _fbb.CreateVector<flatbuffers::Offset<ActionsOfPlayer>> (_o->actions.size(), [](size_t i, _VectorArgs *__va) { return CreateActionsOfPlayer(*__va->__fbb, __va->__o->actions[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _resources = _o->resources.size() ? _fbb.CreateVector<flatbuffers::Offset<ResourcesOfPlayer>> (_o->resources.size(), [](size_t i, _VectorArgs *__va) { return CreateResourcesOfPlayer(*__va->__fbb, __va->__o->resources[i].get(), __va->__rehasher); }, &_va ) : 0;
+  auto _bullets = _o->bullets.size() ? _fbb.CreateVectorOfStructs(_o->bullets) : 0;
+  auto _creep_map = _o->creep_map.size() ? _fbb.CreateVectorOfStructs(_o->creep_map) : 0;
+  auto _reward = _o->reward;
+  auto _is_terminal = _o->is_terminal;
+  return torchcraft::fbs::CreateFrameDiff(
+      _fbb,
+      _pids,
+      _unitDiffContainers,
+      _actions,
+      _resources,
+      _bullets,
+      _creep_map,
+      _reward,
+      _is_terminal);
 }
 
 inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type) {

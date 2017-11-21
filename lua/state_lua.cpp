@@ -52,7 +52,6 @@ const std::set<std::string> stateMembers = {
     "neutral_id",
     "replay",
     "frame",
-    "frame_string",
     "deaths",
     "frame_from_bwapi",
     "battle_frame_count",
@@ -164,8 +163,6 @@ int pushMember(
     (*f)->incref();
     luaL_getmetatable(L, "torchcraft.Frame");
     lua_setmetatable(L, -2);
-  } else if (m == "frame_string") {
-    lua_pushlstring(L, s->frame_string.c_str(), s->frame_string.length());
   } else if (m == "deaths") {
     lua_createtable(L, s->deaths.size(), 0);
     int n = 1;

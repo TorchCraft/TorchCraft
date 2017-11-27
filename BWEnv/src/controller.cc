@@ -587,22 +587,21 @@ int Controller::getAttackFrames(int unitID) {
   return attackFrames;
 }
 
-void Controller::serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff) {
+void Controller::serializeFrameData(
+    torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff,
+    flatbuffers::FlatBufferBuilder& builder) {
   frameOrFrameDiff.Reset();
-  {    
-    flatbuffers::FlatBufferBuilder builder;
-    if (prev_sent_frame == nullptr) {
-      frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::Frame;
-      last_frame->addToFlatBufferBuilder(builder);
-    } else {
-      frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::FrameDiff;
-      auto frameDiff = replayer::frame_diff(last_frame, prev_sent_frame);
-      frameDiff.addToFlatBufferBuilder(builder);      
-    }
-    frameOrFrameDiff.value = builder.GetBufferPointer();
-  }
-  
   if (prev_sent_frame == nullptr) {
+    frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::Frame;
+    last_frame->addToFlatBufferBuilder(builder);
+  } else {
+    frameOrFrameDiff.type = torchcraft::fbs::FrameOrFrameDiff::FrameDiff;
+    auto frameDiff = replayer::frame_diff(last_frame, prev_sent_frame);
+    frameDiff.addToFlatBufferBuilder(builder);      
+  }
+  frameOrFrameDiff.value = builder.GetBufferPointer();
+  
+  if (prev_sent_frame != nullptr) {
     prev_sent_frame->decref();
   }
   prev_sent_frame = last_frame;
@@ -613,9 +612,10 @@ void Controller::endGame() {
   Utils::bwlog(
       output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
+  flatbuffers::FlatBufferBuilder builder;
   torchcraft::fbs::EndGameT endg;
   if (last_frame != nullptr) {
-    this->serializeFrameData(endg.data);
+    this->serializeFrameData(endg.data, builder);
   }
   endg.game_won = this->is_winner;
 
@@ -812,7 +812,8 @@ void Controller::onFrame() {
       }
     }
 
-    this->serializeFrameData(this->tcframe_.data);
+    flatbuffers::FlatBufferBuilder builder;
+    this->serializeFrameData(this->tcframe_.data, builder);
     this->tcframe_.deaths = this->deaths;
     this->deaths.clear();
 

@@ -44,14 +44,14 @@ class CircularBuffer {
   explicit CircularBuffer(size_t size)
       : size(size), head(0), tail(0), length(0) {
     buffer.resize(size);
-    for (int i = 0; i < size; i++) {
+    for (uint i = 0; i < size; i++) {
       buffer[i] = nullptr;
     }
   }
 
   ~CircularBuffer() {
     // free the replayers
-    for (int i = 0; i < size; i++) {
+    for (uint i = 0; i < size; i++) {
       if (buffer[i] != nullptr) {
         buffer[i]->decref();
         buffer[i] = nullptr;
@@ -84,7 +84,7 @@ class CircularBuffer {
 
   // clears the buffer
   void clear() {
-    for (int i = 0; i < size; i++) {
+    for (uint i = 0; i < size; i++) {
       if (buffer[i] != nullptr) {
         delete buffer[i];
         buffer[i] = nullptr;

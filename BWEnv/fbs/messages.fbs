@@ -130,7 +130,6 @@ struct Order {
   targetId:int;
   targetX:int;
   targetY:int;
-  // Current implementation has equivalence operator that compares vars other than first_frame
 }
 
 struct UnitCommand {
@@ -190,25 +189,25 @@ table Unit {
   associatedCount:int; // spiderMines, scarabs, interceptors, nuke
 }
 
-table UnitsByPlayerId {
+table UnitsOfPlayer {
   playerId:int;
   units:[Unit];
 }
 
-table ActionsByPlayerId {
+table ActionsOfPlayer {
   playerId:int;
   actions:[Action];
 }
 
-table ResourcesByPlayerId {
+table ResourcesOfPlayer {
   playerId:int;
   resources:Resources;
 }
 
 table Frame {
-  units:[UnitsByPlayerId];
-  actions:[ActionsByPlayerId];
-  resources:[ResourcesByPlayerId];
+  units:[UnitsOfPlayer];
+  actions:[ActionsOfPlayer];
+  resources:[ResourcesOfPlayer];
   bullets:[Bullet];
   creep_map:[ubyte];
   width:uint;
@@ -241,8 +240,8 @@ struct FrameDiffCreep {
 table FrameDiff {
   pids:[int];
   unitDiffContainers:[UnitDiffContainer];
-  actions:[ActionsByPlayerId];
-  resources:[ResourcesByPlayerId];
+  actions:[ActionsOfPlayer];
+  resources:[ResourcesOfPlayer];
   bullets:[Bullet];
   creep_map:[FrameDiffCreep];
   reward:int;

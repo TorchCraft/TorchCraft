@@ -790,13 +790,12 @@ void Controller::onFrame() {
   bool receive_commands = !last_receive_ok;
 
   if (send_frame) {
-    const int visibilityTileWidth = 20;
-    const int visibilityTileHeight = 13;
-    const int tileSize = 32;    
+    
     fbs::Vec2 vec2ScreenPosition;
     fbs::Vec2 vec2VisibilitySize;
     fbs::Vec2 vec2ImgSize;
     std::string imgMode;
+    
     auto sendImageData = false;
     if (with_image_) {
       with_image_ = false;
@@ -818,6 +817,9 @@ void Controller::onFrame() {
       vec2ScreenPosition.mutate_x(screenPosition.x);
       vec2ScreenPosition.mutate_y(screenPosition.y);
       
+      const int visibilityTileWidth = 20;
+      const int visibilityTileHeight = 13;
+      const int tileSize = 32;    
       vec2VisibilitySize.mutate_x(visibilityTileWidth);
       vec2VisibilitySize.mutate_y(visibilityTileHeight);
       auto ix = screenPosition.x / tileSize;

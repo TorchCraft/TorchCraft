@@ -118,7 +118,9 @@ flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffer
   fbsFrameDiffBuilder.add_resources(resourcesOffsets);
   fbsFrameDiffBuilder.add_actions(actionsOffsets);
   fbsFrameDiffBuilder.add_unitDiffContainers(unitDiffsOffsets);
-  builder.Finish(fbsFrameDiffBuilder.Finish());
+  auto output = fbsFrameDiffBuilder.Finish();
+  builder.Finish(output);
+  return output;
 }
 
 void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {

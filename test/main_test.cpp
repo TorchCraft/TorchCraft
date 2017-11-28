@@ -213,6 +213,6 @@ const lest::test specification[] = {
 // > ctest test --output-on-failure
 // > make ARGS='-VV' test
 int main(int argc, char* argv[]) {
-  std::cout << "Running tests with console output" << std::endl;
+  std::cerr << "Running tests with console output" << std::endl;
   return lest::run(torchcraft::replayer::specification, argc, argv, std::cerr);
 }

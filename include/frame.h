@@ -327,7 +327,7 @@ class Frame : public RefCounted {
   void combine(const Frame& next_frame);
   bool getCreepAt(uint32_t x, uint32_t y);
   
-  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  flatbuffers::Offset<fbs::Frame> addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
   void readFromFlatBufferTable(const fbs::Frame& table);
 }; // class Frame
 
@@ -370,7 +370,7 @@ class FrameDiff {
   int reward;
   int is_terminal;
   
-  void addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  flatbuffers::Offset<fbs::FrameDiff> addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
   void readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff);
 };
 

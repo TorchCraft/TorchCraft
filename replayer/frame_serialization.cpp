@@ -31,7 +31,7 @@ std::istream& operator>>(std::istream& in, Frame& frame) {
   return in;
 }
 
-void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
+flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
   auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
     auto buildFbsUnit = [&builder](const Unit& unit) {
       auto buildFbsOrder = [&builder](const Order& order) {
@@ -149,7 +149,9 @@ void Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) cons
   fbsFrameBuilder.add_height(height);
   fbsFrameBuilder.add_reward(reward);
   fbsFrameBuilder.add_is_terminal(is_terminal);
-  builder.Finish(fbsFrameBuilder.Finish());
+  auto output = fbsFrameBuilder.Finish();
+  builder.Finish(output);
+  return output;
 };
 
 void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {

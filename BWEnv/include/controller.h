@@ -26,6 +26,7 @@
 
 class ZMQ_server;
 namespace replayer = torchcraft::replayer;
+namespace fbs = torchcraft::fbs;
 
 // clang-format off
 enum Commands {
@@ -139,7 +140,7 @@ class Controller {
   bool is_client;
 
  private:
-  void serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff, flatbuffers::FlatBufferBuilder& builder);
+  flatbuffers::Offset<void> serializeFrameData(flatbuffers::FlatBufferBuilder& builder);
   std::unique_ptr<ConfigManager> config_;
   bool sent_battle_end_frame = false;
   bool game_ended = false;
@@ -160,8 +161,10 @@ class Controller {
   bool with_image_ = false;
   bool blocking_ = true;
   int max_frame_time_ms_ = 50;
+  std::vector<uint8_t> image_data_;
+  std::vector<uint8_t> visibility_;
+  std::vector<int8_t> commandsStatus_;
   std::vector<std::pair<std::vector<int>, std::string>> draw_cmds_;
-  torchcraft::fbs::StateUpdateT tcframe_;
 };
 
 #endif // TORCHCRAFT_CONTROL_H_

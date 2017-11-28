@@ -31,7 +31,7 @@ std::istream& operator>>(std::istream& in, FrameDiff& frameDiff) {
   return in;
 }
 
-void FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
+flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
 
   auto buildFbsFrameDiffCreep = [](const std::pair<int32_t, int32_t> creepPair) {
     return fbs::FrameDiffCreep(creepPair.first, creepPair.second);

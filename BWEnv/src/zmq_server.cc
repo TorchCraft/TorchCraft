@@ -24,9 +24,27 @@
 using namespace std;
 
 namespace {
-
+  
+void sendFlatBuffer(
+    zmq::socket_t* sock,
+    const flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder) {
+  
+  try {
+    size_t res = sock->send(
+      finishedFlatBufferBuilder.GetBufferPointer(),
+      finishedFlatBufferBuilder.GetSize());
+    if (res != finishedFlatBufferBuilder.GetSize()) {
+      throw runtime_error(
+          "ZMQ_server::send*(): zmq_send failed: no/partial send");
+    }
+  } catch (const zmq::error_t& e) {
+    throw runtime_error(
+        string("ZMQ_server::send*(): zmq_send failed: ") + e.what());
+  }
+}
+  
 template <typename T>
-void sendFBObject(zmq::socket_t* sock, const T* obj) {
+void sendFlatBufferObject(zmq::socket_t* sock, const T* obj) {
   flatbuffers::FlatBufferBuilder fbb;
   if (sock == nullptr) {
     throw runtime_error("Attempt to use nullptr socket");
@@ -38,18 +56,10 @@ void sendFBObject(zmq::socket_t* sock, const T* obj) {
       torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value,
       payload.Union());
   torchcraft::fbs::FinishMessageBuffer(fbb, root);
-
-  try {
-    size_t res = sock->send(fbb.GetBufferPointer(), fbb.GetSize());
-    if (res != fbb.GetSize()) {
-      throw runtime_error(
-          "ZMQ_server::send*(): zmq_send failed: no/partial send");
-    }
-  } catch (const zmq::error_t& e) {
-    throw runtime_error(
-        string("ZMQ_server::send*(): zmq_send failed: ") + e.what());
-  }
+  
+  sendFlatBuffer(sock, fbb);
 }
+
 
 } // namespace
 
@@ -186,23 +196,23 @@ void ZMQ_server::close()
 }
 
 void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake) {
-  sendFBObject(this->sock.get(), handshake);
+  sendFlatBufferObject(this->sock.get(), handshake);
 }
 
-void ZMQ_server::sendFrame(const torchcraft::fbs::StateUpdateT* stateUpdate) {
-  sendFBObject(this->sock.get(), stateUpdate);
+void ZMQ_server::sendFrame(const flatbuffers::FlatBufferBuilder& stateUpdateBuilder) {
+  sendFlatBuffer(this->sock.get(), stateUpdateBuilder);
 }
 
 void ZMQ_server::sendPlayerLeft(const torchcraft::fbs::PlayerLeftT* pl) {
-  sendFBObject(this->sock.get(), pl);
+  sendFlatBufferObject(this->sock.get(), pl);
 }
 
-void ZMQ_server::sendEndGame(const torchcraft::fbs::EndGameT* endgame) {
-  sendFBObject(this->sock.get(), endgame);
+void ZMQ_server::sendEndGame(const flatbuffers::FlatBufferBuilder& builder) {
+  sendFlatBuffer(this->sock.get(), builder);
 }
 
 void ZMQ_server::sendError(const torchcraft::fbs::ErrorT* error) {
-  sendFBObject(this->sock.get(), error);
+  sendFlatBufferObject(this->sock.get(), error);
 }
 
 /**

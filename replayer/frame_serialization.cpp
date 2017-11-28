@@ -32,7 +32,7 @@ std::istream& operator>>(std::istream& in, Frame& frame) {
 }
 
 flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
-  auto buildFbsUnitsByPlayerId = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
+  auto buildFbsUnitsOfPlayer = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
     auto buildFbsUnit = [&builder](const Unit& unit) {
       auto buildFbsOrder = [&builder](const Order& order) {
         return fbs::Order(
@@ -107,22 +107,22 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
     auto unitsOffsets = builder.CreateVector(fbsUnits);
     builder.Finish(unitsOffsets);
 
-    fbs::UnitsByPlayerIdBuilder fbsUnitsByPlayerIdBuilder(builder);
-    fbsUnitsByPlayerIdBuilder.add_playerId(unitPair.first);
-    fbsUnitsByPlayerIdBuilder.add_units(unitsOffsets);
-    auto output = fbsUnitsByPlayerIdBuilder.Finish();
+    fbs::UnitsOfPlayerBuilder fbsUnitsOfPlayerBuilder(builder);
+    fbsUnitsOfPlayerBuilder.add_playerId(unitPair.first);
+    fbsUnitsOfPlayerBuilder.add_units(unitsOffsets);
+    auto output = fbsUnitsOfPlayerBuilder.Finish();
     builder.Finish(output);
     return output;
   };
 
   std::vector<fbs::Bullet> fbsBullets(bullets.size());
-  std::vector<flatbuffers::Offset<fbs::ResourcesByPlayerId>> fbsResourcesByPlayerId(resources.size());
-  std::vector<flatbuffers::Offset<fbs::ActionsByPlayerId>> fbsActionsByPlayerId(actions.size());
-  std::vector<flatbuffers::Offset<fbs::UnitsByPlayerId>> fbsUnitsByPlayerId(units.size());
+  std::vector<flatbuffers::Offset<fbs::ResourcesOfPlayer>> fbsResourcesOfPlayer(resources.size());
+  std::vector<flatbuffers::Offset<fbs::ActionsOfPlayer>> fbsActionsOfPlayer(actions.size());
+  std::vector<flatbuffers::Offset<fbs::UnitsOfPlayer>> fbsUnitsOfPlayer(units.size());
   std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
-  std::transform(resources.begin(), resources.end(), fbsResourcesByPlayerId.begin(), buildFbsResourcesByPlayerId(builder));
-  std::transform(actions.begin(), actions.end(), fbsActionsByPlayerId.begin(), buildFbsActionsByPlayerId(builder));
-  std::transform(units.begin(), units.end(), fbsUnitsByPlayerId.begin(), buildFbsUnitsByPlayerId);
+  std::transform(resources.begin(), resources.end(), fbsResourcesOfPlayer.begin(), buildFbsResourcesOfPlayer(builder));
+  std::transform(actions.begin(), actions.end(), fbsActionsOfPlayer.begin(), buildFbsActionsOfPlayer(builder));
+  std::transform(units.begin(), units.end(), fbsUnitsOfPlayer.begin(), buildFbsUnitsOfPlayer);
 
   auto creepOffset = builder.CreateVector(creep_map);
   builder.Finish(creepOffset);
@@ -130,21 +130,21 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
   auto bulletsOffset = builder.CreateVectorOfStructs(fbsBullets);
   builder.Finish(bulletsOffset);
 
-  auto resourcesByPlayerIdOffset = builder.CreateVector(fbsResourcesByPlayerId);
-  builder.Finish(resourcesByPlayerIdOffset);
+  auto resourcesOfPlayerOffset = builder.CreateVector(fbsResourcesOfPlayer);
+  builder.Finish(resourcesOfPlayerOffset);
 
-  auto actionsByPlayerIdOffset = builder.CreateVector(fbsActionsByPlayerId);
-  builder.Finish(actionsByPlayerIdOffset);
+  auto actionsOfPlayerOffset = builder.CreateVector(fbsActionsOfPlayer);
+  builder.Finish(actionsOfPlayerOffset);
 
-  auto unitsByPlayerIdOffset = builder.CreateVector(fbsUnitsByPlayerId);
-  builder.Finish(unitsByPlayerIdOffset);
+  auto unitsOfPlayerOffset = builder.CreateVector(fbsUnitsOfPlayer);
+  builder.Finish(unitsOfPlayerOffset);
 
   fbs::FrameBuilder fbsFrameBuilder(builder);
   fbsFrameBuilder.add_creep_map(creepOffset);
   fbsFrameBuilder.add_bullets(bulletsOffset);
-  fbsFrameBuilder.add_actions(actionsByPlayerIdOffset);
-  fbsFrameBuilder.add_resources(resourcesByPlayerIdOffset);
-  fbsFrameBuilder.add_units(unitsByPlayerIdOffset);
+  fbsFrameBuilder.add_actions(actionsOfPlayerOffset);
+  fbsFrameBuilder.add_resources(resourcesOfPlayerOffset);
+  fbsFrameBuilder.add_units(unitsOfPlayerOffset);
   fbsFrameBuilder.add_width(width);
   fbsFrameBuilder.add_height(height);
   fbsFrameBuilder.add_reward(reward);
@@ -224,9 +224,9 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
   auto frame = this;
   auto fbsCreep = fbsFrame.creep_map();
   auto fbsBullets = fbsFrame.bullets();
-  auto fbsResourcesByPlayerIds = fbsFrame.resources();
-  auto fbsActionsByPlayerIds = fbsFrame.actions();
-  auto fbsUnitsByPlayerIds = fbsFrame.units();
+  auto fbsResourcesOfPlayers = fbsFrame.resources();
+  auto fbsActionsOfPlayers = fbsFrame.actions();
+  auto fbsUnitsOfPlayers = fbsFrame.units();
 
   creep_map.clear();
   creep_map.resize(fbsCreep->size());
@@ -245,18 +245,18 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
   resources.clear();
   std::transform(
-    fbsResourcesByPlayerIds->begin(),
-    fbsResourcesByPlayerIds->end(),
+    fbsResourcesOfPlayers->begin(),
+    fbsResourcesOfPlayers->end(),
     std::inserter(resources, resources.begin()),
     buildResources);
 
   actions.clear();
   std::for_each(
-    fbsActionsByPlayerIds->begin(),
-    fbsActionsByPlayerIds->end(),
-    [frame](const fbs::ActionsByPlayerId* fbsActionsByPlayerId) {
-      auto playerId = fbsActionsByPlayerId->playerId();
-      auto fbsActions = fbsActionsByPlayerId->actions();
+    fbsActionsOfPlayers->begin(),
+    fbsActionsOfPlayers->end(),
+    [frame](const fbs::ActionsOfPlayer* fbsActionsOfPlayer) {
+      auto playerId = fbsActionsOfPlayer->playerId();
+      auto fbsActions = fbsActionsOfPlayer->actions();
       auto& playerActions = frame->actions[playerId];
       playerActions.resize(fbsActions->size());
       std::transform(
@@ -268,11 +268,11 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
   units.clear();
   std::for_each(
-    fbsUnitsByPlayerIds->begin(),
-    fbsUnitsByPlayerIds->end(),
-    [frame, buildUnit](const fbs::UnitsByPlayerId* fbsUnitsByPlayerId) {
-      auto playerId = fbsUnitsByPlayerId->playerId();
-      auto fbsUnits = fbsUnitsByPlayerId->units();
+    fbsUnitsOfPlayers->begin(),
+    fbsUnitsOfPlayers->end(),
+    [frame, buildUnit](const fbs::UnitsOfPlayer* fbsUnitsOfPlayer) {
+      auto playerId = fbsUnitsOfPlayer->playerId();
+      auto fbsUnits = fbsUnitsOfPlayer->units();
       auto& playerUnits = frame->units[playerId];
       playerUnits.resize(fbsUnits->size());
       std::transform(

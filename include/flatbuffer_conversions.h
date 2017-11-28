@@ -19,7 +19,7 @@ namespace replayer {
 
 // Serialize to FlatBuffers
 
-auto buildFbsActionsByPlayerId = [](flatbuffers::FlatBufferBuilder& builder) {
+auto buildFbsActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   return [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
     auto buildFbsAction = [&builder](const Action& action) {
       auto actionsOffset = builder.CreateVector(action.action);
@@ -40,16 +40,16 @@ auto buildFbsActionsByPlayerId = [](flatbuffers::FlatBufferBuilder& builder) {
     auto actionOffsets = builder.CreateVector(fbsActions);
     builder.Finish(actionOffsets);
 
-    fbs::ActionsByPlayerIdBuilder fbsActionsByPlayerIdBuilder(builder);
-    fbsActionsByPlayerIdBuilder.add_playerId(actionPair.first);
-    fbsActionsByPlayerIdBuilder.add_actions(actionOffsets);
-    auto output = fbsActionsByPlayerIdBuilder.Finish();
+    fbs::ActionsOfPlayerBuilder fbsActionsOfPlayerBuilder(builder);
+    fbsActionsOfPlayerBuilder.add_playerId(actionPair.first);
+    fbsActionsOfPlayerBuilder.add_actions(actionOffsets);
+    auto output = fbsActionsOfPlayerBuilder.Finish();
     builder.Finish(output);
     return output;
   };
 };
 
-auto buildFbsResourcesByPlayerId = [](flatbuffers::FlatBufferBuilder& builder) {
+auto buildFbsResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   return [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
     auto resources = resourcesPair.second;
     fbs::ResourcesBuilder fbsResourcesBuilder(builder);
@@ -63,10 +63,10 @@ auto buildFbsResourcesByPlayerId = [](flatbuffers::FlatBufferBuilder& builder) {
     auto fbsResources = fbsResourcesBuilder.Finish();
     builder.Finish(fbsResources);
 
-    fbs::ResourcesByPlayerIdBuilder fbsResourcesByPlayerIdBuilder(builder);
-    fbsResourcesByPlayerIdBuilder.add_playerId(resourcesPair.first);
-    fbsResourcesByPlayerIdBuilder.add_resources(fbsResources);
-    auto output = fbsResourcesByPlayerIdBuilder.Finish();
+    fbs::ResourcesOfPlayerBuilder fbsResourcesOfPlayerBuilder(builder);
+    fbsResourcesOfPlayerBuilder.add_playerId(resourcesPair.first);
+    fbsResourcesOfPlayerBuilder.add_resources(fbsResources);
+    auto output = fbsResourcesOfPlayerBuilder.Finish();
     builder.Finish(output);
     return output;
   };
@@ -90,9 +90,9 @@ auto buildAction = [](const fbs::Action* fbsAction) {
   return action;
 };
 
-auto buildResources = [](const fbs::ResourcesByPlayerId* fbsResourcesByPlayerId) {
-  auto fbsResources = fbsResourcesByPlayerId->resources();
-  auto resources = std::make_pair(fbsResourcesByPlayerId->playerId(), Resources()) ;
+auto buildResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
+  auto fbsResources = fbsResourcesOfPlayer->resources();
+  auto resources = std::make_pair(fbsResourcesOfPlayer->playerId(), Resources()) ;
   resources.second.ore = fbsResources->ore();
   resources.second.gas = fbsResources->gas();
   resources.second.used_psi = fbsResources->used_psi();

@@ -139,7 +139,7 @@ class Controller {
   bool is_client;
 
  private:
-  void serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff);
+  void serializeFrameData(torchcraft::fbs::FrameOrFrameDiffUnion& frameOrFrameDiff, flatbuffers::FlatBufferBuilder& builder);
   std::unique_ptr<ConfigManager> config_;
   bool sent_battle_end_frame = false;
   bool game_ended = false;

@@ -11,7 +11,6 @@
 
 #include "frame.h"
 
-// TODO: Why is this necessary?
 namespace torchcraft {
 namespace replayer {
 

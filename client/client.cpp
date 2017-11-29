@@ -165,19 +165,19 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   sent_ = false;
 
   flatbuffers::Verifier verifier(reply.data(), reply.size());
-  if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
+  if (!fbs::VerifyMessageBuffer(verifier)) {
     error_ = "Error parsing init reply";
     return false;
   }
-  auto msg = torchcraft::fbs::GetMessage(reply.data());
-  if (msg->msg_type() != torchcraft::fbs::Any::HandshakeServer) {
+  auto msg = fbs::GetMessage(reply.data());
+  if (msg->msg_type() != fbs::Any::HandshakeServer) {
     error_ = std::string(
                  "Error parsing init reply: expected HandshakeServer, got ") +
-        torchcraft::fbs::EnumNameAny(msg->msg_type());
+        fbs::EnumNameAny(msg->msg_type());
     return false;
   }
-  if (!torchcraft::fbs::VerifyAny(
-          verifier, msg->msg(), torchcraft::fbs::Any::HandshakeServer)) {
+  if (!fbs::VerifyAny(
+          verifier, msg->msg(), fbs::Any::HandshakeServer)) {
     error_ = "Error parsing init reply";
     return false;
   }
@@ -185,7 +185,7 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
   state_->setMicroBattles(opts.micro_battles);
   state_->setOnlyConsiderTypes(opts.only_consider_types);
   updates = state_->update(
-      reinterpret_cast<const torchcraft::fbs::HandshakeServer*>(msg->msg()));
+      reinterpret_cast<const fbs::HandshakeServer*>(msg->msg()));
   return true;
 }
 
@@ -246,51 +246,51 @@ bool Client::receive(std::vector<std::string>& updates) {
   sent_ = false;
 
   flatbuffers::Verifier verifier(reply.data(), reply.size());
-  if (!torchcraft::fbs::VerifyMessageBuffer(verifier)) {
+  if (!fbs::VerifyMessageBuffer(verifier)) {
     error_ = "Error parsing reply";
     return false;
   }
-  auto msg = torchcraft::fbs::GetMessage(reply.data());
-  if (!torchcraft::fbs::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
+  auto msg = fbs::GetMessage(reply.data());
+  if (!fbs::VerifyAny(verifier, msg->msg(), msg->msg_type())) {
     error_ = "Error parsing reply";
     return false;
   }
   
-  auto processCommands = [this](const torchcraft::fbs::StateUpdate* stateUpdate) {
-    if (flatbuffers::IsFieldPresent(
-      stateUpdate, torchcraft::fbs::StateUpdate::VT_COMMANDS_STATUS)) {
-      auto& cs = *stateUpdate->commands_status();
-      this->lastCommandsStatus_.resize(cs.size());
-      for (size_t i = 0; i < cs.size(); i++) {
-        this->lastCommandsStatus_[i] = cs[i];
+  auto processCommands = [this](const fbs::StateUpdate* stateUpdate) {
+      if (flatbuffers::IsFieldPresent(
+        stateUpdate, fbs::StateUpdate::VT_COMMANDS_STATUS)) {
+        auto& cs = *stateUpdate->commands_status();
+        this->lastCommandsStatus_.resize(cs.size());
+        for (size_t i = 0; i < cs.size(); ++i) {
+          this->lastCommandsStatus_[i] = cs[i];
+        }
       }
-    }
-  };
+    };
 
   auto msgData = msg->msg();
   auto msgType = msg->msg_type();
   switch (msgType) {
-    case torchcraft::fbs::Any::StateUpdate: {
-      auto stateUpdate = as<torchcraft::fbs::StateUpdate>(msgData);
+    case fbs::Any::StateUpdate: {
+      auto stateUpdate = as<fbs::StateUpdate>(msgData);
       processCommands(stateUpdate);
       updates = state_->update(stateUpdate);
       break;
     }
-    case torchcraft::fbs::Any::EndGame:
-      updates = state_->update(as<torchcraft::fbs::EndGame>(msgData));
+    case fbs::Any::EndGame:
+      updates = state_->update(as<fbs::EndGame>(msgData));
       break;
-    case torchcraft::fbs::Any::HandshakeServer:
-      updates = state_->update(as<torchcraft::fbs::HandshakeServer>(msgData));
+    case fbs::Any::HandshakeServer:
+      updates = state_->update(as<fbs::HandshakeServer>(msgData));
       break;
-    case torchcraft::fbs::Any::PlayerLeft: {
-      updates = state_->update(as<torchcraft::fbs::PlayerLeft>(msgData));
+    case fbs::Any::PlayerLeft: {
+      updates = state_->update(as<fbs::PlayerLeft>(msgData));
       break;
     }
-    case torchcraft::fbs::Any::Error: {
-      auto error = as<torchcraft::fbs::Error>(msgData);
+    case fbs::Any::Error: {
+      auto error = as<fbs::Error>(msgData);
       auto text = error->message();
       std::cerr << "[Warning] Unhandled message from server: "
-                << torchcraft::fbs::EnumNameAny(msgType)
+                << fbs::EnumNameAny(msgType)
                 << "(message=\"" << (text ? text->str() : "(null)") << "\""
                 << std::endl;
       updates = state_->update(error);
@@ -298,7 +298,7 @@ bool Client::receive(std::vector<std::string>& updates) {
     }
     default:
       error_ = std::string("Error parsing reply: cannot handle message: ") +
-          torchcraft::fbs::EnumNameAny(msgType);
+          fbs::EnumNameAny(msgType);
       return false;
   }
   return true;

@@ -90,6 +90,11 @@ enum CommandStatus : int8_t {
   OPENBW_UNSUCCESSFUL_COMMAND = -9, // TODO reconsider whether we want this
 };
 
+struct FrameSerializationResults {
+  flatbuffers::Offset<void> offset;
+  fbs::FrameOrFrameDiff type;
+};
+
 class Controller {
  public:
   Controller(bool is_client);
@@ -140,7 +145,7 @@ class Controller {
   bool is_client;
 
  private:
-  flatbuffers::Offset<void> serializeFrameData(flatbuffers::FlatBufferBuilder& builder);
+  FrameSerializationResults serializeFrameData(flatbuffers::FlatBufferBuilder& builder);
   std::unique_ptr<ConfigManager> config_;
   bool sent_battle_end_frame = false;
   bool game_ended = false;

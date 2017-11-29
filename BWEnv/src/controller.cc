@@ -155,8 +155,7 @@ void Controller::initGame() {
 
   if (is_client)
     setupHandshake();
-  // TODO this is a logic hack - remove once exit_process is properly
-  // fixed.
+  // TODO this is a logic hack - remove once exit_process is properly fixed.
   if (exit_process_)
     return;
 
@@ -588,16 +587,18 @@ int Controller::getAttackFrames(int unitID) {
   return attackFrames;
 }
 
-flatbuffers::Offset<void> Controller::serializeFrameData(
+FrameSerializationResults Controller::serializeFrameData(
   flatbuffers::FlatBufferBuilder& builder) {
     
-  flatbuffers::Offset<void> output;
+  FrameSerializationResults output;
   
   if (prev_sent_frame == nullptr) {
-    output = last_frame->addToFlatBufferBuilder(builder).Union();
+    output.type = fbs::FrameOrFrameDiff::Frame;
+    output.offset = last_frame->addToFlatBufferBuilder(builder).Union();
   } else {
     auto frameDiff = replayer::frame_diff(last_frame, prev_sent_frame);
-    output = frameDiff.addToFlatBufferBuilder(builder).Union();
+    output.type = fbs::FrameOrFrameDiff::FrameDiff;
+    output.offset = frameDiff.addToFlatBufferBuilder(builder).Union();
   }
   
   if (prev_sent_frame != nullptr) {
@@ -615,15 +616,17 @@ void Controller::endGame() {
 
   flatbuffers::FlatBufferBuilder builder;
   
-  flatbuffers::Offset<void> frameData;
+  FrameSerializationResults frameSerializationResults;
   auto serializeFrame = last_frame != nullptr;
   if (serializeFrame) {
-    // DG TODO: add_data_type()?
-    frameData = serializeFrameData(builder);
+    frameSerializationResults = serializeFrameData(builder);
   }
   
   fbs::EndGameBuilder endGameBuilder(builder);
-  if (serializeFrame) { endGameBuilder.add_data(frameData); }
+  if (serializeFrame) {
+    endGameBuilder.add_data(frameSerializationResults.offset);
+    endGameBuilder.add_data_type(frameSerializationResults.type);
+  }
   endGameBuilder.add_game_won(this->is_winner);
   auto endGameOffset = endGameBuilder.Finish();
   builder.Finish(endGameOffset);
@@ -845,7 +848,8 @@ void Controller::onFrame() {
     auto visibilityOffset = builder.CreateVector(this->visibility_);
     builder.Finish(visibilityOffset);    
     
-    auto imageDataOffset = builder.CreateVector(sendImageData? this->image_data_ : std::vector<uint8_t>());
+    auto imageDataToSend = sendImageData? this->image_data_ : std::vector<uint8_t>();
+    auto imageDataOffset = builder.CreateVector(imageDataToSend);
     builder.Finish(imageDataOffset);
     
     auto imgModeOffset = builder.CreateString(imgMode);
@@ -854,11 +858,11 @@ void Controller::onFrame() {
     this->deaths.clear();
     builder.Finish(deathsOffset);
     
-    auto frameData = serializeFrameData(builder);
+    auto frameSerializationResults = serializeFrameData(builder);
 
     fbs::StateUpdateBuilder stateUpdateBuilder(builder);
-    stateUpdateBuilder.add_data(frameData);
-    // DG TODO: add_data_type()?
+    stateUpdateBuilder.add_data(frameSerializationResults.offset);
+    stateUpdateBuilder.add_data_type(frameSerializationResults.type);
     stateUpdateBuilder.add_deaths(deathsOffset);
     stateUpdateBuilder.add_frame_from_bwapi(BWAPI::Broodwar->getFrameCount());
     stateUpdateBuilder.add_battle_frame_count(this->battle_frame_count);

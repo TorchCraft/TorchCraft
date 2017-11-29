@@ -45,7 +45,7 @@ struct Bullet {
   int32_t type, x, y;
 };
 
-struct Action { // corresponds to a torchcraft message
+struct Action {
   std::vector<int32_t> action;
   int32_t uid;
   int32_t aid;

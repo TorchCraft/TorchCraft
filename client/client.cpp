@@ -176,8 +176,7 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
         fbs::EnumNameAny(msg->msg_type());
     return false;
   }
-  if (!fbs::VerifyAny(
-          verifier, msg->msg(), fbs::Any::HandshakeServer)) {
+  if (!fbs::VerifyAny(verifier, msg->msg(), fbs::Any::HandshakeServer)) {
     error_ = "Error parsing init reply";
     return false;
   }

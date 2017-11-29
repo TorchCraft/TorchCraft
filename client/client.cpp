@@ -257,15 +257,21 @@ bool Client::receive(std::vector<std::string>& updates) {
   }
   
   auto processCommands = [this](const fbs::StateUpdate* stateUpdate) {
-      if (flatbuffers::IsFieldPresent(
-        stateUpdate, fbs::StateUpdate::VT_COMMANDS_STATUS)) {
-        auto& cs = *stateUpdate->commands_status();
-        this->lastCommandsStatus_.resize(cs.size());
-        for (size_t i = 0; i < cs.size(); ++i) {
-          this->lastCommandsStatus_[i] = cs[i];
-        }
+    if (stateUpdate == nullptr) {
+      error_ = "Null StateUpdate";
+    }
+    else if (flatbuffers::IsFieldPresent(
+      stateUpdate, fbs::StateUpdate::VT_COMMANDS_STATUS)) {
+      auto commandsStatus = stateUpdate->commands_status();
+      if (commandsStatus != nullptr) {
+        this->lastCommandsStatus_.resize(commandsStatus->size());
+        std::copy(
+          commandsStatus->begin(),
+          commandsStatus->end(),
+          this->lastCommandsStatus_.begin());
       }
-    };
+    }
+  };
 
   auto msgData = msg->msg();
   auto msgType = msg->msg_type();

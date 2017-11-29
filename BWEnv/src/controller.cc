@@ -579,6 +579,7 @@ int Controller::getAttackFrames(int unitID) {
   // This value is primarily relevant for knowing how many frames a unit needs to be allowed to
   // peform its attack animation before it can receive another command.
   // Receiving a command before that period will cancel the attack.
+  // TODO: Reproduce Churchill's experiments for Photon Cannons (and maybe other omitted units)
   if (unitType == BWAPI::UnitTypes::Enum::Protoss_Dragoon) {
     attackFrames += 5;
   } else if (unitType == BWAPI::UnitTypes::Enum::Zerg_Devourer) {

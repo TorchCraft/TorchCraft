@@ -269,7 +269,7 @@ std::vector<std::string> State::update(const fbs::StateUpdate* stateUpdate) {
   battle_frame_count = stateUpdate->battle_frame_count();
   upd.emplace_back("battle_frame_count");
 
-  if (fb::IsFieldPresent(frame, fbs::StateUpdate::VT_IMG_MODE)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_MODE)) {
     img_mode = stateUpdate->img_mode()->str();
     upd.emplace_back("img_mode");
   }

@@ -861,23 +861,23 @@ void Controller::onFrame() {
     
     auto frameSerializationResults = serializeFrameData(builder);
 
-    fbs::StateUpdateBuilder stateUpdateBuilder(builder);
-    stateUpdateBuilder.add_data(frameSerializationResults.offset);
-    stateUpdateBuilder.add_data_type(frameSerializationResults.type);
-    stateUpdateBuilder.add_deaths(deathsOffset);
-    stateUpdateBuilder.add_frame_from_bwapi(BWAPI::Broodwar->getFrameCount());
-    stateUpdateBuilder.add_battle_frame_count(this->battle_frame_count);
-    stateUpdateBuilder.add_commands_status(commandsOffset);
-    stateUpdateBuilder.add_img_mode(imgModeOffset);
-    stateUpdateBuilder.add_screen_position(&vec2ScreenPosition);    
-    stateUpdateBuilder.add_visibility(visibilityOffset);
-    stateUpdateBuilder.add_visibility_size(&vec2VisibilitySize);
-    stateUpdateBuilder.add_img_data(imageDataOffset);
-    stateUpdateBuilder.add_img_size(&vec2ImgSize);
-    auto stateUpdateOffset = stateUpdateBuilder.Finish();
-    builder.Finish(stateUpdateOffset);
+    fbs::FrameUpdateBuilder frameUpdateBuilder(builder);
+    frameUpdateBuilder.add_data(frameSerializationResults.offset);
+    frameUpdateBuilder.add_data_type(frameSerializationResults.type);
+    frameUpdateBuilder.add_deaths(deathsOffset);
+    frameUpdateBuilder.add_frame_from_bwapi(BWAPI::Broodwar->getFrameCount());
+    frameUpdateBuilder.add_battle_frame_count(this->battle_frame_count);
+    frameUpdateBuilder.add_commands_status(commandsOffset);
+    frameUpdateBuilder.add_img_mode(imgModeOffset);
+    frameUpdateBuilder.add_screen_position(&vec2ScreenPosition);    
+    frameUpdateBuilder.add_visibility(visibilityOffset);
+    frameUpdateBuilder.add_visibility_size(&vec2VisibilitySize);
+    frameUpdateBuilder.add_img_data(imageDataOffset);
+    frameUpdateBuilder.add_img_size(&vec2ImgSize);
+    auto frameUpdateOffset = frameUpdateBuilder.Finish();
+    builder.Finish(frameUpdateOffset);
     
-    this->zmq_server->sendFrame(stateUpdateOffset, builder);
+    this->zmq_server->sendFrame(frameUpdateOffset, builder);
     combined_frames = 0;
 
     if (battle_ended) {

@@ -217,12 +217,12 @@ void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshak
 }
 
 void ZMQ_server::sendFrame(
-    const flatbuffers::Offset<torchcraft::fbs::StateUpdate>& stateUpdateOffset,
+    const flatbuffers::Offset<torchcraft::fbs::FrameUpdate>& frameUpdateOffset,
     flatbuffers::FlatBufferBuilder& builder) {  
   sendMessageAsOffset(
     this->sock.get(),
-    torchcraft::fbs::Any::StateUpdate,
-    stateUpdateOffset.Union(),
+    torchcraft::fbs::Any::FrameUpdate,
+    frameUpdateOffset.Union(),
     builder);
 }
 

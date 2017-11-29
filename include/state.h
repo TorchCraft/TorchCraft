@@ -22,7 +22,7 @@
 namespace torchcraft {
 namespace fbs {
 struct HandshakeServer;
-struct StateUpdate;
+struct FrameUpdate;
 struct EndGame;
 struct PlayerLeft;
 struct Error;
@@ -142,12 +142,11 @@ class State : public RefCounted {
   }
 
   void reset();
-  std::vector<std::string> update(
-      const torchcraft::fbs::HandshakeServer* handshake);
-  std::vector<std::string> update(const torchcraft::fbs::StateUpdate* stateUpdate);
-  std::vector<std::string> update(const torchcraft::fbs::EndGame* end);
-  std::vector<std::string> update(const torchcraft::fbs::PlayerLeft* left);
-  std::vector<std::string> update(const torchcraft::fbs::Error* error);
+  std::vector<std::string> update(const fbs::HandshakeServer* handshake);
+  std::vector<std::string> update(const fbs::FrameUpdate* frameUpdate);
+  std::vector<std::string> update(const fbs::EndGame* end);
+  std::vector<std::string> update(const fbs::PlayerLeft* left);
+  std::vector<std::string> update(const fbs::Error* error);
   void trackAliveUnits(
       std::vector<std::string>& upd,
       const std::set<BW::UnitType>& considered);
@@ -178,11 +177,11 @@ class State : public RefCounted {
   }
 
  private:
-  bool setRawImage(const torchcraft::fbs::StateUpdate* frame);
+  bool setRawImage(const fbs::FrameUpdate* frame);
   void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);
-  bool update_frame(const void* flatBuffer, const torchcraft::fbs::FrameOrFrameDiff type);
+  bool update_frame(const void* flatBuffer, const fbs::FrameOrFrameDiff type);
 
   bool microBattles_;
   std::set<BW::UnitType> onlyConsiderTypes_;

@@ -256,13 +256,10 @@ bool Client::receive(std::vector<std::string>& updates) {
     return false;
   }
   
-  auto processCommands = [this](const fbs::StateUpdate* stateUpdate) {
-    if (stateUpdate == nullptr) {
-      error_ = "Null StateUpdate";
-    }
-    else if (flatbuffers::IsFieldPresent(
-      stateUpdate, fbs::StateUpdate::VT_COMMANDS_STATUS)) {
-      auto commandsStatus = stateUpdate->commands_status();
+  auto processCommands = [this](const fbs::FrameUpdate* frameUpdate) {
+    if (flatbuffers::IsFieldPresent(
+      frameUpdate, fbs::FrameUpdate::VT_COMMANDS_STATUS)) {
+      auto commandsStatus = frameUpdate->commands_status();
       if (commandsStatus != nullptr) {
         this->lastCommandsStatus_.resize(commandsStatus->size());
         std::copy(
@@ -270,16 +267,16 @@ bool Client::receive(std::vector<std::string>& updates) {
           commandsStatus->end(),
           this->lastCommandsStatus_.begin());
       }
-    }
+    };
   };
 
   auto msgData = msg->msg();
   auto msgType = msg->msg_type();
   switch (msgType) {
-    case fbs::Any::StateUpdate: {
-      auto stateUpdate = as<fbs::StateUpdate>(msgData);
-      processCommands(stateUpdate);
-      updates = state_->update(stateUpdate);
+    case fbs::Any::FrameUpdate: {
+      auto frameUpdate = as<fbs::FrameUpdate>(msgData);
+      processCommands(frameUpdate);
+      updates = state_->update(frameUpdate);
       break;
     }
     case fbs::Any::EndGame:

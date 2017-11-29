@@ -32,9 +32,9 @@ std::istream& operator>>(std::istream& in, Frame& frame) {
 }
 
 flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
-  auto buildFbsUnitsOfPlayer = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
-    auto buildFbsUnit = [&builder](const Unit& unit) {
-      auto buildFbsOrder = [&builder](const Order& order) {
+  auto packUnitsOfPlayer = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
+    auto packUnit = [&builder](const Unit& unit) {
+      auto packOrder = [&builder](const Order& order) {
         return fbs::Order(
           order.first_frame,
           order.type,
@@ -44,7 +44,7 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
       };
 
       std::vector<fbs::Order> fbsOrders(unit.orders.size());
-      std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), buildFbsOrder);
+      std::transform(unit.orders.begin(), unit.orders.end(), fbsOrders.begin(), packOrder);
 
       auto ordersOffset = builder.CreateVectorOfStructs(fbsOrders);
       builder.Finish(ordersOffset);
@@ -103,7 +103,7 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
     };
 
     std::vector<flatbuffers::Offset<fbs::Unit>> fbsUnits(unitPair.second.size());
-    std::transform(unitPair.second.begin(), unitPair.second.end(), fbsUnits.begin(), buildFbsUnit);
+    std::transform(unitPair.second.begin(), unitPair.second.end(), fbsUnits.begin(), packUnit);
     auto unitsOffsets = builder.CreateVector(fbsUnits);
     builder.Finish(unitsOffsets);
 
@@ -119,10 +119,10 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
   std::vector<flatbuffers::Offset<fbs::ResourcesOfPlayer>> fbsResourcesOfPlayer(resources.size());
   std::vector<flatbuffers::Offset<fbs::ActionsOfPlayer>> fbsActionsOfPlayer(actions.size());
   std::vector<flatbuffers::Offset<fbs::UnitsOfPlayer>> fbsUnitsOfPlayer(units.size());
-  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), buildFbsBullet);
-  std::transform(resources.begin(), resources.end(), fbsResourcesOfPlayer.begin(), buildFbsResourcesOfPlayer(builder));
-  std::transform(actions.begin(), actions.end(), fbsActionsOfPlayer.begin(), buildFbsActionsOfPlayer(builder));
-  std::transform(units.begin(), units.end(), fbsUnitsOfPlayer.begin(), buildFbsUnitsOfPlayer);
+  std::transform(bullets.begin(), bullets.end(), fbsBullets.begin(), packBullet);
+  std::transform(resources.begin(), resources.end(), fbsResourcesOfPlayer.begin(), packResourcesOfPlayer(builder));
+  std::transform(actions.begin(), actions.end(), fbsActionsOfPlayer.begin(), packActionsOfPlayer(builder));
+  std::transform(units.begin(), units.end(), fbsUnitsOfPlayer.begin(), packUnitsOfPlayer);
 
   auto creepOffset = builder.CreateVector(creep_map);
   builder.Finish(creepOffset);
@@ -156,8 +156,8 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
 
 void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
-  auto buildUnit = [](const fbs::Unit* fbsUnit) {
-    auto buildOrder = [](const fbs::Order* fbsOrder) {
+  auto unpackUnit = [](const fbs::Unit* fbsUnit) {
+    auto unpackOrder = [](const fbs::Order* fbsOrder) {
       Order order;
       order.first_frame = fbsOrder->first_frame();
       order.type = fbsOrder->type();
@@ -171,7 +171,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
     auto fbsOrders = fbsUnit->orders();
     unit.orders.resize(fbsOrders->size());
-    std::transform(fbsOrders->begin(), fbsOrders->end(), unit.orders.begin(), buildOrder);
+    std::transform(fbsOrders->begin(), fbsOrders->end(), unit.orders.begin(), unpackOrder);
 
     auto fbsCommand = fbsUnit->command();
     unit.command.frame = fbsCommand->frame();
@@ -241,14 +241,14 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     fbsBullets->begin(),
     fbsBullets->end(),
     bullets.begin(),
-    buildBullet);
+    unpackBullet);
 
   resources.clear();
   std::transform(
     fbsResourcesOfPlayers->begin(),
     fbsResourcesOfPlayers->end(),
     std::inserter(resources, resources.begin()),
-    buildResources);
+    unpackResources);
 
   actions.clear();
   std::for_each(
@@ -263,14 +263,14 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
         fbsActions->begin(),
         fbsActions->end(),
         playerActions.begin(),
-        buildAction);
+        unpackAction);
     });
 
   units.clear();
   std::for_each(
     fbsUnitsOfPlayers->begin(),
     fbsUnitsOfPlayers->end(),
-    [frame, buildUnit](const fbs::UnitsOfPlayer* fbsUnitsOfPlayer) {
+    [frame, unpackUnit](const fbs::UnitsOfPlayer* fbsUnitsOfPlayer) {
       auto playerId = fbsUnitsOfPlayer->playerId();
       auto fbsUnits = fbsUnitsOfPlayer->units();
       auto& playerUnits = frame->units[playerId];
@@ -279,7 +279,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
         fbsUnits->begin(),
         fbsUnits->end(),
         playerUnits.begin(),
-        buildUnit);
+        unpackUnit);
     });
 
   width = fbsFrame.width();

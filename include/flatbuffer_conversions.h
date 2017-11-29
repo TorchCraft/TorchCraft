@@ -19,9 +19,9 @@ namespace replayer {
 
 // Serialize to FlatBuffers
 
-auto buildFbsActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
+auto packActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   return [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
-    auto buildFbsAction = [&builder](const Action& action) {
+    auto packAction = [&builder](const Action& action) {
       auto actionsOffset = builder.CreateVector(action.action);
       builder.Finish(actionsOffset);
 
@@ -35,7 +35,7 @@ auto buildFbsActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
     };
 
     std::vector<flatbuffers::Offset<fbs::Action>> fbsActions(actionPair.second.size());
-    std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), buildFbsAction);
+    std::transform(actionPair.second.begin(), actionPair.second.end(), fbsActions.begin(), packAction);
 
     auto actionOffsets = builder.CreateVector(fbsActions);
     builder.Finish(actionOffsets);
@@ -49,7 +49,7 @@ auto buildFbsActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   };
 };
 
-auto buildFbsResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
+auto packResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   return [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
     auto resources = resourcesPair.second;
     fbs::ResourcesBuilder fbsResourcesBuilder(builder);
@@ -72,13 +72,13 @@ auto buildFbsResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   };
 };
 
-auto buildFbsBullet = [](const Bullet& bullet) {
+auto packBullet = [](const Bullet& bullet) {
   return fbs::Bullet(bullet.type, bullet.x, bullet.y);
 };
 
 // Deserialize from FlatBuffers
 
-auto buildAction = [](const fbs::Action* fbsAction) {
+auto unpackAction = [](const fbs::Action* fbsAction) {
   assert(fbsAction);
   assert(fbsAction->action());
   auto fbsActionInts = fbsAction->action();
@@ -90,7 +90,7 @@ auto buildAction = [](const fbs::Action* fbsAction) {
   return action;
 };
 
-auto buildResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
+auto unpackResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
   auto fbsResources = fbsResourcesOfPlayer->resources();
   auto resources = std::make_pair(fbsResourcesOfPlayer->playerId(), Resources()) ;
   resources.second.ore = fbsResources->ore();
@@ -103,7 +103,7 @@ auto buildResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
   return resources;
 };
 
-auto buildBullet = [](const fbs::Bullet* fbsBullet) {
+auto unpackBullet = [](const fbs::Bullet* fbsBullet) {
   Bullet bullet;
   bullet.type = fbsBullet->type();
   bullet.x = fbsBullet->x();

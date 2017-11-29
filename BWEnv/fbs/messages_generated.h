@@ -180,7 +180,7 @@ enum class Any : uint8_t {
   HandshakeClient = 1,
   Commands = 2,
   HandshakeServer = 3,
-  Frame = 4,
+  StateUpdate = 4,
   PlayerLeft = 5,
   EndGame = 6,
   Error = 7,
@@ -194,7 +194,7 @@ inline Any (&EnumValuesAny())[8] {
     Any::HandshakeClient,
     Any::Commands,
     Any::HandshakeServer,
-    Any::Frame,
+    Any::StateUpdate,
     Any::PlayerLeft,
     Any::EndGame,
     Any::Error
@@ -208,7 +208,7 @@ inline const char **EnumNamesAny() {
     "HandshakeClient",
     "Commands",
     "HandshakeServer",
-    "Frame",
+    "StateUpdate",
     "PlayerLeft",
     "EndGame",
     "Error",
@@ -238,8 +238,8 @@ template<> struct AnyTraits<HandshakeServer> {
   static const Any enum_value = Any::HandshakeServer;
 };
 
-template<> struct AnyTraits<Frame> {
-  static const Any enum_value = Any::Frame;
+template<> struct AnyTraits<StateUpdate> {
+  static const Any enum_value = Any::StateUpdate;
 };
 
 template<> struct AnyTraits<PlayerLeft> {
@@ -309,13 +309,13 @@ struct AnyUnion {
     return type == Any::HandshakeServer ?
       reinterpret_cast<const HandshakeServerT *>(value) : nullptr;
   }
-  FrameT *AsFrame() {
-    return type == Any::Frame ?
-      reinterpret_cast<FrameT *>(value) : nullptr;
+  StateUpdateT *AsStateUpdate() {
+    return type == Any::StateUpdate ?
+      reinterpret_cast<StateUpdateT *>(value) : nullptr;
   }
-  const FrameT *AsFrame() const {
-    return type == Any::Frame ?
-      reinterpret_cast<const FrameT *>(value) : nullptr;
+  const StateUpdateT *AsStateUpdate() const {
+    return type == Any::StateUpdate ?
+      reinterpret_cast<const StateUpdateT *>(value) : nullptr;
   }
   PlayerLeftT *AsPlayerLeft() {
     return type == Any::PlayerLeft ?
@@ -1755,8 +1755,8 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const HandshakeServer *msg_as_HandshakeServer() const {
     return msg_type() == Any::HandshakeServer ? static_cast<const HandshakeServer *>(msg()) : nullptr;
   }
-  const Frame *msg_as_Frame() const {
-    return msg_type() == Any::Frame ? static_cast<const Frame *>(msg()) : nullptr;
+  const StateUpdate *msg_as_StateUpdate() const {
+    return msg_type() == Any::StateUpdate ? static_cast<const StateUpdate *>(msg()) : nullptr;
   }
   const PlayerLeft *msg_as_PlayerLeft() const {
     return msg_type() == Any::PlayerLeft ? static_cast<const PlayerLeft *>(msg()) : nullptr;
@@ -1802,8 +1802,8 @@ template<> inline const HandshakeServer *Message::msg_as<HandshakeServer>() cons
   return msg_as_HandshakeServer();
 }
 
-template<> inline const Frame *Message::msg_as<Frame>() const {
-  return msg_as_Frame();
+template<> inline const StateUpdate *Message::msg_as<StateUpdate>() const {
+  return msg_as_StateUpdate();
 }
 
 template<> inline const PlayerLeft *Message::msg_as<PlayerLeft>() const {
@@ -4667,8 +4667,8 @@ inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type
       auto ptr = reinterpret_cast<const HandshakeServer *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Any::Frame: {
-      auto ptr = reinterpret_cast<const Frame *>(obj);
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<const StateUpdate *>(obj);
       return verifier.VerifyTable(ptr);
     }
     case Any::PlayerLeft: {
@@ -4712,8 +4712,8 @@ inline void *AnyUnion::UnPack(const void *obj, Any type, const flatbuffers::reso
       auto ptr = reinterpret_cast<const HandshakeServer *>(obj);
       return ptr->UnPack(resolver);
     }
-    case Any::Frame: {
-      auto ptr = reinterpret_cast<const Frame *>(obj);
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<const StateUpdate *>(obj);
       return ptr->UnPack(resolver);
     }
     case Any::PlayerLeft: {
@@ -4746,9 +4746,9 @@ inline flatbuffers::Offset<void> AnyUnion::Pack(flatbuffers::FlatBufferBuilder &
       auto ptr = reinterpret_cast<const HandshakeServerT *>(value);
       return CreateHandshakeServer(_fbb, ptr, _rehasher).Union();
     }
-    case Any::Frame: {
-      auto ptr = reinterpret_cast<const FrameT *>(value);
-      return CreateFrame(_fbb, ptr, _rehasher).Union();
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<const StateUpdateT *>(value);
+      return CreateStateUpdate(_fbb, ptr, _rehasher).Union();
     }
     case Any::PlayerLeft: {
       auto ptr = reinterpret_cast<const PlayerLeftT *>(value);
@@ -4780,8 +4780,8 @@ inline AnyUnion::AnyUnion(const AnyUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type)
       assert(false);  // HandshakeServerT not copyable.
       break;
     }
-    case Any::Frame: {
-      assert(false);  // FrameT not copyable.
+    case Any::StateUpdate: {
+      assert(false);  // StateUpdateT not copyable.
       break;
     }
     case Any::PlayerLeft: {
@@ -4818,8 +4818,8 @@ inline void AnyUnion::Reset() {
       delete ptr;
       break;
     }
-    case Any::Frame: {
-      auto ptr = reinterpret_cast<FrameT *>(value);
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<StateUpdateT *>(value);
       delete ptr;
       break;
     }

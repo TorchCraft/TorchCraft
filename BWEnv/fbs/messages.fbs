@@ -95,7 +95,7 @@ union Any {
 
   // from server
   HandshakeServer,
-  Frame,
+  StateUpdate,
   PlayerLeft,
   EndGame,
   Error,

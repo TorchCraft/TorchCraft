@@ -38,9 +38,13 @@ public:
   void connect();
   void close();
   void sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake);
-  void sendFrame(const flatbuffers::FlatBufferBuilder& builder);
+  void sendFrame(
+    const flatbuffers::Offset<torchcraft::fbs::StateUpdate>& stateUpdateOffset,
+    flatbuffers::FlatBufferBuilder& builder);
   void sendPlayerLeft(const torchcraft::fbs::PlayerLeftT *pl);
-  void sendEndGame(const flatbuffers::FlatBufferBuilder& builder);
+  void sendEndGame(
+    const flatbuffers::Offset<torchcraft::fbs::EndGame>& endGameOffset,
+    flatbuffers::FlatBufferBuilder& builder);
   void sendError(const torchcraft::fbs::ErrorT *error);
   bool receiveMessage(int timeoutMs = -1);
   void handleReconnect(const torchcraft::fbs::HandshakeClient* handshake);

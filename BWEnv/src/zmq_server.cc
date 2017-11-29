@@ -25,41 +25,58 @@ using namespace std;
 
 namespace {
   
+  
 void sendFlatBuffer(
     zmq::socket_t* sock,
-    const flatbuffers::FlatBufferBuilder& finishedFlatBufferBuilder) {
+    const flatbuffers::FlatBufferBuilder& builder) {
+  
+  if (sock == nullptr) {
+    throw runtime_error("Attempt to use nullptr socket");
+  }
   
   try {
-    size_t res = sock->send(
-      finishedFlatBufferBuilder.GetBufferPointer(),
-      finishedFlatBufferBuilder.GetSize());
-    if (res != finishedFlatBufferBuilder.GetSize()) {
+    size_t response = sock->send(builder.GetBufferPointer(), builder.GetSize());
+    if (response != builder.GetSize()) {
       throw runtime_error(
-          "ZMQ_server::send*(): zmq_send failed: no/partial send");
+        "ZMQ_server::send*(): zmq_send failed: no/partial send");
     }
   } catch (const zmq::error_t& e) {
     throw runtime_error(
         string("ZMQ_server::send*(): zmq_send failed: ") + e.what());
   }
 }
-  
-template <typename T>
-void sendFlatBufferObject(zmq::socket_t* sock, const T* obj) {
-  flatbuffers::FlatBufferBuilder fbb;
-  if (sock == nullptr) {
-    throw runtime_error("Attempt to use nullptr socket");
-  }
 
-  auto payload = T::TableType::Pack(fbb, obj);
-  auto root = torchcraft::fbs::CreateMessage(
-      fbb,
-      torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value,
-      payload.Union());
-  torchcraft::fbs::FinishMessageBuffer(fbb, root);
+void sendMessageAsOffset(
+    zmq::socket_t* sock,
+    torchcraft::fbs::Any messageType,
+    const flatbuffers::Offset<void>& unionOffset,
+    flatbuffers::FlatBufferBuilder& builder) {
   
-  sendFlatBuffer(sock, fbb);
+  auto rootMessageOffset = torchcraft::fbs::CreateMessage(
+    builder,
+    messageType,
+    unionOffset);      
+  torchcraft::fbs::FinishMessageBuffer(builder, rootMessageOffset);
+  
+  sendFlatBuffer(sock, builder);
 }
 
+template <typename T>
+void sendMessageAsNativeTable(
+    zmq::socket_t* sock,
+    const T* childMessageNativeTable) {
+      
+  flatbuffers::FlatBufferBuilder builder;
+
+  auto messageType = torchcraft::fbs::AnyTraits<typename T::TableType>::enum_value;
+  auto childMessageOffset = T::TableType::Pack(builder, childMessageNativeTable);
+  auto unionOffset = childMessageOffset.Union();
+  sendMessageAsOffset(
+    sock,
+    messageType,
+    unionOffset, 
+    builder);
+}
 
 } // namespace
 
@@ -196,23 +213,35 @@ void ZMQ_server::close()
 }
 
 void ZMQ_server::sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake) {
-  sendFlatBufferObject(this->sock.get(), handshake);
+  sendMessageAsNativeTable(this->sock.get(), handshake);
 }
 
-void ZMQ_server::sendFrame(const flatbuffers::FlatBufferBuilder& stateUpdateBuilder) {
-  sendFlatBuffer(this->sock.get(), stateUpdateBuilder);
+void ZMQ_server::sendFrame(
+    const flatbuffers::Offset<torchcraft::fbs::StateUpdate>& stateUpdateOffset,
+    flatbuffers::FlatBufferBuilder& builder) {  
+  sendMessageAsOffset(
+    this->sock.get(),
+    torchcraft::fbs::Any::StateUpdate,
+    stateUpdateOffset.Union(),
+    builder);
 }
 
 void ZMQ_server::sendPlayerLeft(const torchcraft::fbs::PlayerLeftT* pl) {
-  sendFlatBufferObject(this->sock.get(), pl);
+  sendMessageAsNativeTable(this->sock.get(), pl);
 }
 
-void ZMQ_server::sendEndGame(const flatbuffers::FlatBufferBuilder& builder) {
-  sendFlatBuffer(this->sock.get(), builder);
+void ZMQ_server::sendEndGame(
+    const flatbuffers::Offset<torchcraft::fbs::EndGame>& endGameOffset,
+    flatbuffers::FlatBufferBuilder& builder) {
+  sendMessageAsOffset(
+    this->sock.get(),
+    torchcraft::fbs::Any::EndGame,
+    endGameOffset.Union(),
+    builder);
 }
 
 void ZMQ_server::sendError(const torchcraft::fbs::ErrorT* error) {
-  sendFlatBufferObject(this->sock.get(), error);
+  sendMessageAsNativeTable(this->sock.get(), error);
 }
 
 /**

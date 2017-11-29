@@ -251,7 +251,7 @@ bool Client::receive(std::vector<std::string>& updates) {
   }
 
   switch (msg->msg_type()) {
-    case torchcraft::fbs::Any::Frame: {
+    case torchcraft::fbs::Any::StateUpdate: {
       auto frameMsg =
           reinterpret_cast<const torchcraft::fbs::StateUpdate*>(msg->msg());
       if (flatbuffers::IsFieldPresent(

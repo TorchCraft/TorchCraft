@@ -628,7 +628,7 @@ void Controller::endGame() {
   builder.Finish(endGameOffset);
 
   clearPendingReceive();
-  this->zmq_server->sendEndGame(builder);
+  this->zmq_server->sendEndGame(endGameOffset, builder); 
 
   if (is_client) {
     // And receive new commands
@@ -868,9 +868,10 @@ void Controller::onFrame() {
     stateUpdateBuilder.add_visibility_size(&vec2VisibilitySize);
     stateUpdateBuilder.add_img_data(imageDataOffset);
     stateUpdateBuilder.add_img_size(&vec2ImgSize);
-    builder.Finish(stateUpdateBuilder.Finish());
+    auto stateUpdateOffset = stateUpdateBuilder.Finish();
+    builder.Finish(stateUpdateOffset);
     
-    this->zmq_server->sendFrame(builder);
+    this->zmq_server->sendFrame(stateUpdateOffset, builder);
     combined_frames = 0;
 
     if (battle_ended) {

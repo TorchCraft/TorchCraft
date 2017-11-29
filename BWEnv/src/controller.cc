@@ -618,6 +618,7 @@ void Controller::endGame() {
   flatbuffers::Offset<void> frameData;
   auto serializeFrame = last_frame != nullptr;
   if (serializeFrame) {
+    // DG TODO: add_data_type()?
     frameData = serializeFrameData(builder);
   }
   

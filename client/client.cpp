@@ -219,7 +219,7 @@ bool Client::send(const std::vector<Command>& commands) {
 }
 
 namespace {
-  template<typename T> const T* as(void* msgData) {
+  template<typename T> const T* as(const void* msgData) {
     return reinterpret_cast<const T*>(msgData);
   }
 }
@@ -287,7 +287,7 @@ bool Client::receive(std::vector<std::string>& updates) {
       break;
     }
     case torchcraft::fbs::Any::Error: {
-      auto error = as<const torchcraft::fbs::Error*>(msgData);
+      auto error = as<torchcraft::fbs::Error>(msgData);
       auto text = error->message();
       std::cerr << "[Warning] Unhandled message from server: "
                 << torchcraft::fbs::EnumNameAny(msgType)

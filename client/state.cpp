@@ -11,6 +11,8 @@
 
 #include "messages_generated.h"
 
+namespace fb = flatbuffers;
+
 namespace torchcraft {
 
 State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
@@ -147,15 +149,13 @@ void State::reset() {
   numUpdates++;
 }
 
-std::vector<std::string> State::update(
-    const torchcraft::fbs::HandshakeServer* handshake) {
+std::vector<std::string> State::update(const fbs::HandshakeServer* handshake) {
   reset();
 
   std::vector<std::string> upd;
   lag_frames = handshake->lag_frames();
   upd.emplace_back("lag_frames");
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_GROUND_HEIGHT_DATA)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_GROUND_HEIGHT_DATA)) {
     auto& ghd = *handshake->ground_height_data();
     ground_height_data.resize(ghd.size());
     for (size_t i = 0; i < ghd.size(); i++) {
@@ -163,8 +163,7 @@ std::vector<std::string> State::update(
     }
     upd.emplace_back("ground_height_data");
   }
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_WALKABLE_DATA)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_WALKABLE_DATA)) {
     auto& wd = *handshake->walkable_data();
     walkable_data.resize(wd.size());
     for (size_t i = 0; i < wd.size(); i++) {
@@ -172,8 +171,7 @@ std::vector<std::string> State::update(
     }
     upd.emplace_back("walkable_data");
   }
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_BUILDABLE_DATA)) {
     auto& bd = *handshake->buildable_data();
     buildable_data.resize(bd.size());
     for (size_t i = 0; i < bd.size(); i++) {
@@ -181,26 +179,22 @@ std::vector<std::string> State::update(
     }
     upd.emplace_back("buildable_data");
   }
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_MAP_SIZE)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_MAP_SIZE)) {
     map_size[0] = handshake->map_size()->x();
     map_size[1] = handshake->map_size()->y();
   }
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_MAP_NAME)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_MAP_NAME)) {
     map_name = handshake->map_name()->str();
     upd.emplace_back("map_name");
   }
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_START_LOCATIONS)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_START_LOCATIONS)) {
     start_locations.clear();
     for (auto p : *handshake->start_locations()) {
       start_locations.emplace_back(p->x(), p->y());
     }
     upd.emplace_back("start_locations");
   }
-  if (flatbuffers::IsFieldPresent(
-          handshake, torchcraft::fbs::HandshakeServer::VT_PLAYERS)) {
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_PLAYERS)) {
     player_info.clear();
     for (auto player : *handshake->players()) {
       PlayerInfo info;
@@ -227,7 +221,7 @@ std::vector<std::string> State::update(
   return upd;
 }
 
-bool State::update_frame(const void* flatBuffer, const torchcraft::fbs::FrameOrFrameDiff type) {
+bool State::update_frame(const void* flatBuffer, const fbs::FrameOrFrameDiff type) {
   switch (type) {
     case fbs::FrameOrFrameDiff::Frame: {
       auto frameFlatBuffer = static_cast<const fbs::Frame*>(flatBuffer);
@@ -242,15 +236,16 @@ bool State::update_frame(const void* flatBuffer, const torchcraft::fbs::FrameOrF
       return true;
     }
     default:
-      return false;
+      throw std::runtime_error(
+        "State::update_frame(): Unrecognized FrameOrFrameDiff type"); 
   }
 }
 
-std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* stateUpdate) {
+std::vector<std::string> State::update(const fbs::StateUpdate* stateUpdate) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (flatbuffers::IsFieldPresent(stateUpdate, torchcraft::fbs::StateUpdate::VT_DATA)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_DATA)) {
     if (this->update_frame(
       stateUpdate->data(),
       stateUpdate->data_type())) {
@@ -258,7 +253,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* state
     }
   }
 
-  if (flatbuffers::IsFieldPresent(stateUpdate, torchcraft::fbs::StateUpdate::VT_DEATHS)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_DEATHS)) {
     auto& fd = *stateUpdate->deaths();
     deaths.resize(fd.size());
     for (size_t i = 0; i < fd.size(); i++) {
@@ -274,22 +269,19 @@ std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* state
   battle_frame_count = stateUpdate->battle_frame_count();
   upd.emplace_back("battle_frame_count");
 
-  if (flatbuffers::IsFieldPresent(frame, torchcraft::fbs::StateUpdate::VT_IMG_MODE)) {
+  if (fb::IsFieldPresent(frame, fbs::StateUpdate::VT_IMG_MODE)) {
     img_mode = stateUpdate->img_mode()->str();
     upd.emplace_back("img_mode");
   }
 
-  if (flatbuffers::IsFieldPresent(
-          stateUpdate, torchcraft::fbs::StateUpdate::VT_SCREEN_POSITION)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_SCREEN_POSITION)) {
     screen_position[0] = stateUpdate->screen_position()->x();
     screen_position[1] = stateUpdate->screen_position()->y();
     upd.emplace_back("screen_position");
   }
 
-  if (flatbuffers::IsFieldPresent(
-          stateUpdate, torchcraft::fbs::StateUpdate::VT_VISIBILITY) &&
-      flatbuffers::IsFieldPresent(
-          stateUpdate, torchcraft::fbs::StateUpdate::VT_VISIBILITY_SIZE)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_VISIBILITY) &&
+      fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_VISIBILITY_SIZE)) {
     if (stateUpdate->visibility()->size() ==
         static_cast<size_t>(
             stateUpdate->visibility_size()->x() * stateUpdate->visibility_size()->y())) {
@@ -310,8 +302,8 @@ std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* state
     }
   }
 
-  if (flatbuffers::IsFieldPresent(stateUpdate, torchcraft::fbs::StateUpdate::VT_IMG_DATA) &&
-      flatbuffers::IsFieldPresent(stateUpdate, torchcraft::fbs::StateUpdate::VT_IMG_SIZE)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_DATA) &&
+      fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_SIZE)) {
     if (setRawImage(stateUpdate)) {
       upd.emplace_back("image");
     }
@@ -321,11 +313,11 @@ std::vector<std::string> State::update(const torchcraft::fbs::StateUpdate* state
   return upd;
 }
 
-std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
+std::vector<std::string> State::update(const fbs::EndGame* end) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (flatbuffers::IsFieldPresent(end, torchcraft::fbs::EndGame::VT_DATA)) {
+  if (fb::IsFieldPresent(end, fbs::EndGame::VT_DATA)) {
     if (this->update_frame(
       end->data(),
       end->data_type())) {
@@ -343,7 +335,7 @@ std::vector<std::string> State::update(const torchcraft::fbs::EndGame* end) {
 }
 
 std::vector<std::string> State::update(
-    const torchcraft::fbs::PlayerLeft* left) {
+    const fbs::PlayerLeft* left) {
   preUpdate();
   if (left->player_left()) {
     for (auto& it : player_info) {
@@ -356,12 +348,12 @@ std::vector<std::string> State::update(
   return std::vector<std::string>();
 }
 
-std::vector<std::string> State::update(const torchcraft::fbs::Error* error) {
+std::vector<std::string> State::update(const fbs::Error* error) {
   preUpdate();
   return std::vector<std::string>();
 }
 
-bool State::setRawImage(const torchcraft::fbs::StateUpdate* frame) {
+bool State::setRawImage(const fbs::StateUpdate* frame) {
   if (frame->img_data()->size() !=
       static_cast<size_t>(
           frame->img_size()->x() * frame->img_size()->y() * 4)) {

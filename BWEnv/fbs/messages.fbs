@@ -59,7 +59,7 @@ union FrameOrFrameDiff {
   FrameDiff
 }
 
-table FrameUpdate {
+table StateUpdate {
   data:FrameOrFrameDiff;
   deaths:[int];
   frame_from_bwapi:int;
@@ -95,7 +95,7 @@ union Any {
 
   // from server
   HandshakeServer,
-  FrameUpdate,
+  StateUpdate,
   PlayerLeft,
   EndGame,
   Error,

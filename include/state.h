@@ -22,7 +22,7 @@
 namespace torchcraft {
 namespace fbs {
 struct HandshakeServer;
-struct FrameUpdate;
+struct StateUpdate;
 struct EndGame;
 struct PlayerLeft;
 struct Error;
@@ -143,7 +143,7 @@ class State : public RefCounted {
 
   void reset();
   std::vector<std::string> update(const fbs::HandshakeServer* handshake);
-  std::vector<std::string> update(const fbs::FrameUpdate* frameUpdate);
+  std::vector<std::string> update(const fbs::StateUpdate* stateUpdate);
   std::vector<std::string> update(const fbs::EndGame* end);
   std::vector<std::string> update(const fbs::PlayerLeft* left);
   std::vector<std::string> update(const fbs::Error* error);
@@ -177,7 +177,7 @@ class State : public RefCounted {
   }
 
  private:
-  bool setRawImage(const fbs::FrameUpdate* frame);
+  bool setRawImage(const fbs::StateUpdate* frame);
   void preUpdate();
   void postUpdate(std::vector<std::string>& upd);
   bool checkBattleFinished(std::vector<std::string>& upd);

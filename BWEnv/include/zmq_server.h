@@ -39,7 +39,7 @@ public:
   void close();
   void sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake);
   void sendFrame(
-    const flatbuffers::Offset<torchcraft::fbs::FrameUpdate>& frameUpdateOffset,
+    const flatbuffers::Offset<torchcraft::fbs::StateUpdate>& stateUpdateOffset,
     flatbuffers::FlatBufferBuilder& builder);
   void sendPlayerLeft(const torchcraft::fbs::PlayerLeftT *pl);
   void sendEndGame(

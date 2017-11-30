@@ -241,20 +241,20 @@ bool State::update_frame(const void* flatBuffer, const fbs::FrameOrFrameDiff typ
   }
 }
 
-std::vector<std::string> State::update(const fbs::FrameUpdate* frameUpdate) {
+std::vector<std::string> State::update(const fbs::StateUpdate* stateUpdate) {
   std::vector<std::string> upd;
   preUpdate();
 
-  if (fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_DATA)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_DATA)) {
     if (this->update_frame(
-      frameUpdate->data(),
-      frameUpdate->data_type())) {
+      stateUpdate->data(),
+      stateUpdate->data_type())) {
       upd.emplace_back("frame");
     }
   }
 
-  if (fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_DEATHS)) {
-    auto& fd = *frameUpdate->deaths();
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_DEATHS)) {
+    auto& fd = *stateUpdate->deaths();
     deaths.resize(fd.size());
     for (size_t i = 0; i < fd.size(); i++) {
       deaths[i] = fd[i];
@@ -264,30 +264,30 @@ std::vector<std::string> State::update(const fbs::FrameUpdate* frameUpdate) {
     }
   }
 
-  frame_from_bwapi = frameUpdate->frame_from_bwapi();
+  frame_from_bwapi = stateUpdate->frame_from_bwapi();
   upd.emplace_back("frame_from_bwapi");
-  battle_frame_count = frameUpdate->battle_frame_count();
+  battle_frame_count = stateUpdate->battle_frame_count();
   upd.emplace_back("battle_frame_count");
 
-  if (fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_IMG_MODE)) {
-    img_mode = frameUpdate->img_mode()->str();
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_MODE)) {
+    img_mode = stateUpdate->img_mode()->str();
     upd.emplace_back("img_mode");
   }
 
-  if (fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_SCREEN_POSITION)) {
-    screen_position[0] = frameUpdate->screen_position()->x();
-    screen_position[1] = frameUpdate->screen_position()->y();
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_SCREEN_POSITION)) {
+    screen_position[0] = stateUpdate->screen_position()->x();
+    screen_position[1] = stateUpdate->screen_position()->y();
     upd.emplace_back("screen_position");
   }
 
-  if (fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_VISIBILITY) &&
-      fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_VISIBILITY_SIZE)) {
-    if (frameUpdate->visibility()->size() ==
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_VISIBILITY) &&
+      fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_VISIBILITY_SIZE)) {
+    if (stateUpdate->visibility()->size() ==
         static_cast<size_t>(
-            frameUpdate->visibility_size()->x() * frameUpdate->visibility_size()->y())) {
-      visibility_size[0] = frameUpdate->visibility_size()->x();
-      visibility_size[1] = frameUpdate->visibility_size()->y();
-      auto& vb = *frameUpdate->visibility();
+            stateUpdate->visibility_size()->x() * stateUpdate->visibility_size()->y())) {
+      visibility_size[0] = stateUpdate->visibility_size()->x();
+      visibility_size[1] = stateUpdate->visibility_size()->y();
+      auto& vb = *stateUpdate->visibility();
       visibility.resize(vb.size());
       for (size_t i = 0; i < vb.size(); i++) {
         visibility[i] = vb[i];
@@ -302,9 +302,9 @@ std::vector<std::string> State::update(const fbs::FrameUpdate* frameUpdate) {
     }
   }
 
-  if (fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_IMG_DATA) &&
-      fb::IsFieldPresent(frameUpdate, fbs::FrameUpdate::VT_IMG_SIZE)) {
-    if (setRawImage(frameUpdate)) {
+  if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_DATA) &&
+      fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_SIZE)) {
+    if (setRawImage(stateUpdate)) {
       upd.emplace_back("image");
     }
   }
@@ -353,7 +353,7 @@ std::vector<std::string> State::update(const fbs::Error* error) {
   return std::vector<std::string>();
 }
 
-bool State::setRawImage(const fbs::FrameUpdate* frame) {
+bool State::setRawImage(const fbs::StateUpdate* frame) {
   if (frame->img_data()->size() !=
       static_cast<size_t>(
           frame->img_size()->x() * frame->img_size()->y() * 4)) {

@@ -26,8 +26,8 @@ struct HandshakeServerT;
 struct Commands;
 struct CommandsT;
 
-struct FrameUpdate;
-struct FrameUpdateT;
+struct StateUpdate;
+struct StateUpdateT;
 
 struct PlayerLeft;
 struct PlayerLeftT;
@@ -180,7 +180,7 @@ enum class Any : uint8_t {
   HandshakeClient = 1,
   Commands = 2,
   HandshakeServer = 3,
-  FrameUpdate = 4,
+  StateUpdate = 4,
   PlayerLeft = 5,
   EndGame = 6,
   Error = 7,
@@ -194,7 +194,7 @@ inline Any (&EnumValuesAny())[8] {
     Any::HandshakeClient,
     Any::Commands,
     Any::HandshakeServer,
-    Any::FrameUpdate,
+    Any::StateUpdate,
     Any::PlayerLeft,
     Any::EndGame,
     Any::Error
@@ -208,7 +208,7 @@ inline const char **EnumNamesAny() {
     "HandshakeClient",
     "Commands",
     "HandshakeServer",
-    "FrameUpdate",
+    "StateUpdate",
     "PlayerLeft",
     "EndGame",
     "Error",
@@ -238,8 +238,8 @@ template<> struct AnyTraits<HandshakeServer> {
   static const Any enum_value = Any::HandshakeServer;
 };
 
-template<> struct AnyTraits<FrameUpdate> {
-  static const Any enum_value = Any::FrameUpdate;
+template<> struct AnyTraits<StateUpdate> {
+  static const Any enum_value = Any::StateUpdate;
 };
 
 template<> struct AnyTraits<PlayerLeft> {
@@ -309,13 +309,13 @@ struct AnyUnion {
     return type == Any::HandshakeServer ?
       reinterpret_cast<const HandshakeServerT *>(value) : nullptr;
   }
-  FrameUpdateT *AsFrameUpdate() {
-    return type == Any::FrameUpdate ?
-      reinterpret_cast<FrameUpdateT *>(value) : nullptr;
+  StateUpdateT *AsStateUpdate() {
+    return type == Any::StateUpdate ?
+      reinterpret_cast<StateUpdateT *>(value) : nullptr;
   }
-  const FrameUpdateT *AsFrameUpdate() const {
-    return type == Any::FrameUpdate ?
-      reinterpret_cast<const FrameUpdateT *>(value) : nullptr;
+  const StateUpdateT *AsStateUpdate() const {
+    return type == Any::StateUpdate ?
+      reinterpret_cast<const StateUpdateT *>(value) : nullptr;
   }
   PlayerLeftT *AsPlayerLeft() {
     return type == Any::PlayerLeft ?
@@ -1229,8 +1229,8 @@ inline flatbuffers::Offset<Commands> CreateCommandsDirect(
 
 flatbuffers::Offset<Commands> CreateCommands(flatbuffers::FlatBufferBuilder &_fbb, const CommandsT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
-struct FrameUpdateT : public flatbuffers::NativeTable {
-  typedef FrameUpdate TableType;
+struct StateUpdateT : public flatbuffers::NativeTable {
+  typedef StateUpdate TableType;
   FrameOrFrameDiffUnion data;
   std::vector<int32_t> deaths;
   int32_t frame_from_bwapi;
@@ -1242,14 +1242,14 @@ struct FrameUpdateT : public flatbuffers::NativeTable {
   std::unique_ptr<Vec2> visibility_size;
   std::vector<uint8_t> img_data;
   std::unique_ptr<Vec2> img_size;
-  FrameUpdateT()
+  StateUpdateT()
       : frame_from_bwapi(0),
         battle_frame_count(0) {
   }
 };
 
-struct FrameUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  typedef FrameUpdateT NativeTableType;
+struct StateUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  typedef StateUpdateT NativeTableType;
   enum {
     VT_DATA_TYPE = 4,
     VT_DATA = 6,
@@ -1365,71 +1365,71 @@ struct FrameUpdate FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<Vec2>(verifier, VT_IMG_SIZE) &&
            verifier.EndTable();
   }
-  FrameUpdateT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  void UnPackTo(FrameUpdateT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
-  static flatbuffers::Offset<FrameUpdate> Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+  StateUpdateT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  void UnPackTo(StateUpdateT *_o, const flatbuffers::resolver_function_t *_resolver = nullptr) const;
+  static flatbuffers::Offset<StateUpdate> Pack(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 };
 
-template<> inline const Frame *FrameUpdate::data_as<Frame>() const {
+template<> inline const Frame *StateUpdate::data_as<Frame>() const {
   return data_as_Frame();
 }
 
-template<> inline const FrameDiff *FrameUpdate::data_as<FrameDiff>() const {
+template<> inline const FrameDiff *StateUpdate::data_as<FrameDiff>() const {
   return data_as_FrameDiff();
 }
 
-struct FrameUpdateBuilder {
+struct StateUpdateBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
   void add_data_type(FrameOrFrameDiff data_type) {
-    fbb_.AddElement<uint8_t>(FrameUpdate::VT_DATA_TYPE, static_cast<uint8_t>(data_type), 0);
+    fbb_.AddElement<uint8_t>(StateUpdate::VT_DATA_TYPE, static_cast<uint8_t>(data_type), 0);
   }
   void add_data(flatbuffers::Offset<void> data) {
-    fbb_.AddOffset(FrameUpdate::VT_DATA, data);
+    fbb_.AddOffset(StateUpdate::VT_DATA, data);
   }
   void add_deaths(flatbuffers::Offset<flatbuffers::Vector<int32_t>> deaths) {
-    fbb_.AddOffset(FrameUpdate::VT_DEATHS, deaths);
+    fbb_.AddOffset(StateUpdate::VT_DEATHS, deaths);
   }
   void add_frame_from_bwapi(int32_t frame_from_bwapi) {
-    fbb_.AddElement<int32_t>(FrameUpdate::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0);
+    fbb_.AddElement<int32_t>(StateUpdate::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0);
   }
   void add_battle_frame_count(int32_t battle_frame_count) {
-    fbb_.AddElement<int32_t>(FrameUpdate::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0);
+    fbb_.AddElement<int32_t>(StateUpdate::VT_BATTLE_FRAME_COUNT, battle_frame_count, 0);
   }
   void add_commands_status(flatbuffers::Offset<flatbuffers::Vector<int8_t>> commands_status) {
-    fbb_.AddOffset(FrameUpdate::VT_COMMANDS_STATUS, commands_status);
+    fbb_.AddOffset(StateUpdate::VT_COMMANDS_STATUS, commands_status);
   }
   void add_img_mode(flatbuffers::Offset<flatbuffers::String> img_mode) {
-    fbb_.AddOffset(FrameUpdate::VT_IMG_MODE, img_mode);
+    fbb_.AddOffset(StateUpdate::VT_IMG_MODE, img_mode);
   }
   void add_screen_position(const Vec2 *screen_position) {
-    fbb_.AddStruct(FrameUpdate::VT_SCREEN_POSITION, screen_position);
+    fbb_.AddStruct(StateUpdate::VT_SCREEN_POSITION, screen_position);
   }
   void add_visibility(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> visibility) {
-    fbb_.AddOffset(FrameUpdate::VT_VISIBILITY, visibility);
+    fbb_.AddOffset(StateUpdate::VT_VISIBILITY, visibility);
   }
   void add_visibility_size(const Vec2 *visibility_size) {
-    fbb_.AddStruct(FrameUpdate::VT_VISIBILITY_SIZE, visibility_size);
+    fbb_.AddStruct(StateUpdate::VT_VISIBILITY_SIZE, visibility_size);
   }
   void add_img_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> img_data) {
-    fbb_.AddOffset(FrameUpdate::VT_IMG_DATA, img_data);
+    fbb_.AddOffset(StateUpdate::VT_IMG_DATA, img_data);
   }
   void add_img_size(const Vec2 *img_size) {
-    fbb_.AddStruct(FrameUpdate::VT_IMG_SIZE, img_size);
+    fbb_.AddStruct(StateUpdate::VT_IMG_SIZE, img_size);
   }
-  explicit FrameUpdateBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit StateUpdateBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
-  FrameUpdateBuilder &operator=(const FrameUpdateBuilder &);
-  flatbuffers::Offset<FrameUpdate> Finish() {
+  StateUpdateBuilder &operator=(const StateUpdateBuilder &);
+  flatbuffers::Offset<StateUpdate> Finish() {
     const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<FrameUpdate>(end);
+    auto o = flatbuffers::Offset<StateUpdate>(end);
     return o;
   }
 };
 
-inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdate(
+inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(
     flatbuffers::FlatBufferBuilder &_fbb,
     FrameOrFrameDiff data_type = FrameOrFrameDiff::NONE,
     flatbuffers::Offset<void> data = 0,
@@ -1443,7 +1443,7 @@ inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdate(
     const Vec2 *visibility_size = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> img_data = 0,
     const Vec2 *img_size = 0) {
-  FrameUpdateBuilder builder_(_fbb);
+  StateUpdateBuilder builder_(_fbb);
   builder_.add_img_size(img_size);
   builder_.add_img_data(img_data);
   builder_.add_visibility_size(visibility_size);
@@ -1459,7 +1459,7 @@ inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdate(
   return builder_.Finish();
 }
 
-inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdateDirect(
+inline flatbuffers::Offset<StateUpdate> CreateStateUpdateDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     FrameOrFrameDiff data_type = FrameOrFrameDiff::NONE,
     flatbuffers::Offset<void> data = 0,
@@ -1473,7 +1473,7 @@ inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdateDirect(
     const Vec2 *visibility_size = 0,
     const std::vector<uint8_t> *img_data = nullptr,
     const Vec2 *img_size = 0) {
-  return torchcraft::fbs::CreateFrameUpdate(
+  return torchcraft::fbs::CreateStateUpdate(
       _fbb,
       data_type,
       data,
@@ -1489,7 +1489,7 @@ inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdateDirect(
       img_size);
 }
 
-flatbuffers::Offset<FrameUpdate> CreateFrameUpdate(flatbuffers::FlatBufferBuilder &_fbb, const FrameUpdateT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
+flatbuffers::Offset<StateUpdate> CreateStateUpdate(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
 
 struct PlayerLeftT : public flatbuffers::NativeTable {
   typedef PlayerLeft TableType;
@@ -1755,8 +1755,8 @@ struct Message FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const HandshakeServer *msg_as_HandshakeServer() const {
     return msg_type() == Any::HandshakeServer ? static_cast<const HandshakeServer *>(msg()) : nullptr;
   }
-  const FrameUpdate *msg_as_FrameUpdate() const {
-    return msg_type() == Any::FrameUpdate ? static_cast<const FrameUpdate *>(msg()) : nullptr;
+  const StateUpdate *msg_as_StateUpdate() const {
+    return msg_type() == Any::StateUpdate ? static_cast<const StateUpdate *>(msg()) : nullptr;
   }
   const PlayerLeft *msg_as_PlayerLeft() const {
     return msg_type() == Any::PlayerLeft ? static_cast<const PlayerLeft *>(msg()) : nullptr;
@@ -1802,8 +1802,8 @@ template<> inline const HandshakeServer *Message::msg_as<HandshakeServer>() cons
   return msg_as_HandshakeServer();
 }
 
-template<> inline const FrameUpdate *Message::msg_as<FrameUpdate>() const {
-  return msg_as_FrameUpdate();
+template<> inline const StateUpdate *Message::msg_as<StateUpdate>() const {
+  return msg_as_StateUpdate();
 }
 
 template<> inline const PlayerLeft *Message::msg_as<PlayerLeft>() const {
@@ -3910,13 +3910,13 @@ inline flatbuffers::Offset<Commands> CreateCommands(flatbuffers::FlatBufferBuild
       _commands);
 }
 
-inline FrameUpdateT *FrameUpdate::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
-  auto _o = new FrameUpdateT();
+inline StateUpdateT *StateUpdate::UnPack(const flatbuffers::resolver_function_t *_resolver) const {
+  auto _o = new StateUpdateT();
   UnPackTo(_o, _resolver);
   return _o;
 }
 
-inline void FrameUpdate::UnPackTo(FrameUpdateT *_o, const flatbuffers::resolver_function_t *_resolver) const {
+inline void StateUpdate::UnPackTo(StateUpdateT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
   { auto _e = data_type(); _o->data.type = _e; };
@@ -3933,14 +3933,14 @@ inline void FrameUpdate::UnPackTo(FrameUpdateT *_o, const flatbuffers::resolver_
   { auto _e = img_size(); if (_e) _o->img_size = std::unique_ptr<Vec2>(new Vec2(*_e)); };
 }
 
-inline flatbuffers::Offset<FrameUpdate> FrameUpdate::Pack(flatbuffers::FlatBufferBuilder &_fbb, const FrameUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
-  return CreateFrameUpdate(_fbb, _o, _rehasher);
+inline flatbuffers::Offset<StateUpdate> StateUpdate::Pack(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
+  return CreateStateUpdate(_fbb, _o, _rehasher);
 }
 
-inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdate(flatbuffers::FlatBufferBuilder &_fbb, const FrameUpdateT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
+inline flatbuffers::Offset<StateUpdate> CreateStateUpdate(flatbuffers::FlatBufferBuilder &_fbb, const StateUpdateT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
-  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const FrameUpdateT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
+  struct _VectorArgs { flatbuffers::FlatBufferBuilder *__fbb; const StateUpdateT* __o; const flatbuffers::rehasher_function_t *__rehasher; } _va = { &_fbb, _o, _rehasher}; (void)_va;
   auto _data_type = _o->data.type;
   auto _data = _o->data.Pack(_fbb);
   auto _deaths = _o->deaths.size() ? _fbb.CreateVector(_o->deaths) : 0;
@@ -3953,7 +3953,7 @@ inline flatbuffers::Offset<FrameUpdate> CreateFrameUpdate(flatbuffers::FlatBuffe
   auto _visibility_size = _o->visibility_size ? _o->visibility_size.get() : 0;
   auto _img_data = _o->img_data.size() ? _fbb.CreateVector(_o->img_data) : 0;
   auto _img_size = _o->img_size ? _o->img_size.get() : 0;
-  return torchcraft::fbs::CreateFrameUpdate(
+  return torchcraft::fbs::CreateStateUpdate(
       _fbb,
       _data_type,
       _data,
@@ -4667,8 +4667,8 @@ inline bool VerifyAny(flatbuffers::Verifier &verifier, const void *obj, Any type
       auto ptr = reinterpret_cast<const HandshakeServer *>(obj);
       return verifier.VerifyTable(ptr);
     }
-    case Any::FrameUpdate: {
-      auto ptr = reinterpret_cast<const FrameUpdate *>(obj);
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<const StateUpdate *>(obj);
       return verifier.VerifyTable(ptr);
     }
     case Any::PlayerLeft: {
@@ -4712,8 +4712,8 @@ inline void *AnyUnion::UnPack(const void *obj, Any type, const flatbuffers::reso
       auto ptr = reinterpret_cast<const HandshakeServer *>(obj);
       return ptr->UnPack(resolver);
     }
-    case Any::FrameUpdate: {
-      auto ptr = reinterpret_cast<const FrameUpdate *>(obj);
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<const StateUpdate *>(obj);
       return ptr->UnPack(resolver);
     }
     case Any::PlayerLeft: {
@@ -4746,9 +4746,9 @@ inline flatbuffers::Offset<void> AnyUnion::Pack(flatbuffers::FlatBufferBuilder &
       auto ptr = reinterpret_cast<const HandshakeServerT *>(value);
       return CreateHandshakeServer(_fbb, ptr, _rehasher).Union();
     }
-    case Any::FrameUpdate: {
-      auto ptr = reinterpret_cast<const FrameUpdateT *>(value);
-      return CreateFrameUpdate(_fbb, ptr, _rehasher).Union();
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<const StateUpdateT *>(value);
+      return CreateStateUpdate(_fbb, ptr, _rehasher).Union();
     }
     case Any::PlayerLeft: {
       auto ptr = reinterpret_cast<const PlayerLeftT *>(value);
@@ -4780,8 +4780,8 @@ inline AnyUnion::AnyUnion(const AnyUnion &u) FLATBUFFERS_NOEXCEPT : type(u.type)
       assert(false);  // HandshakeServerT not copyable.
       break;
     }
-    case Any::FrameUpdate: {
-      assert(false);  // FrameUpdateT not copyable.
+    case Any::StateUpdate: {
+      assert(false);  // StateUpdateT not copyable.
       break;
     }
     case Any::PlayerLeft: {
@@ -4818,8 +4818,8 @@ inline void AnyUnion::Reset() {
       delete ptr;
       break;
     }
-    case Any::FrameUpdate: {
-      auto ptr = reinterpret_cast<FrameUpdateT *>(value);
+    case Any::StateUpdate: {
+      auto ptr = reinterpret_cast<StateUpdateT *>(value);
       delete ptr;
       break;
     }

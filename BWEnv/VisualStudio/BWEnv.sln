@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 12.0.0
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BWEnv", "BWEnv.vcxproj", "{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}"
 EndProject
@@ -12,8 +12,8 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.Debug|Win32.ActiveCfg = Debug|Win32
-		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.Debug|Win32.Build.0 = Debug|Win32
+		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.Debug|Win32.ActiveCfg = Release|Win32
+		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.Debug|Win32.Build.0 = Release|Win32
 		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.DLL-Debug|Win32.ActiveCfg = DLL-Debug|Win32
 		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.DLL-Debug|Win32.Build.0 = DLL-Debug|Win32
 		{AE3B9DC4-5FBB-4B57-8AB4-0D84D8649D78}.DLL-Release|Win32.ActiveCfg = DLL-Release|Win32
@@ -23,5 +23,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BFC2F1B0-38A3-4C7A-8020-2F68838AE062}
 	EndGlobalSection
 EndGlobal

@@ -836,8 +836,8 @@ void Controller::onFrame() {
           uint8_t tile = 0;
           auto x = ix + dx;
           auto y = iy + dy;
-          tile += (uint8_t) BWAPI::Broodwar->isExplored(x, y);
-          tile += (uint8_t) BWAPI::Broodwar->isVisible(x, y);
+          tile += BWAPI::Broodwar->isExplored(x, y) ? 1 : 0;
+          tile += BWAPI::Broodwar->isVisible(x, y) ? 1 : 0;
           *it++ = tile;
         }
       }

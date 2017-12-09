@@ -48,7 +48,6 @@ static void readFlatBufferTableFromStream(
   std::istream& in,
   std::function<void(const T&)> tableReader) {
     size_t bufferSize;
-    in.ignore(1); // Ignores next space
     in.read(reinterpret_cast<char*>(&bufferSize), sizeof(size_t));
 
     std::vector<char> buffer(bufferSize);

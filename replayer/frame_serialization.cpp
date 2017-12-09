@@ -27,6 +27,7 @@ std::istream& operator>>(std::istream& in, Frame& frame) {
   auto converter = [&frame](const fbs::Frame& fbsFrame) {
     frame.readFromFlatBufferTable(fbsFrame);
   };
+  in.ignore(1); // Ignores next space
   readFlatBufferTableFromStream<fbs::Frame>(in, converter);
   return in;
 }

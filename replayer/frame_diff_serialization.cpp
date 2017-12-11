@@ -27,7 +27,6 @@ std::istream& operator>>(std::istream& in, FrameDiff& frameDiff) {
   auto converter = [&frameDiff](const fbs::FrameDiff& fbsFrameDiff) {
     frameDiff.readFromFlatBufferTable(fbsFrameDiff);
   };
-  in.ignore(1); // Ignores next space
   readFlatBufferTableFromStream<fbs::FrameDiff>(in, converter);
   return in;
 }

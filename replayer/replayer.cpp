@@ -33,9 +33,9 @@ std::ostream& operator<<(std::ostream& out, const Replayer& o) {
   out << o.frames.size() << " ";
   for (size_t i = 0; i < o.frames.size(); i++) {
     if (i % kf == 0)
-      out << *o.frames[i] << " ";
+      out << *o.frames[i];
     else
-      out << frame_diff(o.frames[i], o.frames[i - 1]) << " ";
+      out << frame_diff(o.frames[i], o.frames[i - 1]);
   }
 
   out << o.numUnits.size() << " ";
@@ -73,6 +73,7 @@ std::istream& operator>>(std::istream& in, Replayer& o) {
   size_t nFrames;
   in >> nFrames;
   o.frames.resize(nFrames);
+  in.ignore(1); // Ignores next space
   for (size_t i = 0; i < nFrames; i++) {
     if (o.keyframe == 0) {
       o.frames[i] = new Frame();

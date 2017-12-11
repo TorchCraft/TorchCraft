@@ -255,8 +255,8 @@ void init_replayer(py::module& m) {
 #define START_LOC_SHIFT 5
 
             const auto map = self->getRawMap();
-            auto h = self->mapHeight();
-            auto w = self->mapWidth();
+            std::size_t h = self->mapHeight();
+            std::size_t w = self->mapWidth();
             auto w_vec = std::vector<uint8_t>();
             auto g_vec = std::vector<uint8_t>();
             auto b_vec = std::vector<uint8_t>();

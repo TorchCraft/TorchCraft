@@ -169,7 +169,12 @@ void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
   for (auto pair : df->creep_map)
     f->creep_map[pair.first] = pair.second;
 
-  auto frame_units = std::move(frame->units);
+  // We only save units if f and frame are the same pointer
+  std::unordered_map<int32_t, std::vector<Unit>> saved_units;
+  if (f == frame) {
+    saved_units = std::move(frame->units);
+  }
+  auto& frame_units = (f == frame) ? saved_units : frame->units;
   f->units.clear();
 
   for (size_t i = 0; i < df->pids.size(); i++) {

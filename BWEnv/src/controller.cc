@@ -961,8 +961,8 @@ void Controller::packCreep(replayer::Frame& f) {
   auto height = f.height / 4;
   auto width = f.width / 4;
   f.creep_map.resize(height * width / 8); // Only store build tiles
-  for (int y = 0, i = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x, ++i) {
+  for (unsigned y = 0, i = 0; y < height; ++y) {
+    for (unsigned x = 0; x < width; ++x, ++i) {
       f.creep_map[i / 8] |= BWAPI::Broodwar->hasCreep(x, y) << (i % 8);
     }
   }

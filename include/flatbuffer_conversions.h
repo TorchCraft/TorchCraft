@@ -19,7 +19,7 @@ namespace replayer {
 
 // Serialize to FlatBuffers
 
-auto packActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
+const auto packActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   return [&builder](const std::pair<int32_t, std::vector<Action>>& actionPair) {
     auto packAction = [&builder](const Action& action) {
       auto actionsOffset = builder.CreateVector(action.action);
@@ -49,7 +49,7 @@ auto packActionsOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   };
 };
 
-auto packResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
+const auto packResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   return [&builder](const std::pair<int32_t, Resources>& resourcesPair) {
     auto resources = resourcesPair.second;
     fbs::ResourcesBuilder fbsResourcesBuilder(builder);
@@ -72,13 +72,13 @@ auto packResourcesOfPlayer = [](flatbuffers::FlatBufferBuilder& builder) {
   };
 };
 
-auto packBullet = [](const Bullet& bullet) {
+const auto packBullet = [](const Bullet& bullet) {
   return fbs::Bullet(bullet.type, bullet.x, bullet.y);
 };
 
 // Deserialize from FlatBuffers
 
-auto unpackAction = [](const fbs::Action* fbsAction) {
+const auto unpackAction = [](const fbs::Action* fbsAction) {
   assert(fbsAction);
   assert(fbsAction->action());
   auto fbsActionInts = fbsAction->action();
@@ -90,7 +90,7 @@ auto unpackAction = [](const fbs::Action* fbsAction) {
   return action;
 };
 
-auto unpackResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
+const auto unpackResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
   auto fbsResources = fbsResourcesOfPlayer->resources();
   auto resources = std::make_pair(fbsResourcesOfPlayer->playerId(), Resources()) ;
   resources.second.ore = fbsResources->ore();
@@ -103,7 +103,7 @@ auto unpackResources = [](const fbs::ResourcesOfPlayer* fbsResourcesOfPlayer) {
   return resources;
 };
 
-auto unpackBullet = [](const fbs::Bullet* fbsBullet) {
+const auto unpackBullet = [](const fbs::Bullet* fbsBullet) {
   Bullet bullet;
   bullet.type = fbsBullet->type();
   bullet.x = fbsBullet->x();

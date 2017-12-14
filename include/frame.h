@@ -319,7 +319,7 @@ class Frame : public RefCounted {
   Frame(Frame&& o);
   Frame(const Frame& o);
   Frame(const Frame* o);
-  Frame& operator=(Frame& other);
+  Frame& operator=(Frame other);
 
   void swap(Frame& a, Frame& b);
   void clear();

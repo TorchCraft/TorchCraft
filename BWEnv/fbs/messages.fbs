@@ -160,7 +160,7 @@ table Unit {
   groundCD:int;
   airCD:int;
   flags:long;
-  visible:bool;
+  visible:int;
   type:int;
   armor:int;
   shieldArmor:int;

@@ -63,7 +63,7 @@ void Frame::swap(Frame& a, Frame& b) {
   swap(a.is_terminal, b.is_terminal);
 }
 
-Frame& Frame::operator=(Frame& other) {
+Frame& Frame::operator=(Frame other) noexcept {
   swap(*this, other);
   return *this;
 }

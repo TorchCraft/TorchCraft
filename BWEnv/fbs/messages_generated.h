@@ -2128,7 +2128,7 @@ struct UnitT : public flatbuffers::NativeTable {
   int32_t groundCD;
   int32_t airCD;
   int64_t flags;
-  bool visible;
+  int32_t visible;
   int32_t type;
   int32_t armor;
   int32_t shieldArmor;
@@ -2168,7 +2168,7 @@ struct UnitT : public flatbuffers::NativeTable {
         groundCD(0),
         airCD(0),
         flags(0),
-        visible(false),
+        visible(0),
         type(0),
         armor(0),
         shieldArmor(0),
@@ -2311,11 +2311,11 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_flags(int64_t _flags) {
     return SetField<int64_t>(VT_FLAGS, _flags, 0);
   }
-  bool visible() const {
-    return GetField<uint8_t>(VT_VISIBLE, 0) != 0;
+  int32_t visible() const {
+    return GetField<int32_t>(VT_VISIBLE, 0);
   }
-  bool mutate_visible(bool _visible) {
-    return SetField<uint8_t>(VT_VISIBLE, static_cast<uint8_t>(_visible), 0);
+  bool mutate_visible(int32_t _visible) {
+    return SetField<int32_t>(VT_VISIBLE, _visible, 0);
   }
   int32_t type() const {
     return GetField<int32_t>(VT_TYPE, 0);
@@ -2487,7 +2487,7 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_GROUNDCD) &&
            VerifyField<int32_t>(verifier, VT_AIRCD) &&
            VerifyField<int64_t>(verifier, VT_FLAGS) &&
-           VerifyField<uint8_t>(verifier, VT_VISIBLE) &&
+           VerifyField<int32_t>(verifier, VT_VISIBLE) &&
            VerifyField<int32_t>(verifier, VT_TYPE) &&
            VerifyField<int32_t>(verifier, VT_ARMOR) &&
            VerifyField<int32_t>(verifier, VT_SHIELDARMOR) &&
@@ -2561,8 +2561,8 @@ struct UnitBuilder {
   void add_flags(int64_t flags) {
     fbb_.AddElement<int64_t>(Unit::VT_FLAGS, flags, 0);
   }
-  void add_visible(bool visible) {
-    fbb_.AddElement<uint8_t>(Unit::VT_VISIBLE, static_cast<uint8_t>(visible), 0);
+  void add_visible(int32_t visible) {
+    fbb_.AddElement<int32_t>(Unit::VT_VISIBLE, visible, 0);
   }
   void add_type(int32_t type) {
     fbb_.AddElement<int32_t>(Unit::VT_TYPE, type, 0);
@@ -2668,7 +2668,7 @@ inline flatbuffers::Offset<Unit> CreateUnit(
     int32_t groundCD = 0,
     int32_t airCD = 0,
     int64_t flags = 0,
-    bool visible = false,
+    int32_t visible = 0,
     int32_t type = 0,
     int32_t armor = 0,
     int32_t shieldArmor = 0,
@@ -2723,6 +2723,7 @@ inline flatbuffers::Offset<Unit> CreateUnit(
   builder_.add_shieldArmor(shieldArmor);
   builder_.add_armor(armor);
   builder_.add_type(type);
+  builder_.add_visible(visible);
   builder_.add_airCD(airCD);
   builder_.add_groundCD(groundCD);
   builder_.add_maxCD(maxCD);
@@ -2734,7 +2735,6 @@ inline flatbuffers::Offset<Unit> CreateUnit(
   builder_.add_y(y);
   builder_.add_x(x);
   builder_.add_id(id);
-  builder_.add_visible(visible);
   return builder_.Finish();
 }
 
@@ -2752,7 +2752,7 @@ inline flatbuffers::Offset<Unit> CreateUnitDirect(
     int32_t groundCD = 0,
     int32_t airCD = 0,
     int64_t flags = 0,
-    bool visible = false,
+    int32_t visible = 0,
     int32_t type = 0,
     int32_t armor = 0,
     int32_t shieldArmor = 0,

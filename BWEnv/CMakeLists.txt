@@ -3,8 +3,15 @@ project(BWEnv)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
+
+if (MSVC)
+  # Enables TorchCraft usage on SSCAIT.
+  # The SSCAIT submission process doesn't let you put files anywhere that
+  # would allow them to be dynamically linked (namely, the working directory)
+  # The fix is to statically link them to bypass that process.
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif(MSVC)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
@@ -43,6 +50,9 @@ add_library(BWEnvObj OBJECT
   src/utils.cc
   src/zmq_server.cc
   ../replayer/frame.cpp
+  ../replayer/frame_serialization.cpp
+  ../replayer/frame_diff.cpp
+  ../replayer/frame_diff_serialization.cpp
 )
 
 set_property(TARGET BWEnvObj PROPERTY POSITION_INDEPENDENT_CODE ON)

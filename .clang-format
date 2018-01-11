@@ -19,7 +19,6 @@ BinPackParameters: false
 BreakBeforeBinaryOperators: false
 BreakBeforeBraces: Attach
 BreakConstructorInitializersBeforeComma: false
-BreakStringLiterals: false
 ColumnLimit: 80
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4

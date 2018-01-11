@@ -2,10 +2,10 @@
 
 /build.luarocks/
 /build/
+/BWEnv/build/
 
 ## VisualStudio ###########
 
-/BWEnv/build/
 # User-specific files
 *.suo
 *.user

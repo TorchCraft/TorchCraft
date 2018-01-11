@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "refcount.h"
+#include "messages_generated.h"
 
 #ifdef _MSC_VER
 typedef unsigned int uint32_t;
@@ -24,13 +25,34 @@ typedef unsigned short uint16_t;
 typedef int int32_t;
 #endif
 
-// TODO Check types !
-
 namespace torchcraft {
 namespace replayer {
+
+struct Unit;
+struct Resources;
+struct Bullet;
+struct Action;
+class Frame;
+class FrameDiff;
+namespace detail { class UnitDiff; }
+
+std::ostream& operator<<(std::ostream& out, const Frame& o);
+std::istream& operator>>(std::istream& in, Frame& o);
+std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
+std::istream& operator>>(std::istream& in, FrameDiff& o);
+
+struct Bullet {
+  int32_t type, x, y;
+};
+
+struct Action {
+  std::vector<int32_t> action;
+  int32_t uid;
+  int32_t aid;
+};
+
 struct Order {
   int32_t first_frame; // first frame number where order appeared
-
   int32_t type; // see BWAPI::Orders::Enum
   int32_t targetId;
   int32_t targetX, targetY;
@@ -63,10 +85,8 @@ struct Unit {
   uint64_t flags;
   int32_t visible;
   int32_t type, armor, shieldArmor, size;
-
   int32_t pixel_x, pixel_y;
   int32_t pixel_size_x, pixel_size_y;
-
   int32_t groundATK, airATK;
   int32_t groundDmgType, airDmgType;
   int32_t groundRange, airRange;
@@ -77,9 +97,7 @@ struct Unit {
   double velocityX, velocityY;
 
   int32_t playerId;
-
   int32_t resources;
-
   int32_t buildTechUpgradeType;
   int32_t remainingBuildTrainTime;
   int32_t remainingUpgradeResearchTime;
@@ -144,9 +162,6 @@ struct Unit {
     // clang-format on
   };
 };
-
-std::ostream& operator<<(std::ostream& out, const Unit& o);
-std::istream& operator>>(std::istream& in, Unit& o);
 
 struct Resources {
   int32_t ore;
@@ -288,25 +303,6 @@ struct Resources {
   // clang-format on
 };
 
-std::ostream& operator<<(std::ostream& out, const Resources& r);
-std::istream& operator>>(std::istream& in, Resources& r);
-
-struct Bullet {
-  int32_t type, x, y;
-};
-
-std::ostream& operator<<(std::ostream& out, const Bullet& o);
-std::istream& operator>>(std::istream& in, Bullet& o);
-
-struct Action { // corresponds to a torchcraft message
-  std::vector<int32_t> action;
-  int32_t uid;
-  int32_t aid;
-};
-
-std::ostream& operator<<(std::ostream& out, const Action& o);
-std::istream& operator>>(std::istream& in, Action& o);
-
 class Frame : public RefCounted {
  public:
   // The keys of these hash tables are the players' ids.
@@ -319,183 +315,46 @@ class Frame : public RefCounted {
   int reward;
   int is_terminal;
 
-  Frame() : RefCounted() {
-    reward = 0;
-    is_terminal = 0;
-  }
+  Frame();
+  Frame(Frame&& o);
+  Frame(const Frame& o);
+  Frame(const Frame* o);
+  Frame& operator=(Frame other) noexcept;
 
-  Frame(const Frame& o)
-      : RefCounted(),
-        units(o.units),
-        actions(o.actions),
-        resources(o.resources),
-        bullets(o.bullets),
-        creep_map(o.creep_map),
-        width(o.width),
-        height(o.height) {
-    reward = o.reward;
-    is_terminal = o.is_terminal;
-  }
-
-  Frame(const Frame* o)
-      : RefCounted(),
-        units(o->units),
-        actions(o->actions),
-        resources(o->resources),
-        bullets(o->bullets),
-        creep_map(o->creep_map),
-        width(o->width),
-        height(o->height) {
-    reward = o->reward;
-    is_terminal = o->is_terminal;
-  }
-
-  Frame(Frame&& o) : RefCounted() {
-    swap(*this, o);
-  }
-
-  friend void swap(Frame& a, Frame& b) {
-    using std::swap;
-    swap(a.units, b.units);
-    swap(a.actions, b.actions);
-    swap(a.resources, b.resources);
-    swap(a.bullets, b.bullets);
-    swap(a.creep_map, b.creep_map);
-    swap(a.width, b.width);
-    swap(a.height, b.height);
-    swap(a.reward, b.reward);
-    swap(a.is_terminal, b.is_terminal);
-  }
-
-  Frame& operator=(Frame other) {
-    swap(*this, other);
-    return *this;
-  }
-
-  void clear() {
-    units.clear();
-    actions.clear();
-    resources.clear();
-    bullets.clear();
-    creep_map.clear();
-    width = 0;
-    height = 0;
-    reward = 0;
-    is_terminal = 0;
-  }
-
-  void filter(int32_t x, int32_t y, Frame& o) const {
-    auto inRadius = [x, y](int32_t ux, int32_t uy) {
-      return (x / 8 - ux) * (x / 8 - ux) + (y / 8 - uy) * (y / 8 - uy) <=
-          20 * 4 * 20 * 4;
-    };
-
-    for (auto& player : units) {
-      o.units[player.first] = std::vector<Unit>();
-      for (auto& unit : player.second) {
-        if (inRadius(unit.x, unit.y)) {
-          o.units[player.first].push_back(unit);
-        }
-      }
-    }
-    for (auto& bullet : bullets) {
-      if (inRadius(bullet.x, bullet.y)) {
-        o.bullets.push_back(bullet);
-      }
-    }
-  }
-
-  void combine(const Frame& next_frame) {
-    // For units, accumulate presence and commands
-    for (auto& player : next_frame.units) {
-      auto& player_id = player.first;
-      auto& player_units = player.second;
-
-      if (units.count(player_id) == 0) {
-        units.insert(player);
-        continue;
-      }
-
-      // Build dictionary of uid -> position in current frame unit vector
-      std::unordered_map<int32_t, int32_t> idx;
-      for (unsigned i = 0; i < units[player_id].size(); i++) {
-        idx[units[player_id][i].id] = i;
-      }
-      // Iterate over units in next frame
-      for (auto& unit : player_units) {
-        if (idx.count(unit.id) == 0) {
-          // Unit wasn't in current frame, add it
-          units[player_id].push_back(unit);
-        } else {
-          int32_t i = idx[unit.id];
-          // Take unit state from next frame but accumulate orders
-          // so as to have a vector of all the orders taken
-          std::vector<Order> ords = std::move(units[player_id][i].orders);
-          ords.reserve(ords.size() + unit.orders.size());
-          for (auto& ord : unit.orders) {
-            if (ords.empty() || !(ord == ords.back())) {
-              ords.push_back(ord);
-            }
-          }
-          units[player_id][i] = unit;
-          units[player_id][i].orders = std::move(ords);
-        }
-      }
-      // For resources: keep the ones of the next frame
-      if (next_frame.resources.find(player_id) != next_frame.resources.end()) {
-        auto next_res = next_frame.resources.at(player_id);
-        resources[player_id].ore = next_res.ore;
-        resources[player_id].gas = next_res.gas;
-        resources[player_id].used_psi = next_res.used_psi;
-        resources[player_id].total_psi = next_res.total_psi;
-        resources[player_id].upgrades = next_res.upgrades;
-        resources[player_id].upgrades_level = next_res.upgrades_level;
-        resources[player_id].techs = next_res.techs;
-      }
-    }
-    // For other stuff, simply keep that of next_frame
-    actions = next_frame.actions;
-    bullets = next_frame.bullets;
-    creep_map = next_frame.creep_map;
-    width = next_frame.width;
-    height = next_frame.height;
-    reward = next_frame.reward;
-    is_terminal = next_frame.is_terminal;
-  }
-
-  bool getCreepAt(uint32_t x, uint32_t y) {
-    auto ind = (y / 4) * (this->width / 4) + (x / 4); // Convert to buildtiles
-    return (this->creep_map[ind / 8] >> (ind % 8)) & 1;
-  }
+  void swap(Frame& a, Frame& b);
+  void clear();
+  void filter(int32_t x, int32_t y, Frame& o) const;
+  void combine(const Frame& next_frame);
+  bool getCreepAt(uint32_t x, uint32_t y);
+  
+  flatbuffers::Offset<fbs::Frame> addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::Frame& table);
 }; // class Frame
-std::ostream& operator<<(std::ostream& out, const Frame& o);
-std::istream& operator>>(std::istream& in, Frame& o);
 
 // Frame diffs
 class FrameDiff;
 
 namespace detail {
-class UnitDiff {
- public:
-  int id;
-  std::vector<int32_t> var_ids;
-  std::vector<int32_t> var_diffs;
-  std::vector<int32_t> order_ids;
-  std::vector<int32_t> order_diffs;
-  int32_t order_size;
-  double velocityX, velocityY;
-  int64_t flags;
-};
+  class UnitDiff {
+   public:
+    int id;
+    std::vector<int32_t> var_ids;
+    std::vector<int32_t> var_diffs;
+    std::vector<int32_t> order_ids;
+    std::vector<int32_t> order_diffs;
+    int32_t order_size;
+    double velocityX, velocityY;
+    int64_t flags;
+  };
 
-Frame* add(Frame* frame, FrameDiff* diff);
-void add(Frame* res, Frame* frame, FrameDiff* diff);
+  Frame* add(Frame* frame, FrameDiff* diff);
+  void add(Frame* res, Frame* frame, FrameDiff* diff);
 
-inline bool orderUnitByiD(const Unit& a, const Unit& b) {
-  return (a.id < b.id);
-}
+  inline bool orderUnitByiD(const Unit& a, const Unit& b) {
+    return (a.id < b.id);
+  }
 
-bool frameEq(Frame* f1, Frame* f2, bool debug = true);
-
+  bool frameEq(Frame* f1, Frame* f2, bool debug = true);
 } // namespace detail
 
 class FrameDiff {
@@ -510,7 +369,22 @@ class FrameDiff {
   // Width and height never changes, so we don't diff them
   int reward;
   int is_terminal;
+  
+  flatbuffers::Offset<fbs::FrameDiff> addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
+  void readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff);
 };
+
+void writeTail(
+    std::ostream& out,
+    const std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
+    const std::unordered_map<int32_t, replayer::Resources>& resources,
+    const std::vector<replayer::Bullet>& bullets);
+
+void readTail(
+    std::istream& in,
+    std::unordered_map<int32_t, std::vector<replayer::Action>>& actions,
+    std::unordered_map<int32_t, replayer::Resources>& resources,
+    std::vector<replayer::Bullet>& bullets);
 
 // These diffing functions will order the IDs of units in each frame, and thus
 // is not const.
@@ -521,9 +395,5 @@ Frame* frame_undiff(Frame*, FrameDiff*);
 void frame_undiff(Frame* result, FrameDiff*, Frame*);
 void frame_undiff(Frame* result, Frame*, FrameDiff*);
 
-std::ostream& operator<<(std::ostream& out, const FrameDiff& o);
-std::ostream& operator<<(std::ostream& out, const detail::UnitDiff& o);
-std::istream& operator>>(std::istream& in, FrameDiff& o);
-std::istream& operator>>(std::istream& in, detail::UnitDiff& o);
 } // namespace replayer
 } // namespace torchcraft

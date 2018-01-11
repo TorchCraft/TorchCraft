@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <thread>
+#include <memory>
 
 #define WIN32_LEAN_AND_MEAN
 #include <BWAPI/Client.h>
@@ -46,10 +47,6 @@ Controller::Controller(bool is_client) {
   std::cout << *config_ << std::endl;
 
   this->zmq_server = std::make_unique<ZMQ_server>(this, config_->port);
-
-  tcframe_.screen_position = std::make_unique<torchcraft::fbs::Vec2>();
-  tcframe_.visibility_size = std::make_unique<torchcraft::fbs::Vec2>();
-  tcframe_.img_size = std::make_unique<torchcraft::fbs::Vec2>();
 }
 
 Controller::~Controller() {}
@@ -158,8 +155,7 @@ void Controller::initGame() {
 
   if (is_client)
     setupHandshake();
-  // TODO this is a logic hack - remove once exit_process is properly
-  // fixed.
+  // TODO this is a logic hack - remove once exit_process is properly fixed.
   if (exit_process_)
     return;
 
@@ -562,7 +558,7 @@ int8_t Controller::handleUserCommand(
 }
 
 void Controller::setCommandsStatus(std::vector<int8_t> status) {
-  tcframe_.commands_status = status;
+  commandsStatus_ = status;
 }
 
 BWAPI::Position Controller::getPositionFromWalkTiles(int x, int y) {
@@ -576,8 +572,14 @@ BWAPI::TilePosition Controller::getTilePositionFromWalkTiles(int x, int y) {
 int Controller::getAttackFrames(int unitID) {
   int attackFrames = BWAPI::Broodwar->getLatencyFrames();
   int unitType = BWAPI::Broodwar->getUnit(unitID)->getType().getID();
+  
   // From
   // https://docs.google.com/spreadsheets/d/1bsvPvFil-kpvEUfSG74U3E5PLSTC02JxSkiR8QdLMuw/edit#gid=0
+  // Photon Cannons aren't included in this chart but may also have a nonzero value.
+  // This value is primarily relevant for knowing how many frames a unit needs to be allowed to
+  // peform its attack animation before it can receive another command.
+  // Receiving a command before that period will cancel the attack.
+  // TODO: Reproduce Churchill's experiments for Photon Cannons (and maybe other omitted units)
   if (unitType == BWAPI::UnitTypes::Enum::Protoss_Dragoon) {
     attackFrames += 5;
   } else if (unitType == BWAPI::UnitTypes::Enum::Zerg_Devourer) {
@@ -586,35 +588,52 @@ int Controller::getAttackFrames(int unitID) {
   return attackFrames;
 }
 
-void Controller::serializeFrameData(torchcraft::fbs::FrameDataT* data) {
-  std::ostringstream out;
+FrameSerializationResults Controller::serializeFrameData(
+  flatbuffers::FlatBufferBuilder& builder) {
+    
+  FrameSerializationResults output;
+  
   if (prev_sent_frame == nullptr) {
-    out << *last_frame;
-    data->is_diff = false;
+    output.type = fbs::FrameOrFrameDiff::Frame;
+    output.offset = last_frame->addToFlatBufferBuilder(builder).Union();
   } else {
-    out << replayer::frame_diff(last_frame, prev_sent_frame);
-    data->is_diff = true;
+    auto frameDiff = replayer::frame_diff(last_frame, prev_sent_frame);
+    output.type = fbs::FrameOrFrameDiff::FrameDiff;
+    output.offset = frameDiff.addToFlatBufferBuilder(builder).Union();
   }
-  if (prev_sent_frame != nullptr)
+  
+  if (prev_sent_frame != nullptr) {
     prev_sent_frame->decref();
+  }
   prev_sent_frame = last_frame;
   last_frame = nullptr;
-  auto s = out.str();
-  data->data.assign(s.data(), s.data() + s.size());
+  
+  return output;
 }
 
 void Controller::endGame() {
   Utils::bwlog(
       output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
-  torchcraft::fbs::EndGameT endg;
-  endg.data.reset(new torchcraft::fbs::FrameDataT());
-  if (last_frame != nullptr)
-    this->serializeFrameData(endg.data.get());
-  endg.game_won = this->is_winner;
+  flatbuffers::FlatBufferBuilder builder;
+  
+  FrameSerializationResults frameSerializationResults;
+  auto serializeFrame = last_frame != nullptr;
+  if (serializeFrame) {
+    frameSerializationResults = serializeFrameData(builder);
+  }
+  
+  fbs::EndGameBuilder endGameBuilder(builder);
+  if (serializeFrame) {
+    endGameBuilder.add_data(frameSerializationResults.offset);
+    endGameBuilder.add_data_type(frameSerializationResults.type);
+  }
+  endGameBuilder.add_game_won(this->is_winner);
+  auto endGameOffset = endGameBuilder.Finish();
+  builder.Finish(endGameOffset);
 
   clearPendingReceive();
-  this->zmq_server->sendEndGame(&endg);
+  this->zmq_server->sendEndGame(endGameOffset, builder); 
 
   if (is_client) {
     // And receive new commands
@@ -692,7 +711,7 @@ void Controller::executeDrawCommands() {
 
 void Controller::onFrame() {
   auto startOnFrame = std::chrono::steady_clock::now();
-
+  
   // Display the game frame rate as text in the upper left area of the screen
   BWAPI::Broodwar->drawTextScreen(200, 0, "FPS: %d", BWAPI::Broodwar->getFPS());
   BWAPI::Broodwar->drawTextScreen(
@@ -702,6 +721,8 @@ void Controller::onFrame() {
   } catch (std::exception& e) {
     Utils::bwlog(output_log, "Error drawing client annotations: %s", e.what());
   }
+  
+  flatbuffers::FlatBufferBuilder builder;
 
   // check if the Proxy Bot is connected
   if (!this->zmq_server->server_sock_connected) {
@@ -773,68 +794,90 @@ void Controller::onFrame() {
   // case.
   bool receive_commands = !last_receive_ok;
 
-  // Send frame out to Lua side
   if (send_frame) {
-    // only done once before sending
-
+    
+    fbs::Vec2 vec2ScreenPosition;
+    fbs::Vec2 vec2VisibilitySize;
+    fbs::Vec2 vec2ImgSize;
+    std::string imgMode;
+    
+    auto sendImageData = false;
     if (with_image_) {
-      this->tcframe_.img_mode = config_->img_mode;
-
-      auto pos = BWAPI::Broodwar->getScreenPosition();
-      this->tcframe_.screen_position->mutate_x(pos.x);
-      this->tcframe_.screen_position->mutate_y(pos.y);
-
-      // get visibility
-      this->tcframe_.visibility_size->mutate_x(20);
-      this->tcframe_.visibility_size->mutate_y(13);
-      this->tcframe_.visibility.resize(20 * 13);
-
-      auto init_x = pos.x / 32;
-      auto init_y = pos.y / 32;
-      auto it = this->tcframe_.visibility.begin();
-      for (auto y = 0; y < 13; y++) {
-        for (auto x = 0; x < 20; x++) {
+      with_image_ = false;
+      std::unique_ptr<std::string> imageData(recorder_->getScreenData(
+        config_->img_mode,
+        config_->window_mode,
+        config_->window_mode_custom));
+      sendImageData = imageData->size() > 0;
+      if (sendImageData) {
+        vec2ImgSize.mutate_x(recorder_->width);
+        vec2ImgSize.mutate_y(recorder_->height);
+        this->image_data_.resize(imageData->size());
+        std::copy(imageData->begin(), imageData->end(), this->image_data_.begin());        
+      }
+      
+      imgMode = config_->img_mode;
+      
+      auto screenPosition = BWAPI::Broodwar->getScreenPosition();
+      vec2ScreenPosition.mutate_x(screenPosition.x);
+      vec2ScreenPosition.mutate_y(screenPosition.y);
+      
+      const int visibilityTileWidth = 20;
+      const int visibilityTileHeight = 13;
+      const int tileSize = 32;    
+      vec2VisibilitySize.mutate_x(visibilityTileWidth);
+      vec2VisibilitySize.mutate_y(visibilityTileHeight);
+      auto ix = screenPosition.x / tileSize;
+      auto iy = screenPosition.y / tileSize;
+      this->visibility_.resize(visibilityTileWidth * visibilityTileHeight);
+      auto it = this->visibility_.begin();
+      for (auto dy = 0; dy < visibilityTileHeight; dy++) {
+        for (auto dx = 0; dx < visibilityTileWidth; dx++) {
           uint8_t tile = 0;
-          if (BWAPI::Broodwar->isExplored(init_x + x, init_y + y))
-            tile += 1;
-
-          if (BWAPI::Broodwar->isVisible(init_x + x, init_y + y))
-            tile += 1;
-
+          auto x = ix + dx;
+          auto y = iy + dy;
+          tile += BWAPI::Broodwar->isExplored(x, y) ? 1 : 0;
+          tile += BWAPI::Broodwar->isVisible(x, y) ? 1 : 0;
           *it++ = tile;
         }
       }
     }
-
-    if (!this->tcframe_.data)
-      this->tcframe_.data.reset(new torchcraft::fbs::FrameDataT());
-    this->serializeFrameData(this->tcframe_.data.get());
-
-    this->tcframe_.deaths = this->deaths;
+    
+    auto commandsOffset = builder.CreateVector(this->commandsStatus_);
+    builder.Finish(commandsOffset);
+    
+    auto visibilityOffset = builder.CreateVector(this->visibility_);
+    builder.Finish(visibilityOffset);    
+    
+    auto imageDataToSend = sendImageData? this->image_data_ : std::vector<uint8_t>();
+    auto imageDataOffset = builder.CreateVector(imageDataToSend);
+    builder.Finish(imageDataOffset);
+    
+    auto imgModeOffset = builder.CreateString(imgMode);
+    
+    auto deathsOffset = builder.CreateVector(this->deaths);
     this->deaths.clear();
+    builder.Finish(deathsOffset);
+    
+    auto frameSerializationResults = serializeFrameData(builder);
 
-    this->tcframe_.frame_from_bwapi = BWAPI::Broodwar->getFrameCount();
-    this->tcframe_.battle_frame_count = this->battle_frame_count;
-
-    if (with_image_) {
-      auto bin_data = recorder_->getScreenData(
-          config_->img_mode, config_->window_mode, config_->window_mode_custom);
-      if (bin_data->size() > 0) {
-        this->tcframe_.img_size->mutate_x(recorder_->width);
-        this->tcframe_.img_size->mutate_y(recorder_->height);
-        this->tcframe_.img_data.assign(
-            bin_data->data(), bin_data->data() + bin_data->size());
-      } else {
-        this->tcframe_.img_data.clear();
-      }
-
-      delete bin_data;
-      with_image_ = false;
-    } else {
-      this->tcframe_.img_data.clear();
-    }
-
-    this->zmq_server->sendFrame(&this->tcframe_);
+    fbs::StateUpdateBuilder stateUpdateBuilder(builder);
+    stateUpdateBuilder.add_data(frameSerializationResults.offset);
+    stateUpdateBuilder.add_data_type(frameSerializationResults.type);
+    stateUpdateBuilder.add_deaths(deathsOffset);
+    stateUpdateBuilder.add_frame_from_bwapi(BWAPI::Broodwar->getFrameCount());
+    stateUpdateBuilder.add_battle_frame_count(this->battle_frame_count);
+    stateUpdateBuilder.add_commands_status(commandsOffset);
+    stateUpdateBuilder.add_img_mode(imgModeOffset);
+    stateUpdateBuilder.add_screen_position(&vec2ScreenPosition);    
+    stateUpdateBuilder.add_visibility(visibilityOffset);
+    stateUpdateBuilder.add_visibility_size(&vec2VisibilitySize);
+    stateUpdateBuilder.add_img_data(imageDataOffset);
+    stateUpdateBuilder.add_img_size(&vec2ImgSize);
+    auto stateUpdateOffset = stateUpdateBuilder.Finish();
+    builder.Finish(stateUpdateOffset);
+    
+    this->zmq_server->sendFrame(stateUpdateOffset, builder);
     combined_frames = 0;
 
     if (battle_ended) {
@@ -847,7 +890,7 @@ void Controller::onFrame() {
 
   if (receive_commands) {
     draw_cmds_.clear();
-    tcframe_.commands_status.clear();
+    this->commandsStatus_.clear();
     if (blocking_) {
       last_receive_ok = this->zmq_server->receiveMessage();
     } else {
@@ -918,8 +961,8 @@ void Controller::packCreep(replayer::Frame& f) {
   auto height = f.height / 4;
   auto width = f.width / 4;
   f.creep_map.resize(height * width / 8); // Only store build tiles
-  for (int y = 0, i = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x, ++i) {
+  for (unsigned y = 0, i = 0; y < height; ++y) {
+    for (unsigned x = 0; x < width; ++x, ++i) {
       f.creep_map[i / 8] |= BWAPI::Broodwar->hasCreep(x, y) << (i % 8);
     }
   }

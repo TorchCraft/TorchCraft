@@ -20,7 +20,7 @@ class Controller;
 
 class ZMQ_server
 {
-  static const int protocol_version = 22;
+  static const int protocol_version = 30;
   static const int max_commands = 2500; // maximum number of commands per frame
   static const int starting_port = 11111;
   static const int max_instances = 1000;
@@ -38,9 +38,13 @@ public:
   void connect();
   void close();
   void sendHandshake(const torchcraft::fbs::HandshakeServerT* handshake);
-  void sendFrame(const torchcraft::fbs::FrameT* frame);
+  void sendFrame(
+    const flatbuffers::Offset<torchcraft::fbs::StateUpdate>& stateUpdateOffset,
+    flatbuffers::FlatBufferBuilder& builder);
   void sendPlayerLeft(const torchcraft::fbs::PlayerLeftT *pl);
-  void sendEndGame(const torchcraft::fbs::EndGameT *endgame);
+  void sendEndGame(
+    const flatbuffers::Offset<torchcraft::fbs::EndGame>& endGameOffset,
+    flatbuffers::FlatBufferBuilder& builder);
   void sendError(const torchcraft::fbs::ErrorT *error);
   bool receiveMessage(int timeoutMs = -1);
   void handleReconnect(const torchcraft::fbs::HandshakeClient* handshake);

@@ -7,7 +7,7 @@ from subprocess import check_output, CalledProcessError
 import sys
 import distutils.unixccompiler
 
-__version__ = '1.3.3'
+__version__ = '1.4.0'
 
 ###############################################################################
 # Monkey-patch setuptools to compile in parallel (copied from pytorch)
@@ -61,21 +61,6 @@ class get_pybind_include(object):
         return pybind11.get_include(self.user)
 
 
-def get_torch_include_lib():
-    # Try includes from torch
-    try:
-        path = check_output("which th", shell=True).decode()
-        if "not found" not in path:
-            rootdir = dirname(dirname(path))
-            return (join(rootdir, "include"), join(rootdir, "lib"))
-    except CalledProcessError:
-        pass
-
-    # Default to using the torch7 default install dir
-    return expanduser("~/torch/install/include"), expanduser("~/torch/install/lib")
-
-
-torch_incdir, torch_libdir = get_torch_include_lib()
 sources = list(chain(
     glob('py/*.cpp'),
     glob('replayer/*.cpp'),
@@ -94,11 +79,10 @@ ext_modules = [
             "include",
             "replayer",
             ".",
-            torch_incdir,
+            "BWEnv/fbs",
         ],
         # TODO Search for ZSTD and define this if it exists
         define_macros=[('WITH_ZSTD', None)],
-        library_dirs=[torch_libdir],
         libraries=['zstd', 'zmq'],
         language='c++'
     ),

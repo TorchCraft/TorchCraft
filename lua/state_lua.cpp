@@ -52,7 +52,6 @@ const std::set<std::string> stateMembers = {
     "neutral_id",
     "replay",
     "frame",
-    "frame_string",
     "deaths",
     "frame_from_bwapi",
     "battle_frame_count",
@@ -164,8 +163,6 @@ int pushMember(
     (*f)->incref();
     luaL_getmetatable(L, "torchcraft.Frame");
     lua_setmetatable(L, -2);
-  } else if (m == "frame_string") {
-    lua_pushlstring(L, s->frame_string.c_str(), s->frame_string.length());
   } else if (m == "deaths") {
     lua_createtable(L, s->deaths.size(), 0);
     int n = 1;
@@ -256,7 +253,7 @@ void updateUserValueAndPush(
 
   // Still up to date?
   lua_getfield(L, -1, "__numUpdates");
-  if (lua_tointeger(L, -1) == s->numUpdates) {
+  if ((long) lua_tonumber(L, -1) == (long) s->numUpdates) {
     lua_pop(L, 1);
     lua_getfield(L, -1, m.c_str());
     lua_remove(L, -2);
@@ -277,7 +274,7 @@ void updateUserValueAndPush(
     auto nplayers = s->units.size();
     lua_newtable(L);
     for (size_t p = 0; p < nplayers; p++) {
-      if (p != s->neutral_id) {
+      if ((long) p != (long) s->neutral_id) {
         pushUnits(L, s->units[p]);
         lua_rawseti(L, -2, p);
       }
@@ -286,7 +283,7 @@ void updateUserValueAndPush(
 
     lua_newtable(L);
     for (size_t p = 0; p < nplayers; p++) {
-      if (p != s->neutral_id) {
+      if ((long) p != (long) s->neutral_id) {
         pushFrameMember(L, s, frameGetResources, p);
         lua_rawseti(L, -2, p);
       }

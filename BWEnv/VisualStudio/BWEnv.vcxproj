@@ -23,7 +23,7 @@
     <RootNamespace>BWEnv</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>BWEnv</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -149,7 +149,7 @@
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <AdditionalIncludeDirectories>$(BWAPI_DIR)/include;$(SolutionDir)/../include;$(SolutionDir)/../include/libzmq/include;$(SolutionDir)../../include/;$(SolutionDir)/../fbs/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USRDLL;BWENV_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;NDEBUG;_WINDOWS;_USRDLL;BWENV_EXPORTS;ZMQ_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
@@ -165,7 +165,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/libzmq.lib;$(BWAPI_DIR)/lib/BWAPI.lib;$(BWAPI_DIR)/lib/BWAPIClient.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Ws2_32.lib;$(SolutionDir)/../lib/libzmq.lib;$(BWAPI_DIR)/lib/BWAPI.lib;$(BWAPI_DIR)/lib/BWAPIClient.lib;Iphlpapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>
       </AdditionalLibraryDirectories>
       <ImportLibrary>$(IntDir)$(TargetName).lib</ImportLibrary>
@@ -212,6 +212,9 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(BWAPI_DIR)/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="..\..\replayer\frame.cpp" />
+    <ClCompile Include="..\..\replayer\frame_serialization.cpp" />
+    <ClCompile Include="..\..\replayer\frame_diff.cpp" />
+    <ClCompile Include="..\..\replayer\frame_diff_serialization.cpp" />
     <ClCompile Include="..\src\config_manager.cc" />
     <ClCompile Include="..\src\controller.cc" />
     <ClCompile Include="..\src\dll.cc" />

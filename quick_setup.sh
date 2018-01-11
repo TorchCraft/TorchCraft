@@ -21,10 +21,10 @@ cp $TC_DIR/BWEnv/bin/*.dll ./
 cp $TC_DIR/BWEnv/bin/*.sh ./
 cp $TC_DIR/config/*.ini $SC_DIR/bwapi-data/
 cp $TC_DIR/maps/micro/ $SC_DIR/Maps/BroodWar/ -r
-curl -LO https://github.com/TorchCraft/TorchCraft/releases/download/v1.3-0/torchcraft-v1.3-0.zip
-unzip torchcraft-v1.3-0.zip
-cp torchcraft-v1.3-0/* ./
-cp torchcraft-v1.3-0/bin/* ./
+curl -LO https://github.com/TorchCraft/TorchCraft/releases/download/v1.4-0/torchcraft-v1.4-0.zip
+unzip torchcraft-v1.4-0.zip
+cp torchcraft-v1.4-0/* ./
+cp torchcraft-v1.4-0/bin/* ./
 
 if [[ `uname` == 'Darwin' ]]; then
     sed -i '' "s|^ai *=.*|ai=$SC_DIR/BWEnv.dll|" bwapi-data/bwapi.ini

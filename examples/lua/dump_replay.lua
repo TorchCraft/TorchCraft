@@ -35,7 +35,9 @@ local map = tc:connect(params.hostname, params.port)
 assert(tc.state.replay, "This game isn't a replay")
 tc:send({table.concat({
   tc.command(tc.set_speed, 0), tc.command(tc.set_gui, 0),
-  tc.command(tc.set_combine_frames, skip_frames),
+  tc.command(tc.set_combine_frames, skip_frames, skip_frames),
+  tc.command(tc.set_blocking, 0),
+  tc.command(tc.set_max_frame_time_ms, 0),
   tc.command(tc.set_frameskip, 1000), tc.command(tc.set_log, 0),
 }, ':')})
 tc:receive()

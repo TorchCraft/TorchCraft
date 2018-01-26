@@ -48,7 +48,12 @@ BETTER_ENUM(
     SetGui = 8, // activates drawing and text in SC (bool)
     SetFrameskip = 9, // number of frames to skip (int)
     SetCmdOptim = 10, // reduce bot APM (0-6)
-    SetCombineFrames = 11, // combine n frames before sending (int)
+    // Combine min[/max] frames before sending (int [,int])
+    // In blocking mode, always combine according to minimum of arguments passed
+    // In non-blocking mode, it's possible to set a lower and upper limit.
+    // Reaching the upper limit results in blocking. Setting a single number
+    // disables the upper limit.
+    SetCombineFrames = 11,
 
     // Sets the map with BWAPI->setMap and by writing to the config. Is not
     // thread-safe. However, as long as the next connect finishes after set_map,

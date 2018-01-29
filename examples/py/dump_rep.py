@@ -27,7 +27,9 @@ state = cl.init()
 cl.send([
     [tcc.set_speed, 0],
     [tcc.set_gui, 0],
-    [tcc.set_combine_frames, skip_frames],
+    [tcc.set_combine_frames, skip_frames, skip_frames],
+    [tcc.set_max_frame_time_ms, 0],
+    [tcc.set_blocking, 0],
     [tcc.set_frameskip, 1000],
     [tcc.set_log, 0],
     [tcc.set_cmd_optim, 1],
@@ -43,7 +45,6 @@ while not state.game_ended:
     if fc > 5000:
         break
     state = cl.recv()
-
 
 print("Game ended....")
 savePath = path.join(args.out, state.map_name + ".tcr")

@@ -43,7 +43,7 @@ enum Commands {
   SET_GUI,
   SET_FRAMESKIP,
   SET_CMD_OPTIM,
-  SET_COMBINE_FRAMES,
+  SET_COMBINE_FRAMES, // one or two args actually
   SET_MAP,
   SET_MULTI,
   SET_BLOCKING,
@@ -156,6 +156,7 @@ class Controller {
   static const int pixelsPerWalkTile = 8;
   bool logCommands = true;
   int min_combine_frames = 1;
+  int max_combine_frames = -1;
   int combined_frames = 0;
   bool last_receive_ok = true;
   replayer::Frame* last_frame = nullptr;

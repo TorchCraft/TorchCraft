@@ -8,8 +8,8 @@
  */
 
 #include <chrono>
-#include <thread>
 #include <memory>
+#include <thread>
 
 #define WIN32_LEAN_AND_MEAN
 #include <BWAPI/Client.h>
@@ -321,8 +321,21 @@ int8_t Controller::handleCommand(
         BWAPI::Broodwar->setCommandOptimizationLevel(args[0]);
         return CommandStatus::SUCCESS;
       case Commands::SET_COMBINE_FRAMES:
-        Utils::bwlog(output_log, "Set combine frames to: %d", args[0]);
-        this->min_combine_frames = args[0];
+        if (args.size() > 1) {
+          this->min_combine_frames = std::min(args[0], args[1]);
+          this->max_combine_frames = std::max(args[0], args[1]);
+        } else {
+          this->min_combine_frames = args[0];
+          this->max_combine_frames = -1;
+        }
+        Utils::bwlog(
+            output_log,
+            "Set min combine frames to: %d",
+            this->min_combine_frames);
+        Utils::bwlog(
+            output_log,
+            "Set max combine frames to: %d",
+            this->max_combine_frames);
         return CommandStatus::SUCCESS;
       case Commands::SET_MAP:
         setMap(str);
@@ -737,6 +750,9 @@ void Controller::onFrame() {
   // circumstances?
   bool should_send = (combined_frames + 1 >= min_combine_frames);
   bool must_send = false;
+  if (max_combine_frames >= 0 && (combined_frames + 1 >= max_combine_frames)) {
+    must_send = true;
+  }
 
   // If we are in battle mode and the battle has ended, we need to:
   // 1. Send as soon as possible a frame where the Lua side can identify
@@ -746,8 +762,8 @@ void Controller::onFrame() {
       (BWAPI::Broodwar->self()->getUnits().empty() ||
        BWAPI::Broodwar->enemy()->getUnits().empty());
 
-  if (battle_ended) {
-    must_send = !this->sent_battle_end_frame;
+  if (battle_ended && !this->sent_battle_end_frame) {
+    must_send = true;
   }
 
   // Save frame state

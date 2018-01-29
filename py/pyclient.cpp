@@ -45,12 +45,12 @@ void init_client(py::module& torchcraft) {
           [](Client* self, std::vector<std::vector<py::object>> commands) {
             std::vector<Client::Command> to_send;
             for (auto vec : commands) {
-              auto arg0 = vec[0].cast<int>();
-              if (vec.size() == 0)
+              if (vec.size() == 0) {
                 continue;
-              else if (vec.size() == 1)
-                to_send.emplace_back(arg0);
-              else {
+              } else if (vec.size() == 1) {
+                to_send.emplace_back(vec[0].cast<int>());
+              } else {
+                auto arg0 = vec[0].cast<int>();
                 std::vector<int> the_rest;
                 for (size_t i = 2; i < vec.size(); i++)
                   the_rest.push_back(vec[i].cast<int>());

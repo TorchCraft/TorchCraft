@@ -47,21 +47,22 @@ void init_client(py::module& torchcraft) {
             for (auto vec : commands) {
               if (vec.size() == 0) {
                 continue;
-              } else if (vec.size() == 1) {
-                to_send.emplace_back(vec[0].cast<int>());
-              } else {
-                auto arg0 = vec[0].cast<int>();
-                std::vector<int> the_rest;
-                for (size_t i = 2; i < vec.size(); i++)
-                  the_rest.push_back(vec[i].cast<int>());
+              }
+
+              Client::Command cmd;
+              cmd.code = vec[0].cast<int>();
+              if (vec.size() > 1) {
                 try {
                   auto arg1 = vec[1].cast<std::string>();
-                  to_send.emplace_back(arg0, arg1, the_rest);
+                  cmd.str = arg1;
                 } catch (pybind11::cast_error& e) {
-                  the_rest.insert(the_rest.begin(), vec[1].cast<int>());
-                  to_send.emplace_back(arg0, "", the_rest);
+                  cmd.args.push_back(vec[1].cast<int>());
+                }
+                for (size_t i = 2; i < vec.size(); i++) {
+                  cmd.args.push_back(vec[i].cast<int>());
                 }
               }
+              to_send.push_back(cmd);
             }
             return self->send(to_send);
           })

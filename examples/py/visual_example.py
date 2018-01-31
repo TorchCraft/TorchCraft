@@ -102,18 +102,18 @@ while total_battles < 40:
         elif state.waiting_for_restart:
             dprint("WAITING FOR RESTART", 0)
         else:
-            the_image = np.array(state.image, dtype=np.uint8)
-            the_image = the_image.reshape(3, state.image_size[0],
-                                          state.image_size[1]).transpose(
-                                              1, 2, 0)
-
-            plt.imshow(the_image)
-            fig = plt.gcf()
-            plt.savefig('visual_example_out_{}.jpeg'.format(nloop))
-
-            myunits = state.units[0]
-            enemyunits = state.units[1]
             if state.battle_frame_count % skip_frames == 0:
+                the_image = np.array(state.image, dtype=np.uint8)
+                the_image = the_image.reshape(3, state.image_size[0],
+                                              state.image_size[1]).transpose(
+                                                  1, 2, 0)
+
+                plt.imshow(the_image)
+                fig = plt.gcf()
+                plt.savefig('visual_example_out_{}.jpeg'.format(nloop))
+
+                myunits = state.units[0]
+                enemyunits = state.units[1]
                 for unit in myunits:
                     target = get_closest(unit.x, unit.y, enemyunits)
                     if target is not None:

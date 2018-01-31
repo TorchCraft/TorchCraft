@@ -71,6 +71,7 @@ enum OBWCommands {
   KILL_UNIT,
   // four args
   SPAWN_UNIT,
+  SET_SCREEN_VALUES,
 };
 
 enum CommandStatus : int8_t {
@@ -165,6 +166,8 @@ class Controller {
   int frameskips = 1;
   bool exit_process_ = false;
   bool with_image_ = false;
+  std::pair<int, int> obw_screen_pos_ = std::pair<int, int>(340, 920);
+  std::pair<int, int> obw_screen_size_ = std::pair<int, int>(600, 600);
   bool blocking_ = true;
   int max_frame_time_ms_ = 50;
   std::vector<uint8_t> image_data_;

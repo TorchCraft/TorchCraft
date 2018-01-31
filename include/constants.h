@@ -92,8 +92,9 @@ BETTER_ENUM(
     KillUnit = 0, // uid
     // four args
     SpawnUnit = 1, // playerid, type, x, y
+    SetScreenValues = 2, // x, y, width, height
 
-    OPENBW_COMMAND_END = 2)
+    OPENBW_COMMAND_END = 3)
 
 BETTER_ENUM(
     UserCommandType,

@@ -536,6 +536,12 @@ int8_t Controller::handleOpenBWCommand(
       }
       return CommandStatus::SUCCESS;
     }
+    case OBWCommands::SET_SCREEN_VALUES: {
+      // TODO Do some bounds checks
+      obw_screen_pos_ = std::pair<int, int>(args[0], args[1]);
+      obw_screen_size_ = std::pair<int, int>(args[2], args[3]);
+      return CommandStatus::SUCCESS;
+    }
   }
   Utils::bwlog(output_log, "Invalid command: %d", command);
   return CommandStatus::UNKNOWN_COMMAND;
@@ -820,6 +826,7 @@ void Controller::onFrame() {
     auto sendImageData = false;
     if (with_image_) {
       with_image_ = false;
+#ifndef OPENBW_BWAPI
       std::unique_ptr<std::string> imageData(recorder_->getScreenData(
         config_->img_mode,
         config_->window_mode,
@@ -831,7 +838,42 @@ void Controller::onFrame() {
         this->image_data_.resize(imageData->size());
         std::copy(imageData->begin(), imageData->end(), this->image_data_.begin());        
       }
-      
+#else
+      // height is returned always as requested, but pitch/width might not, as SDL
+      // might resize it. Thus we need to use these instead of the args directly.
+      int pitch;
+      int height;
+      uint32_t* buf;
+
+      // (0, 0, 0, 0) crashes it with a floating point exception
+      // TODO Add safeguards
+      std::tie(pitch, height, buf) = BWAPI::Broodwar->drawGameScreen(obw_screen_pos_.first, obw_screen_pos_.second,
+                                                                     obw_screen_size_.first, obw_screen_size_.second);
+      // FIXME no need for this buffer - we can just copy onto image_data_
+      std::vector<uint8_t> img_buf;
+      int img_dim = obw_screen_size_.first * obw_screen_size_.second;
+      img_buf.reserve(4 * img_dim);
+
+      // we ignore extra pixels here
+      // TODO rotate image
+      for (size_t i = 0; i != img_dim; ++i) {
+        uint32_t r = buf[i] & 0xff;
+        uint32_t g = (buf[i] >> 8) & 0xff;
+        uint32_t b = (buf[i] >> 16) & 0xff;
+
+        img_buf.push_back(b);
+        img_buf.push_back(g);
+        img_buf.push_back(r);
+        img_buf.push_back(0);
+      }
+      vec2ImgSize.mutate_x(obw_screen_size_.first);
+      vec2ImgSize.mutate_y(obw_screen_size_.second);
+
+      this->image_data_.resize(img_buf.size());
+      std::copy(img_buf.begin(), img_buf.end(), this->image_data_.begin());
+
+      sendImageData = true;  // TODO add boundary checks
+#endif // !OPENBW_BWAPI
       imgMode = config_->img_mode;
       
       auto screenPosition = BWAPI::Broodwar->getScreenPosition();

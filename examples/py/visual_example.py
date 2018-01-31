@@ -102,24 +102,12 @@ while total_battles < 40:
         elif state.waiting_for_restart:
             dprint("WAITING FOR RESTART", 0)
         else:
-            the_state = [state.image[i:i+state.image_size[0]*3]
-                         for i in range(0, len(state.image),
-                                        state.image_size[0]*3)]
-
-            pixels = np.zeros((state.image_size[0],
-                               state.image_size[1],
-                               3), dtype=np.uint8)
             the_image = np.array(state.image, dtype=np.uint8)
+            the_image = the_image.reshape(3, state.image_size[0],
+                                          state.image_size[1]).transpose(
+                                              1, 2, 0)
 
-            # [r,g,b,r,g,b,...] -> [[r,r,...], [g,g,...], [b,b,...]]
-            print(state.image_size)
-            counter = 0
-            for i in range(state.image_size[0]):
-                for j in range(state.image_size[1]):
-                    pixels[i, j] = the_image[counter:counter+3]
-                    counter += 3
-
-            plt.imshow(pixels)
+            plt.imshow(the_image)
             fig = plt.gcf()
             plt.savefig('visual_example_out_{}.jpeg'.format(nloop))
 

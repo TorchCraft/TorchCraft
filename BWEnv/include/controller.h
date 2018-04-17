@@ -122,9 +122,7 @@ class Controller {
   void packBullets(replayer::Frame& f);
   void packCreep(replayer::Frame& f);
   void packResources(replayer::Frame& f, BWAPI::PlayerInterface* player);
-  void packMyUnits(replayer::Frame& f);
-  void packTheirUnits(replayer::Frame& f, BWAPI::PlayerInterface* player);
-  void packNeutral(replayer::Frame& f);
+  void packUnits(replayer::Frame& f);
   void addUnit(
       BWAPI::Unit u,
       replayer::Frame& frame,

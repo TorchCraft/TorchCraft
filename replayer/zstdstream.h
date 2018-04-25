@@ -140,7 +140,7 @@ class ostreambuf : public std::streambuf {
     if (ret) {
       throw std::runtime_error(std::string("zstd: ") + "not fully flushed");
     }
-    if (sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
+    if ((size_t) sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
         output.pos) {
       return -1;
     }
@@ -157,7 +157,7 @@ class ostreambuf : public std::streambuf {
       inhint_ = std::min(ret, inbuf_.size());
 
       if (output.pos > 0 &&
-          sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
+          (size_t) sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
               output.pos) {
         return -1;
       }

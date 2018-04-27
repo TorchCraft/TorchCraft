@@ -48,65 +48,61 @@ inline size_t check(size_t code) {
 // Provides stream compression functionality
 class cstream {
  public:
-  static const int defaultLevel = 5;
+  static constexpr int defaultLevel = 5;
 
-  explicit cstream(int level = defaultLevel) : ended_(false) {
-    cstr_ = ZSTD_createCStream();
-    if (cstr_ == nullptr) {
-    }
-    check(ZSTD_initCStream(cstr_, level));
+  cstream() {
+    cstrm_ = ZSTD_createCStream();
   }
 
   ~cstream() {
-    check(ZSTD_freeCStream(cstr_));
+    check(ZSTD_freeCStream(cstrm_));
+  }
+
+  size_t init(int level = defaultLevel) {
+    return check(ZSTD_initCStream(cstrm_, level));
   }
 
   size_t compress(ZSTD_outBuffer* output, ZSTD_inBuffer* input) {
-    return check(ZSTD_compressStream(cstr_, output, input));
+    return check(ZSTD_compressStream(cstrm_, output, input));
+  }
+
+  size_t flush(ZSTD_outBuffer* output) {
+    return check(ZSTD_flushStream(cstrm_, output));
   }
 
   size_t end(ZSTD_outBuffer* output) {
-    auto ret = check(ZSTD_endStream(cstr_, output));
-    ended_ = true;
-    return ret;
-  }
-
-  bool ended() const {
-    return ended_;
+    return check(ZSTD_endStream(cstrm_, output));
   }
 
  private:
-  ZSTD_CStream* cstr_;
-  bool ended_;
+  ZSTD_CStream* cstrm_;
 };
 
 // Provides stream decompression functionality
 class dstream {
  public:
   dstream() {
-    dstr_ = ZSTD_createDStream();
-    if (dstr_ == nullptr) {
-    }
-    check(ZSTD_initDStream(dstr_));
+    dstrm_ = ZSTD_createDStream();
+    check(ZSTD_initDStream(dstrm_));
   }
 
   ~dstream() {
-    check(ZSTD_freeDStream(dstr_));
+    check(ZSTD_freeDStream(dstrm_));
   }
 
   size_t decompress(ZSTD_outBuffer* output, ZSTD_inBuffer* input) {
-    return check(ZSTD_decompressStream(dstr_, output, input));
+    return check(ZSTD_decompressStream(dstrm_, output, input));
   }
 
  private:
-  ZSTD_DStream* dstr_;
+  ZSTD_DStream* dstrm_;
 };
 
-// Zstd stream for compression. Data is written in a single big frame.
+// Zstd stream buffer for compression. Data is written in a single big frame.
 class ostreambuf : public std::streambuf {
  public:
   explicit ostreambuf(std::streambuf* sbuf, int level = cstream::defaultLevel)
-      : sbuf_(sbuf), str_(level) {
+      : sbuf_(sbuf), clevel_(level), strInit_(false) {
     inbuf_.resize(ZSTD_CStreamInSize());
     outbuf_.resize(ZSTD_CStreamOutSize());
     inhint_ = inbuf_.size();
@@ -129,36 +125,52 @@ class ostreambuf : public std::streambuf {
 
   virtual int sync() {
     overflow();
-    if (!pptr() || str_.ended()) {
+    if (!pptr() || !strInit_) {
       return -1;
     }
 
-    // Flush and finish the Zstd frame
-    ZSTD_outBuffer output = {outbuf_.data(), outbuf_.size(), 0};
-    auto ret = str_.end(&output);
-    check(ret);
-    if (ret) {
-      throw std::runtime_error(std::string("zstd: ") + "not fully flushed");
+    // We've been asked to sync, so finish the Zstd frame
+    size_t ret = 0;
+    while (true) {
+      ZSTD_outBuffer output = {outbuf_.data(), outbuf_.size(), 0};
+      ret = strm_.end(&output);
+
+      if (output.pos > 0) {
+        if (sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
+            ssize_t(output.pos)) {
+          return -1;
+        }
+      }
+
+      // If ret > 0, Zstd still needs to write some more data
+      if (ret <= 0) {
+        break;
+      }
     }
-    if (sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
-        output.pos) {
-      return -1;
-    }
+    // Need to call init() again for compressing further data
+    strInit_ = false;
+
+    // Sync underlying stream as well
+    sbuf_->pubsync();
     return 0;
   }
 
  private:
   ssize_t compress(size_t pos) {
+    if (!strInit_) {
+      strm_.init(clevel_);
+      strInit_ = true;
+    }
+
     ZSTD_inBuffer input = {inbuf_.data(), pos, 0};
     while (input.pos != input.size) {
       ZSTD_outBuffer output = {outbuf_.data(), outbuf_.size(), 0};
-      auto ret = str_.compress(&output, &input);
-      check(ret);
+      auto ret = strm_.compress(&output, &input);
       inhint_ = std::min(ret, inbuf_.size());
 
       if (output.pos > 0 &&
           sbuf_->sputn(reinterpret_cast<char*>(output.dst), output.pos) !=
-              output.pos) {
+              ssize_t(output.pos)) {
         return -1;
       }
     }
@@ -167,18 +179,19 @@ class ostreambuf : public std::streambuf {
   }
 
   std::streambuf* sbuf_;
-  cstream str_;
+  int clevel_;
+  cstream strm_;
   std::vector<char> inbuf_;
   std::vector<char> outbuf_;
   size_t inhint_;
+  bool strInit_;
 };
 
-// Zstd stream for decompression. If input data is not compressed, this stream
-// will simply copy it.
+// Zstd stream buffer for decompression. If input data is not compressed, this
+// stream will simply copy it.
 class istreambuf : public std::streambuf {
  public:
-  explicit istreambuf(std::streambuf* sbuf)
-      : sbuf_(sbuf) {
+  explicit istreambuf(std::streambuf* sbuf) : sbuf_(sbuf) {
     inbuf_.resize(ZSTD_DStreamInSize());
     inhint_ = inbuf_.size();
     setg(inbuf_.data(), inbuf_.data(), inbuf_.data());
@@ -211,7 +224,7 @@ class istreambuf : public std::streambuf {
         // Consume input
         ZSTD_inBuffer input = {inbuf_.data(), inavail_, inpos_};
         ZSTD_outBuffer output = {outbuf_.data(), outbuf_.size(), 0};
-        auto ret = str_.decompress(&output, &input);
+        auto ret = strm_.decompress(&output, &input);
         inhint_ = std::min(ret, inbuf_.size());
         inpos_ = input.pos;
         if (output.pos == 0 && inhint_ > 0 && inpos_ >= inavail_) {
@@ -232,7 +245,7 @@ class istreambuf : public std::streambuf {
 
  private:
   std::streambuf* sbuf_;
-  dstream str_;
+  dstream strm_;
   std::vector<char> inbuf_;
   std::vector<char> outbuf_; // only needed if actually compressed
   size_t inhint_;
@@ -240,6 +253,34 @@ class istreambuf : public std::streambuf {
   size_t inavail_ = 0;
   bool detected_ = false;
   bool compressed_ = false;
+};
+
+// Input stream for Zstd-compressed data
+class istream : public std::istream {
+ public:
+  istream(std::streambuf* sbuf) : std::istream(new istreambuf(sbuf)) {
+    exceptions(std::ios_base::badbit);
+  }
+
+  virtual ~istream() {
+    if (rdbuf()) {
+      delete rdbuf();
+    }
+  }
+};
+
+// Output stream for Zstd-compressed data
+class ostream : public std::ostream {
+ public:
+  ostream(std::streambuf* sbuf) : std::ostream(new ostreambuf(sbuf)) {
+    exceptions(std::ios_base::badbit);
+  }
+
+  virtual ~ostream() {
+    if (rdbuf()) {
+      delete rdbuf();
+    }
+  }
 };
 
 // This class enables [io]fstream below to inherit from [io]stream (required for

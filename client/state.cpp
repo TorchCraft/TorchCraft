@@ -431,6 +431,12 @@ void State::postUpdate(std::vector<std::string>& upd) {
   }
 
   // Update units
+  for (auto& us : units) {
+    if (frame->units.find(us.first) == frame->units.end()) {
+      // No more units from this team
+      us.second.clear();
+    }
+  }
   for (const auto& fus : frame->units) {
     auto player = fus.first;
     if (units.find(player) == units.end()) {

@@ -92,6 +92,13 @@ BETTER_ENUM(
     KillUnit = 0, // uid
     // four args
     SpawnUnit = 1, // playerid, type, x, y
+    SetPlayerUpgradeLevel = 2, // player, upgrade, level
+    SetPlayerResearched = 3, // player, tech, bool
+    SetPlayerMinerals = 4, // player, minerals
+    SetPlayerGsa = 5, // player, gas
+    SetUnitHealth = 6, // unit, health
+    SetUnitShield = 7, // unit, shield
+    SetUnitEnergy = 8, // unit, energy
 
     OPENBW_COMMAND_END = 2)
 

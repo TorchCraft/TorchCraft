@@ -21,6 +21,11 @@
 #define ZSTD_STATIC_LINKING_ONLY
 #include <zstd.h>
 
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif // _MSC_VER
+
 namespace zstd {
 
 // Custom exception for zstd error codes

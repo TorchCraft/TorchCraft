@@ -25,10 +25,22 @@ static const std::string ERRMSG_TIMEOUT_EXCEEDED = "Timeout exceeded";
 Connection::Connection(
     const std::string& hostname,
     int port,
-    int timeoutMs /* = -1 */)
+    int timeoutMs)
     : sock_(ctx_, zmq::socket_type::req) {
   std::ostringstream ss;
   ss << "tcp://" << hostname << ":" << port;
+  sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_.setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_.setsockopt(ZMQ_IPV6, 1);
+  sock_.connect(ss.str());
+} // Connection
+
+Connection::Connection(
+    const std::string& file_socket,
+    int timeoutMs)
+    : sock_(ctx_, zmq::socket_type::req) {
+  std::ostringstream ss;
+  ss << "ipc://" << file_socket;
   sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
   sock_.setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
   sock_.setsockopt(ZMQ_IPV6, 1);

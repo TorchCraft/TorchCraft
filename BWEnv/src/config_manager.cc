@@ -40,6 +40,7 @@ void ConfigManager::loadDefault()
 void ConfigManager::loadGeneralSection()
 {
   port = readInt_("general", "port", 0);
+  file_socket = readString_("general", "file_socket", "");
   log_path = readString_("general", "log_path", "C:/tc_data/torchcraft_log_cpp_port_");
   display_log = readBool_("general", "display_log", "false");
   img_mode = readString_("general", "img_mode", "raw");
@@ -120,6 +121,7 @@ std::string ConfigManager::toString() const
   data << "  current path: " << current_path_ << std::endl;
   data << "general" << std::endl;
   data << "  port = " << port << std::endl;
+  data << "  file_socket = " << file_socket << std::endl;
   data << "  log_path = " << log_path << std::endl;
   data << "  display_log = " << display_log << std::endl;
   data << "  img_mode = " << img_mode << std::endl;

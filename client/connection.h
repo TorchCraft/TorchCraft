@@ -29,7 +29,19 @@ class Connection {
   ///     0 = non-blocking operation without retries
   ///    >0 = time (in milliseconds) after which the function returns an error,
   ///         if the operation was not accomplished
-  Connection(const std::string& hostname, int port, int timeoutMs = -1);
+  Connection(const std::string& hostname, int port, int timeoutMs);
+
+  /// Creates a new socket and connects it to an endpoint by a file socket.
+  /// ZMQ IPC is used for the connection; the full address is thus
+  ///     ipc://<file_socket>
+  /// @param file_socket [in] file to use as the socket
+  /// @param timeoutMs [in] Send / receive operation timeout in milliseconds
+  ///     (default = -1), the value is interpreted as follows:
+  ///    -1 = blocking operation
+  ///     0 = non-blocking operation without retries
+  ///    >0 = time (in milliseconds) after which the function returns an error,
+  ///         if the operation was not accomplished
+  Connection(const std::string& file_socket, int timeoutMs);
 
   /// Move constructor
   Connection(Connection&& conn);

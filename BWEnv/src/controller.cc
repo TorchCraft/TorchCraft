@@ -46,19 +46,29 @@ Controller::Controller(bool is_client) {
 
   std::cout << *config_ << std::endl;
 
-  this->zmq_server = std::make_unique<ZMQ_server>(this, config_->port);
+  if (config_->port != 0 && config_->file_socket.size() > 0) {
+    throw std::runtime_error("Cannot specify port and file in torchcraft");
+  }
+  if (config_->file_socket.size() > 0) {
+    this->zmq_server = std::make_unique<ZMQ_server>(this, config_->file_socket);
+  } else {
+    this->zmq_server = std::make_unique<ZMQ_server>(this, config_->port);
+  }
 }
 
 Controller::~Controller() {}
 
 bool Controller::connect_server() {
   // connect to client
+  auto log_path = config_->log_path + (
+      config_->file_socket.size() > 0
+      ? this->zmq_server->getFileSocketName()
+      : std::to_string(this->zmq_server->getPort())
+    ) + ".txt";
   try {
     this->zmq_server->connect();
   } catch (std::exception& e) {
-    output_log.open(
-        config_->log_path + std::to_string(this->zmq_server->getPort()) +
-        ".txt");
+    output_log.open(log_path);
     Utils::bwlog(output_log, "Error on connection: %s", e.what());
     if (this->zmq_server->server_sock_connected) {
       torchcraft::fbs::ErrorT err;
@@ -71,12 +81,18 @@ bool Controller::connect_server() {
 
   assert(this->zmq_server->server_sock_connected);
 
-  output_log.open(
-      config_->log_path + std::to_string(this->zmq_server->getPort()) + ".txt");
-  Utils::bwlog(
-      output_log,
-      "Successfully connected to proxy client on port %d.",
-      this->zmq_server->getPort());
+  output_log.open(log_path);
+  if (config_->file_socket.size() > 0) {
+    Utils::bwlog(
+        output_log,
+        "Successfully connected to proxy client on socket at %sd.",
+        this->config_->file_socket.c_str());
+  } else {
+    Utils::bwlog(
+        output_log,
+        "Successfully connected to proxy client on port %d.",
+        this->zmq_server->getPort());
+  }
   // line 46 (onStart)
 
   return true;

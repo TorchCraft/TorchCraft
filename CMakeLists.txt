@@ -25,7 +25,7 @@ SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 IF(ZSTD_FOUND)
-    ADD_DEFINITIONS(-DWITH_ZSTD)
+   ADD_DEFINITIONS(-DWITH_ZSTD)
 ENDIF()
 
 FILE(GLOB headers include/torchcraft/*.h)
@@ -44,13 +44,8 @@ TARGET_INCLUDE_DIRECTORIES(torchcraft
     "${ZMQ_INCLUDE_DIR}"
  )
 
-# https://github.com/zeromq/libzmq/issues/2884
 IF(MSVC)
-   IF(HAVE_WS2_32)
-      TARGET_LINK_LIBRARIES(torchcraft ws2_32)
-   ELSEIF(HAVE_WS2)
-      TARGET_LINK_LIBRARIES(torchcraft ws2)
-   ENDIF(HAVE_WS2_32)
+   TARGET_LINK_LIBRARIES(torchcraft shlwapi ws2_32 wsock32 Iphlpapi)
 ENDIF(MSVC)
 
 # A pure (non-Lua) C++ library containing the main client functionality

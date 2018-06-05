@@ -29,12 +29,12 @@ class ZMQ_server
   std::unique_ptr<zmq::context_t> ctx;
   std::unique_ptr<zmq::socket_t> sock;
   int port = 0;
-  std::string file_socket = "";
+  std::string file_socket;
 public:
   bool server_sock_connected;
 
-  explicit ZMQ_server(Controller *c, int port);
-  explicit ZMQ_server(Controller *c, std::string const& file_socket);
+  ZMQ_server(Controller *c, int port);
+  ZMQ_server(Controller *c, std::string const& file_socket);
   ~ZMQ_server();
 
   void connect();

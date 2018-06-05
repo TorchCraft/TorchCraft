@@ -85,12 +85,12 @@ bool Controller::connect_server() {
   if (config_->file_socket.size() > 0) {
     Utils::bwlog(
         output_log,
-        "Successfully connected to proxy client on socket at %sd.",
+        "Successfully connected to client on socket at %sd.",
         this->config_->file_socket.c_str());
   } else {
     Utils::bwlog(
         output_log,
-        "Successfully connected to proxy client on port %d.",
+        "Successfully connected to client on port %d.",
         this->zmq_server->getPort());
   }
   // line 46 (onStart)

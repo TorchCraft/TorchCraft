@@ -104,7 +104,7 @@ Client::~Client() {
 //============================= OPERATIONS ===================================
 
 // Internal method
-bool Client::connect(Connection* conn) {
+bool Client::connect(std::unique_ptr<Connection>&& conn) {
   clearError();
   if (conn_) {
     error_ = "Active connection present";
@@ -112,7 +112,7 @@ bool Client::connect(Connection* conn) {
   }
 
   try {
-    conn_.reset(conn);
+    conn_ = std::move(conn);
     uid_ = makeUid();
   } catch (zmq::error_t& e) {
     error_ = e.what();
@@ -128,11 +128,13 @@ bool Client::connect(
     const std::string& hostname,
     int port,
     int timeoutMs /* = -1 */) {
-  return connect(new Connection(hostname, port, timeoutMs));
+  return connect(std::unique_ptr<Connection>(
+        new Connection(hostname, port, timeoutMs)));
 }
 
 bool Client::connect(const std::string& file_socket, int timeoutMs /* = -1 */) {
-  return connect(new Connection(file_socket, timeoutMs));
+  return connect(std::unique_ptr<Connection>(
+        new Connection(file_socket, timeoutMs)));
 }
 
 bool Client::close() {

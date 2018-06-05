@@ -59,9 +59,6 @@ class Client {
         : Command(code, std::move(str), {std::forward<Args>(args)...}) {}
   };
 
-  bool connect(Connection*);
-
- public:
   // LIFECYCLE
   Client();
   ~Client();
@@ -149,6 +146,7 @@ class Client {
   }
 
  private:
+  bool connect(std::unique_ptr<Connection>&&);
   void clearError() {
     error_.clear();
   }

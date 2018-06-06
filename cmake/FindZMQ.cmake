@@ -1,3 +1,10 @@
+# Copyright (c) 2015-present, Facebook, Inc.
+# All rights reserved.
+# 
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+
 # - Try to find ZMQ
 # Once done this will define
 # ZMQ_FOUND - System has ZMQ
@@ -5,8 +12,8 @@
 # ZMQ_LIBRARIES - The libraries needed to use ZMQ
 # ZMQ_DEFINITIONS - Compiler switches required for using ZMQ
 
-find_path ( ZMQ_INCLUDE_DIR zmq.h )
-find_library ( ZMQ_LIBRARY NAMES zmq )
+find_path ( ZMQ_INCLUDE_DIR zmq.h HINTS ENV CPLUS_INCLUDE_PATH )
+find_library ( ZMQ_LIBRARY NAMES zmq HINTS ENV LIBRARY_PATH ENV LD_LIBRARY_PATH )
 
 set ( ZMQ_LIBRARIES ${ZMQ_LIBRARY} )
 set ( ZMQ_INCLUDE_DIRS ${ZMQ_INCLUDE_DIR} )

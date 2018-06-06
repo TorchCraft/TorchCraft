@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "refcount.h"
+#include <torchcraft/refcount.h>
 #include "messages_generated.h"
 
 #ifdef _MSC_VER

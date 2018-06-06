@@ -14,9 +14,9 @@
 #include <string>
 #include <vector>
 
-#include "constants.h"
-#include "frame.h"
-#include "refcount.h"
+#include <torchcraft/constants.h>
+#include <torchcraft/frame.h>
+#include <torchcraft/refcount.h>
 
 // Flatbuffer messages
 namespace torchcraft {

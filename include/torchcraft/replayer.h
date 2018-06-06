@@ -14,9 +14,9 @@
 #include <iostream>
 #include <vector>
 
-#include "frame.h"
-#include "refcount.h"
-#include "state.h"
+#include <torchcraft/frame.h>
+#include <torchcraft/refcount.h>
+#include <torchcraft/state.h>
 
 namespace torchcraft {
 namespace replayer {

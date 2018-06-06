@@ -80,21 +80,35 @@ void sendMessageAsNativeTable(
 
 } // namespace
 
-ZMQ_server::ZMQ_server(Controller *c, int port)
-{
+ZMQ_server::ZMQ_server(Controller *c, int port) {
   server_sock_connected = false;
   controller = c;
   this->port = port;
 }
 
-void ZMQ_server::connect()
-{
+ZMQ_server::ZMQ_server(Controller *c, std::string const& file_socket) {
+  server_sock_connected = false;
+  controller = c;
+  this->file_socket = file_socket;
+}
+
+void ZMQ_server::connect() {
   if (this->server_sock_connected) return;
 
   // reinit ZMQ context
   ctx = std::make_unique<zmq::context_t>();
 
-  if (this->port == 0) {
+  std::string message;
+  if (this->file_socket.size() > 0) {
+#ifdef _WIN32
+    throw std::runtime_error("Cannot use IPC on windows");
+#else
+    this->sock = std::make_unique<zmq::socket_t>(*ctx.get(), zmq::socket_type::rep);
+    auto url = "ipc://" + this->file_socket;
+    this->sock->bind(url);
+    message = "TorchCraft server listening on socket " + this->file_socket;
+#endif
+  } else if (this->port == 0) {
     for (int port = ZMQ_server::starting_port;
       port < ZMQ_server::starting_port
       + ZMQ_server::max_instances;
@@ -114,8 +128,8 @@ void ZMQ_server::connect()
       }
       this->sock = nullptr;
     }
-  }
-  else {
+    message = "TorchCraft server listening on port " + std::to_string(port);
+  } else {
     int success = -1;
 #ifdef _WIN32
     DWORD reuse = 1;
@@ -140,13 +154,14 @@ void ZMQ_server::connect()
       }
       std::this_thread::sleep_for(std::chrono::seconds(1));
     }
+    message = "TorchCraft server listening on port " + std::to_string(port);
   }
   if (this->sock == nullptr) {
     throw runtime_error("No more free ports for ZMQ server socket.");
   }
 
   this->server_sock_connected = true;
-  std::cout << "TorchCraft server listening on port " << port << std::endl;
+  std::cout << message << std::endl;
 
   zmq::message_t zmsg;
   try {
@@ -375,7 +390,10 @@ std::vector<int8_t> ZMQ_server::handleCommands(const torchcraft::fbs::Commands* 
   return results;
 }
 
-int ZMQ_server::getPort()
-{
+int ZMQ_server::getPort() {
   return port;
+}
+
+std::string ZMQ_server::getFileSocketName() {
+  return file_socket.substr(file_socket.find_last_of("/\\") + 1);
 }

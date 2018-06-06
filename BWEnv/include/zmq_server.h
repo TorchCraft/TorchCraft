@@ -29,10 +29,12 @@ class ZMQ_server
   std::unique_ptr<zmq::context_t> ctx;
   std::unique_ptr<zmq::socket_t> sock;
   int port = 0;
+  std::string file_socket;
 public:
   bool server_sock_connected;
 
-  explicit ZMQ_server(Controller *c, int port);
+  ZMQ_server(Controller *c, int port);
+  ZMQ_server(Controller *c, std::string const& file_socket);
   ~ZMQ_server();
 
   void connect();
@@ -50,6 +52,7 @@ public:
   void handleReconnect(const torchcraft::fbs::HandshakeClient* handshake);
   std::vector<int8_t> handleCommands(const torchcraft::fbs::Commands* commands);
   int getPort();
+  std::string getFileSocketName();
 };
 
 #endif // TORCHCRAFT_ZMQ_H_

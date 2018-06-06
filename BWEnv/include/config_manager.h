@@ -23,6 +23,7 @@ public:
   std::string toString() const;
 
   int port;
+  std::string file_socket;
   bool assume_on;
   std::string launcher;
   std::string custom_launcher;

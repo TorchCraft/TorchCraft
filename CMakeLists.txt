@@ -1,10 +1,4 @@
-OPTION(BUILD_SHARED_LIBS "Build the TorchCraft libraries shared." ON)
-
-IF(BUILD_SHARED_LIBS)
-  SET(TORCHCRAFT_LIBRARY_TYPE SHARED)
-ELSE()
-  SET(TORCHCRAFT_LIBRARY_TYPE STATIC)
-ENDIF()
+OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.6)
@@ -38,7 +32,7 @@ ENDIF()
 
 FILE(GLOB headers include/torchcraft/*.h)
 FILE(GLOB cppsrc replayer/*.cpp client/*.cpp)
-ADD_LIBRARY(torchcraft ${TORCHCRAFT_LIBRARY_TYPE} ${cppsrc})
+ADD_LIBRARY(torchcraft ${cppsrc})
 TARGET_INCLUDE_DIRECTORIES(torchcraft
    PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

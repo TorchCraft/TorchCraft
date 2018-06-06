@@ -85,7 +85,7 @@ bool Controller::connect_server() {
   if (config_->file_socket.size() > 0) {
     Utils::bwlog(
         output_log,
-        "Successfully connected to client on socket at %sd.",
+        "Successfully connected to client on socket at %s.",
         this->config_->file_socket.c_str());
   } else {
     Utils::bwlog(

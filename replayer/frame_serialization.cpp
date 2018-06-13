@@ -34,7 +34,7 @@ std::istream& operator>>(std::istream& in, Frame& frame) {
 flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const {
   auto packUnitsOfPlayer = [&builder](const std::pair<int32_t, std::vector<Unit>>& unitPair) {
     auto packUnit = [&builder](const Unit& unit) {
-      auto packOrder = [&builder](const Order& order) {
+      auto packOrder = [](const Order& order) {
         return fbs::Order(
           order.first_frame,
           order.type,

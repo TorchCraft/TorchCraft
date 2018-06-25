@@ -9,6 +9,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     '-t', '--hostname', type=str, help='Hostname where SC is running')
 parser.add_argument('-p', '--port', default=11111, help="Port to use")
+parser.add_argument(
+    '-b',
+    '--micro_battles',
+    action='store_true',
+    help="Set to true if needing micro_mode")
 parser.add_argument('-d', '--debug', default=0, type=int, help="Debug level")
 
 args = parser.parse_args()
@@ -53,22 +58,28 @@ tries = 5
 
 cl = tc.Client()
 cl.connect(args.hostname, args.port)
-state = cl.init(micro_battles=True)
-cl.send([
+state = cl.init(micro_battles=args.micro_battles)
+returned = cl.send([
     [tcc.set_combine_frames, skip_frames],
     [tcc.set_speed, 0],
     [tcc.set_gui, 1],
     [tcc.set_cmd_optim, 1],
+    [tcc.map_hack],
 ])
+state = cl.recv()
 
 for i in range(tries):
     print("# try: {}".format(i))
-    unit_add_quantity = random.randint(1, max_add_quantity)
+
     while state.game_ended or state.waiting_for_restart:
-        cl.send([])
+        returned = cl.send([])
         state = cl.recv()
 
-    initial_lens = [len(state.units[0]), len(state.units[1])]
+    unit_add_quantity = random.randint(1, max_add_quantity)
+
+    initial_lens = [0, 0]
+    for i in range(2):
+        initial_lens[i] = len(state.units[i])
 
     print("Current size: {}".format(initial_lens))
     command = create_units(0, unit_add_quantity)
@@ -78,10 +89,15 @@ for i in range(tries):
     cl.send(command)
     state = cl.recv()
 
-    assert (len(state.units[0]) == initial_lens[0] + unit_add_quantity)
-    assert (len(state.units[1]) == initial_lens[1] + unit_add_quantity)
-    print(
-        "Current size: {}".format([len(state.units[0]), len(state.units[1])]))
+    assert (len(state.units[0]) == initial_lens[0] +
+            unit_add_quantity), 'Player: {} =/= {}'.format(
+                len(state.units[0]), initial_lens[0])
+    assert (len(state.units[1]) == initial_lens[1] +
+            unit_add_quantity), 'Enemy: {} =/= {}'.format(
+                len(state.units[1]), initial_lens[1])
+
+    print("Current size: {}".format([len(state.units[0]),
+                                     len(state.units[1])]))
 
     command = kill_units(state.units[0], unit_add_quantity)
     command += kill_units(state.units[1], unit_add_quantity)
@@ -90,8 +106,11 @@ for i in range(tries):
     cl.send(command)
     state = cl.recv()
 
-    assert (len(state.units[0]) == initial_lens[0])
-    assert (len(state.units[1]) == initial_lens[1])
+    assert (len(
+        state.units[0]) == initial_lens[0]), 'Player: {} =/= {}'.format(
+            len(state.units[0]), initial_lens[0])
+    assert (len(state.units[1]) == initial_lens[1]), 'Enemy: {} =/= {}'.format(
+        len(state.units[1]), initial_lens[1])
     print("Current size: {}".format(initial_lens))
 
 cl.close()

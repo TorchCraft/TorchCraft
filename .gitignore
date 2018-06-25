@@ -256,3 +256,16 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# runtime related
+/BrooDat.mpq
+/Patch_rt.mpq
+/StarCraft.mpq
+/StarDat.mpq
+/\\bwapi-data\\bwapi.ini
+
+# C++ client
+/examples/cpp/build/
+
+# python client
+/torchcraft.egg-info/

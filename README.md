@@ -26,9 +26,9 @@ $ git submodule update --init --recursive
 
 TorchCraft is split into two parts: **BWEnv**, the process that runs along with StarCraft, and the set of client interfaces implemented in C++, Python, and Lua.
 
-- To install BWEnv on an instance of StarCraft running on Windows, please follow these [installation instructions](docs/user/starcraft_in_windows.md). 
-- To install BWEnv and StarCraft on WINE, please check these [instructions](docs/user/starcraft_in_wine.md).
-- To install BWEnv using OpenBW, please check follow these [instructions](docs/user/openbw.md).
+- To install BWEnv on an instance of StarCraft running on Windows, please follow these [installation instructions](/docs/user/starcraft_in_windows.md). 
+- To install BWEnv and StarCraft on WINE, please check these [instructions](/docs/starcraft_in_wine.md).
+- To install BWEnv using OpenBW, please check follow these [instructions](/docs/openbw.md).
 
 
 Each client has a different installation procedure, but all have the same library requirements (see above).
@@ -86,7 +86,7 @@ Do whichever was installed:
 #### WINE
 
 1. Open `bwapi.ini` and set `ai = PATH\TO\BWEnv.dll` (or copy
-2. `wine bwheadless.exe -e $STARCRAFT/StarCraft.exe -l $STARCRAFT/bwapi-data/BWAPI.dll --headful` as detailed in the [WINE docs](/docs/user/starcraft_in_wine.md)
+2. `wine bwheadless.exe -e $STARCRAFT/StarCraft.exe -l $STARCRAFT/bwapi-data/BWAPI.dll --headful` as detailed in the [WINE docs](/docs/starcraft_in_wine.md)
 
 
 #### OpenBW
@@ -128,8 +128,8 @@ Note that we have provide an empty map in which you can build your own scenarios
 
 The code is for the most self-documenting, these documents go a bit more in detail on certain parts of TorchCraft:
 
-- [Client basics](/docs/user/torchcraft.md)
-- [Lua Replayer](/docs/user/replayer.md)
+- [Client communication 101](/docs/client_server_comm.md)
+- [Lua Replayer](/docs/replayer.md)
 
 
 ## Citation

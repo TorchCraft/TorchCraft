@@ -95,7 +95,7 @@ BETTER_ENUM(
     SetPlayerUpgradeLevel = 2, // player, upgrade, level
     SetPlayerResearched = 3, // player, tech, bool
     SetPlayerMinerals = 4, // player, minerals
-    SetPlayerGsa = 5, // player, gas
+    SetPlayerGas = 5, // player, gas
     SetUnitHealth = 6, // unit, health
     SetUnitShield = 7, // unit, shield
     SetUnitEnergy = 8, // unit, energy

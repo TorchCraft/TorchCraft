@@ -19,7 +19,7 @@ First, clone the repository and its submodules:
 ```bash
 $ git clone https://github.com/torchcraft/TorchCraft --recursive
 
-# o if you have already cloned the repo...
+# or if you have already cloned the repo:
 $ git submodule update --init --recursive
 ```
 
@@ -51,7 +51,6 @@ The lua setup depends on [torch7](http://torch.ch/docs/getting-started.html).
 ```bash
 $ luarocks make *.rockspec
 ```
-Lua setup (depends on ): `luarocks make *.rockspec`<br/>
 
 
 ### C++

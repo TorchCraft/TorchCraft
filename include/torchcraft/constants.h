@@ -24,7 +24,7 @@
 #define BETTER_ENUMS_MACRO_FILE "enum_macros.h"
 #endif // _MSC_VER
 
-#include "enum.h"
+#include <torchcraft/enum.h>
 
 namespace torchcraft {
 namespace BW {

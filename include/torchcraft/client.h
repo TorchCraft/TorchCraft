@@ -13,7 +13,7 @@
 #include <set>
 #include <vector>
 
-#include "constants.h"
+#include <torchcraft/constants.h>
 
 namespace torchcraft {
 
@@ -59,7 +59,6 @@ class Client {
         : Command(code, std::move(str), {std::forward<Args>(args)...}) {}
   };
 
- public:
   // LIFECYCLE
   Client();
   ~Client();
@@ -73,14 +72,26 @@ class Client {
   /// is defined as tcp://<hostname>:<port>
   /// @param hostname [in] Hostname part of a TCP address for socket connection
   /// @param port [in] Port part of a TCP address for socket connection
+  /// @param timeoutMs [in] Send / receive operation timeout in milliseconds,
+  ///     the value is interpreted as follows:
+  ///    -1 = blocking operation
+  ///     0 = non-blocking operation without retries
+  ///    >0 = time (in milliseconds) after which the function returns an error,
+  ///         if the operation was not accomplished
+  /// @return true if the connection was established; false otherwise
+  bool connect(const std::string& hostname, int port, int timeoutMs);
+
+  /// Creates a new socket and connects it to an endpoint by a file socket.
+  /// ZMQ IPC is used for the connection; the full address is thus
+  ///     ipc://<file_socket>
+  /// @param file_socket [in] file to use as the socket
   /// @param timeoutMs [in] Send / receive operation timeout in milliseconds
   ///     (default = -1), the value is interpreted as follows:
   ///    -1 = blocking operation
   ///     0 = non-blocking operation without retries
   ///    >0 = time (in milliseconds) after which the function returns an error,
   ///         if the operation was not accomplished
-  /// @return true if the connection was established; false otherwise
-  bool connect(const std::string& hostname, int port, int timeoutMs = -1);
+  bool connect(const std::string& file_socket, int timeoutMs);
 
   /// Indicates whether the connection was successfully established
   /// @return true if the connection was successfully established;
@@ -135,6 +146,7 @@ class Client {
   }
 
  private:
+  bool connect(std::unique_ptr<Connection>&&);
   void clearError() {
     error_.clear();
   }

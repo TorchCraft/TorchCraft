@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include "lest/lest.hpp"
-#include "frame.h"
+#include <torchcraft/frame.h>
 #include "flatbuffers.h"
 
 namespace torchcraft {

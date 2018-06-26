@@ -11,9 +11,14 @@ void init_client(py::module& torchcraft) {
   client.def(py::init<>())
       .def(
           "connect",
-          &Client::connect,
+          (bool (Client::*)(const std::string&, int, int)) &Client::connect,
           py::arg("hostname"),
           py::arg("port") = 11111,
+          py::arg("timeout") = -1)
+      .def(
+          "connect",
+          (bool (Client::*)(const std::string&, int)) &Client::connect,
+          py::arg("file_socket"),
           py::arg("timeout") = -1)
       .def("connected", &Client::connected)
       .def("close", &Client::close)

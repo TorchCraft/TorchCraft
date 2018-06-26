@@ -39,6 +39,8 @@ endif()
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/fbs
+  # XXX We shouldn't include this, but the includes would be a bit messed up
+  ${CMAKE_CURRENT_SOURCE_DIR}/../include/torchcraft
   ${CMAKE_CURRENT_SOURCE_DIR}/../include
   ${BWAPI_INCLUDE_DIRS}
 )

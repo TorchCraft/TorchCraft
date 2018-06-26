@@ -1,47 +1,75 @@
 # TorchCraft
 
-A bridge between [Torch](http://torch.ch/) and [StarCraft](http://us.blizzard.com/en-us/games/sc/).
+TorchCraft is an interface to StarCraft: Brood War based on [BWAPI](github.com/bwapi/bwapi) that allows you to build bots and control the game without needing to inject your own controller into the game. This lets you parse StarCraft data and interact with BWAPI from anywhere with a few lines of C++, Python, or Lua.
 
-A general overview of the system (and motivations for using TorchCraft) can be found in:
-
-Synnaeve, G., Nardelli, N., Auvolat, A., Chintala, S., Lacroix, T., Lin, Z.,
-Richoux, F. and Usunier, N., 2016. _TorchCraft: a Library for Machine Learning Research
-on Real-Time Strategy Games_ - [arXiv:1611.00625](https://arxiv.org/abs/1611.00625).
+A general overview of the system (and motivations for using TorchCraft) can be found in: Synnaeve, G., Nardelli, N., Auvolat, A., Chintala, S., Lacroix, T., Lin, Z., Richoux, F. and Usunier, N., 2016. _TorchCraft: a Library for Machine Learning Research on Real-Time Strategy Games_ - [arXiv:1611.00625](https://arxiv.org/abs/1611.00625). If you use TorchCraft in your research, please cite the paper.
 
 
-## [Installation](docs/user/starcraft_in_windows.md)
-
-Please follow the [installation instructions](docs/user/starcraft_in_windows.md). 
-
-You will need to have a license of StarCraft: Brood War. 
-
-TorchCraft is a BWAPI module that sends StarCraft data out over a ZMQ
-connection. This lets you parse StarCraft data and interact with BWAPI from
-anywhere. The TorchCraft client should be installed from C++, Python, or Lua.
-We provide off the shelf solutions for Python and Lua:
+## Installation
 
 Requirements:
+  - StarCraft: Brood War 1.16
+  - A license of StarCraft: Brood War
   - zstd-devel 1.1.4
   - zeromq 4+
 
-Remember to init submodules: `git submodule update --init --recursive`<br/>
-Python setup: `pip install pybind11 && pip install .`<br/>
-Lua setup (depends on [torch7](http://torch.ch/docs/getting-started.html)): `luarocks make *.rockspec`<br/>
 
-We provide an example C++ CMake project in `examples/cpp/`
+First, clone the repository and its submodules:
 
-The hardest part of installing the server is actually setting up starcraft.
-We detail three ways of doing this:
-  - [Use the standard Windows + StarCraft route, perhaps with a VM](/docs/user/starcraft_in_windows.md)
-  - [Use WINE](/docs/user/starcraft_in_wine.md)
-  - [Use OpenBW](/docs/user/openbw.md)
+```bash
+$ git clone https://github.com/torchcraft/TorchCraft --recursive
+
+# or if you have already cloned the repo:
+$ git submodule update --init --recursive
+```
+
+
+TorchCraft is split into two parts: **BWEnv**, the process that runs along with StarCraft, and the set of client interfaces implemented in C++, Python, and Lua.
+
+- To install BWEnv on an instance of StarCraft running on Windows, please follow these [installation instructions](/docs/user/starcraft_in_windows.md). 
+- To install BWEnv and StarCraft on WINE, please check these [instructions](/docs/starcraft_in_wine.md).
+- To install BWEnv using OpenBW, please check follow these [instructions](/docs/openbw.md).
+
+
+Each client has a different installation procedure, but all have the same library requirements (see above).
+
+
+### Python
+
+This should work with a standard python>=3.5 installation or Anaconda, both on Linux and MacOS:
+
+```bash
+# install requirements
+$ pip install pybind11
+$ pip install .
+```
+
+### Lua
+
+The lua setup depends on [torch7](http://torch.ch/docs/getting-started.html).
+
+```bash
+$ luarocks make *.rockspec
+```
+
+
+### C++
+
+We provide an example C++ CMake project in `examples/cpp/`, with the additional dependency of `gflags`.
+
+```bash
+$ cd examples/cpp
+$ mkdir build; cd build
+$ cmake ..
+$ make
+```
 
 
 ## Running TorchCraft
 
-See [`examples/`](examples/) for a list of scripts that you can try.
-In all cases, the `$server_ip` is the ip address of the machine running
+See [`examples/`](examples/) for a list of scripts that you can try. In all cases, the `$server_ip` is the ip address of the machine running
 StarCraft.
+
 
 ### StarCraft Server
 
@@ -49,8 +77,7 @@ Do whichever was installed:
 
 #### Windows / WINE
 
-1. Open `bwapi.ini` and set `ai = PATH\TO\BWEnv.dll` (or copy
-   ours from `config/bwapi.in`)
+1. Open `bwapi.ini` and set `ai = PATH\TO\BWEnv.dll` (or copy ours from `config/bwapi.ini`)
 2. Start ChaosLauncher, enable `BWAPI DLL Injector [Release]`.
 3. Press `Start`.
 
@@ -58,25 +85,51 @@ Do whichever was installed:
 #### WINE
 
 1. Open `bwapi.ini` and set `ai = PATH\TO\BWEnv.dll` (or copy
-1. `wine bwheadless.exe -e $STARCRAFT/StarCraft.exe -l $STARCRAFT/bwapi-data/BWAPI.dll --headful` as detailed in the [WINE docs](/docs/user/starcraft_in_wine.md)
+2. `wine bwheadless.exe -e $STARCRAFT/StarCraft.exe -l $STARCRAFT/bwapi-data/BWAPI.dll --headful` as detailed in the [WINE docs](/docs/starcraft_in_wine.md)
 
 
 #### OpenBW
 
-Something like:
-`OPENBW_ENABLE_UI=0 BWAPI_CONFIG_AI__RACE=Terran BWAPI_CONFIG_AI__AI="BWEnv/build/BWEnv.so" BWAPI_CONFIG_AUTO_MENU__AUTO_MENU="SINGLE_PLAYER" BWAPI_CONFIG_AUTO_MENU__MAP=maps/micro/m5v5_c_far.scm BWAPI_CONFIG_AUTO_MENU__GAME_TYPE="USE MAP SETTINGS" TORCHCRAFT_PORT=11111 BWAPILauncher`
+After installing openbw and building BWEnv, run from the torchcraft repo:
 
-### TorchCraft Client
+```bash
+OPENBW_ENABLE_UI=0 \
+  BWAPI_CONFIG_AI__RACE=Terran \
+  BWAPI_CONFIG_AI__AI="BWEnv/build/BWEnv.so" \
+  BWAPI_CONFIG_AUTO_MENU__AUTO_MENU="SINGLE_PLAYER" \
+  BWAPI_CONFIG_AUTO_MENU__MAP=maps/micro/m5v5_c_far.scm \
+  BWAPI_CONFIG_AUTO_MENU__GAME_TYPE="USE MAP SETTINGS" \
+  TORCHCRAFT_PORT=11111 \
+  BWAPILauncher
+```
+
+Remember that you'll need the StarCraft: Brood War MPQs from your local installation in the same directory. You can also setup these values in `bwapi.ini` and `torchcraft.ini`.
+
+
+#### Running micromanagement example
+
+In all micromanagement examples, the client has to be initialised with `micro_battles=True`. This allows the client to group states into "battles" using our "micro" maps. All such maps have triggers that recreate the initial state automatically after every battle is finished.
 
 ```bash
 $ cd examples
-$ th lua/simple_dll.lua -t $server_ip
+
+# python
 $ python py/example.py -t $server_ip
+
+# lua
+$ th lua/simple_dll.lua -t $server_ip
 ```
+
+Note that we have provide an empty map in which you can build your own scenarios using openbw (see `maps/empty.scm` and `examples/py/create_kill.py`), without relying on triggers and `micro_battles=True`.
+
 
 ## Other Documentation
 
-- [Lua Replayer](/docs/user/replayer.md)
+The code is for the most self-documenting, these documents go a bit more in detail on certain parts of TorchCraft:
+
+- [Client communication 101](/docs/client_server_comm.md)
+- [Lua Replayer](/docs/replayer.md)
+
 
 ## Citation
 

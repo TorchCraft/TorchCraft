@@ -1,7 +1,7 @@
 # TorchCraft Replayer Documentation #
 
-The TorchCraft replayer is a C++ library with Lua bindings for manipulating
-StarCraft game state storage.
+The TorchCraft replayer is a C++ library with Lua and Python bindings for
+manipulating StarCraft game state storage.
 
 Here we describe the Lua replayer API; however, the replayer can
 also be used directly from C++.

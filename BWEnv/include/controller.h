@@ -71,6 +71,13 @@ enum OBWCommands {
   KILL_UNIT,
   // four args
   SPAWN_UNIT,
+  SET_PLAYER_UPGRADE_LEVEL, // player, upgrade, level
+  SET_PLAYER_RESEARCHED, // player, tech, bool
+  SET_PLAYER_MINERALS, // player, minerals
+  SET_PLAYER_GAS, // player, gas
+  SET_UNIT_HEALTH, // unit, health
+  SET_UNIT_SHIELD, // unit, shield
+  SET_UNIT_ENERGY, // unit, energy
 };
 
 enum CommandStatus : int8_t {

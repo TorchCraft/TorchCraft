@@ -509,6 +509,13 @@ int8_t Controller::handleCommand(
         // includes type
         static std::unordered_map<int, int> obw_argcount = {
             {OBWCommands::KILL_UNIT, 3}, {OBWCommands::SPAWN_UNIT, 5},
+            {OBWCommands::SET_PLAYER_UPGRADE_LEVEL, 3},
+            {OBWCommands::SET_PLAYER_RESEARCHED, 3},
+            {OBWCommands::SET_PLAYER_MINERALS, 2},
+            {OBWCommands::SET_PLAYER_GAS, 2},
+            {OBWCommands::SET_UNIT_HEALTH, 2},
+            {OBWCommands::SET_UNIT_SHIELD, 2},
+            {OBWCommands::SET_UNIT_ENERGY, 2},
         };
         if (!check_args(obw_argcount[command]))
           return status;
@@ -550,6 +557,62 @@ int8_t Controller::handleOpenBWCommand(
       if (u == nullptr) {
         return CommandStatus::OPENBW_UNSUCCESSFUL_COMMAND;
       }
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_PLAYER_UPGRADE_LEVEL: {
+      auto p = BWAPI::Broodwar->getPlayer(args[0]);
+      if (p == nullptr) {
+        return CommandStatus::INVALID_PLAYER;
+      }
+      p->setUpgradeLevel((BWAPI::UpgradeType)args[1], args[2]);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_PLAYER_RESEARCHED: {
+      auto p = BWAPI::Broodwar->getPlayer(args[0]);
+      if (p == nullptr) {
+        return CommandStatus::INVALID_PLAYER;
+      }
+      p->setResearched((BWAPI::TechType)args[1], args[2] ? true : false);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_PLAYER_MINERALS: {
+      auto p = BWAPI::Broodwar->getPlayer(args[0]);
+      if (p == nullptr) {
+        return CommandStatus::INVALID_PLAYER;
+      }
+      p->setMinerals(args[1]);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_PLAYER_GAS: {
+      auto p = BWAPI::Broodwar->getPlayer(args[0]);
+      if (p == nullptr) {
+        return CommandStatus::INVALID_PLAYER;
+      }
+      p->setGas(args[1]);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_UNIT_HEALTH: {
+      auto u = BWAPI::Broodwar->getUnit(args[0]);
+      if (u == nullptr) {
+        return CommandStatus::INVALID_UNIT;
+      }
+      u->setHitPoints(args[1]);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_UNIT_SHIELD: {
+      auto u = BWAPI::Broodwar->getUnit(args[0]);
+      if (u == nullptr) {
+        return CommandStatus::INVALID_UNIT;
+      }
+      u->setShields(args[1]);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SET_UNIT_ENERGY: {
+      auto u = BWAPI::Broodwar->getUnit(args[0]);
+      if (u == nullptr) {
+        return CommandStatus::INVALID_UNIT;
+      }
+      u->setEnergy(args[1]);
       return CommandStatus::SUCCESS;
     }
   }

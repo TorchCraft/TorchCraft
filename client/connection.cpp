@@ -162,6 +162,8 @@ zmq::context_t& Connection::refContext() {
     auto numIoThreads =
         std::max(1, std::min(2, int(std::thread::hardware_concurrency()) - 1));
     context_ = new zmq::context_t(numIoThreads);
+  } else if (context_ == nullptr) {
+    throw std::runtime_error("ZMQ context not initialized");
   }
   return *context_;
 }
@@ -172,6 +174,9 @@ void Connection::derefContext() {
   if (contextRef_ == 0) {
     delete context_;
     context_ = nullptr;
+  }
+  if (contextRef_ < 0) {
+    throw std::runtime_error("ZMQ context ref counter < 0");
   }
 }
 

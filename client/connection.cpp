@@ -14,13 +14,7 @@
 
 namespace torchcraft {
 
-///////////////////////// LOCAL DECLARATIONS /////////////////////////////////
-
 static const std::string ERRMSG_TIMEOUT_EXCEEDED = "Timeout exceeded";
-
-/////////////////////////////// PUBLIC ///////////////////////////////////////
-
-//============================= LIFECYCLE ====================================
 
 Connection::Connection(
     const std::string& hostname,
@@ -50,7 +44,6 @@ Connection::Connection(
 Connection::Connection(Connection&& conn)
     : ctx_(std::move(conn.ctx_)), sock_(std::move(conn.sock_)) {}
 
-//============================= OPERATIONS ===================================
 
 bool Connection::send(const std::string& data) {
   clearError();

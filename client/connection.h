@@ -15,8 +15,6 @@ namespace torchcraft {
 
 class Connection {
  public:
-  // LIFECYCLE
-
   /// Creates a new socket and connects it to an endpoint specified
   /// by a hostname and a port. TCP transport protocol is used
   /// for the connection; the full address is thus
@@ -48,8 +46,6 @@ class Connection {
 
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
-
-  // OPERATIONS
 
   /// Send data in a string format over the socket connection
   /// @param data [in] Data to send to the socket

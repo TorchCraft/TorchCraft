@@ -24,38 +24,46 @@ int Connection::contextRef_ = 0;
 std::mutex Connection::contextMutex_;
 
 Connection::Connection(const std::string& hostname, int port, int timeoutMs)
-    : ctx_(refContext()), sock_(ctx_, zmq::socket_type::req) {
+    : ctx_(refContext()),
+      sock_(
+          std::unique_ptr<zmq::socket_t>(
+              new zmq::socket_t(ctx_, zmq::socket_type::req))) {
   std::ostringstream ss;
   ss << "tcp://" << hostname << ":" << port;
-  sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
-  sock_.setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
-  sock_.setsockopt(ZMQ_LINGER, 10);
-  sock_.setsockopt(ZMQ_IPV6, 1);
-  sock_.connect(ss.str());
-} // Connection
+  sock_->setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_->setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_->setsockopt(ZMQ_LINGER, 10);
+  sock_->setsockopt(ZMQ_IPV6, 1);
+  sock_->connect(ss.str());
+}
 
 Connection::Connection(const std::string& file_socket, int timeoutMs)
-    : ctx_(refContext()), sock_(ctx_, zmq::socket_type::req) {
+    : ctx_(refContext()),
+      sock_(
+          std::unique_ptr<zmq::socket_t>(
+              new zmq::socket_t(ctx_, zmq::socket_type::req))) {
   std::ostringstream ss;
   ss << "ipc://" << file_socket;
-  sock_.setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
-  sock_.setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
-  sock_.setsockopt(ZMQ_LINGER, 10);
-  sock_.setsockopt(ZMQ_IPV6, 1);
-  sock_.connect(ss.str());
-} // Connection
+  sock_->setsockopt(ZMQ_SNDTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_->setsockopt(ZMQ_RCVTIMEO, &timeoutMs, sizeof(timeoutMs));
+  sock_->setsockopt(ZMQ_LINGER, 10);
+  sock_->setsockopt(ZMQ_IPV6, 1);
+  sock_->connect(ss.str());
+}
 
 Connection::Connection(Connection&& conn)
     : ctx_(refContext()), sock_(std::move(conn.sock_)) {}
 
 Connection::~Connection() {
+  // Destroy socket before context
+  sock_.reset();
   derefContext();
 }
 
 bool Connection::send(const std::string& data) {
   clearError();
   try {
-    bool res = sock_.send(data.begin(), data.end());
+    bool res = sock_->send(data.begin(), data.end());
     if (!res) {
       errnum_ = EAGAIN;
       errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
@@ -66,12 +74,12 @@ bool Connection::send(const std::string& data) {
     errmsg_ = e.what();
     return false;
   }
-} // send
+}
 
 bool Connection::send(const void* buf, size_t len) {
   clearError();
   try {
-    bool res = sock_.send(buf, len);
+    bool res = sock_->send(buf, len);
     if (!res) {
       errnum_ = EAGAIN;
       errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
@@ -82,12 +90,12 @@ bool Connection::send(const void* buf, size_t len) {
     errmsg_ = e.what();
     return false;
   }
-} // send
+}
 
 bool Connection::receive(std::string& dest) {
   clearError();
   try {
-    bool res = sock_.recv(&recvmsg_);
+    bool res = sock_->recv(&recvmsg_);
     if (res) {
       dest.assign(recvmsg_.data<char>(), recvmsg_.size());
     } else {
@@ -100,12 +108,12 @@ bool Connection::receive(std::string& dest) {
     errmsg_ = e.what();
     return false;
   }
-} // receive
+}
 
 bool Connection::receive(std::vector<uint8_t>& dest) {
   clearError();
   try {
-    bool res = sock_.recv(&recvmsg_);
+    bool res = sock_->recv(&recvmsg_);
     if (res) {
       auto d = recvmsg_.data<unsigned char>();
       dest.assign(d, d + recvmsg_.size());
@@ -119,11 +127,11 @@ bool Connection::receive(std::vector<uint8_t>& dest) {
     errmsg_ = e.what();
     return false;
   }
-} // receive
+}
 
 bool Connection::poll(long timeout) {
   short mask = ZMQ_POLLIN;
-  zmq::pollitem_t items[] = {{sock_, 0, mask, 0}};
+  zmq::pollitem_t items[] = {{*sock_, 0, mask, 0}};
 
   clearError();
   try {
@@ -174,8 +182,7 @@ void Connection::derefContext() {
   if (contextRef_ == 0) {
     delete context_;
     context_ = nullptr;
-  }
-  if (contextRef_ < 0) {
+  } else if (contextRef_ < 0) {
     throw std::runtime_error("ZMQ context ref counter < 0");
   }
 }

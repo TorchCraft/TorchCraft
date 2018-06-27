@@ -97,7 +97,7 @@ class Connection {
   void clearError();
 
   zmq::context_t& ctx_;
-  zmq::socket_t sock_;
+  std::unique_ptr<zmq::socket_t> sock_;
   zmq::message_t recvmsg_;
   int errnum_ = 0;
   std::string errmsg_;

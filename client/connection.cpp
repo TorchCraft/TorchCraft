@@ -15,7 +15,10 @@
 
 namespace torchcraft {
 
-static const std::string ERRMSG_TIMEOUT_EXCEEDED = "Timeout exceeded";
+namespace {
+const std::string ERRMSG_TIMEOUT_EXCEEDED = "Timeout exceeded";
+}
+
 zmq::context_t* Connection::context_ = nullptr;
 int Connection::contextRef_ = 0;
 std::mutex Connection::contextMutex_;

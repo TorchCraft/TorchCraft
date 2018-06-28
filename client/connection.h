@@ -9,14 +9,27 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "zmq.hpp"
 
 namespace torchcraft {
 
+/**
+ * Simple convenience wrapper for a ZeroMQ connection.
+ *
+ * See member function documentation for usage details.
+ *
+ * Implementation details: With the exception of constructors and destructors,
+ * functions do not throw on I/O failures but return `false` and provide error
+ * information via `errnum()` and `errmsg()`.
+ * Concurrent connections will share the same ZeroMQ context. The context will
+ * be destroyed once the last active connection is destructed. This provides
+ * context sharing when required for efficiency (processes with many open
+ * connections) and makes sure that contexts are properly cleaned up.
+ */
 class Connection {
  public:
-  // LIFECYCLE
-
   /// Creates a new socket and connects it to an endpoint specified
   /// by a hostname and a port. TCP transport protocol is used
   /// for the connection; the full address is thus
@@ -48,8 +61,7 @@ class Connection {
 
   Connection(const Connection&) = delete;
   Connection& operator=(const Connection&) = delete;
-
-  // OPERATIONS
+  ~Connection();
 
   /// Send data in a string format over the socket connection
   /// @param data [in] Data to send to the socket
@@ -84,11 +96,17 @@ class Connection {
  private:
   void clearError();
 
-  zmq::context_t ctx_;
-  zmq::socket_t sock_;
+  zmq::context_t& ctx_;
+  std::unique_ptr<zmq::socket_t> sock_;
   zmq::message_t recvmsg_;
   int errnum_ = 0;
   std::string errmsg_;
+
+  static zmq::context_t& refContext();
+  static void derefContext();
+  static zmq::context_t* context_;
+  static int contextRef_;
+  static std::mutex contextMutex_;
 };
 
 } // namespace torchcraft

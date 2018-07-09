@@ -269,3 +269,4 @@ paket-files/
 
 # python client
 /torchcraft.egg-info/
+/examples/py/visual_example/

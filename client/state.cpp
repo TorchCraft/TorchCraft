@@ -364,8 +364,9 @@ bool State::setRawImage(const fbs::StateUpdate* frame) {
     return false;
   }
 
-  image_size[0] = frame->img_size()->x();
-  image_size[1] = frame->img_size()->y();
+  // returned size is (height, width)
+  image_size[0] = frame->img_size()->y();
+  image_size[1] = frame->img_size()->x();
 
   // Incoming binary data is [BGRA,...], which we transform into [R..,G..,B..].
   image.resize(image_size[0] * image_size[1] * 3);

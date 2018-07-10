@@ -607,7 +607,7 @@ BWAPI::TilePosition Controller::getTilePositionFromWalkTiles(int x, int y) {
 int Controller::getAttackFrames(int unitID) {
   int attackFrames = BWAPI::Broodwar->getLatencyFrames();
   int unitType = BWAPI::Broodwar->getUnit(unitID)->getType().getID();
-  
+
   // From
   // https://docs.google.com/spreadsheets/d/1bsvPvFil-kpvEUfSG74U3E5PLSTC02JxSkiR8QdLMuw/edit#gid=0
   // Photon Cannons aren't included in this chart but may also have a nonzero value.
@@ -625,9 +625,9 @@ int Controller::getAttackFrames(int unitID) {
 
 FrameSerializationResults Controller::serializeFrameData(
   flatbuffers::FlatBufferBuilder& builder) {
-    
+
   FrameSerializationResults output;
-  
+
   if (prev_sent_frame == nullptr) {
     output.type = fbs::FrameOrFrameDiff::Frame;
     output.offset = last_frame->addToFlatBufferBuilder(builder).Union();
@@ -636,13 +636,13 @@ FrameSerializationResults Controller::serializeFrameData(
     output.type = fbs::FrameOrFrameDiff::FrameDiff;
     output.offset = frameDiff.addToFlatBufferBuilder(builder).Union();
   }
-  
+
   if (prev_sent_frame != nullptr) {
     prev_sent_frame->decref();
   }
   prev_sent_frame = last_frame;
   last_frame = nullptr;
-  
+
   return output;
 }
 
@@ -651,13 +651,13 @@ void Controller::endGame() {
       output_log, "Game ended (%s)", (this->is_winner ? "WON" : "LOST"));
 
   flatbuffers::FlatBufferBuilder builder;
-  
+
   FrameSerializationResults frameSerializationResults;
   auto serializeFrame = last_frame != nullptr;
   if (serializeFrame) {
     frameSerializationResults = serializeFrameData(builder);
   }
-  
+
   fbs::EndGameBuilder endGameBuilder(builder);
   if (serializeFrame) {
     endGameBuilder.add_data(frameSerializationResults.offset);
@@ -668,7 +668,7 @@ void Controller::endGame() {
   builder.Finish(endGameOffset);
 
   clearPendingReceive();
-  this->zmq_server->sendEndGame(endGameOffset, builder); 
+  this->zmq_server->sendEndGame(endGameOffset, builder);
 
   if (is_client) {
     // And receive new commands
@@ -746,7 +746,7 @@ void Controller::executeDrawCommands() {
 
 void Controller::onFrame() {
   auto startOnFrame = std::chrono::steady_clock::now();
-  
+
   // Display the game frame rate as text in the upper left area of the screen
   BWAPI::Broodwar->drawTextScreen(200, 0, "FPS: %d", BWAPI::Broodwar->getFPS());
   BWAPI::Broodwar->drawTextScreen(
@@ -756,7 +756,7 @@ void Controller::onFrame() {
   } catch (std::exception& e) {
     Utils::bwlog(output_log, "Error drawing client annotations: %s", e.what());
   }
-  
+
   flatbuffers::FlatBufferBuilder builder;
 
   // check if the Proxy Bot is connected
@@ -833,12 +833,12 @@ void Controller::onFrame() {
   bool receive_commands = !last_receive_ok;
 
   if (send_frame) {
-    
+
     fbs::Vec2 vec2ScreenPosition;
     fbs::Vec2 vec2VisibilitySize;
     fbs::Vec2 vec2ImgSize;
     std::string imgMode;
-    
+
     auto sendImageData = false;
     if (with_image_) {
       with_image_ = false;
@@ -852,7 +852,7 @@ void Controller::onFrame() {
         vec2ImgSize.mutate_x(recorder_->width);
         vec2ImgSize.mutate_y(recorder_->height);
         this->image_data_.resize(imageData->size());
-        std::copy(imageData->begin(), imageData->end(), this->image_data_.begin());        
+        std::copy(imageData->begin(), imageData->end(), this->image_data_.begin());
       }
 #else
       // height is returned always as requested, but pitch/width might not, as SDL
@@ -891,14 +891,14 @@ void Controller::onFrame() {
       sendImageData = true;  // TODO add boundary checks
 #endif // !OPENBW_BWAPI
       imgMode = config_->img_mode;
-      
+
       auto screenPosition = BWAPI::Broodwar->getScreenPosition();
       vec2ScreenPosition.mutate_x(screenPosition.x);
       vec2ScreenPosition.mutate_y(screenPosition.y);
-      
+
       const int visibilityTileWidth = 20;
       const int visibilityTileHeight = 13;
-      const int tileSize = 32;    
+      const int tileSize = 32;
       vec2VisibilitySize.mutate_x(visibilityTileWidth);
       vec2VisibilitySize.mutate_y(visibilityTileHeight);
       auto ix = screenPosition.x / tileSize;
@@ -916,23 +916,23 @@ void Controller::onFrame() {
         }
       }
     }
-    
+
     auto commandsOffset = builder.CreateVector(this->commandsStatus_);
     builder.Finish(commandsOffset);
-    
+
     auto visibilityOffset = builder.CreateVector(this->visibility_);
-    builder.Finish(visibilityOffset);    
-    
+    builder.Finish(visibilityOffset);
+
     auto imageDataToSend = sendImageData? this->image_data_ : std::vector<uint8_t>();
     auto imageDataOffset = builder.CreateVector(imageDataToSend);
     builder.Finish(imageDataOffset);
-    
+
     auto imgModeOffset = builder.CreateString(imgMode);
-    
+
     auto deathsOffset = builder.CreateVector(this->deaths);
     this->deaths.clear();
     builder.Finish(deathsOffset);
-    
+
     auto frameSerializationResults = serializeFrameData(builder);
 
     fbs::StateUpdateBuilder stateUpdateBuilder(builder);
@@ -943,14 +943,14 @@ void Controller::onFrame() {
     stateUpdateBuilder.add_battle_frame_count(this->battle_frame_count);
     stateUpdateBuilder.add_commands_status(commandsOffset);
     stateUpdateBuilder.add_img_mode(imgModeOffset);
-    stateUpdateBuilder.add_screen_position(&vec2ScreenPosition);    
+    stateUpdateBuilder.add_screen_position(&vec2ScreenPosition);
     stateUpdateBuilder.add_visibility(visibilityOffset);
     stateUpdateBuilder.add_visibility_size(&vec2VisibilitySize);
     stateUpdateBuilder.add_img_data(imageDataOffset);
     stateUpdateBuilder.add_img_size(&vec2ImgSize);
     auto stateUpdateOffset = stateUpdateBuilder.Finish();
     builder.Finish(stateUpdateOffset);
-    
+
     this->zmq_server->sendFrame(stateUpdateOffset, builder);
     combined_frames = 0;
 

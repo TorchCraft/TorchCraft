@@ -43,6 +43,9 @@ for pid, player in state.player_info.items():
 
 # Initial setup
 cl.send([
+    # note that this can be achieved also by specifying window_size
+    # windows exceeding the map size (in pixels) or having negative values will
+    # fail the command silently.
     [
         tcc.command_openbw,
         tcc.openbwcommandtypes.SetScreenValues,

@@ -553,7 +553,17 @@ int8_t Controller::handleOpenBWCommand(
       return CommandStatus::SUCCESS;
     }
     case OBWCommands::SET_SCREEN_VALUES: {
-      // TODO Do some bounds checks
+      // OpenBW behaves strangely when width / height > maps sizes, but it
+      // doesn't crash.
+      if (// no negative x, y values
+          args[0] < 0 || args[1] < 0 ||
+          // no zero / negative width / height
+          args[2] < 1 || args[3] < 1 ||
+          // window is within map boundaries
+          args[0] + args[2] >= BWAPI::Broodwar->mapWidth() * 4 ||
+          args[1] + args[3] >= BWAPI::Broodwar->mapHeight() * 4
+          )
+        return CommandStatus::OPENBW_UNSUCCESSFUL_COMMAND;
       obw_screen_pos_ = std::pair<int, int>(args[0], args[1]);
       obw_screen_size_ = std::pair<int, int>(args[2], args[3]);
       return CommandStatus::SUCCESS;

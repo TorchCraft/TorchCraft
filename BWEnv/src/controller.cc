@@ -934,17 +934,13 @@ void Controller::onFrame() {
       int height;
       uint32_t* buf;
 
-      // (0, 0, 0, 0) crashes it with a floating point exception
-      // TODO Add safeguards
       std::tie(pitch, height, buf) = BWAPI::Broodwar->drawGameScreen(obw_screen_pos_.first, obw_screen_pos_.second,
                                                                      obw_screen_size_.first, obw_screen_size_.second);
-      // FIXME no need for this buffer - we can just copy onto image_data_
       std::vector<uint8_t> img_buf;
       int img_dim = obw_screen_size_.first * obw_screen_size_.second;
       img_buf.reserve(4 * img_dim);
 
       // we ignore extra pixels here
-      // TODO rotate image
       for (size_t i = 0; i != img_dim; ++i) {
         uint32_t r = buf[i] & 0xff;
         uint32_t g = (buf[i] >> 8) & 0xff;
@@ -961,7 +957,7 @@ void Controller::onFrame() {
       this->image_data_.resize(img_buf.size());
       std::copy(img_buf.begin(), img_buf.end(), this->image_data_.begin());
 
-      sendImageData = true;  // TODO add boundary checks
+      sendImageData = true;
 #endif // !OPENBW_BWAPI
       imgMode = config_->img_mode;
 

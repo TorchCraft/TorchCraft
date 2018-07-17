@@ -30,6 +30,7 @@ TorchCraft is split into two parts: **BWEnv**, the process that runs along with 
 - To install BWEnv and StarCraft on WINE, please check these [instructions](/docs/starcraft_in_wine.md).
 - To install BWEnv using OpenBW, please check follow these [instructions](/docs/openbw.md).
 
+Dockerfiles are also available in `docker` directory; please see the relevant [README](docker/README.md).
 
 Each client has a different installation procedure, but all have the same library requirements (see above).
 

@@ -1,5 +1,35 @@
 # Torchcraft on Docker
-## Install the image
+
+## OpenBW image
+
+You can build the image by running:
+```bash
+$ cd docker
+$  docker build -f openbw/Dockerfile -t torchcraft-obw --build-arg TC_BRANCH=master OBW_GUI=1
+```
+
+Then you can simply run BWAPILauncher by doing:
+
+```bash
+$ docker run -it -p 11111:11111 -v /your/path/to/mpqs:/mpqs torchcraft-obw
+root@image$ cd /mpqs
+root@image$ OPENBW_ENABLE_UI=0 \
+   BWAPI_CONFIG_AI__RACE=Terran \
+   BWAPI_CONFIG_AI__AI=/torchcraft/BWEnv/build/BWEnv.so \
+   BWAPI_CONFIG_AUTO_MENU__AUTO_MENU="SINGLE_PLAYER" \
+   BWAPI_CONFIG_AUTO_MENU__MAP=/torchcraft/maps/micro/m5v5_c_far.scm \
+   BWAPI_CONFIG_AUTO_MENU__GAME_TYPE="USE MAP SETTINGS" \
+   TORCHCRAFT_PORT=11111 \
+   BWAPILauncher
+```
+
+* `TC_BRANCH` allows you to control which version of torchcraft to clone (defaults to `master`)
+* `OBW_GUI` allows you to control whether to compile OpenBW with sdl support (defaults to `1`)
+
+
+## Standard Image
+
+### Building the image
 
 First, download the [Starcraft: Brood War installer](https://us.battle.net/account/management/)
 to `TorchCraft/docker/common/Downloader_StarCraft_Combo_enUS.exe`

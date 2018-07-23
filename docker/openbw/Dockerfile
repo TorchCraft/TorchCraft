@@ -46,8 +46,11 @@ RUN tar xvzf zeromq-4.2.2.tar.gz
 RUN cd zeromq-4.2.2 && ./configure && make install && ldconfig
 
 ## --------- zstd
-# TODO check if we need to install zstd from source
-RUN apt-get install -y libzstd1-dev zstd
+# This can only be done on 18.04, so commenting out for now
+# RUN apt-get install -y libzstd1-dev zstd
+RUN wget https://github.com/facebook/zstd/archive/v1.1.4.tar.gz
+RUN tar xf v1.1.4.tar.gz
+RUN cd zstd-1.1.4/ && make -j && make install && ldconfig
 
 ## --------- build BWEnv
 RUN cd torchcraft/BWEnv && mkdir build && cd build \

@@ -5,7 +5,7 @@
 You can build the image by running:
 ```bash
 $ cd docker
-$  docker build -f openbw/Dockerfile -t torchcraft-obw --build-arg TC_BRANCH=master OBW_GUI=1
+$ docker build -f openbw/Dockerfile -t torchcraft-obw --build-arg TC_BRANCH=master OBW_GUI=1
 ```
 
 Then you can simply run BWAPILauncher by doing:
@@ -18,7 +18,7 @@ root@image$ OPENBW_ENABLE_UI=0 \
    BWAPI_CONFIG_AI__AI=/torchcraft/BWEnv/build/BWEnv.so \
    BWAPI_CONFIG_AUTO_MENU__AUTO_MENU="SINGLE_PLAYER" \
    BWAPI_CONFIG_AUTO_MENU__MAP=/torchcraft/maps/micro/m5v5_c_far.scm \
-   BWAPI_CONFIG_AUTO_MENU__GAME_TYPE="USE MAP SETTINGS" \
+   BWAPI_CONFIG_AUTO_MENU__GAME_TYPE="USE_MAP_SETTINGS" \
    TORCHCRAFT_PORT=11111 \
    BWAPILauncher
 ```
@@ -70,12 +70,12 @@ connection.
 7. `cd ~/.wine/drive_c/StarCraft`
 8. Launch Starcraft! `winegui bwheadless.exe -e StarCraft.exe -l bwapi-data/BWAPI.dll --headful`
 9. Use `docker ps` to find the container id of the torchcraft container, and run `docker exec -it $ID bash`
-   to jump into the container from a different terminal. From there, you can do things like 
+   to jump into the container from a different terminal. From there, you can do things like
    `cd ~/TorchCraft/examples && th simple_dll.lua -t localhost`
-   
+
 
 The sudo password to the image is `starcraft`
-   
+
 ## Saving and reloading
 This is a good time to [save a copy of your image](http://stackoverflow.com/questions/24482822/how-to-share-my-docker-image-without-using-the-docker-hub) in case it gets corrupted, so you don't have to go through that process again.
 

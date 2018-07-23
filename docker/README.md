@@ -5,7 +5,8 @@
 You can build the image by running:
 ```bash
 $ cd docker
-$ docker build -f openbw/Dockerfile -t torchcraft-obw --build-arg TC_BRANCH=master OBW_GUI=1
+$ docker build -f openbw/Dockerfile -t torchcraft-obw \
+  --build-arg TC_BRANCH=master --build-arg OBW_GUI=1 .
 ```
 
 Then you can simply run BWAPILauncher by doing:
@@ -36,18 +37,18 @@ to `TorchCraft/docker/common/Downloader_StarCraft_Combo_enUS.exe`
 
 From the current directory:
 
-`docker build -f no-cuda/Dockerfile -t torchcraft .`
+`docker build -f no-cuda/Dockerfile -t torchcraft-std .`
 
 or if you want CUDA, install the [nvidia docker](https://github.com/NVIDIA/nvidia-docker) plugin first and:
 
-`docker build -f cuda/Dockerfile -t cutorchcraft .`
+`docker build -f cuda/Dockerfile -t torchcraft-std-cu .`
 
 To run the client:
 
 ```
-docker run --rm --privileged -it -p 5900:5900 torchcraft bash
+docker run --rm --privileged -it -p 5900:5900 torchcraft-std bash
 # For a docker image with CUDA support:
-nvidia-docker run --rm --privileged -it -p 5900:5900 cutorchcraft bash
+nvidia-docker run --rm --privileged -it -p 5900:5900 torchcraft-std bash
 # Setup wine
 wine wineboot --init
 winetricks -q vcrun2013
@@ -86,12 +87,12 @@ docker ps -a
 docker commit $ID
 # Note the ID of the image you just created
 # Optionally, tag it with something else
-docker tag $IMAGE_ID torchcraft:my_version
-docker save $IMAGE_ID -o torchcraft.docker
+docker tag $IMAGE_ID torchcraft-std:my_version
+docker save $IMAGE_ID -o torchcraft-std.docker
 ```
 
 ### Importing
 ```
-docker load -i torchcraft.docker
-docker run --rm --privileged -it -p 5900:5900 torchcraft:my_version bash
+docker load -i torchcraft-std.docker
+docker run --rm --privileged -it -p 5900:5900 torchcraft-std:my_version bash
 ```

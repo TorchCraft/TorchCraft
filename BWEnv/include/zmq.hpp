@@ -655,7 +655,7 @@ namespace zmq
         }
 #endif
 
-        constexpr int eintrRetries = 10;
+        static constexpr int eintrRetries = 10;
         
         inline size_t recv (void *buf_, size_t len_, int flags_ = 0, int retries = 0)
         {

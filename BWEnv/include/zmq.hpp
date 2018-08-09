@@ -655,39 +655,23 @@ namespace zmq
         }
 #endif
 
-        static constexpr int eintrRetries = 10;
-        
-        inline size_t recv (void *buf_, size_t len_, int flags_ = 0, int retries = 0)
+        inline size_t recv (void *buf_, size_t len_, int flags_ = 0)
         {
             int nbytes = zmq_recv (ptr, buf_, len_, flags_);
             if (nbytes >= 0)
                 return (size_t) nbytes;
             if (zmq_errno () == EAGAIN)
                 return 0;
-            if (zmq_errno () == EINTR) {
-              // This error pops up intermittently + mysteriously. Should retry.
-              if (retries < eintrRetries) {
-                return recv(buf_, len_, flags_, retries + 1);
-              }
-              throw std::runtime_error("Received EINTR after many retries");
-            }
             throw error_t ();
         }
 
-        inline bool recv (message_t *msg_, int flags_ = 0, int retries = 0)
+        inline bool recv (message_t *msg_, int flags_ = 0)
         {
             int nbytes = zmq_msg_recv (&(msg_->msg), ptr, flags_);
             if (nbytes >= 0)
                 return true;
             if (zmq_errno () == EAGAIN)
                 return false;
-            if (zmq_errno () == EINTR) {
-              // This error pops up intermittently + mysteriously. Should retry.
-              if (retries < eintrRetries) {
-                return recv(msg_, flags_, retries + 1);
-              }
-              throw std::runtime_error("Received EINTR after many retries");
-            }
             throw error_t ();
         }
 

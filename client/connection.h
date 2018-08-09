@@ -11,7 +11,7 @@
 
 #include <mutex>
 
-#include "zmq.hpp"
+#include "../BWEnv/include/zmq.hpp"
 
 namespace torchcraft {
 

@@ -92,38 +92,28 @@ bool Connection::send(const void* buf, size_t len) {
   }
 }
 
-bool Connection::receive_(std::function<void()> assignToDestination) {
+bool Connection::receive(std::vector<uint8_t>& destination) {
   clearError();
-  try {
-    bool response = sock_->recv(&recvmsg_);
-    if (response) {
-      assignToDestination();
-    } else {
-      errnum_ = EAGAIN;
-      errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
+  while(true) {
+    try {
+      bool response = sock_->recv(&recvmsg_);
+      if (response) {
+        auto data = recvmsg_.data<unsigned char>();
+        destination.assign(data, data + recvmsg_.size());
+      } else {
+        errnum_ = EAGAIN;
+        errmsg_ = ERRMSG_TIMEOUT_EXCEEDED;
+      }
+      return response;
+    } catch (zmq::error_t& exception) {
+      if (exception.num() == EINTR) {
+        continue;
+      }
+      errnum_ = exception.num();
+      errmsg_ = exception.what();
+      return false;
     }
-    return response;
-  } catch (zmq::error_t& exception) {
-    if (exception.num() == EINTR) {
-      return receive_(assignToDestination);
-    }
-    errnum_ = exception.num();
-    errmsg_ = exception.what();
-    return false;
   }
-}
-
-bool Connection::receive(std::string& dest) {
-  return receive_([&](){
-    dest.assign(recvmsg_.data<char>(), recvmsg_.size());
-  });
-}
-
-bool Connection::receive(std::vector<uint8_t>& dest) {
-  return receive_([&](){
-    auto d = recvmsg_.data<unsigned char>();
-    dest.assign(d, d + recvmsg_.size());
-  });
 }
 
 bool Connection::poll(long timeout) {

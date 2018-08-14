@@ -94,7 +94,7 @@ bool Connection::send(const void* buf, size_t len) {
 
 bool Connection::receive(std::vector<uint8_t>& destination) {
   clearError();
-  while(true) {
+  while (true) {
     try {
       bool response = sock_->recv(&recvmsg_);
       if (response) {

@@ -11,7 +11,7 @@
 
 #include <mutex>
 
-#include "zmq.hpp"
+#include "../BWEnv/include/zmq.hpp"
 
 namespace torchcraft {
 
@@ -83,6 +83,8 @@ class Connection {
   /// @param dest [out] Vector to store the received data to
   /// @return true if the receive operation succeeded
   bool receive(std::vector<uint8_t>& dest);
+  
+ public: 
 
   bool poll(long timeout);
 

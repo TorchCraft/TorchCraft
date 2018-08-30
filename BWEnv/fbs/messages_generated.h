@@ -3082,10 +3082,12 @@ struct FrameT : public flatbuffers::NativeTable {
   std::vector<uint8_t> creep_map;
   uint32_t width;
   uint32_t height;
+  bool latcom_enabled;
   int32_t remaining_latency_frames;
   FrameT()
       : width(0),
         height(0),
+        latcom_enabled(false),
         remaining_latency_frames(0) {
   }
 };
@@ -3100,7 +3102,8 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_CREEP_MAP = 12,
     VT_WIDTH = 14,
     VT_HEIGHT = 16,
-    VT_REMAINING_LATENCY_FRAMES = 18
+    VT_LATCOM_ENABLED = 18,
+    VT_REMAINING_LATENCY_FRAMES = 20
   };
   const flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>> *units() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<UnitsOfPlayer>> *>(VT_UNITS);
@@ -3144,6 +3147,12 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_height(uint32_t _height) {
     return SetField<uint32_t>(VT_HEIGHT, _height, 0);
   }
+  bool latcom_enabled() const {
+    return GetField<uint8_t>(VT_LATCOM_ENABLED, 0) != 0;
+  }
+  bool mutate_latcom_enabled(bool _latcom_enabled) {
+    return SetField<uint8_t>(VT_LATCOM_ENABLED, static_cast<uint8_t>(_latcom_enabled), 0);
+  }
   int32_t remaining_latency_frames() const {
     return GetField<int32_t>(VT_REMAINING_LATENCY_FRAMES, 0);
   }
@@ -3167,6 +3176,7 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(creep_map()) &&
            VerifyField<uint32_t>(verifier, VT_WIDTH) &&
            VerifyField<uint32_t>(verifier, VT_HEIGHT) &&
+           VerifyField<uint8_t>(verifier, VT_LATCOM_ENABLED) &&
            VerifyField<int32_t>(verifier, VT_REMAINING_LATENCY_FRAMES) &&
            verifier.EndTable();
   }
@@ -3199,6 +3209,9 @@ struct FrameBuilder {
   void add_height(uint32_t height) {
     fbb_.AddElement<uint32_t>(Frame::VT_HEIGHT, height, 0);
   }
+  void add_latcom_enabled(bool latcom_enabled) {
+    fbb_.AddElement<uint8_t>(Frame::VT_LATCOM_ENABLED, static_cast<uint8_t>(latcom_enabled), 0);
+  }
   void add_remaining_latency_frames(int32_t remaining_latency_frames) {
     fbb_.AddElement<int32_t>(Frame::VT_REMAINING_LATENCY_FRAMES, remaining_latency_frames, 0);
   }
@@ -3208,7 +3221,7 @@ struct FrameBuilder {
   }
   FrameBuilder &operator=(const FrameBuilder &);
   flatbuffers::Offset<Frame> Finish() {
-    const auto end = fbb_.EndTable(start_, 8);
+    const auto end = fbb_.EndTable(start_, 9);
     auto o = flatbuffers::Offset<Frame>(end);
     return o;
   }
@@ -3223,6 +3236,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> creep_map = 0,
     uint32_t width = 0,
     uint32_t height = 0,
+    bool latcom_enabled = false,
     int32_t remaining_latency_frames = 0) {
   FrameBuilder builder_(_fbb);
   builder_.add_remaining_latency_frames(remaining_latency_frames);
@@ -3233,6 +3247,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
   builder_.add_resources(resources);
   builder_.add_actions(actions);
   builder_.add_units(units);
+  builder_.add_latcom_enabled(latcom_enabled);
   return builder_.Finish();
 }
 
@@ -3245,6 +3260,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
     const std::vector<uint8_t> *creep_map = nullptr,
     uint32_t width = 0,
     uint32_t height = 0,
+    bool latcom_enabled = false,
     int32_t remaining_latency_frames = 0) {
   return torchcraft::fbs::CreateFrame(
       _fbb,
@@ -3255,6 +3271,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
       creep_map ? _fbb.CreateVector<uint8_t>(*creep_map) : 0,
       width,
       height,
+      latcom_enabled,
       remaining_latency_frames);
 }
 
@@ -4391,6 +4408,7 @@ inline void Frame::UnPackTo(FrameT *_o, const flatbuffers::resolver_function_t *
   { auto _e = creep_map(); if (_e) { _o->creep_map.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->creep_map[_i] = _e->Get(_i); } } };
   { auto _e = width(); _o->width = _e; };
   { auto _e = height(); _o->height = _e; };
+  { auto _e = latcom_enabled(); _o->latcom_enabled = _e; };
   { auto _e = remaining_latency_frames(); _o->remaining_latency_frames = _e; };
 }
 
@@ -4408,6 +4426,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
   auto _creep_map = _o->creep_map.size() ? _fbb.CreateVector(_o->creep_map) : 0;
   auto _width = _o->width;
   auto _height = _o->height;
+  auto _latcom_enabled = _o->latcom_enabled;
   auto _remaining_latency_frames = _o->remaining_latency_frames;
   return torchcraft::fbs::CreateFrame(
       _fbb,
@@ -4418,6 +4437,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(flatbuffers::FlatBufferBuilder &_f
       _creep_map,
       _width,
       _height,
+      _latcom_enabled,
       _remaining_latency_frames);
 }
 

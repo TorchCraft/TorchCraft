@@ -885,8 +885,8 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
   std::vector<uint8_t> buildable_data;
   std::vector<Vec2> start_locations;
   std::vector<std::unique_ptr<PlayerT>> players;
-  int32_t latency;
-  int32_t latency_frames;
+  uint8_t latency;
+  uint8_t latency_frames;
   uint32_t random_seed;
   HandshakeServerT()
       : lag_frames(0),
@@ -991,17 +991,17 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<flatbuffers::Offset<Player>> *mutable_players() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Player>> *>(VT_PLAYERS);
   }
-  int32_t latency() const {
-    return GetField<int32_t>(VT_LATENCY, 0);
+  uint8_t latency() const {
+    return GetField<uint8_t>(VT_LATENCY, 0);
   }
-  bool mutate_latency(int32_t _latency) {
-    return SetField<int32_t>(VT_LATENCY, _latency, 0);
+  bool mutate_latency(uint8_t _latency) {
+    return SetField<uint8_t>(VT_LATENCY, _latency, 0);
   }
-  int32_t latency_frames() const {
-    return GetField<int32_t>(VT_LATENCY_FRAMES, 0);
+  uint8_t latency_frames() const {
+    return GetField<uint8_t>(VT_LATENCY_FRAMES, 0);
   }
-  bool mutate_latency_frames(int32_t _latency_frames) {
-    return SetField<int32_t>(VT_LATENCY_FRAMES, _latency_frames, 0);
+  bool mutate_latency_frames(uint8_t _latency_frames) {
+    return SetField<uint8_t>(VT_LATENCY_FRAMES, _latency_frames, 0);
   }
   uint32_t random_seed() const {
     return GetField<uint32_t>(VT_RANDOM_SEED, 0);
@@ -1030,8 +1030,8 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_PLAYERS) &&
            verifier.Verify(players()) &&
            verifier.VerifyVectorOfTables(players()) &&
-           VerifyField<int32_t>(verifier, VT_LATENCY) &&
-           VerifyField<int32_t>(verifier, VT_LATENCY_FRAMES) &&
+           VerifyField<uint8_t>(verifier, VT_LATENCY) &&
+           VerifyField<uint8_t>(verifier, VT_LATENCY_FRAMES) &&
            VerifyField<uint32_t>(verifier, VT_RANDOM_SEED) &&
            verifier.EndTable();
   }
@@ -1079,11 +1079,11 @@ struct HandshakeServerBuilder {
   void add_players(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players) {
     fbb_.AddOffset(HandshakeServer::VT_PLAYERS, players);
   }
-  void add_latency(int32_t latency) {
-    fbb_.AddElement<int32_t>(HandshakeServer::VT_LATENCY, latency, 0);
+  void add_latency(uint8_t latency) {
+    fbb_.AddElement<uint8_t>(HandshakeServer::VT_LATENCY, latency, 0);
   }
-  void add_latency_frames(int32_t latency_frames) {
-    fbb_.AddElement<int32_t>(HandshakeServer::VT_LATENCY_FRAMES, latency_frames, 0);
+  void add_latency_frames(uint8_t latency_frames) {
+    fbb_.AddElement<uint8_t>(HandshakeServer::VT_LATENCY_FRAMES, latency_frames, 0);
   }
   void add_random_seed(uint32_t random_seed) {
     fbb_.AddElement<uint32_t>(HandshakeServer::VT_RANDOM_SEED, random_seed, 0);
@@ -1114,13 +1114,11 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data = 0,
     flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players = 0,
-    int32_t latency = 0,
-    int32_t latency_frames = 0,
+    uint8_t latency = 0,
+    uint8_t latency_frames = 0,
     uint32_t random_seed = 0) {
   HandshakeServerBuilder builder_(_fbb);
   builder_.add_random_seed(random_seed);
-  builder_.add_latency_frames(latency_frames);
-  builder_.add_latency(latency);
   builder_.add_players(players);
   builder_.add_start_locations(start_locations);
   builder_.add_buildable_data(buildable_data);
@@ -1132,6 +1130,8 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
   builder_.add_ground_height_data(ground_height_data);
   builder_.add_map_size(map_size);
   builder_.add_lag_frames(lag_frames);
+  builder_.add_latency_frames(latency_frames);
+  builder_.add_latency(latency);
   builder_.add_is_replay(is_replay);
   return builder_.Finish();
 }
@@ -1150,8 +1150,8 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
     const std::vector<uint8_t> *buildable_data = nullptr,
     const std::vector<const Vec2 *> *start_locations = nullptr,
     const std::vector<flatbuffers::Offset<Player>> *players = nullptr,
-    int32_t latency = 0,
-    int32_t latency_frames = 0,
+    uint8_t latency = 0,
+    uint8_t latency_frames = 0,
     uint32_t random_seed = 0) {
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
@@ -3083,7 +3083,7 @@ struct FrameT : public flatbuffers::NativeTable {
   uint32_t width;
   uint32_t height;
   bool latcom_enabled;
-  int32_t remaining_latency_frames;
+  uint8_t remaining_latency_frames;
   FrameT()
       : width(0),
         height(0),
@@ -3153,11 +3153,11 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_latcom_enabled(bool _latcom_enabled) {
     return SetField<uint8_t>(VT_LATCOM_ENABLED, static_cast<uint8_t>(_latcom_enabled), 0);
   }
-  int32_t remaining_latency_frames() const {
-    return GetField<int32_t>(VT_REMAINING_LATENCY_FRAMES, 0);
+  uint8_t remaining_latency_frames() const {
+    return GetField<uint8_t>(VT_REMAINING_LATENCY_FRAMES, 0);
   }
-  bool mutate_remaining_latency_frames(int32_t _remaining_latency_frames) {
-    return SetField<int32_t>(VT_REMAINING_LATENCY_FRAMES, _remaining_latency_frames, 0);
+  bool mutate_remaining_latency_frames(uint8_t _remaining_latency_frames) {
+    return SetField<uint8_t>(VT_REMAINING_LATENCY_FRAMES, _remaining_latency_frames, 0);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -3177,7 +3177,7 @@ struct Frame FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint32_t>(verifier, VT_WIDTH) &&
            VerifyField<uint32_t>(verifier, VT_HEIGHT) &&
            VerifyField<uint8_t>(verifier, VT_LATCOM_ENABLED) &&
-           VerifyField<int32_t>(verifier, VT_REMAINING_LATENCY_FRAMES) &&
+           VerifyField<uint8_t>(verifier, VT_REMAINING_LATENCY_FRAMES) &&
            verifier.EndTable();
   }
   FrameT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -3212,8 +3212,8 @@ struct FrameBuilder {
   void add_latcom_enabled(bool latcom_enabled) {
     fbb_.AddElement<uint8_t>(Frame::VT_LATCOM_ENABLED, static_cast<uint8_t>(latcom_enabled), 0);
   }
-  void add_remaining_latency_frames(int32_t remaining_latency_frames) {
-    fbb_.AddElement<int32_t>(Frame::VT_REMAINING_LATENCY_FRAMES, remaining_latency_frames, 0);
+  void add_remaining_latency_frames(uint8_t remaining_latency_frames) {
+    fbb_.AddElement<uint8_t>(Frame::VT_REMAINING_LATENCY_FRAMES, remaining_latency_frames, 0);
   }
   FrameBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -3237,9 +3237,8 @@ inline flatbuffers::Offset<Frame> CreateFrame(
     uint32_t width = 0,
     uint32_t height = 0,
     bool latcom_enabled = false,
-    int32_t remaining_latency_frames = 0) {
+    uint8_t remaining_latency_frames = 0) {
   FrameBuilder builder_(_fbb);
-  builder_.add_remaining_latency_frames(remaining_latency_frames);
   builder_.add_height(height);
   builder_.add_width(width);
   builder_.add_creep_map(creep_map);
@@ -3247,6 +3246,7 @@ inline flatbuffers::Offset<Frame> CreateFrame(
   builder_.add_resources(resources);
   builder_.add_actions(actions);
   builder_.add_units(units);
+  builder_.add_remaining_latency_frames(remaining_latency_frames);
   builder_.add_latcom_enabled(latcom_enabled);
   return builder_.Finish();
 }
@@ -3261,7 +3261,7 @@ inline flatbuffers::Offset<Frame> CreateFrameDirect(
     uint32_t width = 0,
     uint32_t height = 0,
     bool latcom_enabled = false,
-    int32_t remaining_latency_frames = 0) {
+    uint8_t remaining_latency_frames = 0) {
   return torchcraft::fbs::CreateFrame(
       _fbb,
       units ? _fbb.CreateVector<flatbuffers::Offset<UnitsOfPlayer>>(*units) : 0,
@@ -3553,7 +3553,7 @@ struct FrameDiffT : public flatbuffers::NativeTable {
   std::vector<Bullet> bullets;
   std::vector<FrameDiffCreep> creep_map;
   bool latcom_enabled;
-  int32_t remaining_latency_frames;
+  uint8_t remaining_latency_frames;
   FrameDiffT()
       : latcom_enabled(false),
         remaining_latency_frames(0) {
@@ -3614,11 +3614,11 @@ struct FrameDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_latcom_enabled(bool _latcom_enabled) {
     return SetField<uint8_t>(VT_LATCOM_ENABLED, static_cast<uint8_t>(_latcom_enabled), 0);
   }
-  int32_t remaining_latency_frames() const {
-    return GetField<int32_t>(VT_REMAINING_LATENCY_FRAMES, 0);
+  uint8_t remaining_latency_frames() const {
+    return GetField<uint8_t>(VT_REMAINING_LATENCY_FRAMES, 0);
   }
-  bool mutate_remaining_latency_frames(int32_t _remaining_latency_frames) {
-    return SetField<int32_t>(VT_REMAINING_LATENCY_FRAMES, _remaining_latency_frames, 0);
+  bool mutate_remaining_latency_frames(uint8_t _remaining_latency_frames) {
+    return SetField<uint8_t>(VT_REMAINING_LATENCY_FRAMES, _remaining_latency_frames, 0);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -3638,7 +3638,7 @@ struct FrameDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_CREEP_MAP) &&
            verifier.Verify(creep_map()) &&
            VerifyField<uint8_t>(verifier, VT_LATCOM_ENABLED) &&
-           VerifyField<int32_t>(verifier, VT_REMAINING_LATENCY_FRAMES) &&
+           VerifyField<uint8_t>(verifier, VT_REMAINING_LATENCY_FRAMES) &&
            verifier.EndTable();
   }
   FrameDiffT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -3670,8 +3670,8 @@ struct FrameDiffBuilder {
   void add_latcom_enabled(bool latcom_enabled) {
     fbb_.AddElement<uint8_t>(FrameDiff::VT_LATCOM_ENABLED, static_cast<uint8_t>(latcom_enabled), 0);
   }
-  void add_remaining_latency_frames(int32_t remaining_latency_frames) {
-    fbb_.AddElement<int32_t>(FrameDiff::VT_REMAINING_LATENCY_FRAMES, remaining_latency_frames, 0);
+  void add_remaining_latency_frames(uint8_t remaining_latency_frames) {
+    fbb_.AddElement<uint8_t>(FrameDiff::VT_REMAINING_LATENCY_FRAMES, remaining_latency_frames, 0);
   }
   FrameDiffBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -3694,15 +3694,15 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiff(
     flatbuffers::Offset<flatbuffers::Vector<const Bullet *>> bullets = 0,
     flatbuffers::Offset<flatbuffers::Vector<const FrameDiffCreep *>> creep_map = 0,
     bool latcom_enabled = false,
-    int32_t remaining_latency_frames = 0) {
+    uint8_t remaining_latency_frames = 0) {
   FrameDiffBuilder builder_(_fbb);
-  builder_.add_remaining_latency_frames(remaining_latency_frames);
   builder_.add_creep_map(creep_map);
   builder_.add_bullets(bullets);
   builder_.add_resources(resources);
   builder_.add_actions(actions);
   builder_.add_unitDiffContainers(unitDiffContainers);
   builder_.add_pids(pids);
+  builder_.add_remaining_latency_frames(remaining_latency_frames);
   builder_.add_latcom_enabled(latcom_enabled);
   return builder_.Finish();
 }
@@ -3716,7 +3716,7 @@ inline flatbuffers::Offset<FrameDiff> CreateFrameDiffDirect(
     const std::vector<const Bullet *> *bullets = nullptr,
     const std::vector<const FrameDiffCreep *> *creep_map = nullptr,
     bool latcom_enabled = false,
-    int32_t remaining_latency_frames = 0) {
+    uint8_t remaining_latency_frames = 0) {
   return torchcraft::fbs::CreateFrameDiff(
       _fbb,
       pids ? _fbb.CreateVector<int32_t>(*pids) : 0,

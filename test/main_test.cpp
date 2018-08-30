@@ -73,6 +73,8 @@ const lest::test specification[] = {
       frameBefore.width += 1;
       frameBefore.height += 2;
       frameBefore.creep_map = { 1, 2 };
+      frameBefore.latcom_enabled = ! frameBefore.latcom_enabled;
+      frameBefore.remaining_latency_frames += 3;
       frameBefore.bullets = {{11, 12, 13}, {21, 22, 23}};
       frameBefore.resources = {
         {11, {12, 13, 14, 15, 16, 17, 18}},
@@ -136,6 +138,8 @@ const lest::test specification[] = {
 
       EXPECT(frameBefore.width == frameAfter.width);
       EXPECT(frameBefore.height == frameAfter.height);
+      EXPECT(frameBefore.latcom_enabled == frameAfter.latcom_enabled);
+      EXPECT(frameBefore.remaining_latency_frames == frameAfter.remaining_latency_frames);
       EXPECT(frameBefore.creep_map == frameAfter.creep_map);
       EXPECT(frameBefore.bullets == frameAfter.bullets);
       EXPECT(matchingResources);
@@ -147,6 +151,8 @@ const lest::test specification[] = {
   lest_CASE("A TorchCraft FrameDiff is invariant through serialization") {
     SETUP("Create & serialize a FrameDiff") {
       torchcraft::replayer::FrameDiff diffBefore, diffAfter;
+      diffBefore.latcom_enabled = ! diffBefore.latcom_enabled;
+      diffBefore.remaining_latency_frames = 29;
       diffBefore.pids = {1, 2, 3};
       diffBefore.creep_map = {{11, 12}, {21, 22}};
       diffBefore.bullets = {{11, 12, 13}, {21, 22, 23}};

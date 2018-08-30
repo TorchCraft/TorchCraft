@@ -282,6 +282,8 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
   width = fbsFrame.width();
   height = fbsFrame.height();
+  latcom_enabled = fbsFrame.latcom_enabled();
+  remaining_latency_frames = fbsFrame.remaining_latency_frames();
 }
 
 } // namespace replayer

@@ -110,6 +110,8 @@ flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffer
   builder.Finish(unitDiffsOffsets);
 
   fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
+  fbsFrameDiffBuilder.add_latcom_enabled(latcom_enabled);
+  fbsFrameDiffBuilder.add_remaining_latency_frames(remaining_latency_frames);
   fbsFrameDiffBuilder.add_pids(pidsOffsets); 
   fbsFrameDiffBuilder.add_creep_map(creepMapOffsets);
   fbsFrameDiffBuilder.add_bullets(bulletsOffsets);
@@ -219,6 +221,9 @@ void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
     fbsUnitDiffContainers->end(),
     units.begin(),
     unpackUnits);
+    
+  latcom_enabled = fbsFrameDiff.latcom_enabled();
+  remaining_latency_frames = fbsFrameDiff.remaining_latency_frames();
 }
 
 } // namespace replayer

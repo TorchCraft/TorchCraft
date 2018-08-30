@@ -54,7 +54,7 @@ namespace replayer {
   F(command.targetId, 36)             \
   F(command.targetX, 37)              \
   F(command.targetY, 38)              \
-  F(command.extra, 39)
+  F(command.extra, 39)                
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \
@@ -69,6 +69,8 @@ FrameDiff frame_diff(Frame& lhs, Frame& rhs) {
 
 FrameDiff frame_diff(Frame* lhs, Frame* rhs) {
   FrameDiff df;
+  df.latcom_enabled = lhs->latcom_enabled;
+  df.remaining_latency_frames = lhs->remaining_latency_frames;
   df.bullets = lhs->bullets;
   df.actions = lhs->actions;
   df.resources = lhs->resources;
@@ -156,6 +158,8 @@ Frame* detail::add(Frame* frame, FrameDiff* df) {
 }
 
 void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
+  f->latcom_enabled = df->latcom_enabled;
+  f->remaining_latency_frames = df->remaining_latency_frames;
   f->bullets = df->bullets;
   f->actions = df->actions;
   f->resources = df->resources;
@@ -255,6 +259,8 @@ void frame_undiff(Frame* frame, Frame* lhs, FrameDiff* rhs) {
 #define _EQV(VAR, CODE) (f1##VAR) CODE == (f2##VAR)CODE
 #define _EQ(CODE) (f1) CODE == (f2)CODE
 bool detail::frameEq(Frame* f1, Frame* f2, bool debug) {
+  _TEST(_EQ(->latcom_enabled));
+  _TEST(_EQ(->remaining_latency_frames));
   _TEST(_EQ(->height));
   _TEST(_EQ(->width));
   _TEST(_EQ(->bullets.size()));

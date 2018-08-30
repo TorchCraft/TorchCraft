@@ -48,8 +48,8 @@ table HandshakeServer {
   buildable_data:[ubyte];       // walk tile resolution of buildability
   start_locations:[Vec2];
   players:[Player];
-  latency:int;                  // BWAPI's Game.getLatency()
-  latency_frames:int;           // BWAPI's Game.getLatencyFrames()
+  latency:ubyte;                // BWAPI's Game.getLatency()
+  latency_frames:ubyte;         // BWAPI's Game.getLatencyFrames()
   random_seed:uint;
 }
 
@@ -216,7 +216,7 @@ table Frame {
   width:uint;
   height:uint;
   latcom_enabled:bool;
-  remaining_latency_frames:int;
+  remaining_latency_frames:ubyte;
 }
 
 table UnitDiff {
@@ -248,5 +248,5 @@ table FrameDiff {
   bullets:[Bullet];
   creep_map:[FrameDiffCreep];
   latcom_enabled:bool;
-  remaining_latency_frames:int;
+  remaining_latency_frames:ubyte;
 }

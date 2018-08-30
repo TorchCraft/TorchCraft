@@ -170,7 +170,8 @@ void init_replayer(py::module& m) {
       .def_readwrite("resources", &Frame::resources)
       .def_readwrite("bullets", &Frame::bullets)
       .def_readwrite("height", &Frame::height)
-      .def_readwrite("width", &Frame::width)
+      .def_readwrite("latcom_enabled:bool", &Frame::latcom_enabled)
+      .def_readwrite("remaining_latency_frames", &Frame::remaining_latency_frames)
       .def(
           "deepEq",
           [](Frame* self, Frame* other, bool debug) {

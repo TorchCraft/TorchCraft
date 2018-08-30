@@ -14,11 +14,11 @@
 namespace torchcraft {
 namespace replayer { 
 
+Frame::Frame() {}
+
 Frame::Frame(Frame&& o) : RefCounted() {
   swap(*this, o);
 }
-
-Frame::Frame() {}
 
 Frame::Frame(const Frame& o)
     : RefCounted(),
@@ -28,7 +28,9 @@ Frame::Frame(const Frame& o)
       bullets(o.bullets),
       creep_map(o.creep_map),
       width(o.width),
-      height(o.height) {}
+      height(o.height),
+      latcom_enabled(o.latcom_enabled),
+      remaining_latency_frames(o.remaining_latency_frames) {}
 
 Frame::Frame(const Frame* o)
     : RefCounted(),
@@ -38,8 +40,9 @@ Frame::Frame(const Frame* o)
       bullets(o->bullets),
       creep_map(o->creep_map),
       width(o->width),
-      height(o->height) {}
-
+      height(o->height),
+      latcom_enabled(o->latcom_enabled),
+      remaining_latency_frames(o->remaining_latency_frames) {}
 
 void Frame::swap(Frame& a, Frame& b) {
   using std::swap;
@@ -50,6 +53,8 @@ void Frame::swap(Frame& a, Frame& b) {
   swap(a.creep_map, b.creep_map);
   swap(a.width, b.width);
   swap(a.height, b.height);
+  swap(a.latcom_enabled, b.latcom_enabled);
+  swap(a.remaining_latency_frames, b.remaining_latency_frames);
 }
 
 Frame& Frame::operator=(Frame other) noexcept {
@@ -65,6 +70,8 @@ void Frame::clear() {
   creep_map.clear();
   width = 0;
   height = 0;
+  latcom_enabled = false;
+  remaining_latency_frames = 0;
 }
 
 void Frame::filter(int32_t x, int32_t y, Frame& o) const {

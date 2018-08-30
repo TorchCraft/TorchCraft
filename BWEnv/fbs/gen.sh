@@ -1,5 +1,5 @@
 #!/bin/bash
-flatcVersionRequired='1.7.1';
+flatcVersionRequired='1.7.0';
 flatcVersionCurrent=`flatc --version`;
 if [[ $flatcVersionCurrent == *"$flatcVersionRequired"* ]]; then
   flatc -c --gen-mutable --scoped-enums --gen-object-api --no-includes *.fbs

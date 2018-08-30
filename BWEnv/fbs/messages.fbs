@@ -48,6 +48,9 @@ table HandshakeServer {
   buildable_data:[ubyte];       // walk tile resolution of buildability
   start_locations:[Vec2];
   players:[Player];
+  latency:int;                  // BWAPI's Game.getLatency()
+  latency_frames:int;           // BWAPI's Game.getLatencyFrames()
+  random_seed:uint;
 }
 
 table Commands {
@@ -212,8 +215,7 @@ table Frame {
   creep_map:[ubyte];
   width:uint;
   height:uint;
-  reward:int;
-  is_terminal:bool;
+  remaining_latency_frames:int;
 }
 
 table UnitDiff {
@@ -244,6 +246,6 @@ table FrameDiff {
   resources:[ResourcesOfPlayer];
   bullets:[Bullet];
   creep_map:[FrameDiffCreep];
-  reward:int;
-  is_terminal:int;
+  latcom_enabled:bool;
+  remaining_latency_frames:int;
 }

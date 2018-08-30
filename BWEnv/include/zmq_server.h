@@ -20,7 +20,7 @@ class Controller;
 
 class ZMQ_server
 {
-  static const int protocol_version = 30;
+  static const int protocol_version = 31; // Should match HandshakeClient
   static const int max_commands = 2500; // maximum number of commands per frame
   static const int starting_port = 11111;
   static const int max_instances = 1000;

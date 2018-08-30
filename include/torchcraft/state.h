@@ -57,6 +57,7 @@ class State : public RefCounted {
   };
 
   // setup
+  int latency; // BWAPI's Latency enum
   int lag_frames; // number of frames from order to execution
   int map_size[2]; // map size in walk tiles
   std::vector<uint8_t> ground_height_data; // 2D, walk tile resolution
@@ -67,6 +68,7 @@ class State : public RefCounted {
   std::map<int, PlayerInfo> player_info;
   int player_id;
   int neutral_id;
+  int random_seed; // StarCraft engine random seed
   bool replay;
 
   // game state

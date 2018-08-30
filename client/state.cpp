@@ -25,6 +25,7 @@ State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
 
 State::State(const State& other)
     : RefCounted(),
+      latency(other.latency),
       lag_frames(other.lag_frames),
       map_size{other.map_size[0], other.map_size[1]},
       ground_height_data(other.ground_height_data),
@@ -35,6 +36,7 @@ State::State(const State& other)
       player_info(other.player_info),
       player_id(other.player_id),
       neutral_id(other.neutral_id),
+      random_seed(other.random_seed),
       replay(other.replay),
       frame(new Frame(other.frame)),
       deaths(other.deaths),
@@ -76,6 +78,7 @@ State& State::operator=(State other) {
 
 void swap(State& a, State& b) {
   using std::swap;
+  swap(a.latency, b.latency);
   swap(a.lag_frames, b.lag_frames);
   swap(a.map_size[0], b.map_size[0]);
   swap(a.map_size[1], b.map_size[1]);
@@ -85,6 +88,7 @@ void swap(State& a, State& b) {
   swap(a.map_name, b.map_name);
   swap(a.start_locations, b.start_locations);
   swap(a.player_info, b.player_info);
+  swap(a.random_seed, b.random_seed);
   swap(a.player_id, b.player_id);
   swap(a.neutral_id, b.neutral_id);
   swap(a.replay, b.replay);
@@ -117,6 +121,7 @@ void swap(State& a, State& b) {
 
 void State::reset() {
   replay = false;
+  latency = 0;
   lag_frames = 0;
   map_size[0] = 0;
   map_size[1] = 0;
@@ -126,6 +131,7 @@ void State::reset() {
   map_name.clear();
   start_locations.clear();
   player_info.clear();
+  random_seed = 0;
   frame->clear();
   deaths.clear();
   frame_from_bwapi = 0;
@@ -153,6 +159,8 @@ std::vector<std::string> State::update(const fbs::HandshakeServer* handshake) {
   reset();
 
   std::vector<std::string> upd;
+  latency = handshake->latency();
+  upd.emplace_back("latency");
   lag_frames = handshake->lag_frames();
   upd.emplace_back("lag_frames");
   if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_GROUND_HEIGHT_DATA)) {
@@ -216,6 +224,8 @@ std::vector<std::string> State::update(const fbs::HandshakeServer* handshake) {
   upd.emplace_back("battle_frame_count");
   replay = handshake->is_replay();
   upd.emplace_back("replay");
+  random_seed = handshake->random_seed();
+  upd.emplace_back("random_seed");
 
   postUpdate(upd);
   return upd;

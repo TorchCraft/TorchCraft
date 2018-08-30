@@ -873,6 +873,7 @@ flatbuffers::Offset<HandshakeClient> CreateHandshakeClient(flatbuffers::FlatBuff
 
 struct HandshakeServerT : public flatbuffers::NativeTable {
   typedef HandshakeServer TableType;
+  uint8_t latency;
   int32_t lag_frames;
   std::unique_ptr<Vec2> map_size;
   std::vector<uint8_t> ground_height_data;
@@ -885,17 +886,14 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
   std::vector<uint8_t> buildable_data;
   std::vector<Vec2> start_locations;
   std::vector<std::unique_ptr<PlayerT>> players;
-  uint8_t latency;
-  uint8_t latency_frames;
   uint32_t random_seed;
   HandshakeServerT()
-      : lag_frames(0),
+      : latency(0),
+        lag_frames(0),
         is_replay(false),
         player_id(0),
         neutral_id(0),
         battle_frame_count(0),
-        latency(0),
-        latency_frames(0),
         random_seed(0) {
   }
 };
@@ -903,22 +901,27 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
 struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   typedef HandshakeServerT NativeTableType;
   enum {
-    VT_LAG_FRAMES = 4,
-    VT_MAP_SIZE = 6,
-    VT_GROUND_HEIGHT_DATA = 8,
-    VT_WALKABLE_DATA = 10,
-    VT_MAP_NAME = 12,
-    VT_IS_REPLAY = 14,
-    VT_PLAYER_ID = 16,
-    VT_NEUTRAL_ID = 18,
-    VT_BATTLE_FRAME_COUNT = 20,
-    VT_BUILDABLE_DATA = 22,
-    VT_START_LOCATIONS = 24,
-    VT_PLAYERS = 26,
-    VT_LATENCY = 28,
-    VT_LATENCY_FRAMES = 30,
-    VT_RANDOM_SEED = 32
+    VT_LATENCY = 4,
+    VT_LAG_FRAMES = 6,
+    VT_MAP_SIZE = 8,
+    VT_GROUND_HEIGHT_DATA = 10,
+    VT_WALKABLE_DATA = 12,
+    VT_MAP_NAME = 14,
+    VT_IS_REPLAY = 16,
+    VT_PLAYER_ID = 18,
+    VT_NEUTRAL_ID = 20,
+    VT_BATTLE_FRAME_COUNT = 22,
+    VT_BUILDABLE_DATA = 24,
+    VT_START_LOCATIONS = 26,
+    VT_PLAYERS = 28,
+    VT_RANDOM_SEED = 30
   };
+  uint8_t latency() const {
+    return GetField<uint8_t>(VT_LATENCY, 0);
+  }
+  bool mutate_latency(uint8_t _latency) {
+    return SetField<uint8_t>(VT_LATENCY, _latency, 0);
+  }
   int32_t lag_frames() const {
     return GetField<int32_t>(VT_LAG_FRAMES, 0);
   }
@@ -991,18 +994,6 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<flatbuffers::Offset<Player>> *mutable_players() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<Player>> *>(VT_PLAYERS);
   }
-  uint8_t latency() const {
-    return GetField<uint8_t>(VT_LATENCY, 0);
-  }
-  bool mutate_latency(uint8_t _latency) {
-    return SetField<uint8_t>(VT_LATENCY, _latency, 0);
-  }
-  uint8_t latency_frames() const {
-    return GetField<uint8_t>(VT_LATENCY_FRAMES, 0);
-  }
-  bool mutate_latency_frames(uint8_t _latency_frames) {
-    return SetField<uint8_t>(VT_LATENCY_FRAMES, _latency_frames, 0);
-  }
   uint32_t random_seed() const {
     return GetField<uint32_t>(VT_RANDOM_SEED, 0);
   }
@@ -1011,6 +1002,7 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint8_t>(verifier, VT_LATENCY) &&
            VerifyField<int32_t>(verifier, VT_LAG_FRAMES) &&
            VerifyField<Vec2>(verifier, VT_MAP_SIZE) &&
            VerifyOffset(verifier, VT_GROUND_HEIGHT_DATA) &&
@@ -1030,8 +1022,6 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_PLAYERS) &&
            verifier.Verify(players()) &&
            verifier.VerifyVectorOfTables(players()) &&
-           VerifyField<uint8_t>(verifier, VT_LATENCY) &&
-           VerifyField<uint8_t>(verifier, VT_LATENCY_FRAMES) &&
            VerifyField<uint32_t>(verifier, VT_RANDOM_SEED) &&
            verifier.EndTable();
   }
@@ -1043,6 +1033,9 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct HandshakeServerBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_latency(uint8_t latency) {
+    fbb_.AddElement<uint8_t>(HandshakeServer::VT_LATENCY, latency, 0);
+  }
   void add_lag_frames(int32_t lag_frames) {
     fbb_.AddElement<int32_t>(HandshakeServer::VT_LAG_FRAMES, lag_frames, 0);
   }
@@ -1079,12 +1072,6 @@ struct HandshakeServerBuilder {
   void add_players(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players) {
     fbb_.AddOffset(HandshakeServer::VT_PLAYERS, players);
   }
-  void add_latency(uint8_t latency) {
-    fbb_.AddElement<uint8_t>(HandshakeServer::VT_LATENCY, latency, 0);
-  }
-  void add_latency_frames(uint8_t latency_frames) {
-    fbb_.AddElement<uint8_t>(HandshakeServer::VT_LATENCY_FRAMES, latency_frames, 0);
-  }
   void add_random_seed(uint32_t random_seed) {
     fbb_.AddElement<uint32_t>(HandshakeServer::VT_RANDOM_SEED, random_seed, 0);
   }
@@ -1094,7 +1081,7 @@ struct HandshakeServerBuilder {
   }
   HandshakeServerBuilder &operator=(const HandshakeServerBuilder &);
   flatbuffers::Offset<HandshakeServer> Finish() {
-    const auto end = fbb_.EndTable(start_, 15);
+    const auto end = fbb_.EndTable(start_, 14);
     auto o = flatbuffers::Offset<HandshakeServer>(end);
     return o;
   }
@@ -1102,6 +1089,7 @@ struct HandshakeServerBuilder {
 
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t latency = 0,
     int32_t lag_frames = 0,
     const Vec2 *map_size = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ground_height_data = 0,
@@ -1114,8 +1102,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data = 0,
     flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players = 0,
-    uint8_t latency = 0,
-    uint8_t latency_frames = 0,
     uint32_t random_seed = 0) {
   HandshakeServerBuilder builder_(_fbb);
   builder_.add_random_seed(random_seed);
@@ -1130,14 +1116,14 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
   builder_.add_ground_height_data(ground_height_data);
   builder_.add_map_size(map_size);
   builder_.add_lag_frames(lag_frames);
-  builder_.add_latency_frames(latency_frames);
-  builder_.add_latency(latency);
   builder_.add_is_replay(is_replay);
+  builder_.add_latency(latency);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint8_t latency = 0,
     int32_t lag_frames = 0,
     const Vec2 *map_size = 0,
     const std::vector<uint8_t> *ground_height_data = nullptr,
@@ -1150,11 +1136,10 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
     const std::vector<uint8_t> *buildable_data = nullptr,
     const std::vector<const Vec2 *> *start_locations = nullptr,
     const std::vector<flatbuffers::Offset<Player>> *players = nullptr,
-    uint8_t latency = 0,
-    uint8_t latency_frames = 0,
     uint32_t random_seed = 0) {
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
+      latency,
       lag_frames,
       map_size,
       ground_height_data ? _fbb.CreateVector<uint8_t>(*ground_height_data) : 0,
@@ -1167,8 +1152,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
       buildable_data ? _fbb.CreateVector<uint8_t>(*buildable_data) : 0,
       start_locations ? _fbb.CreateVector<const Vec2 *>(*start_locations) : 0,
       players ? _fbb.CreateVector<flatbuffers::Offset<Player>>(*players) : 0,
-      latency,
-      latency_frames,
       random_seed);
 }
 
@@ -3842,6 +3825,7 @@ inline HandshakeServerT *HandshakeServer::UnPack(const flatbuffers::resolver_fun
 inline void HandshakeServer::UnPackTo(HandshakeServerT *_o, const flatbuffers::resolver_function_t *_resolver) const {
   (void)_o;
   (void)_resolver;
+  { auto _e = latency(); _o->latency = _e; };
   { auto _e = lag_frames(); _o->lag_frames = _e; };
   { auto _e = map_size(); if (_e) _o->map_size = std::unique_ptr<Vec2>(new Vec2(*_e)); };
   { auto _e = ground_height_data(); if (_e) { _o->ground_height_data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->ground_height_data[_i] = _e->Get(_i); } } };
@@ -3854,8 +3838,6 @@ inline void HandshakeServer::UnPackTo(HandshakeServerT *_o, const flatbuffers::r
   { auto _e = buildable_data(); if (_e) { _o->buildable_data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->buildable_data[_i] = _e->Get(_i); } } };
   { auto _e = start_locations(); if (_e) { _o->start_locations.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->start_locations[_i] = *_e->Get(_i); } } };
   { auto _e = players(); if (_e) { _o->players.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->players[_i] = std::unique_ptr<PlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
-  { auto _e = latency(); _o->latency = _e; };
-  { auto _e = latency_frames(); _o->latency_frames = _e; };
   { auto _e = random_seed(); _o->random_seed = _e; };
 }
 
@@ -3866,6 +3848,7 @@ inline flatbuffers::Offset<HandshakeServer> HandshakeServer::Pack(flatbuffers::F
 inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT *_o, const flatbuffers::rehasher_function_t *_rehasher) {
   (void)_rehasher;
   (void)_o;
+  auto _latency = _o->latency;
   auto _lag_frames = _o->lag_frames;
   auto _map_size = _o->map_size ? _o->map_size.get() : 0;
   auto _ground_height_data = _o->ground_height_data.size() ? _fbb.CreateVector(_o->ground_height_data) : 0;
@@ -3878,11 +3861,10 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
   auto _buildable_data = _o->buildable_data.size() ? _fbb.CreateVector(_o->buildable_data) : 0;
   auto _start_locations = _o->start_locations.size() ? _fbb.CreateVectorOfStructs(_o->start_locations) : 0;
   auto _players = _o->players.size() ? _fbb.CreateVector<flatbuffers::Offset<Player>>(_o->players.size(), [&](size_t i) { return CreatePlayer(_fbb, _o->players[i].get(), _rehasher); }) : 0;
-  auto _latency = _o->latency;
-  auto _latency_frames = _o->latency_frames;
   auto _random_seed = _o->random_seed;
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
+      _latency,
       _lag_frames,
       _map_size,
       _ground_height_data,
@@ -3895,8 +3877,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
       _buildable_data,
       _start_locations,
       _players,
-      _latency,
-      _latency_frames,
       _random_seed);
 }
 

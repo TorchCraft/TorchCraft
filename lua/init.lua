@@ -46,6 +46,7 @@ torchcraft.field_size = {640, 370}   -- size of the field view in pixels (approx
     * buildable_data      : [torch.ByteTensor] 2D.
     * map_name            : [string] Name on the current map
     * img_mode            : [string] Image mode selected (can be empty, raw, compress)
+    * latency             : [int] Latency setting; maps to BWAPI's Game.getLatency()
     * lag_frames          : [int] number of frames from order to execution
     * frame_from_bwapi    : [int] game frame number as seen from BWAPI
     * game_ended          : [boolean] did the game end? (i.e. did the map end)
@@ -56,6 +57,7 @@ torchcraft.field_size = {640, 370}   -- size of the field view in pixels (approx
     * units_enemy         : [table] same as above, but for the enemy player
     * bullets             : [table] table with all bullets (position and type)
     * screen_position     : [table] Position of screen {x, y} in pixels. {0, 0} is top-left
+    * random_seed         : [int] StarCraft initial seed; maps to BWAPI's Game.getRandomSeed()
 ]]
 
 function torchcraft:init(hostname, port)

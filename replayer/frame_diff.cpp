@@ -69,8 +69,6 @@ FrameDiff frame_diff(Frame& lhs, Frame& rhs) {
 
 FrameDiff frame_diff(Frame* lhs, Frame* rhs) {
   FrameDiff df;
-  df.reward = lhs->reward;
-  df.is_terminal = lhs->is_terminal;
   df.bullets = lhs->bullets;
   df.actions = lhs->actions;
   df.resources = lhs->resources;
@@ -158,8 +156,6 @@ Frame* detail::add(Frame* frame, FrameDiff* df) {
 }
 
 void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
-  f->reward = df->reward;
-  f->is_terminal = df->is_terminal;
   f->bullets = df->bullets;
   f->actions = df->actions;
   f->resources = df->resources;
@@ -259,8 +255,6 @@ void frame_undiff(Frame* frame, Frame* lhs, FrameDiff* rhs) {
 #define _EQV(VAR, CODE) (f1##VAR) CODE == (f2##VAR)CODE
 #define _EQ(CODE) (f1) CODE == (f2)CODE
 bool detail::frameEq(Frame* f1, Frame* f2, bool debug) {
-  _TEST(_EQ(->reward));
-  _TEST(_EQ(->is_terminal));
   _TEST(_EQ(->height));
   _TEST(_EQ(->width));
   _TEST(_EQ(->bullets.size()));

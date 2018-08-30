@@ -72,8 +72,6 @@ const lest::test specification[] = {
       torchcraft::replayer::Frame frameBefore, frameAfter;
       frameBefore.width += 1;
       frameBefore.height += 2;
-      frameBefore.reward += 3.4;
-      frameBefore.is_terminal = ! frameBefore.is_terminal;
       frameBefore.creep_map = { 1, 2 };
       frameBefore.bullets = {{11, 12, 13}, {21, 22, 23}};
       frameBefore.resources = {
@@ -138,8 +136,6 @@ const lest::test specification[] = {
 
       EXPECT(frameBefore.width == frameAfter.width);
       EXPECT(frameBefore.height == frameAfter.height);
-      EXPECT(frameBefore.reward == frameAfter.reward);
-      EXPECT(frameBefore.is_terminal == frameAfter.is_terminal);
       EXPECT(frameBefore.creep_map == frameAfter.creep_map);
       EXPECT(frameBefore.bullets == frameAfter.bullets);
       EXPECT(matchingResources);
@@ -151,8 +147,6 @@ const lest::test specification[] = {
   lest_CASE("A TorchCraft FrameDiff is invariant through serialization") {
     SETUP("Create & serialize a FrameDiff") {
       torchcraft::replayer::FrameDiff diffBefore, diffAfter;
-      diffBefore.reward = 1.1;
-      diffBefore.is_terminal = ! diffBefore.is_terminal;
       diffBefore.pids = {1, 2, 3};
       diffBefore.creep_map = {{11, 12}, {21, 22}};
       diffBefore.bullets = {{11, 12, 13}, {21, 22, 23}};
@@ -195,8 +189,6 @@ const lest::test specification[] = {
       auto matchingActions = sortedActionsBefore == sortedActionsAfter;
       auto matchingUnits = diffBefore.units == diffAfter.units;
       
-      EXPECT(diffBefore.reward == diffAfter.reward);
-      EXPECT(diffBefore.is_terminal == diffAfter.is_terminal);
       EXPECT(diffBefore.pids == diffAfter.pids);
       EXPECT(matchingCreep);
       EXPECT(matchingResources);

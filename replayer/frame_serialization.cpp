@@ -147,8 +147,6 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
   fbsFrameBuilder.add_units(unitsOfPlayerOffset);
   fbsFrameBuilder.add_width(width);
   fbsFrameBuilder.add_height(height);
-  fbsFrameBuilder.add_reward(reward);
-  fbsFrameBuilder.add_is_terminal(is_terminal);
   auto output = fbsFrameBuilder.Finish();
   builder.Finish(output);
   return output;
@@ -284,8 +282,6 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
   width = fbsFrame.width();
   height = fbsFrame.height();
-  reward = fbsFrame.reward();
-  is_terminal = fbsFrame.is_terminal();
 }
 
 } // namespace replayer

@@ -14,14 +14,11 @@
 namespace torchcraft {
 namespace replayer { 
 
-Frame::Frame() : RefCounted() {
-  reward = 0;
-  is_terminal = 0;
-}
-
 Frame::Frame(Frame&& o) : RefCounted() {
   swap(*this, o);
 }
+
+Frame::Frame() {}
 
 Frame::Frame(const Frame& o)
     : RefCounted(),
@@ -31,10 +28,7 @@ Frame::Frame(const Frame& o)
       bullets(o.bullets),
       creep_map(o.creep_map),
       width(o.width),
-      height(o.height) {
-  reward = o.reward;
-  is_terminal = o.is_terminal;
-}
+      height(o.height) {}
 
 Frame::Frame(const Frame* o)
     : RefCounted(),
@@ -44,10 +38,7 @@ Frame::Frame(const Frame* o)
       bullets(o->bullets),
       creep_map(o->creep_map),
       width(o->width),
-      height(o->height) {
-  reward = o->reward;
-  is_terminal = o->is_terminal;
-}
+      height(o->height) {}
 
 
 void Frame::swap(Frame& a, Frame& b) {
@@ -59,8 +50,6 @@ void Frame::swap(Frame& a, Frame& b) {
   swap(a.creep_map, b.creep_map);
   swap(a.width, b.width);
   swap(a.height, b.height);
-  swap(a.reward, b.reward);
-  swap(a.is_terminal, b.is_terminal);
 }
 
 Frame& Frame::operator=(Frame other) noexcept {
@@ -76,8 +65,6 @@ void Frame::clear() {
   creep_map.clear();
   width = 0;
   height = 0;
-  reward = 0;
-  is_terminal = 0;
 }
 
 void Frame::filter(int32_t x, int32_t y, Frame& o) const {
@@ -155,8 +142,6 @@ void Frame::combine(const Frame& next_frame) {
   creep_map = next_frame.creep_map;
   width = next_frame.width;
   height = next_frame.height;
-  reward = next_frame.reward;
-  is_terminal = next_frame.is_terminal;
 }
 
 bool Frame::getCreepAt(uint32_t x, uint32_t y) {

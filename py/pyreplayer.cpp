@@ -171,8 +171,6 @@ void init_replayer(py::module& m) {
       .def_readwrite("bullets", &Frame::bullets)
       .def_readwrite("height", &Frame::height)
       .def_readwrite("width", &Frame::width)
-      .def_readwrite("reward", &Frame::reward)
-      .def_readwrite("is_terminal", &Frame::is_terminal)
       .def(
           "deepEq",
           [](Frame* self, Frame* other, bool debug) {

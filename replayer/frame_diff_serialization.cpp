@@ -110,8 +110,6 @@ flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffer
   builder.Finish(unitDiffsOffsets);
 
   fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
-  fbsFrameDiffBuilder.add_reward(reward);
-  fbsFrameDiffBuilder.add_is_terminal(is_terminal);
   fbsFrameDiffBuilder.add_pids(pidsOffsets); 
   fbsFrameDiffBuilder.add_creep_map(creepMapOffsets);
   fbsFrameDiffBuilder.add_bullets(bulletsOffsets);
@@ -221,9 +219,6 @@ void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
     fbsUnitDiffContainers->end(),
     units.begin(),
     unpackUnits);
-
-  reward = fbsFrameDiff.reward();
-  is_terminal = fbsFrameDiff.is_terminal();
 }
 
 } // namespace replayer

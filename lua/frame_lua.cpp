@@ -329,9 +329,6 @@ void toFrame(lua_State* L, int id, Frame& res) {
   luaL_argcheck(L, lua_istable(L, id), 1, "'table' expected");
   // put's table[key] on top of the stack. don't forget to pop
 
-  res.reward = getInt(L, "reward");
-  res.is_terminal = getBool(L, "is_terminal");
-
   // {[playerid] = {[uid]={aid=aid, action={cmd, arg1, ...}, ...}, ...}
   getField(L, "actions");
   // iterate through player ids
@@ -644,8 +641,6 @@ void pushUnit(lua_State* L, const Unit& unit) {
 
 void pushFrame(lua_State* L, const Frame& res) {
   lua_newtable(L);
-  setInt(L, "reward", res.reward);
-  setBool(L, "is_terminal", res.is_terminal);
   setInt(L, "height", res.height);
   setInt(L, "width", res.width);
 

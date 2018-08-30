@@ -312,8 +312,6 @@ class Frame : public RefCounted {
   std::vector<Bullet> bullets;
   std::vector<uint8_t> creep_map; // Do not access directly
   uint32_t width, height;
-  int reward;
-  int is_terminal;
 
   Frame();
   Frame(Frame&& o);
@@ -367,8 +365,6 @@ class FrameDiff {
   std::vector<Bullet> bullets;
   std::unordered_map<uint32_t, uint32_t> creep_map;
   // Width and height never changes, so we don't diff them
-  int reward;
-  int is_terminal;
   
   flatbuffers::Offset<fbs::FrameDiff> addToFlatBufferBuilder(flatbuffers::FlatBufferBuilder& builder) const;
   void readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff);

@@ -168,9 +168,7 @@ while (first_loop or not one_loop_only)
                 rep:push(replayer.frameFromTable({
                     state = {[0] = tc.state.units_myself,
                              [1] = tc.state.units_enemy},
-                    actions = {},
-                    reward = 0,
-                    is_terminal = false
+                    actions = {}
                 }))
             end
 

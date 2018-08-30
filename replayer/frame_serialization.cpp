@@ -87,6 +87,7 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
       fbsUnitBuilder.add_airRange(unit.airRange);
       fbsUnitBuilder.add_velocityX(unit.velocityX);
       fbsUnitBuilder.add_velocityY(unit.velocityY);
+      fbsUnitBuilder.add_angle(unit.angle);
       fbsUnitBuilder.add_playerId(unit.playerId);
       fbsUnitBuilder.add_resources(unit.resources);
       fbsUnitBuilder.add_buildTechUpgradeType(unit.buildTechUpgradeType);
@@ -147,8 +148,6 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
   fbsFrameBuilder.add_units(unitsOfPlayerOffset);
   fbsFrameBuilder.add_width(width);
   fbsFrameBuilder.add_height(height);
-  fbsFrameBuilder.add_reward(reward);
-  fbsFrameBuilder.add_is_terminal(is_terminal);
   auto output = fbsFrameBuilder.Finish();
   builder.Finish(output);
   return output;
@@ -210,6 +209,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     unit.airRange = fbsUnit->airRange();
     unit.velocityX = fbsUnit->velocityX();
     unit.velocityY = fbsUnit->velocityY();
+    unit.angle = fbsUnit->angle();
     unit.playerId = fbsUnit->playerId();
     unit.resources = fbsUnit->resources();
     unit.buildTechUpgradeType = fbsUnit->buildTechUpgradeType();
@@ -284,8 +284,8 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
 
   width = fbsFrame.width();
   height = fbsFrame.height();
-  reward = fbsFrame.reward();
-  is_terminal = fbsFrame.is_terminal();
+  latcom_enabled = fbsFrame.latcom_enabled();
+  remaining_latency_frames = fbsFrame.remaining_latency_frames();
 }
 
 } // namespace replayer

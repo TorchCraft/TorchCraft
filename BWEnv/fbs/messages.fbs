@@ -36,7 +36,8 @@ table HandshakeClient {
 }
 
 table HandshakeServer {
-  lag_frames:int;
+  latency:ubyte;                // BWAPI's Game.getLatency()
+  lag_frames:int;               // BWAPI's Game.getLatencyFrames()
   map_size:Vec2;                // walk tile x and y
   ground_height_data:[ubyte];   // walk tile resolution of ground heights
   walkable_data:[ubyte];        // walk tile resolution of walkability
@@ -47,7 +48,8 @@ table HandshakeServer {
   battle_frame_count:int;       // if micro_mode == true
   buildable_data:[ubyte];       // walk tile resolution of buildability
   start_locations:[Vec2];
-  players:[Player];
+  players:[Player];  
+  random_seed:uint;
 }
 
 table Commands {
@@ -179,6 +181,7 @@ table Unit {
   command:UnitCommand;
   velocityX:double;
   velocityY:double;
+  angle:double;
   playerId:int;
   resources:int;
   buildTechUpgradeType:int;
@@ -212,8 +215,8 @@ table Frame {
   creep_map:[ubyte];
   width:uint;
   height:uint;
-  reward:int;
-  is_terminal:bool;
+  latcom_enabled:bool;
+  remaining_latency_frames:ubyte;
 }
 
 table UnitDiff {
@@ -225,6 +228,7 @@ table UnitDiff {
   order_size:int;
   velocityX:double;
   velocityY:double;
+  angle:double;
   flags:long;
 }
 
@@ -244,6 +248,6 @@ table FrameDiff {
   resources:[ResourcesOfPlayer];
   bullets:[Bullet];
   creep_map:[FrameDiffCreep];
-  reward:int;
-  is_terminal:int;
+  latcom_enabled:bool;
+  remaining_latency_frames:ubyte;
 }

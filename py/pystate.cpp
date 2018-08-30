@@ -23,7 +23,9 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("name", &State::PlayerInfo::name)
       .def_readwrite("is_enemy", &State::PlayerInfo::is_enemy);
 
-  state.def_readwrite("lag_frames", &State::lag_frames)
+  state
+      .def_readwrite("latency", &State::latency)
+      .def_readwrite("lag_frames", &State::lag_frames)
       .def_property_readonly(
           "map_size",
           [](State* self) {
@@ -36,8 +38,9 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("map_name", &State::map_name)
       .def_readwrite("start_locations", &State::start_locations)
       .def_readwrite("player_info", &State::player_info)
-      .def_readwrite("player_id", &State::player_id)
+      .def_readwrite("player_id", &State::player_id))
       .def_readwrite("neutral_id", &State::neutral_id)
+      .def_readwrite("random_seed", &State::random_seed
       .def_readwrite("replay", &State::replay)
       .def_readwrite("deaths", &State::deaths)
       .def_readwrite("frame_from_bwapi", &State::frame_from_bwapi)

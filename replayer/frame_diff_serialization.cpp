@@ -61,6 +61,7 @@ flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffer
       fbsUnitDiffBuilder.add_order_size(unitDiff.order_size);
       fbsUnitDiffBuilder.add_velocityX(unitDiff.velocityX);
       fbsUnitDiffBuilder.add_velocityY(unitDiff.velocityY);
+      fbsUnitDiffBuilder.add_angle(unitDiff.angle);
       fbsUnitDiffBuilder.add_flags(unitDiff.flags);
       auto output = fbsUnitDiffBuilder.Finish();
       builder.Finish(output);
@@ -110,8 +111,8 @@ flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffer
   builder.Finish(unitDiffsOffsets);
 
   fbs::FrameDiffBuilder fbsFrameDiffBuilder(builder);
-  fbsFrameDiffBuilder.add_reward(reward);
-  fbsFrameDiffBuilder.add_is_terminal(is_terminal);
+  fbsFrameDiffBuilder.add_latcom_enabled(latcom_enabled);
+  fbsFrameDiffBuilder.add_remaining_latency_frames(remaining_latency_frames);
   fbsFrameDiffBuilder.add_pids(pidsOffsets); 
   fbsFrameDiffBuilder.add_creep_map(creepMapOffsets);
   fbsFrameDiffBuilder.add_bullets(bulletsOffsets);
@@ -142,8 +143,9 @@ void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
       std::copy(fbsOrderDiffs->begin(), fbsOrderDiffs->end(), unitDiff.order_diffs.begin());
       unitDiff.id = fbsUnitDiff->id();
       unitDiff.order_size = fbsUnitDiff->order_size();
-      unitDiff.velocityX = fbsUnitDiff->velocityX ();
+      unitDiff.velocityX = fbsUnitDiff->velocityX();
       unitDiff.velocityY = fbsUnitDiff->velocityY();
+      unitDiff.angle = fbsUnitDiff->angle();
       unitDiff.flags = fbsUnitDiff->flags();
       return unitDiff;
     };
@@ -221,9 +223,9 @@ void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
     fbsUnitDiffContainers->end(),
     units.begin(),
     unpackUnits);
-
-  reward = fbsFrameDiff.reward();
-  is_terminal = fbsFrameDiff.is_terminal();
+    
+  latcom_enabled = fbsFrameDiff.latcom_enabled();
+  remaining_latency_frames = fbsFrameDiff.remaining_latency_frames();
 }
 
 } // namespace replayer

@@ -41,6 +41,7 @@ int push2DIntegerArray(
 }
 
 const std::set<std::string> stateMembers = {
+    "latency",
     "lag_frames",
     "ground_height_data",
     "walkable_data",
@@ -50,6 +51,7 @@ const std::set<std::string> stateMembers = {
     "player_info",
     "player_id",
     "neutral_id",
+    "random_seed",
     "replay",
     "frame",
     "deaths",
@@ -66,7 +68,7 @@ const std::set<std::string> stateMembers = {
     "visibility",
     "image",
     "micro_battles",
-    "only_consider_types",
+    "only_consider_types"    
 };
 
 void updateUserValueAndPush(

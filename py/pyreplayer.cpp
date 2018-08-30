@@ -61,6 +61,7 @@ void init_replayer(py::module& m) {
       .def_readwrite("command", &Unit::command)
       .def_readwrite("velocityX", &Unit::velocityX)
       .def_readwrite("velocityY", &Unit::velocityY)
+      .def_readwrite("angle", &Unit::angle)
       .def_readwrite("playerId", &Unit::playerId)
       .def_readwrite("resources", &Unit::resources)
       .def(
@@ -170,9 +171,8 @@ void init_replayer(py::module& m) {
       .def_readwrite("resources", &Frame::resources)
       .def_readwrite("bullets", &Frame::bullets)
       .def_readwrite("height", &Frame::height)
-      .def_readwrite("width", &Frame::width)
-      .def_readwrite("reward", &Frame::reward)
-      .def_readwrite("is_terminal", &Frame::is_terminal)
+      .def_readwrite("latcom_enabled:bool", &Frame::latcom_enabled)
+      .def_readwrite("remaining_latency_frames", &Frame::remaining_latency_frames)
       .def(
           "deepEq",
           [](Frame* self, Frame* other, bool debug) {

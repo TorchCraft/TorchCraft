@@ -12,8 +12,7 @@ The file [init.cpp](/replayer/init.cpp) registers the c++ functions to be expose
 
 The `torchcraft.Frame` is the basic element of game storage in torchcraft:
 it stores a single frame of a game. It contains the full state of the game:
-players, units, actions, bullets. It may also contain reward information to
-be used for a reinforcement learning algorithm.
+players, units, actions, bullets.
 
 
 ### `replayer.frameFromTable(table)`
@@ -63,7 +62,7 @@ is dead in `next_frame`, it will still be present in the combined frame (with it
 last known stats). If you want to remove the dead units, you have to filter
 them by hand afterward (using `torchcraft.state.deaths`)
 
-> Reward, bullets, actions and terminal state are NOT accumulated (we keep the
+> Bullet and actions state are NOT accumulated (we keep the
   value of the next frame).
 
 ## `torchcraft.Replayer`

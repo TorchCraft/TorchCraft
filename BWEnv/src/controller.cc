@@ -1252,6 +1252,7 @@ void Controller::addUnit(
       replayer::UnitCommand(),
       u->getVelocityX(),
       u->getVelocityY(),
+      u->angle(),
       unit_player,
       u->getResources(),
       buildTechUpgradeType,

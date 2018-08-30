@@ -42,19 +42,22 @@ namespace replayer {
   F(groundRange, 24)                  \
   F(airRange, 25)                     \
   F(playerId, 26)                     \
-  F(resources, 27)                    \
-  F(buildTechUpgradeType, 28)         \
-  F(remainingBuildTrainTime, 29)      \
-  F(remainingUpgradeResearchTime, 30) \
-  F(spellCD, 31)                      \
-  F(associatedUnit, 32)               \
-  F(associatedCount, 33)              \
-  F(command.frame, 34)                \
-  F(command.type, 35)                 \
-  F(command.targetId, 36)             \
-  F(command.targetX, 37)              \
-  F(command.targetY, 38)              \
-  F(command.extra, 39)                
+  F(velocityX, 27)                    \
+  F(velocityY, 28)                    \
+  F(angle, 29)                        \
+  F(resources, 30)                    \
+  F(buildTechUpgradeType, 31)         \
+  F(remainingBuildTrainTime, 32)      \
+  F(remainingUpgradeResearchTime, 33) \
+  F(spellCD, 34)                      \
+  F(associatedUnit, 35)               \
+  F(associatedCount, 36)              \
+  F(command.frame, 37)                \
+  F(command.type, 38)                 \
+  F(command.targetId, 39)             \
+  F(command.targetX, 40)              \
+  F(command.targetY, 41)              \
+  F(command.extra, 42)                
 
 #define _DOALL_ON_ORDER(F) \
   F(first_frame, 0)        \
@@ -101,6 +104,7 @@ FrameDiff frame_diff(Frame* lhs, Frame* rhs) {
       du.id = lit.id;
       du.velocityX = lit.velocityX;
       du.velocityY = lit.velocityY;
+      du.angle = lit.angle;
       du.flags = lit.flags;
       du.order_size = lit.orders.size();
       if (rit != rhsu.end() &&
@@ -201,6 +205,7 @@ void detail::add(Frame* f, Frame* frame, FrameDiff* df) {
       u.id = du.id;
       u.velocityX = du.velocityX;
       u.velocityY = du.velocityY;
+      u.angle = du.angle;
       u.flags = du.flags;
 
       for (size_t k = 0; k < du.var_diffs.size(); k++) {
@@ -309,6 +314,7 @@ bool detail::frameEq(Frame* f1, Frame* f2, bool debug) {
 #undef _GEN_VAR
       _TEST(_EQV(units, [i].velocityX));
       _TEST(_EQV(units, [i].velocityY));
+      _TEST(_EQV(units, [i].angle));
       _TEST(_EQV(units, [i].flags));
       _TEST(_EQV(units, [i].orders.size()));
       for (size_t k = 0; k < f1units[i].orders.size(); k++)

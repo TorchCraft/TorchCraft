@@ -181,6 +181,7 @@ table Unit {
   command:UnitCommand;
   velocityX:double;
   velocityY:double;
+  angle:double;
   playerId:int;
   resources:int;
   buildTechUpgradeType:int;
@@ -227,6 +228,7 @@ table UnitDiff {
   order_size:int;
   velocityX:double;
   velocityY:double;
+  angle:double;
   flags:long;
 }
 

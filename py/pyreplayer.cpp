@@ -61,6 +61,7 @@ void init_replayer(py::module& m) {
       .def_readwrite("command", &Unit::command)
       .def_readwrite("velocityX", &Unit::velocityX)
       .def_readwrite("velocityY", &Unit::velocityY)
+      .def_readwrite("angle", &Unit::angle)
       .def_readwrite("playerId", &Unit::playerId)
       .def_readwrite("resources", &Unit::resources)
       .def(

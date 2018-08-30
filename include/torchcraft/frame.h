@@ -95,6 +95,7 @@ struct Unit {
   UnitCommand command;
 
   double velocityX, velocityY;
+  double angle;
 
   int32_t playerId;
   int32_t resources;
@@ -344,6 +345,7 @@ namespace detail {
     std::vector<int32_t> order_diffs;
     int32_t order_size;
     double velocityX, velocityY;
+    double angle;
     int64_t flags;
   };
 

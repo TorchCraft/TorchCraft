@@ -61,6 +61,7 @@ flatbuffers::Offset<fbs::FrameDiff> FrameDiff::addToFlatBufferBuilder(flatbuffer
       fbsUnitDiffBuilder.add_order_size(unitDiff.order_size);
       fbsUnitDiffBuilder.add_velocityX(unitDiff.velocityX);
       fbsUnitDiffBuilder.add_velocityY(unitDiff.velocityY);
+      fbsUnitDiffBuilder.add_angle(unitDiff.angle);
       fbsUnitDiffBuilder.add_flags(unitDiff.flags);
       auto output = fbsUnitDiffBuilder.Finish();
       builder.Finish(output);
@@ -142,8 +143,9 @@ void FrameDiff::readFromFlatBufferTable(const fbs::FrameDiff& fbsFrameDiff) {
       std::copy(fbsOrderDiffs->begin(), fbsOrderDiffs->end(), unitDiff.order_diffs.begin());
       unitDiff.id = fbsUnitDiff->id();
       unitDiff.order_size = fbsUnitDiff->order_size();
-      unitDiff.velocityX = fbsUnitDiff->velocityX ();
+      unitDiff.velocityX = fbsUnitDiff->velocityX();
       unitDiff.velocityY = fbsUnitDiff->velocityY();
+      unitDiff.angle = fbsUnitDiff->angle();
       unitDiff.flags = fbsUnitDiff->flags();
       return unitDiff;
     };

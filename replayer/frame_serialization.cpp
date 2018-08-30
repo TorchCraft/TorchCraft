@@ -87,6 +87,7 @@ flatbuffers::Offset<fbs::Frame> Frame::addToFlatBufferBuilder(flatbuffers::FlatB
       fbsUnitBuilder.add_airRange(unit.airRange);
       fbsUnitBuilder.add_velocityX(unit.velocityX);
       fbsUnitBuilder.add_velocityY(unit.velocityY);
+      fbsUnitBuilder.add_angle(unit.angle);
       fbsUnitBuilder.add_playerId(unit.playerId);
       fbsUnitBuilder.add_resources(unit.resources);
       fbsUnitBuilder.add_buildTechUpgradeType(unit.buildTechUpgradeType);
@@ -208,6 +209,7 @@ void Frame::readFromFlatBufferTable(const fbs::Frame& fbsFrame) {
     unit.airRange = fbsUnit->airRange();
     unit.velocityX = fbsUnit->velocityX();
     unit.velocityY = fbsUnit->velocityY();
+    unit.angle = fbsUnit->angle();
     unit.playerId = fbsUnit->playerId();
     unit.resources = fbsUnit->resources();
     unit.buildTechUpgradeType = fbsUnit->buildTechUpgradeType();

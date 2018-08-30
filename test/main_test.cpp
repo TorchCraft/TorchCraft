@@ -39,7 +39,7 @@ bool operator==(const Unit& a, const Unit& b) {
     E(armor) E(shieldArmor) E(size) E(pixel_x) E(pixel_y)
     E(pixel_size_x) E(pixel_size_y) E(groundATK) E(airATK)
     E(groundDmgType) E(airDmgType) E(groundRange) E(airRange)
-    E(orders) E(command) E(velocityX) E(velocityY)
+    E(orders) E(command) E(velocityX) E(velocityY) E(angle)
     E(playerId) E(resources) E(buildTechUpgradeType)
     E(remainingBuildTrainTime) E(remainingUpgradeResearchTime) E(spellCD)
     E(associatedUnit) E(associatedCount);
@@ -49,7 +49,7 @@ namespace detail {
   bool operator==(const UnitDiff& a, const UnitDiff& b) {
     return true
     E(id) E(var_ids) E(var_diffs) E(order_ids) E(order_diffs)
-      E(order_size) E(velocityX) E(velocityY) E(flags);
+      E(order_size) E(velocityX) E(velocityY) E(angle) E(flags);
   }
 }
 
@@ -100,7 +100,7 @@ const lest::test specification[] = {
       U(armor) U(shieldArmor) U(size) U(pixel_x) U(pixel_y)
       U(pixel_size_x) U(pixel_size_y) U(groundATK) U(airATK)
       U(groundDmgType) U(airDmgType) U(groundRange) U(airRange)
-      U(velocityX) U(velocityY)
+      U(velocityX) U(velocityY) U(angle)
       U(playerId) U(resources) U(buildTechUpgradeType)
       U(remainingBuildTrainTime) U(remainingUpgradeResearchTime) U(spellCD)
       U(associatedUnit) U(associatedCount)

@@ -2141,6 +2141,7 @@ struct UnitT : public flatbuffers::NativeTable {
   std::unique_ptr<UnitCommand> command;
   double velocityX;
   double velocityY;
+  double angle;
   int32_t playerId;
   int32_t resources;
   int32_t buildTechUpgradeType;
@@ -2179,6 +2180,7 @@ struct UnitT : public flatbuffers::NativeTable {
         airRange(0),
         velocityX(0.0),
         velocityY(0.0),
+        angle(0.0),
         playerId(0),
         resources(0),
         buildTechUpgradeType(0),
@@ -2224,14 +2226,15 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_COMMAND = 60,
     VT_VELOCITYX = 62,
     VT_VELOCITYY = 64,
-    VT_PLAYERID = 66,
-    VT_RESOURCES = 68,
-    VT_BUILDTECHUPGRADETYPE = 70,
-    VT_REMAININGBUILDTRAINTIME = 72,
-    VT_REMAININGUPGRADERESEARCHTIME = 74,
-    VT_SPELLCD = 76,
-    VT_ASSOCIATEDUNIT = 78,
-    VT_ASSOCIATEDCOUNT = 80
+    VT_ANGLE = 66,
+    VT_PLAYERID = 68,
+    VT_RESOURCES = 70,
+    VT_BUILDTECHUPGRADETYPE = 72,
+    VT_REMAININGBUILDTRAINTIME = 74,
+    VT_REMAININGUPGRADERESEARCHTIME = 76,
+    VT_SPELLCD = 78,
+    VT_ASSOCIATEDUNIT = 80,
+    VT_ASSOCIATEDCOUNT = 82
   };
   int32_t id() const {
     return GetField<int32_t>(VT_ID, 0);
@@ -2419,6 +2422,12 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_velocityY(double _velocityY) {
     return SetField<double>(VT_VELOCITYY, _velocityY, 0.0);
   }
+  double angle() const {
+    return GetField<double>(VT_ANGLE, 0.0);
+  }
+  bool mutate_angle(double _angle) {
+    return SetField<double>(VT_ANGLE, _angle, 0.0);
+  }
   int32_t playerId() const {
     return GetField<int32_t>(VT_PLAYERID, 0);
   }
@@ -2501,6 +2510,7 @@ struct Unit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<UnitCommand>(verifier, VT_COMMAND) &&
            VerifyField<double>(verifier, VT_VELOCITYX) &&
            VerifyField<double>(verifier, VT_VELOCITYY) &&
+           VerifyField<double>(verifier, VT_ANGLE) &&
            VerifyField<int32_t>(verifier, VT_PLAYERID) &&
            VerifyField<int32_t>(verifier, VT_RESOURCES) &&
            VerifyField<int32_t>(verifier, VT_BUILDTECHUPGRADETYPE) &&
@@ -2612,6 +2622,9 @@ struct UnitBuilder {
   void add_velocityY(double velocityY) {
     fbb_.AddElement<double>(Unit::VT_VELOCITYY, velocityY, 0.0);
   }
+  void add_angle(double angle) {
+    fbb_.AddElement<double>(Unit::VT_ANGLE, angle, 0.0);
+  }
   void add_playerId(int32_t playerId) {
     fbb_.AddElement<int32_t>(Unit::VT_PLAYERID, playerId, 0);
   }
@@ -2642,7 +2655,7 @@ struct UnitBuilder {
   }
   UnitBuilder &operator=(const UnitBuilder &);
   flatbuffers::Offset<Unit> Finish() {
-    const auto end = fbb_.EndTable(start_, 39);
+    const auto end = fbb_.EndTable(start_, 40);
     auto o = flatbuffers::Offset<Unit>(end);
     return o;
   }
@@ -2681,6 +2694,7 @@ inline flatbuffers::Offset<Unit> CreateUnit(
     const UnitCommand *command = 0,
     double velocityX = 0.0,
     double velocityY = 0.0,
+    double angle = 0.0,
     int32_t playerId = 0,
     int32_t resources = 0,
     int32_t buildTechUpgradeType = 0,
@@ -2690,6 +2704,7 @@ inline flatbuffers::Offset<Unit> CreateUnit(
     int32_t associatedUnit = 0,
     int32_t associatedCount = 0) {
   UnitBuilder builder_(_fbb);
+  builder_.add_angle(angle);
   builder_.add_velocityY(velocityY);
   builder_.add_velocityX(velocityX);
   builder_.add_flags(flags);
@@ -2765,6 +2780,7 @@ inline flatbuffers::Offset<Unit> CreateUnitDirect(
     const UnitCommand *command = 0,
     double velocityX = 0.0,
     double velocityY = 0.0,
+    double angle = 0.0,
     int32_t playerId = 0,
     int32_t resources = 0,
     int32_t buildTechUpgradeType = 0,
@@ -2806,6 +2822,7 @@ inline flatbuffers::Offset<Unit> CreateUnitDirect(
       command,
       velocityX,
       velocityY,
+      angle,
       playerId,
       resources,
       buildTechUpgradeType,
@@ -3270,12 +3287,14 @@ struct UnitDiffT : public flatbuffers::NativeTable {
   int32_t order_size;
   double velocityX;
   double velocityY;
+  double angle;
   int64_t flags;
   UnitDiffT()
       : id(0),
         order_size(0),
         velocityX(0.0),
         velocityY(0.0),
+        angle(0.0),
         flags(0) {
   }
 };
@@ -3291,7 +3310,8 @@ struct UnitDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_ORDER_SIZE = 14,
     VT_VELOCITYX = 16,
     VT_VELOCITYY = 18,
-    VT_FLAGS = 20
+    VT_ANGLE = 20,
+    VT_FLAGS = 22
   };
   int32_t id() const {
     return GetField<int32_t>(VT_ID, 0);
@@ -3341,6 +3361,12 @@ struct UnitDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_velocityY(double _velocityY) {
     return SetField<double>(VT_VELOCITYY, _velocityY, 0.0);
   }
+  double angle() const {
+    return GetField<double>(VT_ANGLE, 0.0);
+  }
+  bool mutate_angle(double _angle) {
+    return SetField<double>(VT_ANGLE, _angle, 0.0);
+  }
   int64_t flags() const {
     return GetField<int64_t>(VT_FLAGS, 0);
   }
@@ -3361,6 +3387,7 @@ struct UnitDiff FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_ORDER_SIZE) &&
            VerifyField<double>(verifier, VT_VELOCITYX) &&
            VerifyField<double>(verifier, VT_VELOCITYY) &&
+           VerifyField<double>(verifier, VT_ANGLE) &&
            VerifyField<int64_t>(verifier, VT_FLAGS) &&
            verifier.EndTable();
   }
@@ -3396,6 +3423,9 @@ struct UnitDiffBuilder {
   void add_velocityY(double velocityY) {
     fbb_.AddElement<double>(UnitDiff::VT_VELOCITYY, velocityY, 0.0);
   }
+  void add_angle(double angle) {
+    fbb_.AddElement<double>(UnitDiff::VT_ANGLE, angle, 0.0);
+  }
   void add_flags(int64_t flags) {
     fbb_.AddElement<int64_t>(UnitDiff::VT_FLAGS, flags, 0);
   }
@@ -3405,7 +3435,7 @@ struct UnitDiffBuilder {
   }
   UnitDiffBuilder &operator=(const UnitDiffBuilder &);
   flatbuffers::Offset<UnitDiff> Finish() {
-    const auto end = fbb_.EndTable(start_, 9);
+    const auto end = fbb_.EndTable(start_, 10);
     auto o = flatbuffers::Offset<UnitDiff>(end);
     return o;
   }
@@ -3421,9 +3451,11 @@ inline flatbuffers::Offset<UnitDiff> CreateUnitDiff(
     int32_t order_size = 0,
     double velocityX = 0.0,
     double velocityY = 0.0,
+    double angle = 0.0,
     int64_t flags = 0) {
   UnitDiffBuilder builder_(_fbb);
   builder_.add_flags(flags);
+  builder_.add_angle(angle);
   builder_.add_velocityY(velocityY);
   builder_.add_velocityX(velocityX);
   builder_.add_order_size(order_size);
@@ -3445,6 +3477,7 @@ inline flatbuffers::Offset<UnitDiff> CreateUnitDiffDirect(
     int32_t order_size = 0,
     double velocityX = 0.0,
     double velocityY = 0.0,
+    double angle = 0.0,
     int64_t flags = 0) {
   return torchcraft::fbs::CreateUnitDiff(
       _fbb,
@@ -3456,6 +3489,7 @@ inline flatbuffers::Offset<UnitDiff> CreateUnitDiffDirect(
       order_size,
       velocityX,
       velocityY,
+      angle,
       flags);
 }
 
@@ -4189,6 +4223,7 @@ inline void Unit::UnPackTo(UnitT *_o, const flatbuffers::resolver_function_t *_r
   { auto _e = command(); if (_e) _o->command = std::unique_ptr<UnitCommand>(new UnitCommand(*_e)); };
   { auto _e = velocityX(); _o->velocityX = _e; };
   { auto _e = velocityY(); _o->velocityY = _e; };
+  { auto _e = angle(); _o->angle = _e; };
   { auto _e = playerId(); _o->playerId = _e; };
   { auto _e = resources(); _o->resources = _e; };
   { auto _e = buildTechUpgradeType(); _o->buildTechUpgradeType = _e; };
@@ -4237,6 +4272,7 @@ inline flatbuffers::Offset<Unit> CreateUnit(flatbuffers::FlatBufferBuilder &_fbb
   auto _command = _o->command ? _o->command.get() : 0;
   auto _velocityX = _o->velocityX;
   auto _velocityY = _o->velocityY;
+  auto _angle = _o->angle;
   auto _playerId = _o->playerId;
   auto _resources = _o->resources;
   auto _buildTechUpgradeType = _o->buildTechUpgradeType;
@@ -4278,6 +4314,7 @@ inline flatbuffers::Offset<Unit> CreateUnit(flatbuffers::FlatBufferBuilder &_fbb
       _command,
       _velocityX,
       _velocityY,
+      _angle,
       _playerId,
       _resources,
       _buildTechUpgradeType,
@@ -4438,6 +4475,7 @@ inline void UnitDiff::UnPackTo(UnitDiffT *_o, const flatbuffers::resolver_functi
   { auto _e = order_size(); _o->order_size = _e; };
   { auto _e = velocityX(); _o->velocityX = _e; };
   { auto _e = velocityY(); _o->velocityY = _e; };
+  { auto _e = angle(); _o->angle = _e; };
   { auto _e = flags(); _o->flags = _e; };
 }
 
@@ -4456,6 +4494,7 @@ inline flatbuffers::Offset<UnitDiff> CreateUnitDiff(flatbuffers::FlatBufferBuild
   auto _order_size = _o->order_size;
   auto _velocityX = _o->velocityX;
   auto _velocityY = _o->velocityY;
+  auto _angle = _o->angle;
   auto _flags = _o->flags;
   return torchcraft::fbs::CreateUnitDiff(
       _fbb,
@@ -4467,6 +4506,7 @@ inline flatbuffers::Offset<UnitDiff> CreateUnitDiff(flatbuffers::FlatBufferBuild
       _order_size,
       _velocityX,
       _velocityY,
+      _angle,
       _flags);
 }
 

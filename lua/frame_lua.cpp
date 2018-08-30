@@ -626,7 +626,6 @@ void pushUnit(lua_State* L, const Unit& unit) {
   lua_pushnumber(L, (lua_Number)o.targetY);
   lua_rawseti(L, -2, 2);
   lua_settable(L, -3);
-  // }
 
   lua_pushstring(L, "velocity");
   lua_newtable(L);
@@ -635,6 +634,8 @@ void pushUnit(lua_State* L, const Unit& unit) {
   lua_pushnumber(L, (lua_Number)unit.velocityY);
   lua_rawseti(L, -2, 2);
   lua_settable(L, -3);
+  
+  lua_setdouble(L, "angle", o.angle);
 
   setInt(L, "playerId", unit.playerId);
 }

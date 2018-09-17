@@ -48,6 +48,7 @@ table HandshakeServer {
   buildable_data:[ubyte];       // walk tile resolution of buildability
   start_locations:[Vec2];
   players:[Player];
+  frame_from_bwapi:int;
 }
 
 table Commands {

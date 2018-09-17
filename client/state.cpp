@@ -216,6 +216,8 @@ std::vector<std::string> State::update(const fbs::HandshakeServer* handshake) {
   upd.emplace_back("battle_frame_count");
   replay = handshake->is_replay();
   upd.emplace_back("replay");
+  frame_from_bwapi = handshake->frame_from_bwapi();
+  upd.emplace_back("frame_from_bwapi");
 
   postUpdate(upd);
   return upd;

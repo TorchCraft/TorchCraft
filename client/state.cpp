@@ -348,11 +348,6 @@ std::vector<std::string> State::update(
   return std::vector<std::string>();
 }
 
-std::vector<std::string> State::update(const fbs::Error* error) {
-  preUpdate();
-  return std::vector<std::string>();
-}
-
 bool State::setRawImage(const fbs::StateUpdate* frame) {
   if (frame->img_data()->size() !=
       static_cast<size_t>(

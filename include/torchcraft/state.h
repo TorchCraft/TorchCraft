@@ -146,7 +146,6 @@ class State : public RefCounted {
   std::vector<std::string> update(const fbs::StateUpdate* stateUpdate);
   std::vector<std::string> update(const fbs::EndGame* end);
   std::vector<std::string> update(const fbs::PlayerLeft* left);
-  std::vector<std::string> update(const fbs::Error* error);
   void trackAliveUnits(
       std::vector<std::string>& upd,
       const std::set<BW::UnitType>& considered);

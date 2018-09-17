@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.1)
 project(BWEnv)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../../cmake")
+find_package(ZMQ REQUIRED)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_SHARED_LIBRARY_PREFIX "")
@@ -67,7 +70,7 @@ if (NOT USE_MINI_OPENBWAPI)
   )
   
   target_link_libraries(BWEnv
-    zmq
+    ${ZMQ_LIBRARIES}
     ${BWAPI_LIBRARIES}
   )
 endif()
@@ -78,6 +81,6 @@ add_executable(BWEnvClient
 )
 
 target_link_libraries(BWEnvClient
-  zmq
+  ${ZMQ_LIBRARIES}
   ${BWAPI_LIBRARIES}
 )

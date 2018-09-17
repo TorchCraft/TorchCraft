@@ -242,7 +242,9 @@ void Controller::setupHandshake() {
   this->zmq_server->sendHandshake(&handshake);
 
   /* Receive first message (usually setup commands) */
-  this->zmq_server->receiveMessage();
+  while (!this->zmq_server->receiveMessage()) {
+    continue;
+  }
 
   this->resetFrameState();
 }
@@ -729,7 +731,9 @@ void Controller::endGame() {
 
   if (is_client) {
     // And receive new commands
-    this->zmq_server->receiveMessage();
+    while (!this->zmq_server->receiveMessage()) {
+      continue;
+    }
   } else {
     this->zmq_server->close();
   }
@@ -1379,7 +1383,7 @@ void Controller::setIsWinner(bool isWinner) {
 }
 
 void Controller::clearPendingReceive() {
-  if (!last_receive_ok) {
+  while (!last_receive_ok) {
     // The previous receive did not complete successfully. Perform a blocking
     // receive so that we're clear wrt the REQ/REP pattern.
     last_receive_ok = zmq_server->receiveMessage();

@@ -200,6 +200,7 @@ void ZMQ_server::connect() {
             verifier, msg->msg(), torchcraft::fbs::Any::HandshakeClient)) {
       throw runtime_error("ZMQ_server::connect(): invalid message.");
     }
+    client_uid = msg->uid()->str();
     handleReconnect(
         reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
   } else {
@@ -312,13 +313,22 @@ bool ZMQ_server::receiveMessage(int timeoutMs)
 
   switch (msg->msg_type()) {
     case torchcraft::fbs::Any::HandshakeClient: // reconnection
+      client_uid = msg->uid()->str();
       handleReconnect(
           reinterpret_cast<const torchcraft::fbs::HandshakeClient*>(msg->msg()));
       break;
     case torchcraft::fbs::Any::Commands: {
-      auto status = handleCommands(
-          reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
-      controller->setCommandsStatus(std::move(status));
+      if (client_uid != msg->uid()->str()) {
+        torchcraft::fbs::ErrorT err;
+        err.message = "Unexpected commands from client " + msg->uid()->str() +
+            " (last handshake was from " + client_uid + ")";
+        sendError(&err);
+        return false;
+      } else {
+        auto status = handleCommands(
+            reinterpret_cast<const torchcraft::fbs::Commands*>(msg->msg()));
+        controller->setCommandsStatus(std::move(status));
+      }
       break;
     }
     default:

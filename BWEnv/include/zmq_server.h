@@ -30,6 +30,7 @@ class ZMQ_server
   std::unique_ptr<zmq::socket_t> sock;
   int port = 0;
   std::string file_socket;
+  std::string client_uid;
 public:
   bool server_sock_connected;
 

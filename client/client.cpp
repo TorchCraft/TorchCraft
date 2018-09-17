@@ -301,13 +301,9 @@ bool Client::receive(std::vector<std::string>& updates) {
     }
     case fbs::Any::Error: {
       auto error = as<fbs::Error>(msgData);
-      auto text = error->message();
-      std::cerr << "[Warning] Unhandled message from server: "
-                << fbs::EnumNameAny(msgType)
-                << "(message=\"" << (text ? text->str() : "(null)") << "\""
-                << std::endl;
-      updates = state_->update(error);
-      break;
+      error_ = std::string("Error from server: ") +
+          (error->message() ? error->message()->str() : "(Null)");
+      return false;
     }
     default:
       error_ = std::string("Error parsing reply: cannot handle message: ") +

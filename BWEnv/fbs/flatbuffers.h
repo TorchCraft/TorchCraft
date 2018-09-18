@@ -413,7 +413,7 @@ class DetachedBuffer {
     : allocator_(other.allocator_), own_allocator_(other.own_allocator_),
       buf_(other.buf_), reserved_(other.reserved_), cur_(other.cur_),
       size_(other.size_) {
-    other.reset();
+    other.reset();  
   }
 
   DetachedBuffer &operator=(DetachedBuffer &&other) {

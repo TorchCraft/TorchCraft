@@ -27,7 +27,7 @@ std::string makeUid(size_t len = 6) {
       "0123456789"
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
       "abcdefghijklmnopqrstuvwxyz";
-  std::uniform_int_distribution<int> dis(0, sizeof(alphanum) - 1);
+  std::uniform_int_distribution<int> dis(0, sizeof(alphanum) - 2);
   std::string s(len, 0);
   for (size_t i = 0; i < len; i++) {
     s[i] = alphanum[dis(rng)];

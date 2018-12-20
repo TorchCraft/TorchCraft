@@ -46,6 +46,7 @@ include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../include/torchcraft
   ${CMAKE_CURRENT_SOURCE_DIR}/../include
   ${BWAPI_INCLUDE_DIRS}
+  ${ZMQ_INCLUDE_DIR}
 )
 
 add_library(BWEnvObj OBJECT

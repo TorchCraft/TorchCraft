@@ -21,7 +21,7 @@
 namespace {
 
 std::string makeUid(size_t len = 6) {
-  static std::mt19937 rng = std::mt19937(std::random_device()());
+  thread_local std::mt19937 rng = std::mt19937(std::random_device()());
 
   static const char alphanum[] =
       "0123456789"
@@ -265,7 +265,7 @@ bool Client::receive(std::vector<std::string>& updates) {
     error_ = "Error parsing reply";
     return false;
   }
-  
+
   auto processCommands = [this](const fbs::StateUpdate* stateUpdate) {
     if (flatbuffers::IsFieldPresent(
       stateUpdate, fbs::StateUpdate::VT_COMMANDS_STATUS)) {

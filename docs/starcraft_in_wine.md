@@ -67,8 +67,7 @@ Warning: Chaoslauncher was only tested to work on wine1.6. For most non-ubuntu d
     "InstallPath"="C:\\StarCraft\\"
     ```
 - Other operating systems:
-  - Sometimes, you need to emulate a virtual desktop: `$ wine /desktop=foo,
-  800x600 bwheadless.exe -e $STARCRAFT/StarCraft.exe -l bwapi-data/BWAPI.dll 
+  - Sometimes, you need to emulate a virtual desktop: `$ wine explorer /desktop=foo,800x600 bwheadless.exe -e $STARCRAFT/StarCraft.exe -l bwapi-data/BWAPI.dll 
   --headful`
 - If the auto-menu doesn’t work for maps:
   - Run everything from the $STARCRAFT folder

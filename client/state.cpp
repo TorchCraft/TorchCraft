@@ -31,6 +31,7 @@ State::State(const State& other)
       walkable_data(other.walkable_data),
       buildable_data(other.buildable_data),
       map_name(other.map_name),
+      map_title(other.map_title),
       start_locations(other.start_locations),
       player_info(other.player_info),
       player_id(other.player_id),
@@ -83,6 +84,7 @@ void swap(State& a, State& b) {
   swap(a.walkable_data, b.walkable_data);
   swap(a.buildable_data, b.buildable_data);
   swap(a.map_name, b.map_name);
+  swap(a.map_title, b.map_title);
   swap(a.start_locations, b.start_locations);
   swap(a.player_info, b.player_info);
   swap(a.player_id, b.player_id);
@@ -124,6 +126,7 @@ void State::reset() {
   walkable_data.clear();
   buildable_data.clear();
   map_name.clear();
+  map_title.clear();
   start_locations.clear();
   player_info.clear();
   frame->clear();
@@ -186,6 +189,10 @@ std::vector<std::string> State::update(const fbs::HandshakeServer* handshake) {
   if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_MAP_NAME)) {
     map_name = handshake->map_name()->str();
     upd.emplace_back("map_name");
+  }
+  if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_MAP_TITLE)) {
+    map_title = handshake->map_title()->str();
+    upd.emplace_back("map_title");
   }
   if (fb::IsFieldPresent(handshake, fbs::HandshakeServer::VT_START_LOCATIONS)) {
     start_locations.clear();

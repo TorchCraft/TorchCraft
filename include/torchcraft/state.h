@@ -62,7 +62,8 @@ class State : public RefCounted {
   std::vector<uint8_t> ground_height_data; // 2D, walk tile resolution
   std::vector<uint8_t> walkable_data; // 2D, walk tile resolution
   std::vector<uint8_t> buildable_data; // 2D, walk tile resolution
-  std::string map_name; // Name on the current map
+  std::string map_name; // File name of the current map or replay; derives from BWAPI::Game::mapFileName()
+  std::string map_title; // Name embedded into the current map; derives from BWAPI::Game::mapName()
   std::vector<Position> start_locations;
   std::map<int, PlayerInfo> player_info;
   int player_id;

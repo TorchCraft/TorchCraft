@@ -218,6 +218,7 @@ void Controller::setupHandshake() {
   handshake.walkable_data = Utils::walkableToVector();
   handshake.buildable_data = Utils::buildableToVector();
   handshake.map_name = BWAPI::Broodwar->mapFileName();
+  handshake.map_title = BWAPI::Broodwar->mapName();
   handshake.neutral_id = BWAPI::Broodwar->neutral()->getID();
   if (BWAPI::Broodwar->isReplay()) {
     handshake.is_replay = true;

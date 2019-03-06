@@ -51,7 +51,8 @@ torchcraft.field_size = {640, 370}   -- size of the field view in pixels (approx
     * ground_height_data  : [torch.ByteTensor] 2D. 255 (-1) where not walkable
     * walkable_data       : [torch.ByteTensor] 2D.
     * buildable_data      : [torch.ByteTensor] 2D.
-    * map_name            : [string] Name on the current map
+    * map_name            : [string] File name of the current map or replay
+    * map_title           : [string] StarCraft name on the current map (or, if in a replay, the original map)
     * img_mode            : [string] Image mode selected (can be empty, raw, compress)
     * lag_frames          : [int] number of frames from order to execution
     * frame_from_bwapi    : [int] game frame number as seen from BWAPI

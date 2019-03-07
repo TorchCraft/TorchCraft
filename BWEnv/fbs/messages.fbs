@@ -40,8 +40,7 @@ table HandshakeServer {
   map_size:Vec2;                // walk tile x and y
   ground_height_data:[ubyte];   // walk tile resolution of ground heights
   walkable_data:[ubyte];        // walk tile resolution of walkability
-  map_name:string;              // file name of the map (from BWAPI::Game::mapFileName())
-  map_title:string;             // in-game name of the map (from BWAPI::Game::mapName())
+  map_name:string;              // file name of the map (from BWAPI::Game::mapFileName()). see also map_title
   is_replay:bool;
   player_id:int;                // if is_replay == false
   neutral_id:int;               // if is_replay == false
@@ -50,6 +49,7 @@ table HandshakeServer {
   start_locations:[Vec2];
   players:[Player];
   frame_from_bwapi:int;
+  map_title:string;             // in-game name of the map (from BWAPI::Game::mapName()). see also map_name
 }
 
 table Commands {

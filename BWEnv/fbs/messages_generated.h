@@ -903,7 +903,6 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
   std::vector<uint8_t> ground_height_data;
   std::vector<uint8_t> walkable_data;
   std::string map_name;
-  std::string map_title;
   bool is_replay;
   int32_t player_id;
   int32_t neutral_id;
@@ -912,6 +911,7 @@ struct HandshakeServerT : public flatbuffers::NativeTable {
   std::vector<Vec2> start_locations;
   std::vector<std::unique_ptr<PlayerT>> players;
   int32_t frame_from_bwapi;
+  std::string map_title;
   HandshakeServerT()
       : lag_frames(0),
         is_replay(false),
@@ -930,15 +930,15 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_GROUND_HEIGHT_DATA = 8,
     VT_WALKABLE_DATA = 10,
     VT_MAP_NAME = 12,
-    VT_MAP_TITLE = 14,
-    VT_IS_REPLAY = 16,
-    VT_PLAYER_ID = 18,
-    VT_NEUTRAL_ID = 20,
-    VT_BATTLE_FRAME_COUNT = 22,
-    VT_BUILDABLE_DATA = 24,
-    VT_START_LOCATIONS = 26,
-    VT_PLAYERS = 28,
-    VT_FRAME_FROM_BWAPI = 30
+    VT_IS_REPLAY = 14,
+    VT_PLAYER_ID = 16,
+    VT_NEUTRAL_ID = 18,
+    VT_BATTLE_FRAME_COUNT = 20,
+    VT_BUILDABLE_DATA = 22,
+    VT_START_LOCATIONS = 24,
+    VT_PLAYERS = 26,
+    VT_FRAME_FROM_BWAPI = 28,
+    VT_MAP_TITLE = 30
   };
   int32_t lag_frames() const {
     return GetField<int32_t>(VT_LAG_FRAMES, 0);
@@ -969,12 +969,6 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   flatbuffers::String *mutable_map_name() {
     return GetPointer<flatbuffers::String *>(VT_MAP_NAME);
-  }
-  const flatbuffers::String *map_title() const {
-    return GetPointer<const flatbuffers::String *>(VT_MAP_TITLE);
-  }
-  flatbuffers::String *mutable_map_title() {
-    return GetPointer<flatbuffers::String *>(VT_MAP_TITLE);
   }
   bool is_replay() const {
     return GetField<uint8_t>(VT_IS_REPLAY, 0) != 0;
@@ -1024,6 +1018,12 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool mutate_frame_from_bwapi(int32_t _frame_from_bwapi) {
     return SetField<int32_t>(VT_FRAME_FROM_BWAPI, _frame_from_bwapi, 0);
   }
+  const flatbuffers::String *map_title() const {
+    return GetPointer<const flatbuffers::String *>(VT_MAP_TITLE);
+  }
+  flatbuffers::String *mutable_map_title() {
+    return GetPointer<flatbuffers::String *>(VT_MAP_TITLE);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<int32_t>(verifier, VT_LAG_FRAMES) &&
@@ -1034,8 +1034,6 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(walkable_data()) &&
            VerifyOffset(verifier, VT_MAP_NAME) &&
            verifier.Verify(map_name()) &&
-           VerifyOffset(verifier, VT_MAP_TITLE) &&
-           verifier.Verify(map_title()) &&
            VerifyField<uint8_t>(verifier, VT_IS_REPLAY) &&
            VerifyField<int32_t>(verifier, VT_PLAYER_ID) &&
            VerifyField<int32_t>(verifier, VT_NEUTRAL_ID) &&
@@ -1048,6 +1046,8 @@ struct HandshakeServer FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(players()) &&
            verifier.VerifyVectorOfTables(players()) &&
            VerifyField<int32_t>(verifier, VT_FRAME_FROM_BWAPI) &&
+           VerifyOffset(verifier, VT_MAP_TITLE) &&
+           verifier.Verify(map_title()) &&
            verifier.EndTable();
   }
   HandshakeServerT *UnPack(const flatbuffers::resolver_function_t *_resolver = nullptr) const;
@@ -1073,9 +1073,6 @@ struct HandshakeServerBuilder {
   void add_map_name(flatbuffers::Offset<flatbuffers::String> map_name) {
     fbb_.AddOffset(HandshakeServer::VT_MAP_NAME, map_name);
   }
-  void add_map_title(flatbuffers::Offset<flatbuffers::String> map_title) {
-    fbb_.AddOffset(HandshakeServer::VT_MAP_TITLE, map_title);
-  }
   void add_is_replay(bool is_replay) {
     fbb_.AddElement<uint8_t>(HandshakeServer::VT_IS_REPLAY, static_cast<uint8_t>(is_replay), 0);
   }
@@ -1100,6 +1097,9 @@ struct HandshakeServerBuilder {
   void add_frame_from_bwapi(int32_t frame_from_bwapi) {
     fbb_.AddElement<int32_t>(HandshakeServer::VT_FRAME_FROM_BWAPI, frame_from_bwapi, 0);
   }
+  void add_map_title(flatbuffers::Offset<flatbuffers::String> map_title) {
+    fbb_.AddOffset(HandshakeServer::VT_MAP_TITLE, map_title);
+  }
   explicit HandshakeServerBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -1119,7 +1119,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> ground_height_data = 0,
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> walkable_data = 0,
     flatbuffers::Offset<flatbuffers::String> map_name = 0,
-    flatbuffers::Offset<flatbuffers::String> map_title = 0,
     bool is_replay = false,
     int32_t player_id = 0,
     int32_t neutral_id = 0,
@@ -1127,8 +1126,10 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
     flatbuffers::Offset<flatbuffers::Vector<uint8_t>> buildable_data = 0,
     flatbuffers::Offset<flatbuffers::Vector<const Vec2 *>> start_locations = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Player>>> players = 0,
-    int32_t frame_from_bwapi = 0) {
+    int32_t frame_from_bwapi = 0,
+    flatbuffers::Offset<flatbuffers::String> map_title = 0) {
   HandshakeServerBuilder builder_(_fbb);
+  builder_.add_map_title(map_title);
   builder_.add_frame_from_bwapi(frame_from_bwapi);
   builder_.add_players(players);
   builder_.add_start_locations(start_locations);
@@ -1136,7 +1137,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(
   builder_.add_battle_frame_count(battle_frame_count);
   builder_.add_neutral_id(neutral_id);
   builder_.add_player_id(player_id);
-  builder_.add_map_title(map_title);
   builder_.add_map_name(map_name);
   builder_.add_walkable_data(walkable_data);
   builder_.add_ground_height_data(ground_height_data);
@@ -1153,7 +1153,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
     const std::vector<uint8_t> *ground_height_data = nullptr,
     const std::vector<uint8_t> *walkable_data = nullptr,
     const char *map_name = nullptr,
-    const char *map_title = nullptr,
     bool is_replay = false,
     int32_t player_id = 0,
     int32_t neutral_id = 0,
@@ -1161,7 +1160,8 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
     const std::vector<uint8_t> *buildable_data = nullptr,
     const std::vector<const Vec2 *> *start_locations = nullptr,
     const std::vector<flatbuffers::Offset<Player>> *players = nullptr,
-    int32_t frame_from_bwapi = 0) {
+    int32_t frame_from_bwapi = 0,
+    const char *map_title = nullptr) {
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
       lag_frames,
@@ -1169,7 +1169,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
       ground_height_data ? _fbb.CreateVector<uint8_t>(*ground_height_data) : 0,
       walkable_data ? _fbb.CreateVector<uint8_t>(*walkable_data) : 0,
       map_name ? _fbb.CreateString(map_name) : 0,
-      map_title ? _fbb.CreateString(map_title) : 0,
       is_replay,
       player_id,
       neutral_id,
@@ -1177,7 +1176,8 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServerDirect(
       buildable_data ? _fbb.CreateVector<uint8_t>(*buildable_data) : 0,
       start_locations ? _fbb.CreateVector<const Vec2 *>(*start_locations) : 0,
       players ? _fbb.CreateVector<flatbuffers::Offset<Player>>(*players) : 0,
-      frame_from_bwapi);
+      frame_from_bwapi,
+      map_title ? _fbb.CreateString(map_title) : 0);
 }
 
 flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT *_o, const flatbuffers::rehasher_function_t *_rehasher = nullptr);
@@ -3858,7 +3858,6 @@ inline void HandshakeServer::UnPackTo(HandshakeServerT *_o, const flatbuffers::r
   { auto _e = ground_height_data(); if (_e) { _o->ground_height_data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->ground_height_data[_i] = _e->Get(_i); } } };
   { auto _e = walkable_data(); if (_e) { _o->walkable_data.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->walkable_data[_i] = _e->Get(_i); } } };
   { auto _e = map_name(); if (_e) _o->map_name = _e->str(); };
-  { auto _e = map_title(); if (_e) _o->map_title = _e->str(); };
   { auto _e = is_replay(); _o->is_replay = _e; };
   { auto _e = player_id(); _o->player_id = _e; };
   { auto _e = neutral_id(); _o->neutral_id = _e; };
@@ -3867,6 +3866,7 @@ inline void HandshakeServer::UnPackTo(HandshakeServerT *_o, const flatbuffers::r
   { auto _e = start_locations(); if (_e) { _o->start_locations.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->start_locations[_i] = *_e->Get(_i); } } };
   { auto _e = players(); if (_e) { _o->players.resize(_e->size()); for (flatbuffers::uoffset_t _i = 0; _i < _e->size(); _i++) { _o->players[_i] = std::unique_ptr<PlayerT>(_e->Get(_i)->UnPack(_resolver)); } } };
   { auto _e = frame_from_bwapi(); _o->frame_from_bwapi = _e; };
+  { auto _e = map_title(); if (_e) _o->map_title = _e->str(); };
 }
 
 inline flatbuffers::Offset<HandshakeServer> HandshakeServer::Pack(flatbuffers::FlatBufferBuilder &_fbb, const HandshakeServerT* _o, const flatbuffers::rehasher_function_t *_rehasher) {
@@ -3882,7 +3882,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
   auto _ground_height_data = _o->ground_height_data.size() ? _fbb.CreateVector(_o->ground_height_data) : 0;
   auto _walkable_data = _o->walkable_data.size() ? _fbb.CreateVector(_o->walkable_data) : 0;
   auto _map_name = _o->map_name.empty() ? 0 : _fbb.CreateString(_o->map_name);
-  auto _map_title = _o->map_title.empty() ? 0 : _fbb.CreateString(_o->map_title);
   auto _is_replay = _o->is_replay;
   auto _player_id = _o->player_id;
   auto _neutral_id = _o->neutral_id;
@@ -3891,6 +3890,7 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
   auto _start_locations = _o->start_locations.size() ? _fbb.CreateVectorOfStructs(_o->start_locations) : 0;
   auto _players = _o->players.size() ? _fbb.CreateVector<flatbuffers::Offset<Player>> (_o->players.size(), [](size_t i, _VectorArgs *__va) { return CreatePlayer(*__va->__fbb, __va->__o->players[i].get(), __va->__rehasher); }, &_va ) : 0;
   auto _frame_from_bwapi = _o->frame_from_bwapi;
+  auto _map_title = _o->map_title.empty() ? 0 : _fbb.CreateString(_o->map_title);
   return torchcraft::fbs::CreateHandshakeServer(
       _fbb,
       _lag_frames,
@@ -3898,7 +3898,6 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
       _ground_height_data,
       _walkable_data,
       _map_name,
-      _map_title,
       _is_replay,
       _player_id,
       _neutral_id,
@@ -3906,7 +3905,8 @@ inline flatbuffers::Offset<HandshakeServer> CreateHandshakeServer(flatbuffers::F
       _buildable_data,
       _start_locations,
       _players,
-      _frame_from_bwapi);
+      _frame_from_bwapi,
+      _map_title);
 }
 
 inline CommandsT *Commands::UnPack(const flatbuffers::resolver_function_t *_resolver) const {

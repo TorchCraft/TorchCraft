@@ -46,6 +46,7 @@ const std::set<std::string> stateMembers = {
     "walkable_data",
     "buildable_data",
     "map_name",
+    "map_title",
     "start_locations",
     "player_info",
     "player_id",
@@ -124,7 +125,9 @@ int pushMember(
     }
   } else if (m == "map_name") {
     lua_pushstring(L, s->map_name.c_str());
-  } else if (m == "start_locations") {
+  } else if (m == "map_title") {
+    lua_pushstring(L, s->map_title.c_str());
+  }else if (m == "start_locations") {
     lua_createtable(L, s->start_locations.size(), 0);
     int n = 1;
     for (auto d : s->start_locations) {

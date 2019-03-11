@@ -43,6 +43,7 @@ void init_state(py::module& torchcraft) {
       .def_readwrite("walkable_data", &State::walkable_data)
       .def_readwrite("buildable_data", &State::buildable_data)
       .def_readwrite("map_name", &State::map_name)
+      .def_readwrite("map_title", &State::map_title)
       .def_readwrite("start_locations", &State::start_locations)
       .def_readwrite("player_info", &State::player_info)
       .def_readwrite("player_id", &State::player_id)

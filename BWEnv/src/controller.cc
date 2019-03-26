@@ -520,6 +520,9 @@ int8_t Controller::handleCommand(
             {OBWCommands::SET_UNIT_HEALTH, 2},
             {OBWCommands::SET_UNIT_SHIELD, 2},
             {OBWCommands::SET_UNIT_ENERGY, 2},
+            {OBWCommands::SAVE_SNAPSHOT, 0},
+            {OBWCommands::LOAD_SNAPSHOT, 0},
+            {OBWCommands::DELETE_SNAPSHOT, 0},
         };
         if (!check_args(obw_argcount[command]))
           return status;
@@ -528,7 +531,7 @@ int8_t Controller::handleCommand(
         auto last = args.end();
         std::vector<int> user_args(second, last);
 
-        return handleOpenBWCommand(type, user_args);
+        return handleOpenBWCommand(type, user_args, str);
       }
     }
   }
@@ -538,7 +541,8 @@ int8_t Controller::handleCommand(
 
 int8_t Controller::handleOpenBWCommand(
     int command,
-    const std::vector<int>& args) {
+    const std::vector<int>& args,
+    const std::string& str) {
 #ifndef OPENBW_BWAPI
   return CommandStatus::OPENBW_NOT_IN_USE;
 #else
@@ -617,6 +621,27 @@ int8_t Controller::handleOpenBWCommand(
         return CommandStatus::INVALID_UNIT;
       }
       u->setEnergy(args[1]);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::SAVE_SNAPSHOT: {
+      if (str == "") {
+        return CommandStatus::MISSING_ARGUMENTS;
+      }
+      BWAPI::Broodwar->saveSnapshot(str);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::LOAD_SNAPSHOT: {
+      if (str == "") {
+        return CommandStatus::MISSING_ARGUMENTS;
+      }
+      BWAPI::Broodwar->loadSnapshot(str);
+      return CommandStatus::SUCCESS;
+    }
+    case OBWCommands::DELETE_SNAPSHOT: {
+      if (str == "") {
+        return CommandStatus::MISSING_ARGUMENTS;
+      }
+      BWAPI::Broodwar->deleteSnapshot(str);
       return CommandStatus::SUCCESS;
     }
   }

@@ -78,6 +78,9 @@ enum OBWCommands {
   SET_UNIT_HEALTH, // unit, health
   SET_UNIT_SHIELD, // unit, shield
   SET_UNIT_ENERGY, // unit, energy
+  SAVE_SNAPSHOT, // name
+  LOAD_SNAPSHOT, // name
+  DELETE_SNAPSHOT, // name
 };
 
 enum CommandStatus : int8_t {
@@ -116,7 +119,10 @@ class Controller {
       const std::vector<int>& args,
       const std::string& str);
   int8_t handleUserCommand(int command, const std::vector<int>& args);
-  int8_t handleOpenBWCommand(int command, const std::vector<int>& args);
+  int8_t handleOpenBWCommand(
+      int command,
+      const std::vector<int>& args,
+      const std::string& str);
   void setCommandsStatus(std::vector<int8_t> status);
   BWAPI::Position getPositionFromWalkTiles(int x, int y);
   BWAPI::TilePosition getTilePositionFromWalkTiles(int x, int y);

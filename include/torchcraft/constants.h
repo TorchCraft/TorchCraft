@@ -823,7 +823,7 @@ BETTER_ENUM(
     Teal = 159,
     Purple = 164,
     Blue = 165,
-    Orange = -179,
+    Orange = 179,
     White = 255)
 
 constexpr int XYPixelsPerWalktile = 8;

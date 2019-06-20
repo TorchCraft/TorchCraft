@@ -148,6 +148,9 @@ void State::reset() {
   aliveUnits.clear();
   aliveUnitsConsidered.clear();
   units.clear();
+  units[-1]={};
+  units[0]={};
+  units[1]={};
 
   numUpdates++;
 }

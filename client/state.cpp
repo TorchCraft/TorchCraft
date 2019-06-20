@@ -146,7 +146,13 @@ void State::reset() {
   image_size[0] = 0;
   image_size[1] = 0;
   aliveUnits.clear();
+  aliveUnits[-1]={};
+  aliveUnits[0]={};
+  aliveUnits[1]={};
   aliveUnitsConsidered.clear();
+  aliveUnitsConsidered[-1]={};
+  aliveUnitsConsidered[0]={};
+  aliveUnitsConsidered[1]={};
   units.clear();
   units[-1]={};
   units[0]={};

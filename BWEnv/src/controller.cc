@@ -857,20 +857,21 @@ void Controller::onFrame() {
     f->height = BWAPI::Broodwar->mapHeight() * 4;
     f->width = BWAPI::Broodwar->mapWidth() * 4;
 
-    if (BWAPI::Broodwar->isReplay()) {
-      for (auto player : BWAPI::Broodwar->getPlayers()) {
-        if (!player->isNeutral()) {
+    for (auto player : BWAPI::Broodwar->getPlayers()) {
+      if (!player->isNeutral()) {
+        // BWAPI can't accurately identify enemy players who start the game
+        // without units (eg. an empty map where we spawn units)
+        // so it's important not to use isEnemy() or Broodwar->enemy() to identify
+        // enemy players.
+        if (player == BWAPI::Broodwar->self() && ! BWAPI::Broodwar->isReplay()) {
+          this->packMyUnits(*f);
+        } else {
           this->packTheirUnits(*f, player);
-          this->packResources(*f, player);
         }
+        this->packResources(*f, player);
       }
-      this->packNeutral(*f);
-    } else {
-      this->packResources(*f, BWAPI::Broodwar->self());
-      this->packMyUnits(*f);
-      this->packTheirUnits(*f, BWAPI::Broodwar->enemy());
-      this->packNeutral(*f);
     }
+    this->packNeutral(*f);
     this->packBullets(*f);
     this->packCreep(*f);
 

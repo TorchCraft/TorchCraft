@@ -15,11 +15,7 @@ namespace fb = flatbuffers;
 
 namespace torchcraft {
 
-State::State(bool microBattles, std::set<BW::UnitType> onlyConsiderTypes)
-    : RefCounted(),
-      frame(new Frame()),
-      microBattles_(microBattles),
-      onlyConsiderTypes_(std::move(onlyConsiderTypes)) {
+State::State(): RefCounted(), frame(new Frame()) {
   reset();
 }
 
@@ -40,25 +36,16 @@ State::State(const State& other)
       frame(new Frame(other.frame)),
       deaths(other.deaths),
       frame_from_bwapi(other.frame_from_bwapi),
-      battle_frame_count(other.battle_frame_count),
       game_ended(other.game_ended),
       game_won(other.game_won),
-      battle_just_ended(other.battle_just_ended),
-      battle_won(other.battle_won),
-      waiting_for_restart(other.waiting_for_restart),
-      last_battle_ended(other.last_battle_ended),
       img_mode(other.img_mode),
       screen_position{other.screen_position[0], other.screen_position[1]},
       visibility(other.visibility),
       visibility_size{other.visibility_size[0], other.visibility_size[1]},
       image(other.image),
       image_size{other.image_size[0], other.image_size[1]},
-      aliveUnits(other.aliveUnits),
-      aliveUnitsConsidered(other.aliveUnitsConsidered),
       units(other.units),
-      numUpdates(other.numUpdates),
-      microBattles_(other.microBattles_),
-      onlyConsiderTypes_(other.onlyConsiderTypes_) {}
+      numUpdates(other.numUpdates) {}
 
 State::State(State&& other) : RefCounted(), frame(nullptr) {
   swap(*this, other);
@@ -93,13 +80,8 @@ void swap(State& a, State& b) {
   swap(a.frame, b.frame);
   swap(a.deaths, b.deaths);
   swap(a.frame_from_bwapi, b.frame_from_bwapi);
-  swap(a.battle_frame_count, b.battle_frame_count);
   swap(a.game_ended, b.game_ended);
   swap(a.game_won, b.game_won);
-  swap(a.battle_just_ended, b.battle_just_ended);
-  swap(a.battle_won, b.battle_won);
-  swap(a.waiting_for_restart, b.waiting_for_restart);
-  swap(a.last_battle_ended, b.last_battle_ended);
   swap(a.img_mode, b.img_mode);
   swap(a.screen_position[0], b.screen_position[0]);
   swap(a.screen_position[1], b.screen_position[1]);
@@ -109,12 +91,8 @@ void swap(State& a, State& b) {
   swap(a.image, b.image);
   swap(a.image_size[0], b.image_size[0]);
   swap(a.image_size[1], b.image_size[1]);
-  swap(a.aliveUnits, b.aliveUnits);
-  swap(a.aliveUnitsConsidered, b.aliveUnitsConsidered);
   swap(a.units, b.units);
   swap(a.numUpdates, b.numUpdates);
-  swap(a.microBattles_, b.microBattles_);
-  swap(a.onlyConsiderTypes_, b.onlyConsiderTypes_);
 }
 
 void State::reset() {
@@ -132,27 +110,14 @@ void State::reset() {
   frame->clear();
   deaths.clear();
   frame_from_bwapi = 0;
-  battle_frame_count = 0;
   game_ended = false;
   game_won = false;
-  battle_just_ended = false;
-  battle_won = false;
-  waiting_for_restart = microBattles_;
-  last_battle_ended = 0;
   img_mode.clear();
   screen_position[0] = -1;
   screen_position[1] = -1;
   image.clear(); // XXX invalidates existing tensors pointing to it
   image_size[0] = 0;
   image_size[1] = 0;
-  aliveUnits.clear();
-  aliveUnits[-1]={};
-  aliveUnits[0]={};
-  aliveUnits[1]={};
-  aliveUnitsConsidered.clear();
-  aliveUnitsConsidered[-1]={};
-  aliveUnitsConsidered[0]={};
-  aliveUnitsConsidered[1]={};
   units.clear();
   units[-1]={};
   units[0]={};
@@ -228,8 +193,6 @@ std::vector<std::string> State::update(const fbs::HandshakeServer* handshake) {
   upd.emplace_back("player_id");
   neutral_id = handshake->neutral_id();
   upd.emplace_back("neutral_id");
-  battle_frame_count = handshake->battle_frame_count();
-  upd.emplace_back("battle_frame_count");
   replay = handshake->is_replay();
   upd.emplace_back("replay");
   frame_from_bwapi = handshake->frame_from_bwapi();
@@ -284,8 +247,6 @@ std::vector<std::string> State::update(const fbs::StateUpdate* stateUpdate) {
 
   frame_from_bwapi = stateUpdate->frame_from_bwapi();
   upd.emplace_back("frame_from_bwapi");
-  battle_frame_count = stateUpdate->battle_frame_count();
-  upd.emplace_back("battle_frame_count");
 
   if (fb::IsFieldPresent(stateUpdate, fbs::StateUpdate::VT_IMG_MODE)) {
     img_mode = stateUpdate->img_mode()->str();
@@ -402,47 +363,6 @@ void State::preUpdate() {
 void State::postUpdate(std::vector<std::string>& upd) {
   numUpdates++;
 
-  if (microBattles_) {
-    if (battle_just_ended) {
-      upd.emplace_back("battle_just_ended");
-    }
-    battle_just_ended = false;
-
-    // Apply list of deaths on list of units from previous frame
-    // so that battle ended condition can be detected every time.
-    // This is particularly important with frame skipping: it's possible
-    // that all remaining units die in the same interval and we wouldn't be able
-    // to find out who won.
-    for (auto d : deaths) {
-      aliveUnits.erase(d);
-      if (!onlyConsiderTypes_.empty()) {
-        aliveUnitsConsidered.erase(d);
-      }
-      if (checkBattleFinished(upd)) {
-        break;
-      }
-    }
-
-    if (battle_just_ended) {
-      // Remove dead units from *previous* frame; if the battle has just ended,
-      // we won't bother copying the frame units.
-      for (auto& us : units) {
-        us.second.erase(
-            std::remove_if(
-                us.second.begin(),
-                us.second.end(),
-                [this](const Unit& unit) {
-                  return aliveUnits.find(unit.id) == aliveUnits.end();
-                }),
-            us.second.end());
-      }
-    }
-  }
-
-  if (microBattles_ && battle_just_ended) {
-    return;
-  }
-
   // Update units
   for (auto& us : units) {
     if (frame->units.find(us.first) == frame->units.end()) {
@@ -471,64 +391,6 @@ void State::postUpdate(std::vector<std::string>& upd) {
               std::find(deaths.begin(), deaths.end(), unit.id) == deaths.end());
         });
   }
-
-  // Update alive units
-  aliveUnits.clear();
-  aliveUnitsConsidered.clear();
-  for (const auto& us : units) {
-    auto player = us.first;
-    for (const auto& unit : us.second) {
-      aliveUnits[unit.id] = player;
-      if (!onlyConsiderTypes_.empty() &&
-          onlyConsiderTypes_.find(BW::UnitType::_from_integral(unit.type)) !=
-              onlyConsiderTypes_.end()) {
-        aliveUnitsConsidered[unit.id] = player;
-      }
-    }
-  }
-
-  if (microBattles_ && waiting_for_restart) {
-    // Check if both players have active units
-    auto numUnitsMyself = units[player_id].size();
-    auto numUnitsEnemy = units[1 - player_id].size();
-    if (numUnitsMyself > 0 && numUnitsEnemy > 0) {
-      waiting_for_restart = false;
-      upd.emplace_back("waiting_for_restart");
-    }
-  }
-}
-
-bool State::checkBattleFinished(std::vector<std::string>& upd) {
-  if (waiting_for_restart) {
-    return false;
-  }
-
-  auto map = &aliveUnits;
-  if (!onlyConsiderTypes_.empty()) {
-    map = &aliveUnitsConsidered;
-  }
-  size_t numUnitsMyself = 0;
-  size_t numUnitsEnemy = 0;
-  for (auto unit : *map) {
-    if (unit.second == player_id) {
-      numUnitsMyself++;
-    } else if (unit.second == 1 - player_id) {
-      numUnitsEnemy++;
-    }
-  }
-
-  if (numUnitsMyself == 0 || numUnitsEnemy == 0) {
-    battle_just_ended = true;
-    upd.emplace_back("battle_just_ended");
-    battle_won = numUnitsMyself > 0 || numUnitsEnemy == 0;
-    upd.emplace_back("battle_won");
-    waiting_for_restart = true;
-    upd.emplace_back("waiting_for_restart");
-    last_battle_ended = frame_from_bwapi;
-    upd.emplace_back("last_battle_ended");
-    return true;
-  }
-  return false;
 }
 
 } // namespace torchcraft

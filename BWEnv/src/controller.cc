@@ -226,7 +226,6 @@ void Controller::setupHandshake() {
     handshake.is_replay = false;
     handshake.player_id = BWAPI::Broodwar->self()->getID();
   }
-  handshake.battle_frame_count = battle_frame_count;
   handshake.frame_from_bwapi = BWAPI::Broodwar->getFrameCount();
   for (auto loc : BWAPI::Broodwar->getStartLocations()) {
     BWAPI::WalkPosition walkPos(loc);
@@ -373,98 +372,6 @@ int8_t Controller::handleCommand(
       case Commands::SET_MAX_FRAME_TIME_MS:
         max_frame_time_ms_ = args[0];
         return CommandStatus::SUCCESS;
-    }
-  } else if (command <= Commands::COMMAND_UNIT_PROTECTED) {
-    if (!check_args(2))
-      return status;
-    auto unit = check_unit(args[0]);
-    if (unit == nullptr)
-      return status;
-    auto cmd_type = args[1];
-    auto target =
-        (args.size() >= 3 ? BWAPI::Broodwar->getUnit(args[2]) : nullptr);
-    BWAPI::Position position = BWAPI::Positions::Invalid;
-    BWAPI::TilePosition tposition = BWAPI::TilePositions::Invalid;
-    if (args.size() >= 5) {
-      // Some commands require tile position
-      if (cmd_type == BWAPI::UnitCommandTypes::Build ||
-          cmd_type == BWAPI::UnitCommandTypes::Land ||
-          cmd_type == BWAPI::UnitCommandTypes::Build_Addon ||
-          cmd_type == BWAPI::UnitCommandTypes::Place_COP)
-        tposition = getTilePositionFromWalkTiles(args[3], args[4]);
-      else
-        position = getPositionFromWalkTiles(args[3], args[4]);
-    }
-    int x, y;
-    if (position.isValid()) {
-      x = position.x;
-      y = position.y;
-    } else if (tposition.isValid()) {
-      x = tposition.x;
-      y = tposition.y;
-    } else {
-      x = y = 0;
-    }
-    auto extra = (args.size() >= 6 ? args[5] : 0);
-    switch (command) {
-      case Commands::COMMAND_UNIT:
-        Utils::bwlog(
-            output_log,
-            "Unit:%d command (%d, %d, (%d, %d), %d)",
-            args[0],
-            cmd_type,
-            target,
-            x,
-            y,
-            extra);
-        if (!unit->issueCommand(
-                BWAPI::UnitCommand(unit, cmd_type, target, x, y, extra))) {
-          Utils::bwlog(
-              output_log,
-              "Commanding unit failed! Error: %s",
-              BWAPI::Broodwar->getLastError().c_str());
-          return CommandStatus::BWAPI_ERROR_MASK |
-              BWAPI::Broodwar->getLastError().getID();
-        }
-        return CommandStatus::SUCCESS;
-      case Commands::COMMAND_UNIT_PROTECTED:
-        const char* msg = "OK";
-        status = CommandStatus::PROTECTED;
-        if (target != nullptr && unit->getTarget() == target) {
-          msg = "CANCELED (already targetted)";
-        } else if (target != nullptr && unit->getOrderTarget() == target) {
-          msg = "CANCELED (already targetted 2)";
-        } else if (unit->isAttackFrame()) {
-          msg = "CANCELED (attack frame)";
-        } else if (
-            unit->getOrder() == BWAPI::Orders::AttackUnit &&
-            unit->getLastCommandFrame() + getAttackFrames(args[0]) >=
-                BWAPI::Broodwar->getFrameCount()) {
-          msg = "CANCELED (still attacking)";
-        } else {
-          if (!unit->issueCommand(
-                  BWAPI::UnitCommand(unit, cmd_type, target, x, y, extra))) {
-            Utils::bwlog(
-                output_log,
-                "Commanding unit failed! Error: %s",
-                BWAPI::Broodwar->getLastError().c_str());
-            status = CommandStatus::BWAPI_ERROR_MASK |
-                BWAPI::Broodwar->getLastError().getID();
-          } else {
-            status = CommandStatus::SUCCESS;
-          }
-        }
-        Utils::bwlog(
-            output_log,
-            "Unit:%d command (%d, %d, (%d, %d), %d) %s",
-            args[0],
-            cmd_type,
-            args[2],
-            x,
-            y,
-            extra,
-            msg);
-        return status;
     }
   } else if (command < Commands::COMMAND_END) {
     switch (command) {
@@ -834,56 +741,38 @@ void Controller::onFrame() {
   // Should we ideally send this frame or do we have to under all
   // circumstances?
   bool should_send = (combined_frames + 1 >= min_combine_frames);
-  bool must_send = false;
-  if (max_combine_frames >= 0 && (combined_frames + 1 >= max_combine_frames)) {
-    must_send = true;
-  }
+  bool must_send = max_combine_frames >= 0 && (combined_frames + 1 >= max_combine_frames);
 
-  // If we are in battle mode and the battle has ended, we need to:
-  // 1. Send as soon as possible a frame where the Lua side can identify
-  //    the winner, before all the units get destroyed
-  // 2. Stop sending frames while the next battle has not started.
-  bool battle_ended = micro_mode && !BWAPI::Broodwar->isReplay() &&
-      (BWAPI::Broodwar->self()->getUnits().empty() ||
-       BWAPI::Broodwar->enemy()->getUnits().empty());
+  replayer::Frame* f = new replayer::Frame();
+  f->height = BWAPI::Broodwar->mapHeight() * 4;
+  f->width = BWAPI::Broodwar->mapWidth() * 4;
 
-  if (battle_ended && !this->sent_battle_end_frame) {
-    must_send = true;
-  }
-
-  // Save frame state
-  if (!battle_ended || !this->sent_battle_end_frame || last_frame == nullptr) {
-    replayer::Frame* f = new replayer::Frame();
-    f->height = BWAPI::Broodwar->mapHeight() * 4;
-    f->width = BWAPI::Broodwar->mapWidth() * 4;
-
-    for (auto player : BWAPI::Broodwar->getPlayers()) {
-      if (!player->isNeutral()) {
-        // BWAPI can't accurately identify enemy players who start the game
-        // without units (eg. an empty map where we spawn units)
-        // so it's important not to use isEnemy() or Broodwar->enemy() to identify
-        // enemy players.
-        if (player == BWAPI::Broodwar->self() && ! BWAPI::Broodwar->isReplay()) {
-          this->packMyUnits(*f);
-        } else {
-          this->packTheirUnits(*f, player);
-        }
-        this->packResources(*f, player);
+  for (auto player : BWAPI::Broodwar->getPlayers()) {
+    if (!player->isNeutral()) {
+      // BWAPI can't accurately identify enemy players who start the game
+      // without units (eg. an empty map where we spawn units)
+      // so it's important not to use isEnemy() or Broodwar->enemy() to identify
+      // enemy players.
+      if (player == BWAPI::Broodwar->self() && ! BWAPI::Broodwar->isReplay()) {
+        this->packMyUnits(*f);
+      } else {
+        this->packTheirUnits(*f, player);
       }
+      this->packResources(*f, player);
     }
-    this->packNeutral(*f);
-    this->packBullets(*f);
-    this->packCreep(*f);
-
-    // Combine with last_frame
-    if (last_frame == nullptr) {
-      last_frame = f;
-    } else {
-      last_frame->combine(*f);
-      f->decref();
-    }
-    combined_frames++;
   }
+  this->packNeutral(*f);
+  this->packBullets(*f);
+  this->packCreep(*f);
+
+  // Combine with last_frame
+  if (last_frame == nullptr) {
+    last_frame = f;
+  } else {
+    last_frame->combine(*f);
+    f->decref();
+  }
+  combined_frames++;
 
   // We can send the data if the last receive call did complete
   bool send_frame = (should_send && last_receive_ok) || must_send;
@@ -968,7 +857,6 @@ void Controller::onFrame() {
     stateUpdateBuilder.add_data_type(frameSerializationResults.type);
     stateUpdateBuilder.add_deaths(deathsOffset);
     stateUpdateBuilder.add_frame_from_bwapi(BWAPI::Broodwar->getFrameCount());
-    stateUpdateBuilder.add_battle_frame_count(this->battle_frame_count);
     stateUpdateBuilder.add_commands_status(commandsOffset);
     stateUpdateBuilder.add_img_mode(imgModeOffset);
     stateUpdateBuilder.add_screen_position(&vec2ScreenPosition);    
@@ -981,10 +869,6 @@ void Controller::onFrame() {
     
     this->zmq_server->sendFrame(stateUpdateOffset, builder);
     combined_frames = 0;
-
-    if (battle_ended) {
-      this->sent_battle_end_frame = true;
-    }
 
     // Ready for new commands!
     receive_commands = true;
@@ -1003,13 +887,6 @@ void Controller::onFrame() {
           int(std::chrono::duration_cast<std::chrono::milliseconds>(timeLeft)
                   .count())));
     }
-  }
-
-  if (battle_ended) {
-    this->battle_frame_count = 0;
-  } else {
-    this->battle_frame_count++;
-    this->sent_battle_end_frame = false; // reset state
   }
 }
 
@@ -1321,7 +1198,6 @@ void Controller::handleEvents() {
       case BWAPI::EventType::MatchEnd:
         this->game_ended = true;
         this->is_winner = e.isWinner();
-        this->battle_frame_count = 0;
         break;
       default:
         break;

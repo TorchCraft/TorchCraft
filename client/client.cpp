@@ -50,7 +50,6 @@ void buildHandshakeMessage(
     hsc.window_pos.reset(
         new torchcraft::fbs::Vec2(opts.window_pos[0], opts.window_pos[1]));
   }
-  hsc.micro_mode = opts.micro_battles;
 
   auto payload = torchcraft::fbs::HandshakeClient::Pack(fbb, &hsc);
   auto root = torchcraft::fbs::CreateMessageDirect(
@@ -192,8 +191,6 @@ bool Client::init(std::vector<std::string>& updates, const Options& opts) {
     return false;
   }
 
-  state_->setMicroBattles(opts.micro_battles);
-  state_->setOnlyConsiderTypes(opts.only_consider_types);
   updates = state_->update(
       reinterpret_cast<const fbs::HandshakeServer*>(msg->msg()));
   return true;

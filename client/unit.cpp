@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#include <torchcraft/constants.h>
 #include <torchcraft/unit.h>
 #include <torchcraft/state.h>
 
@@ -18,6 +19,10 @@ bool Unit::isMine() const {
 }
 bool Unit::isNeutral() const {
   return playerId == state->neutral_id;
+}
+
+int32_t Unit::constructingType() const {
+  return (upgrading() || researching()) ? BW::UnitType::MAX : buildTechUpgradeType;
 }
 
 } //namespace replayer

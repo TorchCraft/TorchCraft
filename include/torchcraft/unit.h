@@ -238,6 +238,7 @@ struct Unit {
   bool ensnared() const {
     return flag(Flags::Ensnared);
   }
+  int32_t constructingType() const;
 };
 
 } //namespace replayer

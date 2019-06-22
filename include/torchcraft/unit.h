@@ -10,8 +10,12 @@
 #pragma once
 
 #include <torchcraft/primitives.h>
+#include <vector>
 
 namespace torchcraft {
+
+struct State;
+
 namespace replayer {
 
 struct Order {
@@ -125,7 +129,13 @@ struct Unit {
     // clang-format on
   };
 
+  State* state;
 
+  bool isMine() const;
+  bool isNeutral() const;
+  bool isEnemy() const {
+    return ! isMine() && ! isNeutral();
+  }
   bool flag(Flags n) const {
     return (flags & n) != 0;
   }

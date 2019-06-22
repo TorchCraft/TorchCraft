@@ -7,12 +7,18 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#pragma once
+#include <torchcraft/unit.h>
+#include <torchcraft/state.h>
 
-#include <cstdint>
+namespace torchcraft {
+namespace replayer {
 
-#ifdef _MSC_VER
-typedef unsigned int uint32_t;
-typedef unsigned short uint16_t;
-typedef int int32_t;
-#endif
+bool Unit::isMine() const {
+  return playerId == state->player_id;
+}
+bool Unit::isNeutral() const {
+  return playerId == state->neutral_id;
+}
+
+} //namespace replayer
+} //namespace torchcraft

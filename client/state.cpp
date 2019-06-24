@@ -45,6 +45,7 @@ State::State(const State& other)
       image(other.image),
       image_size{other.image_size[0], other.image_size[1]},
       units(other.units),
+      allUnits(other.allUnits),
       numUpdates(other.numUpdates) {}
 
 State::State(State&& other) : RefCounted(), frame(nullptr) {
@@ -92,6 +93,7 @@ void swap(State& a, State& b) {
   swap(a.image_size[0], b.image_size[0]);
   swap(a.image_size[1], b.image_size[1]);
   swap(a.units, b.units);
+  swap(a.allUnits, b.allUnits);
   swap(a.numUpdates, b.numUpdates);
 }
 
@@ -122,6 +124,7 @@ void State::reset() {
   units[-1]={};
   units[0]={};
   units[1]={};
+  allUnits.clear();
 
   numUpdates++;
 }
@@ -370,8 +373,8 @@ void State::postUpdate(std::vector<std::string>& upd) {
       us.second.clear();
     }
   }
-  for (const auto& fus : frame->units) {
-    auto player = fus.first;
+  for (const auto& frameUnits : frame->units) {
+    auto player = frameUnits.first;
     if (units.find(player) == units.end()) {
       units.emplace(player, std::vector<Unit>());
     } else {
@@ -379,8 +382,8 @@ void State::postUpdate(std::vector<std::string>& upd) {
     }
 
     std::copy_if(
-        fus.second.begin(),
-        fus.second.end(),
+        frameUnits.second.begin(),
+        frameUnits.second.end(),
         std::back_inserter(units[player]),
         [this, player](const Unit& unit) {
           auto ut = torchcraft::BW::UnitType::_from_integral_nothrow(unit.type);
@@ -390,6 +393,11 @@ void State::postUpdate(std::vector<std::string>& upd) {
               // Unit has not been marked dead
               std::find(deaths.begin(), deaths.end(), unit.id) == deaths.end());
         });
+  }
+  for (auto& playerUnits : units) { 
+    for (auto& unit : playerUnits.second) {
+      allUnits.push_back(&unit);
+    }
   }
 }
 

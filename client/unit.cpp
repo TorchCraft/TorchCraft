@@ -7,6 +7,7 @@
  * of patent rights can be found in the PATENTS file in the same directory.
  */
 
+#include <torchcraft/buildtype.h>
 #include <torchcraft/constants.h>
 #include <torchcraft/unit.h>
 #include <torchcraft/state.h>
@@ -21,8 +22,8 @@ bool Unit::isNeutral() const {
   return playerId == state->neutral_id;
 }
 
-int32_t Unit::constructingType() const {
-  return (upgrading() || researching()) ? BW::UnitType::MAX : buildTechUpgradeType;
+const BuildType* Unit::constructingType() const {
+  return (upgrading() || researching()) ? nullptr : getUnitBuildType(buildTechUpgradeType);
 }
 
 } //namespace replayer

@@ -74,16 +74,9 @@ class State : public RefCounted {
   Frame* frame; // this will allow for easy reset (XXX)
   std::vector<int> deaths;
   int frame_from_bwapi;
-  int battle_frame_count; // if micro mode
 
   bool game_ended; // did the game end?
   bool game_won;
-
-  // if micro mode
-  bool battle_just_ended;
-  bool battle_won;
-  bool waiting_for_restart;
-  int last_battle_ended;
 
   // if with image
   std::string img_mode;
@@ -94,14 +87,14 @@ class State : public RefCounted {
   std::vector<uint8_t> image; // RGB
   int image_size[2];
 
-  // Bots might want to use this map instead of frame->units because:
-  // - Unknown unit types are not present (e.g. map revealers)
-  // - Units reported as dead are not present (important if the server performs
-  //   frame skipping. In that case, frame->units will still contain all units
-  //   that have died since the last update.
-  // - In micro mode and with frame skipping, deaths are only applied until the
-  //   battle is considered finished, i.e. it corresponds to aliveUnits.
+  /// Map of units by player ID
+  /// Bots might want to use this map instead of frame->units because:
+  /// - Unknown unit types are not present (e.g. map revealers)
+  /// - Units reported as dead are not present (important if the server performs
+  ///   frame skipping. In that case, frame->units will still contain all units
+  ///   that have died since the last update.
   std::unordered_map<int32_t, std::vector<Unit>> units;
+  std::vector<Unit*> allUnits;
 
   // Total number of updates received since creation (resets are counted as
   // well).
@@ -119,6 +112,16 @@ class State : public RefCounted {
   std::vector<std::string> update(const fbs::StateUpdate* stateUpdate);
   std::vector<std::string> update(const fbs::EndGame* end);
   std::vector<std::string> update(const fbs::PlayerLeft* left);
+
+  // Convenience methods
+
+  int mapWidth() const {
+    return map_size[0];
+  }
+
+  int mapHeight() const {
+    return map_size[1];
+  }
 
   int getUpgradeLevel(BW::UpgradeType ut) {
     if (!(frame->resources[player_id].upgrades & (1ll << ut))) {

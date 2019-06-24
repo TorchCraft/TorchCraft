@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <torchcraft/buildtype.h>
 #include <torchcraft/primitives.h>
 #include <vector>
 
@@ -44,6 +45,7 @@ struct UnitCommand {
         targetY == c.targetY && extra == c.extra;
   }
 };
+
 
 struct Unit {
   int32_t id, x, y;
@@ -130,6 +132,10 @@ struct Unit {
   };
 
   State* state;
+
+  const BuildType* getType() const {
+    return getUnitBuildType(type);
+  }
 
   bool isMine() const;
   bool isNeutral() const;
@@ -238,7 +244,7 @@ struct Unit {
   bool ensnared() const {
     return flag(Flags::Ensnared);
   }
-  int32_t constructingType() const;
+  const BuildType* constructingType() const;
 };
 
 } //namespace replayer

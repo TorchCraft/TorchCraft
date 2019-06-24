@@ -1,3 +1,6 @@
 [submodule "BWEnv/include/libzmq"]
 	path = BWEnv/include/libzmq
 	url = https://github.com/TorchCraft/libzmq
+[submodule "thirdparty/openbwapi"]
+	path = thirdparty/openbwapi
+	url = https://github.com/OpenBW/bwapi.git

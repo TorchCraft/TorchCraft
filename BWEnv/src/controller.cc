@@ -860,16 +860,13 @@ void Controller::onFrame() {
     if (BWAPI::Broodwar->isReplay()) {
       for (auto player : BWAPI::Broodwar->getPlayers()) {
         if (!player->isNeutral()) {
-          this->packTheirUnits(*f, player);
           this->packResources(*f, player);
         }
       }
-      this->packNeutral(*f);
+      this->packUnits(*f);
     } else {
       this->packResources(*f, BWAPI::Broodwar->self());
-      this->packMyUnits(*f);
-      this->packTheirUnits(*f, BWAPI::Broodwar->enemy());
-      this->packNeutral(*f);
+      this->packUnits(*f);
     }
     this->packBullets(*f);
     this->packCreep(*f);
@@ -1069,33 +1066,17 @@ void Controller::packCreep(replayer::Frame& f) {
   }
 }
 
-void Controller::packMyUnits(replayer::Frame& f) {
-  for (auto& u : BWAPI::Broodwar->self()->getUnits()) {
-    // Ignore the unit if it no longer exists
+void Controller::packUnits(replayer::Frame& f) {
+  for (auto& u : BWAPI::Broodwar->getAllUnits()) {
+    if (u->getPlayer() == nullptr)
+    continue;
+
+    // Ignore the unit if it no longer exists,
     // Make sure to include this block when handling any Unit pointer!
-    if (!u->exists())
+    if (u->getPlayer() == BWAPI::Broodwar->self() && !u->exists())
       continue;
 
-    addUnit(u, f, BWAPI::Broodwar->self()); // TODO: only when the state changes
-  }
-}
-
-void Controller::packTheirUnits(
-    replayer::Frame& f,
-    BWAPI::PlayerInterface* player) {
-  if (player == nullptr)
-    return;
-  for (auto& u : player->getUnits()) {
-    addUnit(u, f, player); // TODO: only when the state changes
-  }
-}
-
-void Controller::packNeutral(replayer::Frame& f) {
-  for (auto& u : BWAPI::Broodwar->getNeutralUnits()) {
-    addUnit(
-        u,
-        f,
-        BWAPI::Broodwar->neutral()); // TODO: only when the state changes
+    addUnit(u, f, u->getPlayer()); // TODO: only when the state changes
   }
 }
 

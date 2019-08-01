@@ -373,6 +373,98 @@ int8_t Controller::handleCommand(
         max_frame_time_ms_ = args[0];
         return CommandStatus::SUCCESS;
     }
+  } else if (command <= Commands::COMMAND_UNIT_PROTECTED) {
+    if (!check_args(2))
+      return status;
+    auto unit = check_unit(args[0]);
+    if (unit == nullptr)
+      return status;
+    auto cmd_type = args[1];
+    auto target =
+        (args.size() >= 3 ? BWAPI::Broodwar->getUnit(args[2]) : nullptr);
+    BWAPI::Position position = BWAPI::Positions::Invalid;
+    BWAPI::TilePosition tposition = BWAPI::TilePositions::Invalid;
+    if (args.size() >= 5) {
+      // Some commands require tile position
+      if (cmd_type == BWAPI::UnitCommandTypes::Build ||
+          cmd_type == BWAPI::UnitCommandTypes::Land ||
+          cmd_type == BWAPI::UnitCommandTypes::Build_Addon ||
+          cmd_type == BWAPI::UnitCommandTypes::Place_COP)
+        tposition = getTilePositionFromWalkTiles(args[3], args[4]);
+      else
+        position = getPositionFromWalkTiles(args[3], args[4]);
+    }
+    int x, y;
+    if (position.isValid()) {
+      x = position.x;
+      y = position.y;
+    } else if (tposition.isValid()) {
+      x = tposition.x;
+      y = tposition.y;
+    } else {
+      x = y = 0;
+    }
+    auto extra = (args.size() >= 6 ? args[5] : 0);
+    switch (command) {
+      case Commands::COMMAND_UNIT:
+        Utils::bwlog(
+            output_log,
+            "Unit:%d command (%d, %d, (%d, %d), %d)",
+            args[0],
+            cmd_type,
+            target,
+            x,
+            y,
+            extra);
+        if (!unit->issueCommand(
+                BWAPI::UnitCommand(unit, cmd_type, target, x, y, extra))) {
+          Utils::bwlog(
+              output_log,
+              "Commanding unit failed! Error: %s",
+              BWAPI::Broodwar->getLastError().c_str());
+          return CommandStatus::BWAPI_ERROR_MASK |
+              BWAPI::Broodwar->getLastError().getID();
+        }
+        return CommandStatus::SUCCESS;
+      case Commands::COMMAND_UNIT_PROTECTED:
+        const char* msg = "OK";
+        status = CommandStatus::PROTECTED;
+        if (target != nullptr && unit->getTarget() == target) {
+          msg = "CANCELED (already targetted)";
+        } else if (target != nullptr && unit->getOrderTarget() == target) {
+          msg = "CANCELED (already targetted 2)";
+        } else if (unit->isAttackFrame()) {
+          msg = "CANCELED (attack frame)";
+        } else if (
+            unit->getOrder() == BWAPI::Orders::AttackUnit &&
+            unit->getLastCommandFrame() + getAttackFrames(args[0]) >=
+                BWAPI::Broodwar->getFrameCount()) {
+          msg = "CANCELED (still attacking)";
+        } else {
+          if (!unit->issueCommand(
+                  BWAPI::UnitCommand(unit, cmd_type, target, x, y, extra))) {
+            Utils::bwlog(
+                output_log,
+                "Commanding unit failed! Error: %s",
+                BWAPI::Broodwar->getLastError().c_str());
+            status = CommandStatus::BWAPI_ERROR_MASK |
+                BWAPI::Broodwar->getLastError().getID();
+          } else {
+            status = CommandStatus::SUCCESS;
+          }
+        }
+        Utils::bwlog(
+            output_log,
+            "Unit:%d command (%d, %d, (%d, %d), %d) %s",
+            args[0],
+            cmd_type,
+            args[2],
+            x,
+            y,
+            extra,
+            msg);
+        return status;
+    }
   } else if (command < Commands::COMMAND_END) {
     switch (command) {
       case Commands::DRAW_LINE:

@@ -88,19 +88,24 @@ BETTER_ENUM(
 BETTER_ENUM(
     OpenBWCommandType,
     int,
+
     // two args
     KillUnit = 0, // uid
+
     // four args
     SpawnUnit = 1, // playerid, type, x, y
-    SetPlayerUpgradeLevel = 2, // player, upgrade, level
-    SetPlayerResearched = 3, // player, tech, bool
-    SetPlayerMinerals = 4, // player, minerals
-    SetPlayerGas = 5, // player, gas
-    SetUnitHealth = 6, // unit, health
-    SetUnitShield = 7, // unit, shield
-    SetUnitEnergy = 8, // unit, energy
+    SetScreenValues = 2, // x, y, width, height
 
-    OPENBW_COMMAND_END = 2)
+    // openbw player modifiers
+    SetPlayerUpgradeLevel = 3, // player, upgrade, level
+    SetPlayerResearched = 4, // player, tech, bool
+    SetPlayerMinerals = 5, // player, minerals
+    SetPlayerGas = 6, // player, gas
+    SetUnitHealth = 7, // unit, health
+    SetUnitShield = 8, // unit, shield
+    SetUnitEnergy = 9, // unit, energy
+
+    OPENBW_COMMAND_END = 10)
 
 BETTER_ENUM(
     UserCommandType,

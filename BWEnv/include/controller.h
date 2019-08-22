@@ -71,6 +71,7 @@ enum OBWCommands {
   KILL_UNIT,
   // four args
   SPAWN_UNIT,
+  SET_SCREEN_VALUES,
   SET_PLAYER_UPGRADE_LEVEL, // player, upgrade, level
   SET_PLAYER_RESEARCHED, // player, tech, bool
   SET_PLAYER_MINERALS, // player, minerals
@@ -170,6 +171,8 @@ class Controller {
   int frameskips = 1;
   bool exit_process_ = false;
   bool with_image_ = false;
+  std::pair<int, int> obw_screen_pos_ = std::pair<int, int>(100, 100);
+  std::pair<int, int> obw_screen_size_ = std::pair<int, int>(256, 256);
   bool blocking_ = true;
   int max_frame_time_ms_ = 50;
   std::vector<uint8_t> image_data_;

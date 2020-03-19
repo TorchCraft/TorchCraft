@@ -1,13 +1,24 @@
+#Not in 2
 OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
+#3.10 in 2
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.6)
+
+#Not in 2
 ENABLE_TESTING()
 
+# Similar to 2
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+#FindZMQ.cmake is identical in TC2 but not referenced anywhere
 FIND_PACKAGE(ZMQ REQUIRED)
+
+#FindZSTD.cmake is identical in TC2
+# Done differently in 2
 FIND_PACKAGE(ZSTD 1.0 COMPONENTS static)
 
+#ZMQ not referenced in TC2
 IF(MSVC)
    ADD_DEFINITIONS(-DZMQ_STATIC)
 ELSE(MSVC)
@@ -16,15 +27,22 @@ ELSE(MSVC)
 ENDIF(MSVC)
 
 ADD_SUBDIRECTORY(test)
-#ADD_SUBDIRECTORY(thirdparty/bwapilib)
 
+# This was commented out before
+# Linking libtorchcraft fails due to: 
+# > /usr/bin/ld: cannot find -lBWAPILIB
+ADD_SUBDIRECTORY(thirdparty/bwapilib)
+
+# Same in 2
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 2 isn't so careful
 IF(ZSTD_FOUND)
    ADD_DEFINITIONS(-DWITH_ZSTD)
 ENDIF()
 
+############## Everything below is TC1 ##############
 FILE(GLOB headers include/torchcraft/*.h)
 FILE(GLOB cppsrc replayer/*.cpp client/*.cpp)
 ADD_LIBRARY(torchcraft ${cppsrc})

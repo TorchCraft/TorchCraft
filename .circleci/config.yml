@@ -1,0 +1,75 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # specify the version you desire here
+      - image: conda/miniconda3
+
+    working_directory: ~/repo
+
+    steps:
+      - run:
+          name: Install apt packages
+          command: |
+            apt-get update
+            apt-get install build-essential git curl p7zip-full -y
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "0a:f2:26:69:26:e3:4e:26:22:14:1e:c9:d6:03:02:41"
+      - run:
+          name: Pull submodules for TorchCraft
+          command: |
+            mkdir -p ~/.ssh
+            echo "StrictHostKeyChecking=no" >> ~/.ssh/config
+            git submodule init
+            git submodule update --init
+      - run:
+          name: Install Anaconda environment for TorchCraft
+          command: |
+            conda create --name tc python=3 pip
+            source activate tc
+            conda install pip ninja cmake pybind11 numpy
+            conda install -y -c conda-forge sdl2 zstd
+            conda install -y -c anaconda zeromq
+            pip install gym zstandard
+      - run:
+          name: Build TorchCraft
+          command: |
+            source activate tc
+            rm -rf build
+            mkdir -p build
+            pushd build
+            cmake .. -DCMAKE_BUILD_TYPE=Release -DPython3_ROOT_DIR=/usr/local/envs/tc/
+            make -j2            
+      - run:
+          name: Install MyPy
+          when: always
+          command: |
+            source activate tc
+            pip install mypy
+      - run:
+          name: Run MyPy typechecking on TorchCraft
+          when: always
+          command: |
+            source activate tc
+            mypy mkd
+      - run:
+          name: Verify TorchCraft location
+          when: always
+          command: |
+            find . -name "*.so"
+      - run:
+          name: Install StarCraft Brood War
+          command: |
+            ./install_starcraft.sh <<< "Iagreetotheeula"
+      - run:
+          name: Run TorchCraft unit tests
+          when: always
+          command: |
+            source activate tc
+            python3 -m unittest tc.tests
